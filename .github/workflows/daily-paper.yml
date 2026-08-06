@@ -23,8 +23,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: daily-paper
@@ -66,6 +64,13 @@ jobs:
         with:
           path: _site
 
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          publish_branch: gh-pages
+
       - name: Commit paper state
         run: |
           git config user.name "github-actions[bot]"
@@ -77,14 +82,3 @@ jobs:
             git commit -m "chore(paper): daily update ${PAPER_STYLE}/${PAPER_STRATEGY} (run ${GITHUB_RUN_ID})"
             git push
           fi
-
-  deploy:
-    needs: update
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
