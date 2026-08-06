@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import os
+
+os.environ.setdefault("ARROW_DEFAULT_MEMORY_POOL", "system")
+
 from signalforge.bootstrap import warmup_native_libs
 
 warmup_native_libs()
@@ -43,6 +47,7 @@ from signalforge.report.dashboard_glossary import (
     render_sidebar_glossary_link,
     render_tab_intro,
 )
+from signalforge.report.dashboard_strategies import render_strategies_tab
 
 MACD_OPTIMIZED = {
     "adx_threshold": 23,
@@ -528,7 +533,7 @@ def run_dashboard() -> None:
     st.title("SignalForge")
     st.caption(
         "NVDA テクニカル分析 — バックテスト・ML・Alpaca 実コスト検証。"
-        " わからない用語は **📖 用語集** タブまたはサイドバーの用語集を参照。"
+        "わからない用語は **📖 用語集**、各戦略の詳細は **📚 戦略解説** タブを参照。"
     )
 
     if st.session_state.last_error:
@@ -550,8 +555,8 @@ def run_dashboard() -> None:
             meta += f"  |  ML folds: {mr.get('folds', 0)}, OOS accuracy: {acc_txt}"
         st.markdown(meta)
 
-    tab_overview, tab_charts, tab_compare, tab_cost, tab_trades, tab_ml, tab_glossary = st.tabs(
-        ["📊 概要", "📈 チャート", "⚖️ 戦略比較", "💰 コスト", "📋 トレード", "🤖 ML/監査", "📖 用語集"]
+    tab_overview, tab_charts, tab_compare, tab_cost, tab_trades, tab_ml, tab_strategies, tab_glossary = st.tabs(
+        ["📊 概要", "📈 チャート", "⚖️ 戦略比較", "💰 コスト", "📋 トレード", "🤖 ML/監査", "📚 戦略解説", "📖 用語集"]
     )
 
     with tab_overview:
@@ -581,6 +586,9 @@ def run_dashboard() -> None:
 
     with tab_ml:
         _page_ml(result, cfg.get("saved_run"))
+
+    with tab_strategies:
+        render_strategies_tab()
 
     with tab_glossary:
         render_glossary_tab()

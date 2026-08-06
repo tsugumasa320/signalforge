@@ -47,7 +47,15 @@ class BacktestEngine:
         self._entry_ml_expl: dict[str, Any] | None = None
         self._cash_at_entry = 0.0
 
-    def run(self, df: pd.DataFrame, signals: pd.Series | None = None) -> BacktestResult:
+    def run(
+        self,
+        df: pd.DataFrame,
+        signals: pd.Series | None = None,
+        *,
+        start_idx: int = 0,
+        initial_cash: float | None = None,
+        initial_state: dict[str, Any] | None = None,
+    ) -> BacktestResult:
         if isinstance(self.profile, DaytradeProfile):
             df = self.profile.apply_session_filter(df)
 
@@ -55,8 +63,9 @@ class BacktestEngine:
             signals = self.strategy.generate_signals(df)
 
         trade_rows = []
-        equity = pd.Series(100_000.0, index=df.index)
-        cash = 100_000.0
+        start_cash = initial_cash if initial_cash is not None else 100_000.0
+        equity = pd.Series(start_cash, index=df.index)
+        cash = start_cash
         position = 0
         position_shares = 0.0
         entry_price = 0.0
@@ -67,7 +76,26 @@ class BacktestEngine:
         ml_cfg = self.cfg.get("ml_filter", {})
         self._entry_cost_breakdown = TradeCostBreakdown()
 
-        for i in range(len(df)):
+        if initial_state:
+            cash = float(initial_state.get("cash", cash))
+            position = int(initial_state.get("position", 0))
+            position_shares = float(initial_state.get("position_shares", 0.0))
+            entry_price = float(initial_state.get("entry_price", 0.0))
+            entry_idx = int(initial_state.get("entry_idx", 0))
+            side = initial_state.get("side", "flat")
+            self._entry_signal_idx = initial_state.get("entry_signal_idx")
+            self._entry_is_oos = bool(initial_state.get("entry_is_oos", False))
+            self._entry_ml_expl = initial_state.get("entry_ml_expl")
+            self._cash_at_entry = float(initial_state.get("cash_at_entry", cash))
+            bd = initial_state.get("entry_cost_breakdown")
+            if isinstance(bd, dict):
+                self._entry_cost_breakdown = TradeCostBreakdown(**bd)
+
+        loop_start = max(start_idx, 0)
+        if loop_start > 0:
+            equity.iloc[:loop_start] = cash
+
+        for i in range(loop_start, len(df)):
             ts = df.index[i]
             day = ts.date() if hasattr(ts, "date") else pd.Timestamp(ts).date()
             if day != current_day:
@@ -218,6 +246,12 @@ class BacktestEngine:
                 trades_today += 1
 
             equity.iloc[i] = cash
+            if position != 0 and position_shares > 0:
+                mark = float(row["close"])
+                if side == "long":
+                    equity.iloc[i] = cash + position_shares * mark
+                else:
+                    equity.iloc[i] = cash + self._cash_at_entry + (entry_price - mark) * position_shares
 
         trades_df = pd.DataFrame(trade_rows)
         metrics = compute_metrics(trades_df, equity)
@@ -226,6 +260,20 @@ class BacktestEngine:
             equity_curve=equity,
             metrics=metrics,
             journal_run_id=self.journal.run_id,
+            final_cash=cash,
+            final_state={
+                "cash": cash,
+                "position": position,
+                "position_shares": position_shares,
+                "entry_price": entry_price,
+                "entry_idx": entry_idx,
+                "side": side,
+                "entry_signal_idx": self._entry_signal_idx,
+                "entry_is_oos": self._entry_is_oos,
+                "entry_ml_expl": self._entry_ml_expl,
+                "cash_at_entry": self._cash_at_entry,
+                "entry_cost_breakdown": self._entry_cost_breakdown.to_dict(),
+            },
         )
 
     def _build_summary(self, audit_rec, reason: str) -> str:

@@ -358,53 +358,230 @@ def verify_profit(style: str, strategy: str | None, ml_filter: bool) -> None:
 
 
 @main.command()
-@click.option("--port", default=8501, show_default=True)
-@click.option("--no-browser", is_flag=True, help="Do not auto-open browser")
-def dashboard(port: int, no_browser: bool) -> None:
-    """Launch Streamlit interactive analysis dashboard."""
-    import os
-    import subprocess
+def doctor() -> None:
+    """Check local setup for dashboard / CLI."""
+    import socket
     import sys
 
-    from signalforge.bootstrap import warmup_native_libs
-
-    warmup_native_libs()
-
-    path = Path(__file__).resolve().parent / "report" / "dashboard.py"
     root = Path(__file__).resolve().parents[2]
-    url = f"http://localhost:{port}"
+    click.echo(f"Project: {root}")
+    click.echo(f"Python:  {sys.executable} ({sys.version.split()[0]})")
 
-    click.echo("")
-    click.echo("=" * 50)
-    click.echo("  SignalForge GUI")
-    click.echo("=" * 50)
-    click.echo(f"  URL: {url}")
-    click.echo("")
-    click.echo("  ※ このターミナルは閉じないでください（閉じると停止します）")
-    click.echo("  ※ ブラウザが自動で開かない場合は上記 URL を直接開いてください")
-    click.echo("")
-    click.echo("  停止: Ctrl+C")
-    click.echo("=" * 50)
-    click.echo("")
+    dash = root / "src" / "signalforge" / "report" / "dashboard.py"
+    click.echo(f"Dashboard file: {'OK' if dash.is_file() else 'MISSING'}")
 
-    args = [
-        sys.executable,
-        "-m",
-        "streamlit",
-        "run",
-        str(path),
-        "--server.port",
-        str(port),
-        "--server.address",
-        "localhost",
-    ]
-    if no_browser:
-        args.append("--server.headless")
-        args.append("true")
+    venv = root / ".venv"
+    click.echo(f".venv: {'OK' if venv.is_dir() else 'MISSING — run: uv sync --extra dev'}")
 
-    env = os.environ.copy()
-    env.setdefault("ARROW_DEFAULT_MEMORY_POOL", "system")
-    subprocess.run(args, cwd=str(root), check=False, env=env)
+    try:
+        import streamlit
+
+        static = Path(streamlit.__file__).parent / "static" / "index.html"
+        click.echo(f"Streamlit static: {'OK' if static.is_file() else 'BROKEN — recreate .venv'}")
+    except ImportError:
+        click.echo("Streamlit: NOT INSTALLED — run: uv sync")
+
+    port = 8501
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        in_use = sock.connect_ex(("127.0.0.1", port)) == 0
+    click.echo(f"Port {port}: {'IN USE (dashboard may already be running)' if in_use else 'free'}")
+
+    data = root / "data" / "NVDA_1d.pkl"
+    click.echo(f"Data cache: {'OK' if data.is_file() else 'MISSING — run: uv run signalforge fetch --ticker NVDA --timeframe 1d'}")
+
+    click.echo("\nLaunch (background, survives terminal close):")
+    click.echo("  uv run signalforge dashboard start")
+    click.echo("Stop: uv run signalforge dashboard stop")
+    click.echo("Status: uv run signalforge dashboard status")
+
+
+@main.group(invoke_without_command=True)
+@click.option("--port", default=8501, show_default=True, help="Preferred TCP port")
+@click.pass_context
+def dashboard(ctx: click.Context, port: int) -> None:
+    """Launch / manage Streamlit dashboard."""
+    ctx.ensure_object(dict)
+    ctx.obj["port"] = port
+    if ctx.invoked_subcommand is None:
+        ctx.invoke(dashboard_start, port=port, browser=True, force=False)
+
+
+@dashboard.command("start")
+@click.option("--port", default=8501, show_default=True)
+@click.option("--browser/--no-browser", "open_browser", default=True, help="Open browser after start")
+@click.option("--force", is_flag=True, help="Restart if already running")
+def dashboard_start(port: int, open_browser: bool, force: bool) -> None:
+    """Start dashboard in background (keeps running after terminal closes)."""
+    from signalforge.report.dashboard_daemon import start
+
+    try:
+        info = start(port, open_browser=open_browser, force=force)
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if info.get("already_running"):
+        click.echo(f"✅ すでに起動中: {info['url']}  (PID {info.get('pid', '?')})")
+    else:
+        click.echo(f"✅ バックグラウンド起動: {info['url']}")
+        click.echo(f"   PID: {info['pid']}  |  ログ: {info['log']}")
+    click.echo("   停止: uv run signalforge dashboard stop")
+
+
+@dashboard.command("stop")
+def dashboard_stop() -> None:
+    """Stop background dashboard."""
+    from signalforge.report.dashboard_daemon import stop
+
+    if stop():
+        click.echo("ダッシュボードを停止しました。")
+    else:
+        click.echo("停止対象のダッシュボードは見つかりませんでした。")
+
+
+@dashboard.command("status")
+def dashboard_status() -> None:
+    """Show dashboard process status."""
+    from signalforge.report.dashboard_daemon import status
+
+    info = status()
+    if info["running"]:
+        click.echo(f"✅ 起動中: {info['url']}  (PID {info.get('pid') or 'unknown'})")
+    else:
+        click.echo("停止中")
+    click.echo(f"ログ: {info['log']}")
+
+
+@dashboard.command("run")
+@click.option("--port", default=8501, show_default=True)
+@click.option("--no-browser", is_flag=True, help="Do not auto-open browser")
+def dashboard_run(port: int, no_browser: bool) -> None:
+    """Run dashboard in foreground (stops when terminal closes)."""
+    from signalforge.report.dashboard_daemon import run_foreground
+
+    click.echo("⚠ フォアグラウンドモード: ターミナルを閉じると停止します。")
+    run_foreground(port, no_browser=no_browser)
+
+
+@main.group()
+def paper() -> None:
+    """Forward paper trading — daily data refresh + virtual PnL tracking."""
+
+
+@paper.command("init")
+@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--strategy", default=None)
+@click.option("--cost-model", default="alpaca", type=click.Choice(["legacy", "alpaca", "alpaca_conservative"]))
+def paper_init(style: str, strategy: str | None, cost_model: str) -> None:
+    """Start a new paper account from the latest bar (forward-only)."""
+    from signalforge.paper.portfolio import PaperPortfolio
+    from signalforge.paper.runner import init_paper_portfolio
+
+    cfg = load_style_config(style)
+    strategy = strategy or cfg.get("strategy", "ema_pullback")
+    existing = PaperPortfolio.load(style, strategy)
+    if existing:
+        raise click.ClickException(
+            f"既に paper 口座があります。リセットする場合: signalforge paper reset --style {style} --strategy {strategy}"
+        )
+    p = init_paper_portfolio(style, strategy, cost_model=cost_model, refresh=True)
+    click.echo(f"✅ Paper 口座を作成しました: {style} / {strategy}")
+    click.echo(f"   開始時点の最終足: {p.last_processed_bar}")
+    click.echo(f"   初期資金: ${p.initial_cash:,.0f}")
+    click.echo(f"   保存先: {p.save()}")
+    click.echo(f"\n毎日実行: uv run signalforge paper run --style {style} --strategy {strategy}")
+
+
+@paper.command("run")
+@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--strategy", default=None)
+@click.option("--refresh/--no-refresh", default=True, help="Fetch latest market data")
+@click.option("--cost-model", default=None, type=click.Choice(["legacy", "alpaca", "alpaca_conservative"]))
+def paper_run(style: str, strategy: str | None, refresh: bool, cost_model: str | None) -> None:
+    """Fetch latest data and process new bars (run daily via cron)."""
+    from signalforge.paper.runner import run_paper_daily
+
+    cfg = load_style_config(style)
+    strategy = strategy or cfg.get("strategy", "ema_pullback")
+    try:
+        out = run_paper_daily(style, strategy, cost_model=cost_model, refresh=refresh)
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    p = out["portfolio"]
+    click.echo(f"\n=== Paper: {style} / {strategy} ===")
+    click.echo(f"Data: {out.get('data_source', '?')}  |  最終足: {out.get('last_bar', '?')}")
+
+    if out["status"] == "up_to_date":
+        click.echo(f"\n{out['message']}")
+        click.echo(f"現在評価額: ${out['equity']:,.0f}")
+        return
+
+    click.echo(f"処理した新規足: {out['new_bars']} 本")
+    if out.get("new_trades"):
+        click.echo(f"新規トレード: {len(out['new_trades'])} 件")
+        for t in out["new_trades"]:
+            click.echo(
+                f"  - {t.get('side')} {t.get('entry_time')} → {t.get('exit_time')} "
+                f"PnL {float(t.get('pnl_pct', 0)):+.2f}% ({t.get('reason', '')})"
+            )
+    else:
+        click.echo("新規トレード: なし")
+
+    pos = out.get("position")
+    if pos:
+        click.echo(f"\n建玉: {pos.get('side')} @ {pos.get('entry_price', 0):.2f} ({pos.get('entry_time', '')})")
+    else:
+        click.echo("\n建玉: なし")
+
+    click.echo(f"\n--- 累積成績（paper 開始以降） ---")
+    click.echo(f"評価額: ${out['equity']:,.0f}")
+    click.echo(f"総リターン: {out.get('total_return_pct', 0):.2f}%")
+    m = out.get("metrics", {})
+    click.echo(f"クローズドトレード: {m.get('total_trades', 0)}")
+    click.echo(f"Win率: {m.get('win_rate', 0):.1%}")
+    click.echo(f"PF: {m.get('profit_factor', 0):.2f}")
+    click.echo(f"\n状態ファイル: {p.save()}")
+
+
+@paper.command("status")
+@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--strategy", default=None)
+def paper_status(style: str, strategy: str | None) -> None:
+    """Show paper account status."""
+    from signalforge.paper.portfolio import PaperPortfolio
+
+    cfg = load_style_config(style)
+    strategy = strategy or cfg.get("strategy", "ema_pullback")
+    p = PaperPortfolio.load(style, strategy)
+    if not p:
+        raise click.ClickException("Paper 口座がありません。`signalforge paper init` を実行してください。")
+
+    eq = p.equity_snapshots[-1]["equity"] if p.equity_snapshots else p.cash
+    click.echo(f"Paper: {style} / {strategy}")
+    click.echo(f"開始: {p.started_at}")
+    click.echo(f"最終処理足: {p.last_processed_bar}")
+    click.echo(f"最終実行: {p.last_run_at}")
+    click.echo(f"現金: ${p.cash:,.0f}")
+    click.echo(f"最新評価額: ${eq:,.0f}")
+    click.echo(f"クローズドトレード: {len(p.closed_trades)}")
+    if p.position:
+        click.echo(f"建玉: {p.position.get('side')} @ {p.position.get('entry_price')} ({p.position.get('entry_time')})")
+
+
+@paper.command("reset")
+@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--strategy", default=None)
+@click.confirmation_option(prompt="Paper 口座をリセットしますか？")
+def paper_reset(style: str, strategy: str | None) -> None:
+    """Delete paper state and start fresh on next init/run."""
+    from signalforge.paper.portfolio import PaperPortfolio, portfolio_path
+
+    cfg = load_style_config(style)
+    strategy = strategy or cfg.get("strategy", "ema_pullback")
+    path = portfolio_path(style, strategy)
+    if path.exists():
+        path.unlink()
+    click.echo("Paper 口座をリセットしました。`paper init` または `paper run` で再開できます。")
 
 
 if __name__ == "__main__":

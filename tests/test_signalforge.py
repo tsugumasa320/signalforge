@@ -216,3 +216,16 @@ def test_pickle_cache_roundtrip(tmp_path):
     assert loaded is not None
     assert len(loaded) == 5
     assert cache.path("NVDA", "1d").suffix == ".pkl"
+
+
+def test_paper_portfolio_save_load(tmp_path, monkeypatch):
+    from signalforge.paper.portfolio import PaperPortfolio, paper_dir
+
+    monkeypatch.setattr("signalforge.paper.portfolio.data_dir", lambda: tmp_path)
+    p = PaperPortfolio.create("swing", "ema_pullback", last_bar_ts="2026-08-01T00:00:00Z")
+    p.save()
+    loaded = PaperPortfolio.load("swing", "ema_pullback")
+    assert loaded is not None
+    assert loaded.strategy == "ema_pullback"
+    assert loaded.last_processed_bar == "2026-08-01T00:00:00Z"
+    assert paper_dir().exists()

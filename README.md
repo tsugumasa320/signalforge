@@ -40,8 +40,21 @@ uv run signalforge backtest --style swing --ml-filter
 # TA vs ML 比較（OOS メトリクス付き）
 uv run signalforge compare --style swing --strategies ema_pullback,macd_cross --ml-filter
 
-# ダッシュボード
-uv run signalforge dashboard
+# ダッシュボード（ターミナルを閉じても動き続ける）
+uv run signalforge dashboard start
+uv run signalforge dashboard status
+uv run signalforge dashboard stop
+
+# 仮想運用（毎日データ取得 → 成績追跡）
+uv run signalforge paper init --style swing --strategy macd_cross
+uv run signalforge paper run --style swing --strategy macd_cross
+uv run signalforge paper status
+
+GitHub Actions で毎日自動実行（`.github/workflows/daily-paper.yml`）:
+- 月〜金 22:00 UTC に fetch + paper run
+- 状態は `data/paper/*.json` に commit され履歴が残る
+- 手動実行: GitHub → Actions → Daily paper update → Run workflow
+- Alpaca 利用時は Secrets に `ALPACA_API_KEY`, `ALPACA_SECRET_KEY` を設定
 ```
 
 ## テスト

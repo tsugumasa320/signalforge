@@ -1,0 +1,76 @@
+name: Daily paper update
+
+on:
+  schedule:
+    # 月〜金 22:00 UTC ≒ 米国東部 17:00〜18:00（大引け後）
+    - cron: "0 22 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      style:
+        description: "Trading style"
+        required: false
+        default: swing
+        type: choice
+        options:
+          - swing
+          - swing_high_winrate
+          - daytrade
+      strategy:
+        description: "Strategy name"
+        required: false
+        default: macd_cross
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-paper
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      PAPER_STYLE: ${{ github.event.inputs.style || 'swing' }}
+      PAPER_STRATEGY: ${{ github.event.inputs.strategy || 'macd_cross' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore OHLCV cache (optional speedup)
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: ohlcv-${{ runner.os }}-${{ hashFiles('data/*.pkl') }}
+          restore-keys: |
+            ohlcv-${{ runner.os }}-
+
+      - name: Fetch data & run paper
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: bash scripts/ci-daily-paper.sh
+
+      - name: Commit paper state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/paper/
+          if git diff --staged --quiet; then
+            echo "No paper state changes."
+          else
+            git commit -m "$(cat <<EOF
+chore(paper): daily update ${PAPER_STYLE}/${PAPER_STRATEGY}
+
+Automated fetch + paper run (${GITHUB_RUN_ID})
+EOF
+)"
+            git push
+          fi

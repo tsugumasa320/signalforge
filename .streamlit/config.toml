@@ -1,0 +1,9 @@
+[server]
+headless = false
+port = 8501
+address = "127.0.0.1"
+
+[browser]
+gatherUsageStats = false
+serverAddress = "127.0.0.1"
+serverPort = 8501

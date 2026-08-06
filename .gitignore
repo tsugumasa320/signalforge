@@ -23,7 +23,9 @@ venv/
 ENV/
 .env
 .cache/
-/data/
+/data/*
+!/data/paper/
+!/data/paper/**
 *.parquet
 .pytest_cache/
 .coverage
@@ -32,7 +34,7 @@ htmlcov/
 .ruff_cache/
 uv.lock
 notebooks/.ipynb_checkpoints/
-.streamlit/
+.streamlit/*
+!.streamlit/config.toml
 reports/
 *.log
-.git.incomplete.icloud-backup/
