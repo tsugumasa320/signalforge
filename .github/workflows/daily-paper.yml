@@ -19,6 +19,7 @@ on:
         description: "Strategy name"
         required: false
         default: macd_cross
+        type: string
 
 permissions:
   contents: write
