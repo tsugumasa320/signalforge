@@ -463,21 +463,31 @@ def dashboard_run(port: int, no_browser: bool) -> None:
 
 
 @dashboard.command("export")
-@click.option("--output", default="docs", type=click.Path(), show_default=True, help="Output directory")
-@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--output", default="_site", type=click.Path(), show_default=True, help="Output directory")
+@click.option("--style", default=None, help="Export single strategy only (legacy)")
 @click.option("--strategy", default=None)
 @click.option("--refresh/--no-refresh", default=False, help="Re-fetch market data before export")
-def dashboard_export(output: str, style: str, strategy: str | None, refresh: bool) -> None:
-    """Export static HTML dashboard (for GitHub Pages / CI)."""
-    from signalforge.report.static_dashboard import export_paper_dashboard
+def dashboard_export(output: str, style: str | None, strategy: str | None, refresh: bool) -> None:
+    """Export static HTML site (hub + all strategies) for GitHub Pages."""
+    out = Path(output)
+    if style:
+        from signalforge.report.static_dashboard import export_paper_dashboard
 
-    cfg = load_style_config(style)
-    strategy = strategy or cfg.get("strategy", "ema_pullback")
-    try:
-        path = export_paper_dashboard(Path(output), style, strategy, refresh=refresh)
-    except RuntimeError as exc:
-        raise click.ClickException(str(exc)) from exc
-    click.echo(f"✅ 静的ダッシュボード: {path.resolve()}")
+        cfg = load_style_config(style)
+        strategy = strategy or cfg.get("strategy", "ema_pullback")
+        try:
+            path = export_paper_dashboard(out, style, strategy, refresh=refresh)
+        except RuntimeError as exc:
+            raise click.ClickException(str(exc)) from exc
+        click.echo(f"✅ 静的ダッシュボード: {path.resolve()}")
+        return
+
+    from signalforge.report.static_site import export_full_site
+
+    path = export_full_site(out, refresh=refresh)
+    click.echo(f"✅ 統合ダッシュボード: {path.resolve()}")
+    click.echo(f"   Paper: {len(list((out / 'paper').glob('*.html')))} ページ")
+    click.echo(f"   戦略解説: {len(list((out / 'guide').glob('*.html')))} ページ")
 
 
 @main.group()
@@ -507,6 +517,25 @@ def paper_init(style: str, strategy: str | None, cost_model: str) -> None:
     click.echo(f"   初期資金: ${p.initial_cash:,.0f}")
     click.echo(f"   保存先: {p.save()}")
     click.echo(f"\n毎日実行: uv run signalforge paper run --style {style} --strategy {strategy}")
+
+
+@paper.command("run-all")
+@click.option("--refresh/--no-refresh", default=True, help="Fetch latest market data")
+@click.option("--cost-model", default=None, type=click.Choice(["legacy", "alpaca", "alpaca_conservative"]))
+def paper_run_all(refresh: bool, cost_model: str | None) -> None:
+    """Fetch data and advance all configured paper accounts."""
+    from signalforge.paper.matrix import PAPER_SIMULATIONS, run_all_paper_daily
+
+    results = run_all_paper_daily(refresh=refresh, cost_model=cost_model)
+    click.echo(f"\n=== Paper run-all ({len(PAPER_SIMULATIONS)} 口座) ===")
+    for r in results:
+        label = f"{r['style']}/{r['strategy']}"
+        if not r.get("ok"):
+            click.echo(f"  ✗ {label}: {r.get('error', 'failed')}")
+            continue
+        eq = r.get("equity", 0)
+        status = r.get("status", "?")
+        click.echo(f"  ✓ {label}: ${eq:,.0f} ({status})")
 
 
 @paper.command("run")

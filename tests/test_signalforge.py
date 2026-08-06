@@ -233,7 +233,7 @@ def test_paper_portfolio_save_load(tmp_path, monkeypatch):
 
 def test_static_dashboard_export(tmp_path, monkeypatch):
     from signalforge.paper.portfolio import PaperPortfolio
-    from signalforge.report.static_dashboard import export_paper_dashboard
+    from signalforge.report.static_dashboard import export_paper_page
 
     monkeypatch.setattr("signalforge.paper.portfolio.data_dir", lambda: tmp_path)
     p = PaperPortfolio.create("swing", "test_strat", last_bar_ts="2026-08-01T00:00:00Z")
@@ -257,7 +257,8 @@ def test_static_dashboard_export(tmp_path, monkeypatch):
         lambda style, cfg, refresh: (df, "test"),
     )
 
-    out = export_paper_dashboard(tmp_path / "site", "swing", "test_strat")
-    assert out.name == "index.html"
+    out = export_paper_page(tmp_path / "site", "swing", "test_strat")
+    assert out is not None
+    assert out.name == "swing_test_strat.html"
     assert out.exists()
-    assert "SignalForge Paper" in out.read_text(encoding="utf-8")
+    assert "Paper" in out.read_text(encoding="utf-8")

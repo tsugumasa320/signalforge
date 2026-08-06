@@ -10,9 +10,9 @@ NVDA 向けマルチホライズン（スイング + デイトレ）テクニカ
 | **ダッシュボード（公開）** | **https://tsugumasa320.github.io/signalforge/** |
 | 自動更新ログ（Actions） | https://github.com/tsugumasa320/signalforge/actions/workflows/daily-paper.yml |
 | Paper 成績（JSON） | https://github.com/tsugumasa320/signalforge/tree/main/data/paper |
-| ダッシュボード（ローカル・Streamlit） | `uv run signalforge dashboard status` で表示 |
+| ダッシュボード（ローカル・Streamlit） | `uv run signalforge dashboard status` |
 
-GitHub Actions が毎日データ更新 → 静的 HTML ダッシュボードを **GitHub Pages** に自動公開します。
+公開サイト: **Paper 全7口座 · バックテスト比較 · 6戦略解説** を統合（ローカル Streamlit 版と同等の戦略検討）。
 
 - **Primary Model**: 人間可読 YAML ルール（EMA Pullback, VWAP+EMA 等）
 - **Secondary Model**: Meta-Labeling ML フィルタ（LightGBM + SHAP）
@@ -57,13 +57,12 @@ uv run signalforge dashboard start
 uv run signalforge dashboard status
 uv run signalforge dashboard stop
 
-# 仮想運用（毎日データ取得 → 成績追跡）
-uv run signalforge paper init --style swing --strategy macd_cross
-uv run signalforge paper run --style swing --strategy macd_cross
-uv run signalforge paper status
+# 仮想運用（全戦略一括）
+uv run signalforge paper run-all
+uv run signalforge dashboard export   # 統合サイト → _site/
 
 GitHub Actions で**毎日自動実行**（`.github/workflows/daily-paper.yml`）:
-- 毎日 22:00 UTC（日本時間 翌朝 7:00）に fetch + paper run → 結果を自動 commit
+- 全7戦略の fetch + paper run + 統合ダッシュボード公開
 - 手動実行は不要（デバッグ時のみ Actions タブから Run workflow 可）
 - Alpaca 利用時は Secrets に `ALPACA_API_KEY`, `ALPACA_SECRET_KEY` を設定
 ```
