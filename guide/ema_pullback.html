@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>戦略解説 — EMA 押し目買い</title>
+  <style>
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 2rem;
+  background: #0b1220;
+  border-bottom: 1px solid #334155;
+  font-size: 0.875rem;
+}
+nav a { color: var(--accent); text-decoration: none; }
+nav a:hover { text-decoration: underline; }
+nav .active { color: var(--text); font-weight: 600; }
+header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #334155;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+header h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+main { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.metric {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #334155;
+}
+.metric label { display: block; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+.metric value { display: block; font-size: 1.35rem; font-weight: 600; margin-top: 0.25rem; }
+.metric.positive value { color: var(--green); }
+.metric.negative value { color: var(--red); }
+section, .card {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #334155;
+}
+section h2, .card h2 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--muted); }
+section h3 { margin: 1rem 0 0.5rem; font-size: 0.95rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #334155; }
+th { color: var(--muted); font-weight: 500; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.muted { color: var(--muted); }
+.positive { color: var(--green); }
+.negative { color: var(--red); }
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  background: #334155;
+}
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+ul.compact { margin: 0.25rem 0; padding-left: 1.25rem; }
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+a { color: var(--accent); }
+.info-box {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+</style>
+</head>
+<body>
+<nav>
+<a href="../index.html">🏠 ホーム</a>
+<a href="../index.html#paper">📈 Paper 成績</a>
+<a href="../index.html#backtest">⚖️ バックテスト比較</a>
+<a href="../index.html#guides" class="active">📚 戦略解説</a>
+</nav>
+<header>
+  <h1>戦略解説 — EMA 押し目買い</h1>
+  <p>スイング（日足）  |  キー: `ema_pullback`</p>
+</header>
+<main>
+
+    <div class="info-box">長期上昇トレンド（EMA200 上）で、短期 EMA20 まで押し目が来たら買い。トレンドフォローの定番。</div>
+    <section><h2>考え方</h2><p>「上昇している株は押し目で買う」というトレンドフォロー思想。EMA200 で大きな方向を確認し、EMA20 付近までの調整を待ってからエントリーします。</p></section>
+    <div class="grid-2">
+      <section><h2>🟢 買いシグナル</h2><p>EMA200 上の上昇トレンドで EMA20 押し目から反発したら **買いのみ**</p><ul class='compact'><li>終値 &gt; EMA200（長期上昇トレンド）</li><li>安値が EMA20 付近までタッチ（low ≤ EMA20 × 1.002）</li><li>終値 &gt; EMA20（押し目後に反発して終わっている）</li><li>ADX &gt; 25（トレンドの強さ確認）</li></ul></section>
+      <section><h2>🔴 売りシグナル</h2><p class="muted">🔴 売りシグナル: なし（買い専用）</p><ul class='compact'><li>なし（ロング専用）</li></ul></section>
+    </div>
+    <div style="height:420px; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.7.0.min.js" integrity="sha256-jvTGqxNp8AGWEcvNLVuKr+8j5dGe9Yw51LQkmDH+IYA=" crossorigin="anonymous"></script>                <div id="strategy-demo" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("strategy-demo")) {                    Plotly.newPlot(                        "strategy-demo",                        [{"line":{"color":"#e2e8f0","width":2},"name":"\u7d42\u5024","x":["2024-03-01T00:00:00.000000","2024-03-02T00:00:00.000000","2024-03-03T00:00:00.000000","2024-03-04T00:00:00.000000","2024-03-05T00:00:00.000000","2024-03-06T00:00:00.000000","2024-03-07T00:00:00.000000","2024-03-08T00:00:00.000000","2024-03-09T00:00:00.000000","2024-03-10T00:00:00.000000","2024-03-11T00:00:00.000000","2024-03-12T00:00:00.000000","2024-03-13T00:00:00.000000","2024-03-14T00:00:00.000000","2024-03-15T00:00:00.000000","2024-03-16T00:00:00.000000","2024-03-17T00:00:00.000000","2024-03-18T00:00:00.000000","2024-03-19T00:00:00.000000","2024-03-20T00:00:00.000000","2024-03-21T00:00:00.000000","2024-03-22T00:00:00.000000","2024-03-23T00:00:00.000000","2024-03-24T00:00:00.000000","2024-03-25T00:00:00.000000","2024-03-26T00:00:00.000000","2024-03-27T00:00:00.000000","2024-03-28T00:00:00.000000","2024-03-29T00:00:00.000000","2024-03-30T00:00:00.000000","2024-03-31T00:00:00.000000","2024-04-01T00:00:00.000000","2024-04-02T00:00:00.000000","2024-04-03T00:00:00.000000","2024-04-04T00:00:00.000000","2024-04-05T00:00:00.000000","2024-04-06T00:00:00.000000","2024-04-07T00:00:00.000000","2024-04-08T00:00:00.000000","2024-04-09T00:00:00.000000","2024-04-10T00:00:00.000000","2024-04-11T00:00:00.000000","2024-04-12T00:00:00.000000","2024-04-13T00:00:00.000000","2024-04-14T00:00:00.000000","2024-04-15T00:00:00.000000","2024-04-16T00:00:00.000000","2024-04-17T00:00:00.000000","2024-04-18T00:00:00.000000","2024-04-19T00:00:00.000000"],"y":{"dtype":"f8","bdata":"AAAAAAAAWUAV89Tuqj9ZQAyW6NBdfVlAPP5a8D+3WUA0JDxStetZQAZF+FN4GVpAtrFs6q0\u002fWkAJxmJA811aQNFGq9tjdFpAj0ML55eDWkArPze8moxaQAiDc0TakFpA1bZtOBCSWkCuzW2pJpJaQDyLAokZk1pA5ysmFNeWWkCFj4gYIZ9aQPIRHP1wrVpA\u002fuIIS+DCWkBuHIQsF+BaQJt9KPhBBVtAyak8bw4yW0A\u002f1cfasGVbQCdzELbwnltAup7qHDzcW0C7Ao\u002fIwBtcQMvGQA2JW1xAvFJRC5uZXEAotAkjGNRcQJ+o2LZaCV1AufIbYhA4XUBHdkYDT19dQD6jgEqjfl1AoBAP5ReWXUBof2HTNKZdQHczW\u002fT2r11AXxhsTMC0XUDjaboCQrZdQOyttXJhtl1AWXm8\u002fhm3XUDDMiiEXbpdQJN+3mb1wV1A9D4cIWbPXUClCyAc1+NdQLBFJ1IAAF5A4vAW3h4kXkAlQOIu8U9eQHSKJxu7gl5AaaIglFG7XkAKmrA9LfheQA=="},"type":"scatter"},{"line":{"color":"#fbbf24","width":2},"name":"EMA20\uff08\u62bc\u3057\u76ee\u30e9\u30a4\u30f3\uff09","x":["2024-03-01T00:00:00.000000","2024-03-02T00:00:00.000000","2024-03-03T00:00:00.000000","2024-03-04T00:00:00.000000","2024-03-05T00:00:00.000000","2024-03-06T00:00:00.000000","2024-03-07T00:00:00.000000","2024-03-08T00:00:00.000000","2024-03-09T00:00:00.000000","2024-03-10T00:00:00.000000","2024-03-11T00:00:00.000000","2024-03-12T00:00:00.000000","2024-03-13T00:00:00.000000","2024-03-14T00:00:00.000000","2024-03-15T00:00:00.000000","2024-03-16T00:00:00.000000","2024-03-17T00:00:00.000000","2024-03-18T00:00:00.000000","2024-03-19T00:00:00.000000","2024-03-20T00:00:00.000000","2024-03-21T00:00:00.000000","2024-03-22T00:00:00.000000","2024-03-23T00:00:00.000000","2024-03-24T00:00:00.000000","2024-03-25T00:00:00.000000","2024-03-26T00:00:00.000000","2024-03-27T00:00:00.000000","2024-03-28T00:00:00.000000","2024-03-29T00:00:00.000000","2024-03-30T00:00:00.000000","2024-03-31T00:00:00.000000","2024-04-01T00:00:00.000000","2024-04-02T00:00:00.000000","2024-04-03T00:00:00.000000","2024-04-04T00:00:00.000000","2024-04-05T00:00:00.000000","2024-04-06T00:00:00.000000","2024-04-07T00:00:00.000000","2024-04-08T00:00:00.000000","2024-04-09T00:00:00.000000","2024-04-10T00:00:00.000000","2024-04-11T00:00:00.000000","2024-04-12T00:00:00.000000","2024-04-13T00:00:00.000000","2024-04-14T00:00:00.000000","2024-04-15T00:00:00.000000","2024-04-16T00:00:00.000000","2024-04-17T00:00:00.000000","2024-04-18T00:00:00.000000","2024-04-19T00:00:00.000000"],"y":{"dtype":"f8","bdata":"AAAAAAAAWUDRMpbwbCFZQDJ9JoovQ1lAYVDHDLFkWUAk917aWYVZQGvhUeuYpFlA3cEdZevBWUAX4ivk49xZQNVqegcx9VlAmK030aIKWkAFaDF7Lh1aQG6YsXDwLFpAx90uOCw6WkAbq8M0SkVaQH6T9EfTTlpAytLmfWpXWkBbCpgOxV9aQDeRvhuhaFpAZjWqqrtyWkDsPQVqxn5aQFf6XdtdjVpAdSkadwCfWkAaE6hWB7RaQBaC19ygzFpAXepGuM3oWkCtsFZ5YAhbQHq5LM7\u002fKltAh0xiTitQW0C46JGXQndbQI1QuVaOn1tAMea0ukrIW0BJGxm0svBbQHj+AlgLGFxAflgzt649XECNE1KBFWFcQHcYS93egVxARhRe+tWfXEBcDiQA9bpcQJEeXixl01xAjr5YGXzpXEBWXlNUtv1cQF4r4JWvEF1AWfzlExkjXUDuLHGDrjVdQD\u002fV23UqSV1ArkKnxzpeXUA4NO3WdXVdQIQUkStRj11AgeL\u002fJBqsXUBuebMh8ctdQA=="},"type":"scatter"},{"line":{"color":"#64748b","width":1.5},"name":"EMA200\uff08\u5927\u5c40\u30c8\u30ec\u30f3\u30c9\uff09","x":["2024-03-01T00:00:00.000000","2024-03-02T00:00:00.000000","2024-03-03T00:00:00.000000","2024-03-04T00:00:00.000000","2024-03-05T00:00:00.000000","2024-03-06T00:00:00.000000","2024-03-07T00:00:00.000000","2024-03-08T00:00:00.000000","2024-03-09T00:00:00.000000","2024-03-10T00:00:00.000000","2024-03-11T00:00:00.000000","2024-03-12T00:00:00.000000","2024-03-13T00:00:00.000000","2024-03-14T00:00:00.000000","2024-03-15T00:00:00.000000","2024-03-16T00:00:00.000000","2024-03-17T00:00:00.000000","2024-03-18T00:00:00.000000","2024-03-19T00:00:00.000000","2024-03-20T00:00:00.000000","2024-03-21T00:00:00.000000","2024-03-22T00:00:00.000000","2024-03-23T00:00:00.000000","2024-03-24T00:00:00.000000","2024-03-25T00:00:00.000000","2024-03-26T00:00:00.000000","2024-03-27T00:00:00.000000","2024-03-28T00:00:00.000000","2024-03-29T00:00:00.000000","2024-03-30T00:00:00.000000","2024-03-31T00:00:00.000000","2024-04-01T00:00:00.000000","2024-04-02T00:00:00.000000","2024-04-03T00:00:00.000000","2024-04-04T00:00:00.000000","2024-04-05T00:00:00.000000","2024-04-06T00:00:00.000000","2024-04-07T00:00:00.000000","2024-04-08T00:00:00.000000","2024-04-09T00:00:00.000000","2024-04-10T00:00:00.000000","2024-04-11T00:00:00.000000","2024-04-12T00:00:00.000000","2024-04-13T00:00:00.000000","2024-04-14T00:00:00.000000","2024-04-15T00:00:00.000000","2024-04-16T00:00:00.000000","2024-04-17T00:00:00.000000","2024-04-18T00:00:00.000000","2024-04-19T00:00:00.000000"],"y":{"dtype":"f8","bdata":"AAAAAAAAWUCrpbs2\u002fh9ZQE2qW+RtP1lA\u002fiob0NVdWUAxTSC3x3pZQOKTRuDklVlAaKaY\u002feGuWUCwh6gsisVZQA4N1vHA2VlAuM9IF4PrWUD+nUdm5vpZQBLf9T8YCFpAL8iaKFsTWkDOGLVlAx1aQImuk9pyJVpAER5hWBQtWkBfRA6dVjRaQJi1+T+nO1pAw2Rty21DWkDNhRE\u002fB0xaQLh0bzHCVVpAZCbmvdtgWkA4W3xhfW1aQIIuYty7e1pA6+BfIJeLWkCVPptG+5xaQIpWwnnCr1pANhx8tbfDWkDtSZ8xmthaQFC2pEch7lpAn1V6mwAEW0C65IZO7BlbQDqiaQSdL1tAkNy4hNNEW0BFwHfLW1lbQPefzGIPbVtAFTMq69Z\u002fW0CHHwXDqpFbQOI7qcuSoltAYxUfVaWyW0BAAqZGBcJbQEFUcqPf0FtAvASZk2jfW0C5tO4e2O1bQIZe1spm\u002fFtA44RqTEoLXEA5Dhh+shpcQB+k2cLGKlxAV\u002f8W+qM7XEDy4y0eW01cQA=="},"type":"scatter"},{"marker":{"color":"#22c55e","line":{"color":"white","width":2},"size":16,"symbol":"triangle-up"},"mode":"markers+text","name":"\ud83d\udfe2 \u8cb7\u3044\u30b7\u30b0\u30ca\u30eb\uff08\u306e\u307f\uff09","text":["\u8cb7\u3044"],"textposition":"top center","x":["2024-04-05T00:00:00"],"y":[118.74944790750838],"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#f2f5fa"},"error_y":{"color":"#f2f5fa"},"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"baxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"line":{"color":"#283442"}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"marker":{"line":{"color":"#283442"}},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#506784"},"line":{"color":"rgb(17,17,17)"}},"header":{"fill":{"color":"#2a3f5f"},"line":{"color":"rgb(17,17,17)"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#f2f5fa","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#f2f5fa"},"geo":{"bgcolor":"rgb(17,17,17)","lakecolor":"rgb(17,17,17)","landcolor":"rgb(17,17,17)","showlakes":true,"showland":true,"subunitcolor":"#506784"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"dark"},"paper_bgcolor":"rgb(17,17,17)","plot_bgcolor":"rgb(17,17,17)","polar":{"angularaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","radialaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"yaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"zaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"}},"shapedefaults":{"line":{"color":"#f2f5fa"}},"sliderdefaults":{"bgcolor":"#C8D4E3","bordercolor":"rgb(17,17,17)","borderwidth":1,"tickwidth":0},"ternary":{"aaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"baxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","caxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"title":{"x":0.05},"updatemenudefaults":{"bgcolor":"#506784","borderwidth":0},"xaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2}}},"shapes":[{"fillcolor":"rgba(251, 191, 36, 0.2)","line":{"width":0},"type":"rect","x0":0,"x1":1,"xref":"x domain","y0":113.80116911000141,"y1":114.25728602026194,"yref":"y"},{"fillcolor":"rgba(34,197,94,0.08)","line":{"width":0},"type":"rect","x0":0,"x1":1,"xref":"x domain","y0":107.70406408293626,"y1":159.70406408293627,"yref":"y"}],"annotations":[{"showarrow":false,"text":"\u2461 \u5b89\u5024\u304c EMA20 \u4ed8\u8fd1","x":1,"xanchor":"right","xref":"x domain","y":114.02922756513168,"yanchor":"middle","yref":"y"},{"showarrow":false,"text":"\u2460 \u7d42\u5024 \u003e EMA200","x":0,"xanchor":"left","xref":"x domain","y":133.70406408293627,"yanchor":"middle","yref":"y"},{"arrowcolor":"#22c55e","arrowhead":2,"ax":40,"ay":-45,"bgcolor":"rgba(0,0,0,0.6)","bordercolor":"#22c55e","borderwidth":1,"font":{"color":"#22c55e","size":11},"showarrow":true,"text":"\u2462 \u53cd\u767a\u3057\u3066\u7d42\u5024\u003eEMA20","x":"2024-04-05T00:00:00","y":118.74944790750838}],"title":{"font":{"size":14},"text":"EMA \u62bc\u3057\u76ee\u8cb7\u3044 \u2014 \ud83d\udfe2 \u8cb7\u3044\u30b7\u30b0\u30ca\u30eb\u306e\u307f\uff08\u58f2\u308a\u306a\u3057\uff09","x":0.02},"margin":{"l":40,"r":20,"t":50,"b":40},"legend":{"orientation":"h","yanchor":"bottom","y":1.02,"x":0},"xaxis":{"showgrid":true,"gridcolor":"rgba(255,255,255,0.06)"},"yaxis":{"showgrid":true,"gridcolor":"rgba(255,255,255,0.06)"},"height":420},                        {"displayModeBar": false, "responsive": true}                    )                };            </script>        </div>
+    <div class="grid-2">
+      <section><h2>🚪 イグジット</h2><ul class='compact'><li>利確: ATR × 3.0</li><li>損切: ATR × 1.5</li><li>最大保有: 15 本（日足）</li><li>トレーリングストップ: ATR × 2.0</li></ul></section>
+      <section><h2>⚙️ パラメータ</h2><ul class='compact'><li>rules.long: YAML の long ルール一覧（adx 閾値など）</li><li>exit.atr_tp_multiple: 利確幅（ATR の倍数）</li><li>exit.max_hold_bars: 最大保有足数</li></ul></section>
+    </div>
+    <div class="grid-2">
+      <section><h2>✅ 長所</h2><ul class='compact'><li>理屈がわかりやすい</li><li>勝率が比較的安定しやすい</li><li>NVDA のスイング向き</li></ul></section>
+      <section><h2>⚠️ 短所</h2><ul class='compact'><li>強いトレンドでは押し目が浅くエントリー機会が少ない</li><li>レンジ相場では EMA 付近で往復しやすい</li></ul></section>
+    </div>
+    <section><h2>🎯 向いている相場</h2><p>緩やか〜中程度の上昇トレンド。急落・暴落局面では EMA 割れが連続しやすい。</p></section>
+    <section><h2>💡 使い方</h2><p>ML フィルタと組み合わせると、押し目シグナルの質をさらに絞り込めます。</p></section>
+    
+</main>
+<footer>
+  Generated 2026-08-06 14:47 UTC ·
+  <a href="https://github.com/tsugumasa320/signalforge">SignalForge</a>
+</footer>
+</body>
+</html>
