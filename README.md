@@ -2,6 +2,17 @@
 
 NVDA 向けマルチホライズン（スイング + デイトレ）テクニカル分析基盤。
 
+## リンク
+
+| 用途 | URL / コマンド |
+|------|----------------|
+| リポジトリ | https://github.com/tsugumasa320/signalforge |
+| 自動更新ログ（Actions） | https://github.com/tsugumasa320/signalforge/actions/workflows/daily-paper.yml |
+| Paper 成績（JSON） | https://github.com/tsugumasa320/signalforge/tree/main/data/paper |
+| ダッシュボード（ローカルのみ） | `uv run signalforge dashboard status` で表示（例: http://127.0.0.1:8501） |
+
+GitHub Actions はデータ取得と paper 更新のみ。**グラフ付きダッシュボードはローカル PC で起動**してください。
+
 - **Primary Model**: 人間可読 YAML ルール（EMA Pullback, VWAP+EMA 等）
 - **Secondary Model**: Meta-Labeling ML フィルタ（LightGBM + SHAP）
 - **解釈性**: 全トレードにルール監査ログ + 日本語サマリー
