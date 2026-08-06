@@ -67,11 +67,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No paper state changes."
           else
-            git commit -m "$(cat <<EOF
-chore(paper): daily update ${PAPER_STYLE}/${PAPER_STRATEGY}
-
-Automated fetch + paper run (${GITHUB_RUN_ID})
-EOF
-)"
+            git commit -m "chore(paper): daily update ${PAPER_STYLE}/${PAPER_STRATEGY} (run ${GITHUB_RUN_ID})"
             git push
           fi
