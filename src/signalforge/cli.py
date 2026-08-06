@@ -462,6 +462,24 @@ def dashboard_run(port: int, no_browser: bool) -> None:
     run_foreground(port, no_browser=no_browser)
 
 
+@dashboard.command("export")
+@click.option("--output", default="docs", type=click.Path(), show_default=True, help="Output directory")
+@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--strategy", default=None)
+@click.option("--refresh/--no-refresh", default=False, help="Re-fetch market data before export")
+def dashboard_export(output: str, style: str, strategy: str | None, refresh: bool) -> None:
+    """Export static HTML dashboard (for GitHub Pages / CI)."""
+    from signalforge.report.static_dashboard import export_paper_dashboard
+
+    cfg = load_style_config(style)
+    strategy = strategy or cfg.get("strategy", "ema_pullback")
+    try:
+        path = export_paper_dashboard(Path(output), style, strategy, refresh=refresh)
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"✅ 静的ダッシュボード: {path.resolve()}")
+
+
 @main.group()
 def paper() -> None:
     """Forward paper trading — daily data refresh + virtual PnL tracking."""

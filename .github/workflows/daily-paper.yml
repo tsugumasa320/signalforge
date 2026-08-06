@@ -23,6 +23,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: daily-paper
@@ -59,6 +61,11 @@ jobs:
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
         run: bash scripts/ci-daily-paper.sh
 
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
       - name: Commit paper state
         run: |
           git config user.name "github-actions[bot]"
@@ -70,3 +77,14 @@ jobs:
             git commit -m "chore(paper): daily update ${PAPER_STYLE}/${PAPER_STRATEGY} (run ${GITHUB_RUN_ID})"
             git push
           fi
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

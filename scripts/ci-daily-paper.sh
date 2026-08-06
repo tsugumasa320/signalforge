@@ -19,3 +19,6 @@ uv run signalforge paper run --style "$STYLE" --strategy "$STRATEGY" --refresh
 
 echo "--- status ---"
 uv run signalforge paper status --style "$STYLE" --strategy "$STRATEGY"
+
+echo "--- export dashboard ---"
+uv run signalforge dashboard export --output _site --style "$STYLE" --strategy "$STRATEGY"

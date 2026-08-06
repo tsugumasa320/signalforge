@@ -229,3 +229,35 @@ def test_paper_portfolio_save_load(tmp_path, monkeypatch):
     assert loaded.strategy == "ema_pullback"
     assert loaded.last_processed_bar == "2026-08-01T00:00:00Z"
     assert paper_dir().exists()
+
+
+def test_static_dashboard_export(tmp_path, monkeypatch):
+    from signalforge.paper.portfolio import PaperPortfolio
+    from signalforge.report.static_dashboard import export_paper_dashboard
+
+    monkeypatch.setattr("signalforge.paper.portfolio.data_dir", lambda: tmp_path)
+    p = PaperPortfolio.create("swing", "test_strat", last_bar_ts="2026-08-01T00:00:00Z")
+    p.equity_snapshots = [{"date": "2026-08-01T00:00:00Z", "equity": 100_000.0, "cash": 100_000.0}]
+    p.save()
+
+    dates = pd.date_range("2026-07-01", periods=40, freq="D", tz="UTC")
+    df = pd.DataFrame(
+        {
+            "open": 100.0,
+            "high": 101.0,
+            "low": 99.0,
+            "close": 100.0,
+            "volume": 1_000_000,
+        },
+        index=dates,
+    )
+
+    monkeypatch.setattr(
+        "signalforge.report.static_dashboard._prepare_dataframe",
+        lambda style, cfg, refresh: (df, "test"),
+    )
+
+    out = export_paper_dashboard(tmp_path / "site", "swing", "test_strat")
+    assert out.name == "index.html"
+    assert out.exists()
+    assert "SignalForge Paper" in out.read_text(encoding="utf-8")

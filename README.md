@@ -7,11 +7,12 @@ NVDA 向けマルチホライズン（スイング + デイトレ）テクニカ
 | 用途 | URL / コマンド |
 |------|----------------|
 | リポジトリ | https://github.com/tsugumasa320/signalforge |
+| **ダッシュボード（公開）** | **https://tsugumasa320.github.io/signalforge/** |
 | 自動更新ログ（Actions） | https://github.com/tsugumasa320/signalforge/actions/workflows/daily-paper.yml |
 | Paper 成績（JSON） | https://github.com/tsugumasa320/signalforge/tree/main/data/paper |
-| ダッシュボード（ローカルのみ） | `uv run signalforge dashboard status` で表示（例: http://127.0.0.1:8501） |
+| ダッシュボード（ローカル・Streamlit） | `uv run signalforge dashboard status` で表示 |
 
-GitHub Actions はデータ取得と paper 更新のみ。**グラフ付きダッシュボードはローカル PC で起動**してください。
+GitHub Actions が毎日データ更新 → 静的 HTML ダッシュボードを **GitHub Pages** に自動公開します。
 
 - **Primary Model**: 人間可読 YAML ルール（EMA Pullback, VWAP+EMA 等）
 - **Secondary Model**: Meta-Labeling ML フィルタ（LightGBM + SHAP）
