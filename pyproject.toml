@@ -1,0 +1,41 @@
+[project]
+name = "signalforge"
+version = "0.1.0"
+description = "NVDA multi-horizon technical analysis with interpretable TA + Meta-Labeling ML"
+readme = "README.md"
+authors = [
+    { name = "tsugumasa320", email = "tsugumasa320@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "polars>=1.0",
+    "pyyaml>=6.0",
+    "yfinance>=0.2",
+    "pyarrow>=15.0",
+    "scikit-learn>=1.4",
+    "lightgbm>=4.0",
+    "shap>=0.44",
+    "plotly>=5.18",
+    "click>=8.1",
+    "python-dotenv>=1.0",
+    "optuna>=3.6",
+    "vectorbt>=0.26",
+    "streamlit>=1.32",
+]
+
+[project.optional-dependencies]
+alpaca = ["alpaca-py>=0.21"]
+dev = ["pytest>=8.0", "pytest-cov>=4.1"]
+
+[project.scripts]
+signalforge = "signalforge.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

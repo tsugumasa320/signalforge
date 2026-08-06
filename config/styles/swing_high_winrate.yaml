@@ -1,0 +1,46 @@
+# 高勝率プリセット — macd_cross + ML
+# OOS 勝率 ~73% (TP=2.0×ATR, SL=1.5×ATR)
+style: swing
+timeframe: 1d
+data_source: yfinance
+
+strategy: macd_cross
+strategy_params:
+  ema_trend: 200
+  adx_min: 23
+  long_only: true
+
+rules:
+  long:
+    - adx > 23
+  exit:
+    atr_tp_multiple: 2.0
+    atr_sl_multiple: 1.5
+    max_hold_bars: 12
+    trailing_stop_atr: 2.0
+
+ml_filter:
+  enabled: true
+  min_probability: 0.52
+  max_holding_period: 12
+  min_train_labels: 10
+  cusum_threshold: 0.02
+  use_cusum_subsample: false
+  walk_forward:
+    train_days: 252
+    test_days: 63
+    train_labels: 30
+    test_labels: 12
+  interpretability:
+    baseline_model: logistic_regression
+    primary_model: lightgbm
+    shap_top_k: 3
+    calibration: platt
+    max_ece: 0.10
+    log_rejected_signals: true
+
+backtest:
+  fill: next_day_open
+  slippage_pct: 0.0005
+  max_open_positions: 1
+  max_hold_bars: 12

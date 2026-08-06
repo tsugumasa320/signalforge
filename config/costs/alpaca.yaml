@@ -1,0 +1,34 @@
+# Alpaca Securities Brokerage Fee Schedule (equities)
+# Source: https://files.alpaca.markets/disclosures/library/BrokFeeSched.pdf (rev. July 2026)
+# Regulatory: https://docs.alpaca.markets/us/docs/regulatory-fees
+
+broker: alpaca
+commission_per_share: 0.0
+commission_per_trade: 0.0
+
+regulatory:
+  sec_rate_per_dollar: 0.0000206   # sells only
+  finra_taf_per_share: 0.000195    # sells only, max $9.79/trade
+  finra_taf_max_usd: 9.79
+  cat_per_share: 0.000003          # buys and sells (NMS equities)
+  round_up_to_cent: true
+
+# Slippage on top of profile fill prices (half-spread + execution shortfall)
+slippage:
+  swing:
+    entry_bps: 5.0    # next-day open: auction / spread
+    exit_bps: 5.0
+  daytrade:
+    entry_bps: 3.0    # next-bar open, liquid name
+    exit_bps: 3.0
+
+# Conservative stress-test (wider spread + open uncertainty)
+conservative:
+  swing:
+    entry_bps: 10.0
+    exit_bps: 8.0
+  daytrade:
+    entry_bps: 6.0
+    exit_bps: 5.0
+
+initial_cash_usd: 100000

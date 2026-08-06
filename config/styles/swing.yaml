@@ -1,0 +1,47 @@
+style: swing
+timeframe: 1d
+data_source: yfinance
+
+strategy: ema_pullback
+strategy_params:
+  ema_trend: 50
+  adx_min: 0
+  long_only: true
+
+rules:
+  long:
+    - close > ema200
+    - low touches ema20
+    - close > ema20
+    - adx > 25
+  exit:
+    atr_tp_multiple: 3.0
+    atr_sl_multiple: 1.5
+    max_hold_bars: 15
+    trailing_stop_atr: 2.0
+
+ml_filter:
+  enabled: false
+  min_probability: 0.52
+  max_holding_period: 15
+  min_train_labels: 10
+  cusum_threshold: 0.02
+  use_cusum_subsample: false
+  walk_forward:
+    train_days: 252
+    test_days: 63
+    train_labels: 30
+    test_labels: 12
+  interpretability:
+    baseline_model: logistic_regression
+    primary_model: lightgbm
+    shap_top_k: 3
+    calibration: platt
+    max_ece: 0.10
+    log_rejected_signals: true
+
+backtest:
+  fill: next_day_open
+  slippage_pct: 0.0005
+  max_open_positions: 1
+  max_hold_bars: 15

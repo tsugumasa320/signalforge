@@ -1,0 +1,21 @@
+allowed_features:
+  adx_14:
+    desc: "14日ADX: トレンド強度"
+  rsi_14:
+    desc: "14日RSI: 過熱/売られ過ぎ"
+  ema20_distance_pct:
+    desc: "EMA20からの乖離率"
+  macd_histogram:
+    desc: "MACD ヒストグラム"
+  atr_pct:
+    desc: "ATR/価格: ボラティリティ"
+  volume_ratio_20:
+    desc: "20日平均出来高比"
+  qqq_relative_strength:
+    desc: "QQQ に対する相対強度"
+  soxx_relative_strength:
+    desc: "SOXX に対する相対強度"
+  days_to_earnings:
+    desc: "決算までの日数"
+  hour_of_day:
+    desc: "エントリー時刻（デイトレのみ）"

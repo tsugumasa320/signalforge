@@ -1,0 +1,7 @@
+ticker: NVDA
+correlation_tickers: [QQQ, SOXX]
+timezone: America/New_York
+earnings_blackout_days: 2
+
+# バックテスト評価期間（ChatGPT 公開後の AI ブーム以降）
+backtest_start_date: "2023-01-01"

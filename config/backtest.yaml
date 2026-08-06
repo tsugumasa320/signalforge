@@ -1,0 +1,10 @@
+slippage_pct_daytrade: 0.0002
+slippage_pct_swing: 0.0005
+commission_pct: 0.00005
+max_trades_per_day_daytrade: 3
+max_trades_per_day_swing: 1
+daily_loss_limit_daytrade: 400
+daily_loss_limit_swing: 800
+
+# デフォルト評価開始日（nvda.yaml と併用、style/backtest で上書き可）
+backtest_start_date: "2023-01-01"

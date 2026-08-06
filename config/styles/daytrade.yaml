@@ -1,0 +1,43 @@
+style: daytrade
+timeframe: 5m
+data_source: yfinance
+
+strategy: vwap_ema
+rules:
+  long:
+    - close > vwap
+    - ema9 crosses_above ema21
+    - volume > volume_ma20 * 1.5
+  short:
+    - close < vwap
+    - ema9 crosses_below ema21
+    - volume > volume_ma20 * 1.5
+  exit:
+    atr_tp_multiple: 2.0
+    atr_sl_multiple: 1.0
+    max_hold_bars: 12
+    force_flat_time: "15:55"
+
+ml_filter:
+  enabled: false
+  min_probability: 0.55
+  max_holding_period: 12
+  cusum_threshold: 0.005
+  walk_forward:
+    train_days: 60
+    test_days: 10
+  interpretability:
+    baseline_model: logistic_regression
+    primary_model: lightgbm
+    shap_top_k: 3
+    calibration: platt
+    max_ece: 0.10
+    log_rejected_signals: true
+
+backtest:
+  session_start: "09:30"
+  session_end: "15:55"
+  fill: next_bar_open
+  slippage_pct: 0.0002
+  max_trades_per_day: 3
+  max_hold_bars: 12
