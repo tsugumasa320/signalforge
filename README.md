@@ -50,10 +50,9 @@ uv run signalforge paper init --style swing --strategy macd_cross
 uv run signalforge paper run --style swing --strategy macd_cross
 uv run signalforge paper status
 
-GitHub Actions で毎日自動実行（`.github/workflows/daily-paper.yml`）:
-- 月〜金 22:00 UTC に fetch + paper run
-- 状態は `data/paper/*.json` に commit され履歴が残る
-- 手動実行: GitHub → Actions → Daily paper update → Run workflow
+GitHub Actions で**毎日自動実行**（`.github/workflows/daily-paper.yml`）:
+- 毎日 22:00 UTC（日本時間 翌朝 7:00）に fetch + paper run → 結果を自動 commit
+- 手動実行は不要（デバッグ時のみ Actions タブから Run workflow 可）
 - Alpaca 利用時は Secrets に `ALPACA_API_KEY`, `ALPACA_SECRET_KEY` を設定
 ```
 

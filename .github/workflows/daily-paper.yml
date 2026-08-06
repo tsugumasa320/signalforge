@@ -2,8 +2,8 @@ name: Daily paper update
 
 on:
   schedule:
-    # 月〜金 22:00 UTC ≒ 米国東部 17:00〜18:00（大引け後）
-    - cron: "0 22 * * 1-5"
+    # 毎日 22:00 UTC ≒ JST 07:00（米国大引け後・日本の朝）
+    - cron: "0 22 * * *"
   workflow_dispatch:
     inputs:
       style:
