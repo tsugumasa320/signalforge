@@ -3,12 +3,82 @@
   "strategy": "orb",
   "cost_model": "alpaca",
   "initial_cash": 100000.0,
-  "cash": 100000.0,
+  "cash": 99897.5096944886,
   "started_at": "2026-08-06T14:46:03.052519+00:00",
-  "last_processed_bar": "2026-08-06 10:45:00-04:00",
-  "last_run_at": "2026-08-06T14:47:10.316341+00:00",
+  "last_processed_bar": "2026-08-06 15:55:00-04:00",
+  "last_run_at": "2026-08-07T01:31:21.336929+00:00",
   "position": null,
-  "closed_trades": [],
+  "closed_trades": [
+    {
+      "entry_time": "2026-08-06 13:10:00-04:00",
+      "exit_time": "2026-08-06 14:05:00-04:00",
+      "side": "short",
+      "entry_price": 219.43014495492585,
+      "exit_price": 219.93789534469528,
+      "pnl_pct": -0.23356500266643707,
+      "gross_pnl_pct": -0.23086080230678707,
+      "hold_bars": 11,
+      "reason": "stop_loss",
+      "is_oos": false,
+      "buy_fees_usd": 0.01,
+      "sell_fees_usd": 2.1599999999999997,
+      "sec_fee_usd": 2.06,
+      "taf_fee_usd": 0.09,
+      "cat_fee_usd": 0.02,
+      "commission_usd": 0.0,
+      "slippage_entry_usd": 30.00900270080253,
+      "slippage_exit_usd": 30.060400380685035,
+      "total_fees_usd": 2.1699999999999995,
+      "total_slippage_usd": 60.069403081487565,
+      "total_cost_usd": 62.239403081487566
+    },
+    {
+      "entry_time": "2026-08-06 14:15:00-04:00",
+      "exit_time": "2026-08-06 14:15:00-04:00",
+      "side": "short",
+      "entry_price": 219.9000027101822,
+      "exit_price": 219.08646045361,
+      "pnl_pct": 0.36778501370087413,
+      "gross_pnl_pct": 0.37133388110237586,
+      "hold_bars": 0,
+      "reason": "take_profit",
+      "is_oos": false,
+      "buy_fees_usd": 0.01,
+      "sell_fees_usd": 2.1599999999999997,
+      "sec_fee_usd": 2.06,
+      "taf_fee_usd": 0.09,
+      "cat_fee_usd": 0.02,
+      "commission_usd": 0.0,
+      "slippage_entry_usd": 29.93891217284521,
+      "slippage_exit_usd": 29.81025862262065,
+      "total_fees_usd": 2.1699999999999995,
+      "total_slippage_usd": 59.74917079546586,
+      "total_cost_usd": 61.91917079546586
+    },
+    {
+      "entry_time": "2026-08-06 15:15:00-04:00",
+      "exit_time": "2026-08-06 15:30:00-04:00",
+      "side": "short",
+      "entry_price": 219.69011623823212,
+      "exit_price": 220.20278528711117,
+      "pnl_pct": -0.23553718473807123,
+      "gross_pnl_pct": -0.2328167866771591,
+      "hold_bars": 3,
+      "reason": "stop_loss",
+      "is_oos": false,
+      "buy_fees_usd": 0.01,
+      "sell_fees_usd": 2.1699999999999995,
+      "sec_fee_usd": 2.07,
+      "taf_fee_usd": 0.09,
+      "cat_fee_usd": 0.02,
+      "commission_usd": 0.0,
+      "slippage_entry_usd": 30.049023005085026,
+      "slippage_exit_usd": 30.10107936422097,
+      "total_fees_usd": 2.1799999999999993,
+      "total_slippage_usd": 60.150102369306,
+      "total_cost_usd": 62.330102369306
+    }
+  ],
   "equity_snapshots": [
     {
       "date": "2026-08-05 15:55:00-04:00",
@@ -22,6 +92,13 @@
       "cash": 100000.0,
       "position": "flat",
       "new_trades": 0
+    },
+    {
+      "date": "2026-08-06 15:55:00-04:00",
+      "equity": 99897.5096944886,
+      "cash": 99897.5096944886,
+      "position": "flat",
+      "new_trades": 3
     }
   ],
   "daily_log": [
@@ -31,6 +108,13 @@
       "from_bar": "2026-08-06 09:30:00-04:00",
       "to_bar": "2026-08-06 10:45:00-04:00",
       "new_trades": 0
+    },
+    {
+      "run_at": "2026-08-07T01:31:21.336929+00:00",
+      "bars_processed": 62,
+      "from_bar": "2026-08-06 10:50:00-04:00",
+      "to_bar": "2026-08-06 15:55:00-04:00",
+      "new_trades": 3
     }
   ]
 }
