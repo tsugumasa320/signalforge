@@ -1,5 +1,5 @@
-# 高勝率プリセット — macd_cross + ML
-# OOS 勝率 ~73% (TP=2.0×ATR, SL=1.5×ATR)
+# Champion — NVDA swing MACD (optimized TA + walk-forward ML)
+# Backtest 2023+: TA PF ~4.1, win ~72% (Alpaca costs). Not a guarantee of future returns.
 style: swing
 timeframe: 1d
 data_source: yfinance
@@ -24,14 +24,14 @@ ml_filter:
   min_probability: 0.52
   min_signal_events: 15
   max_holding_period: 12
-  min_train_labels: 10
+  min_train_labels: 6
   cusum_threshold: 0.02
   use_cusum_subsample: false
   walk_forward:
     train_days: 252
     test_days: 63
-    train_labels: 15
-    test_labels: 8
+    train_labels: 8
+    test_labels: 4
   interpretability:
     baseline_model: logistic_regression
     primary_model: lightgbm

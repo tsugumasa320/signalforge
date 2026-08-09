@@ -11,7 +11,8 @@ from typing import Any
 import pandas as pd
 
 from signalforge.config import load_style_config
-from signalforge.optimize.spaces import build_cfg_override, strategies_for_style
+from signalforge.optimize.champion import champion_cfg_override
+from signalforge.optimize.spaces import strategies_for_style
 from signalforge.paper.matrix import PAPER_SIMULATIONS, STYLE_LABELS
 from signalforge.pipeline import run_backtest_pipeline
 from signalforge.report.charts import plot_strategy_comparison
@@ -21,22 +22,13 @@ from signalforge.report.static_dashboard import export_paper_page, paper_summary
 from signalforge.report.static_html import fig_to_html_block, wrap_page
 from signalforge.report.strategy_visuals import plot_strategy_demo
 
-MACD_OPTIMIZED = {
-    "adx_threshold": 23,
-    "ema_trend": 200,
-    "long_only": True,
-    "atr_tp_multiple": 2.0,
-    "atr_sl_multiple": 1.5,
-}
 
-BACKTEST_STYLES = ("swing", "swing_high_winrate", "daytrade")
+BACKTEST_STYLES = ("swing", "swing_champion", "swing_high_winrate", "daytrade")
 
 
 def _run_backtest_row(style: str, strategy: str) -> dict[str, Any] | None:
-    ml_filter = style == "swing_high_winrate"
-    cfg_override = None
-    if strategy == "macd_cross" and style != "swing_high_winrate":
-        cfg_override = build_cfg_override("macd_cross", MACD_OPTIMIZED, load_style_config(style))
+    ml_filter = style in ("swing_champion", "swing_high_winrate")
+    cfg_override = champion_cfg_override(style, strategy, load_style_config(style))
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=PendingDeprecationWarning)

@@ -18,7 +18,8 @@ import pandas as pd
 import streamlit as st
 
 from signalforge.config import data_dir, load_style_config
-from signalforge.optimize.spaces import build_cfg_override, strategies_for_style
+from signalforge.optimize.champion import CHAMPION_MACD_PARAMS, champion_cfg_override
+from signalforge.optimize.spaces import strategies_for_style
 from signalforge.pipeline import run_backtest_pipeline
 from signalforge.report.charts import (
     plot_cost_breakdown,
@@ -49,13 +50,7 @@ from signalforge.report.dashboard_glossary import (
 )
 from signalforge.report.dashboard_strategies import render_strategies_tab
 
-MACD_OPTIMIZED = {
-    "adx_threshold": 23,
-    "ema_trend": 200,
-    "long_only": True,
-    "atr_tp_multiple": 2.0,
-    "atr_sl_multiple": 1.5,
-}
+MACD_OPTIMIZED = CHAMPION_MACD_PARAMS  # backward compat for sidebar toggle label
 
 COST_LABELS = {
     "legacy": "Legacy（簡易）",
@@ -65,6 +60,7 @@ COST_LABELS = {
 
 STYLE_LABELS = {
     "swing": "スイング（日足）",
+    "swing_champion": "🏆 Champion（最強プリセット）",
     "swing_high_winrate": "スイング・高勝率",
     "daytrade": "デイトレ（5分足）",
 }
@@ -97,8 +93,8 @@ def _run_backtest(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=PendingDeprecationWarning)
         cfg_override = None
-        if strategy == "macd_cross" and use_macd_opt and style != "swing_high_winrate":
-            cfg_override = build_cfg_override("macd_cross", MACD_OPTIMIZED, load_style_config(style))
+        if strategy == "macd_cross" and use_macd_opt:
+            cfg_override = champion_cfg_override(style, strategy, load_style_config(style))
         return run_backtest_pipeline(
             style,
             strategy,
@@ -146,8 +142,8 @@ def _verify_costs(style: str, strategy: str, ml_filter: bool, use_macd_opt: bool
         rows = []
         for preset in ("legacy", "alpaca", "alpaca_conservative"):
             cfg_override = None
-            if strategy == "macd_cross" and use_macd_opt and style != "swing_high_winrate":
-                cfg_override = build_cfg_override("macd_cross", MACD_OPTIMIZED, load_style_config(style))
+            if strategy == "macd_cross" and use_macd_opt:
+                cfg_override = champion_cfg_override(style, strategy, load_style_config(style))
             result = run_backtest_pipeline(
                 style,
                 strategy,
@@ -185,7 +181,7 @@ def _sidebar() -> dict[str, Any]:
     st.sidebar.header("⚙️ 設定")
     style = st.sidebar.selectbox(
         "スタイル",
-        ["swing", "swing_high_winrate", "daytrade"],
+        ["swing", "swing_champion", "swing_high_winrate", "daytrade"],
         format_func=lambda x: STYLE_LABELS.get(x, x),
         help=SIDEBAR_HELP["style"],
     )
@@ -201,7 +197,7 @@ def _sidebar() -> dict[str, Any]:
     st.sidebar.caption(STRATEGY_DESCRIPTIONS.get(strategy, ""))
     ml_filter = st.sidebar.toggle(
         "ML フィルタ（Walk-Forward OOS）",
-        value=(style == "swing_high_winrate"),
+        value=(style in ("swing_champion", "swing_high_winrate")),
         help=SIDEBAR_HELP["ml_filter"],
     )
     cost_model = st.sidebar.selectbox(
@@ -211,7 +207,7 @@ def _sidebar() -> dict[str, Any]:
         help=SIDEBAR_HELP["cost_model"],
     )
     use_macd_opt = False
-    if strategy == "macd_cross" and style != "swing_high_winrate":
+    if strategy == "macd_cross" and style not in ("swing_champion", "swing_high_winrate"):
         use_macd_opt = st.sidebar.toggle(
             "macd_cross 最適化パラメータ",
             value=True,

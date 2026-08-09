@@ -8,6 +8,7 @@ from signalforge.paper.runner import init_paper_portfolio, run_paper_daily
 
 # (style, strategy) pairs simulated daily in CI and shown on the public dashboard.
 PAPER_SIMULATIONS: list[tuple[str, str]] = [
+    ("swing_champion", "macd_cross"),
     ("swing", "ema_pullback"),
     ("swing", "macd_cross"),
     ("swing", "bb_squeeze"),
@@ -19,6 +20,7 @@ PAPER_SIMULATIONS: list[tuple[str, str]] = [
 
 STYLE_LABELS = {
     "swing": "スイング（日足）",
+    "swing_champion": "Champion（最強プリセット）",
     "swing_high_winrate": "スイング・高勝率",
     "daytrade": "デイトレ（5分足）",
 }

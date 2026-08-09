@@ -57,8 +57,9 @@ class MetaLabelFilter:
 
         # Meta-labeling: label each primary (TA) signal event
         event_index = signals.index[signals != 0]
-        if len(event_index) < 30:
-            return {"trained": False, "reason": "insufficient signal events"}
+        min_events = int(self.cfg.get("min_signal_events", 15))
+        if len(event_index) < min_events:
+            return {"trained": False, "reason": "insufficient signal events", "events": len(event_index)}
 
         event_signals = signals.loc[event_index]
         labels = triple_barrier_labels(

@@ -11,6 +11,7 @@ from signalforge.data.fetcher import MarketDataFetcher
 from signalforge.interpret.journal import TradeJournal
 from signalforge.optimize.bayesian import bayesian_optimize
 from signalforge.optimize.objective import make_objective
+from signalforge.optimize.champion import CHAMPION_MACD_PARAMS, CHAMPION_STRATEGY, CHAMPION_STYLE, champion_cfg_override
 from signalforge.optimize.spaces import build_cfg_override, strategies_for_style, suggest_params
 from signalforge.pipeline import run_backtest_pipeline
 from signalforge.report.trade_report import save_report
@@ -63,8 +64,53 @@ def fetch(ticker: str, timeframe: str, source: str, refresh: bool, with_correlat
             click.echo(f"Cached {sym} {timeframe}: {len(cdf)} bars → {cache.path(sym, timeframe)}")
 
 
+STYLE_CHOICES = ["swing", "swing_champion", "swing_high_winrate", "daytrade"]
+
+
 @main.command()
-@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--refresh", is_flag=True, help="Re-fetch market data")
+@click.option(
+    "--cost-model",
+    default="alpaca",
+    type=click.Choice(["legacy", "alpaca", "alpaca_conservative"]),
+)
+def champion(refresh: bool, cost_model: str) -> None:
+    """Run the champion algorithm: optimized MACD + walk-forward ML (NVDA swing)."""
+    click.echo("\n=== SignalForge Champion ===")
+    click.echo("NVDA 日足 · MACD + ADX>23 + EMA200 · ML フィルタ（OOS）")
+    click.echo("※ 過去データの成績であり、将来の利益を保証しません。\n")
+
+    ta = run_backtest_pipeline(
+        CHAMPION_STYLE,
+        CHAMPION_STRATEGY,
+        refresh,
+        ml_filter=False,
+        cost_model=cost_model,
+        cfg_override={"ml_filter": {"enabled": False}},
+    )
+    click.echo(f"評価期間: {ta.get('backtest_window', '?')}")
+    _print_metrics("Champion TA（全期間）", ta["metrics"])
+
+    ml = run_backtest_pipeline(
+        CHAMPION_STYLE,
+        CHAMPION_STRATEGY,
+        refresh,
+        ml_filter=True,
+        cost_model=cost_model,
+    )
+    _print_metrics("Champion TA+ML（OOS）", ml.get("metrics_oos", {}))
+    mr = ml.get("ml_report", {})
+    if mr.get("trained"):
+        click.echo(f"ML folds: {mr.get('folds', 0)}  |  avg OOS accuracy: {mr.get('avg_oos_accuracy', 0):.1%}")
+    else:
+        click.echo(f"ML: 未学習 ({mr.get('reason', '?')})")
+
+    click.echo("\n使い方: uv run signalforge backtest --style swing_champion --ml-filter")
+    click.echo("Paper:  uv run signalforge paper run --style swing_champion --strategy macd_cross")
+
+
+@main.command()
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
 @click.option("--strategy", default=None)
 @click.option("--refresh", is_flag=True)
 @click.option("--ml-filter", is_flag=True)
@@ -76,7 +122,17 @@ def fetch(ticker: str, timeframe: str, source: str, refresh: bool, with_correlat
 )
 def backtest(style: str, strategy: str | None, refresh: bool, ml_filter: bool, cost_model: str) -> None:
     """Run backtest with trade journal."""
-    result = run_backtest_pipeline(style, strategy, refresh, ml_filter, cost_model=cost_model)
+    cfg = load_style_config(style)
+    strat = strategy or cfg.get("strategy", "ema_pullback")
+    override = champion_cfg_override(style, strat, cfg)
+    result = run_backtest_pipeline(
+        style,
+        strategy,
+        refresh,
+        ml_filter,
+        cost_model=cost_model,
+        cfg_override=override,
+    )
     click.echo(f"\n=== Backtest: {result['style']} / {result['strategy']} ===")
     click.echo(f"Data source: {result.get('data_source', 'unknown')}")
     click.echo(f"Cost model: {result.get('cost_model', cost_model)}")
@@ -302,11 +358,7 @@ def verify_profit(style: str, strategy: str | None, ml_filter: bool) -> None:
 
     names = [strategy] if strategy else list(strategies_for_style(style))
     presets = ("legacy", "alpaca", "alpaca_conservative")
-    optimized_macd = {
-        "adx_threshold": 23,
-        "ema_trend": 200,
-        "long_only": True,
-    }
+    optimized_macd = CHAMPION_MACD_PARAMS
 
     click.echo("\n=== Profit verification (NVDA) ===")
     click.echo("Broker model: Alpaca API (commission-free equities + SEC/TAF/CAT pass-through)")
@@ -496,7 +548,7 @@ def paper() -> None:
 
 
 @paper.command("init")
-@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
 @click.option("--strategy", default=None)
 @click.option("--cost-model", default="alpaca", type=click.Choice(["legacy", "alpaca", "alpaca_conservative"]))
 def paper_init(style: str, strategy: str | None, cost_model: str) -> None:
@@ -539,7 +591,7 @@ def paper_run_all(refresh: bool, cost_model: str | None) -> None:
 
 
 @paper.command("run")
-@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
 @click.option("--strategy", default=None)
 @click.option("--refresh/--no-refresh", default=True, help="Fetch latest market data")
 @click.option("--cost-model", default=None, type=click.Choice(["legacy", "alpaca", "alpaca_conservative"]))
@@ -591,7 +643,7 @@ def paper_run(style: str, strategy: str | None, refresh: bool, cost_model: str |
 
 
 @paper.command("status")
-@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
 @click.option("--strategy", default=None)
 def paper_status(style: str, strategy: str | None) -> None:
     """Show paper account status."""
@@ -616,7 +668,7 @@ def paper_status(style: str, strategy: str | None) -> None:
 
 
 @paper.command("reset")
-@click.option("--style", default="swing", type=click.Choice(["swing", "swing_high_winrate", "daytrade"]))
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
 @click.option("--strategy", default=None)
 @click.confirmation_option(prompt="Paper 口座をリセットしますか？")
 def paper_reset(style: str, strategy: str | None) -> None:

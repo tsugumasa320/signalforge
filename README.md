@@ -57,7 +57,9 @@ uv run signalforge dashboard start
 uv run signalforge dashboard status
 uv run signalforge dashboard stop
 
-# 仮想運用（全戦略一括）
+# Champion（最強プリセット — NVDA swing MACD + ML）
+uv run signalforge champion
+uv run signalforge backtest --style swing_champion --ml-filter
 uv run signalforge paper run-all
 uv run signalforge dashboard export   # 統合サイト → _site/
 
