@@ -5,8 +5,8 @@
   "initial_cash": 100000.0,
   "cash": 100000.0,
   "started_at": "2026-08-09T22:36:19.287088+00:00",
-  "last_processed_bar": "2026-08-07 00:00:00+00:00",
-  "last_run_at": "2026-08-09T22:36:19.287088+00:00",
+  "last_processed_bar": "2026-08-10 00:00:00+00:00",
+  "last_run_at": "2026-08-10T22:43:00.110953+00:00",
   "position": null,
   "closed_trades": [],
   "equity_snapshots": [
@@ -15,7 +15,22 @@
       "equity": 100000.0,
       "cash": 100000.0,
       "note": "paper \u958b\u59cb\uff08\u3053\u306e\u6642\u70b9\u4ee5\u964d\u306e\u8db3\u3060\u3051\u4eee\u60f3\u58f2\u8cb7\uff09"
+    },
+    {
+      "date": "2026-08-10 00:00:00+00:00",
+      "equity": 100000.0,
+      "cash": 100000.0,
+      "position": "flat",
+      "new_trades": 0
     }
   ],
-  "daily_log": []
+  "daily_log": [
+    {
+      "run_at": "2026-08-10T22:43:00.110953+00:00",
+      "bars_processed": 1,
+      "from_bar": "2026-08-10 00:00:00+00:00",
+      "to_bar": "2026-08-10 00:00:00+00:00",
+      "new_trades": 0
+    }
+  ]
 }
