@@ -5,8 +5,8 @@
   "initial_cash": 100000.0,
   "cash": 100000.0,
   "started_at": "2026-08-09T22:36:19.287088+00:00",
-  "last_processed_bar": "2026-08-13 00:00:00+00:00",
-  "last_run_at": "2026-08-13T22:49:40.488838+00:00",
+  "last_processed_bar": "2026-08-14 00:00:00+00:00",
+  "last_run_at": "2026-08-14T22:28:50.530022+00:00",
   "position": null,
   "closed_trades": [],
   "equity_snapshots": [
@@ -43,6 +43,13 @@
       "cash": 100000.0,
       "position": "flat",
       "new_trades": 0
+    },
+    {
+      "date": "2026-08-14 00:00:00+00:00",
+      "equity": 100000.0,
+      "cash": 100000.0,
+      "position": "flat",
+      "new_trades": 0
     }
   ],
   "daily_log": [
@@ -72,6 +79,13 @@
       "bars_processed": 1,
       "from_bar": "2026-08-13 00:00:00+00:00",
       "to_bar": "2026-08-13 00:00:00+00:00",
+      "new_trades": 0
+    },
+    {
+      "run_at": "2026-08-14T22:28:50.530022+00:00",
+      "bars_processed": 1,
+      "from_bar": "2026-08-14 00:00:00+00:00",
+      "to_bar": "2026-08-14 00:00:00+00:00",
       "new_trades": 0
     }
   ]
