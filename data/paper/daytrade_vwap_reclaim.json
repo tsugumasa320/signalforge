@@ -3,10 +3,10 @@
   "strategy": "vwap_reclaim",
   "cost_model": "alpaca",
   "initial_cash": 100000.0,
-  "cash": 94851.90887141135,
+  "cash": 95500.32162789647,
   "started_at": "2026-08-06T14:46:02.926962+00:00",
-  "last_processed_bar": "2026-08-24 15:55:00-04:00",
-  "last_run_at": "2026-08-24T22:32:00.006564+00:00",
+  "last_processed_bar": "2026-08-25 15:55:00-04:00",
+  "last_run_at": "2026-08-25T22:32:48.270986+00:00",
   "position": null,
   "closed_trades": [
     {
@@ -353,6 +353,29 @@
       "total_fees_usd": 2.0699999999999994,
       "total_slippage_usd": 57.042747741225966,
       "total_cost_usd": 59.11274774122597
+    },
+    {
+      "entry_time": "2026-08-25 09:35:00-04:00",
+      "exit_time": "2026-08-25 09:45:00-04:00",
+      "side": "long",
+      "entry_price": 211.8759019807974,
+      "exit_price": 213.3289434185772,
+      "pnl_pct": 0.6836053846466721,
+      "gross_pnl_pct": 0.6857983490314412,
+      "hold_bars": 2,
+      "reason": "take_profit",
+      "is_oos": false,
+      "buy_fees_usd": 0.01,
+      "sell_fees_usd": 2.07,
+      "sec_fee_usd": 1.97,
+      "taf_fee_usd": 0.09,
+      "cat_fee_usd": 0.02,
+      "commission_usd": 0.0,
+      "slippage_entry_usd": 28.44703555075313,
+      "slippage_exit_usd": 28.65931528294567,
+      "total_fees_usd": 2.0799999999999996,
+      "total_slippage_usd": 57.1063508336988,
+      "total_cost_usd": 59.186350833698796
     }
   ],
   "equity_snapshots": [
@@ -452,6 +475,13 @@
       "cash": 94851.90887141135,
       "position": "flat",
       "new_trades": 0
+    },
+    {
+      "date": "2026-08-25 15:55:00-04:00",
+      "equity": 95500.32162789647,
+      "cash": 95500.32162789647,
+      "position": "flat",
+      "new_trades": 1
     }
   ],
   "daily_log": [
@@ -545,6 +575,13 @@
       "from_bar": "2026-08-24 09:30:00-04:00",
       "to_bar": "2026-08-24 15:55:00-04:00",
       "new_trades": 0
+    },
+    {
+      "run_at": "2026-08-25T22:32:48.270986+00:00",
+      "bars_processed": 78,
+      "from_bar": "2026-08-25 09:30:00-04:00",
+      "to_bar": "2026-08-25 15:55:00-04:00",
+      "new_trades": 1
     }
   ]
 }
