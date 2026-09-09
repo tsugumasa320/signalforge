@@ -5,11 +5,11 @@
   "initial_cash": 100000.0,
   "cash": 100000.0,
   "started_at": "2026-08-06T14:10:27.326013+00:00",
-  "last_processed_bar": "2026-09-08 00:00:00+00:00",
-  "last_run_at": "2026-09-08T23:57:34.770884+00:00",
+  "last_processed_bar": "2026-09-09 00:00:00+00:00",
+  "last_run_at": "2026-09-09T23:57:11.771720+00:00",
   "position": {
-    "position_shares": 428.3695471206531,
-    "entry_price": 233.4432750230827,
+    "position_shares": 428.55332117221724,
+    "entry_price": 233.34316888846206,
     "entry_time": "2026-09-08 00:00:00+00:00",
     "entry_signal_time": "2026-09-04 00:00:00+00:00",
     "side": "long",
@@ -23,11 +23,11 @@
       "taf_fee_usd": 0.0,
       "cat_fee_usd": 0.01,
       "commission_usd": 0.0,
-      "slippage_entry_usd": 49.975007496244324,
+      "slippage_entry_usd": 49.97500749625179,
       "slippage_exit_usd": 0.0,
       "total_fees_usd": 0.01,
-      "total_slippage_usd": 49.975007496244324,
-      "total_cost_usd": 49.98500749624432
+      "total_slippage_usd": 49.97500749625179,
+      "total_cost_usd": 49.98500749625179
     }
   },
   "closed_trades": [],
@@ -39,8 +39,8 @@
       "note": "paper \u958b\u59cb\uff08\u3053\u306e\u6642\u70b9\u4ee5\u964d\u306e\u8db3\u3060\u3051\u4eee\u60f3\u58f2\u8cb7\uff09"
     },
     {
-      "date": "2026-09-08 00:00:00+00:00",
-      "equity": 196695.85604135288,
+      "date": "2026-09-09 00:00:00+00:00",
+      "equity": 195854.52056188526,
       "cash": 100000.0,
       "position": "long",
       "new_trades": 0
@@ -48,10 +48,10 @@
   ],
   "daily_log": [
     {
-      "run_at": "2026-09-08T23:57:34.770884+00:00",
-      "bars_processed": 22,
+      "run_at": "2026-09-09T23:57:11.771720+00:00",
+      "bars_processed": 23,
       "from_bar": "2026-08-07 00:00:00+00:00",
-      "to_bar": "2026-09-08 00:00:00+00:00",
+      "to_bar": "2026-09-09 00:00:00+00:00",
       "new_trades": 0
     }
   ]
