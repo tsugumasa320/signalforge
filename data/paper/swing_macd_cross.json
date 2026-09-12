@@ -3,20 +3,20 @@
   "strategy": "macd_cross",
   "cost_model": "alpaca",
   "initial_cash": 100000.0,
-  "cash": 95091.48487432172,
+  "cash": 95091.48569047326,
   "started_at": "2026-08-06T14:10:27.326013+00:00",
   "last_processed_bar": "2026-09-10 00:00:00+00:00",
-  "last_run_at": "2026-09-10T23:52:51.831261+00:00",
+  "last_run_at": "2026-09-12T00:00:12.356086+00:00",
   "position": null,
   "closed_trades": [
     {
       "entry_time": "2026-09-08 00:00:00+00:00",
       "exit_time": "2026-09-10 00:00:00+00:00",
       "side": "long",
-      "entry_price": 233.34316888846206,
-      "exit_price": 221.89431320754525,
-      "pnl_pct": -4.908515125678284,
-      "gross_pnl_pct": -4.906445616322863,
+      "entry_price": 233.08235537674622,
+      "exit_price": 221.64629827124725,
+      "pnl_pct": -4.908514309526741,
+      "gross_pnl_pct": -4.9064448001712275,
       "hold_bars": 2,
       "reason": "stop_loss",
       "is_oos": false,
@@ -26,11 +26,11 @@
       "taf_fee_usd": 0.09,
       "cat_fee_usd": 0.02,
       "commission_usd": 0.0,
-      "slippage_entry_usd": 49.97500749625179,
-      "slippage_exit_usd": 47.57055771600878,
+      "slippage_entry_usd": 49.97500749624677,
+      "slippage_exit_usd": 47.570558124287786,
       "total_fees_usd": 2.0699999999999994,
-      "total_slippage_usd": 97.54556521226057,
-      "total_cost_usd": 99.61556521226056
+      "total_slippage_usd": 97.54556562053455,
+      "total_cost_usd": 99.61556562053454
     }
   ],
   "equity_snapshots": [
@@ -42,15 +42,15 @@
     },
     {
       "date": "2026-09-10 00:00:00+00:00",
-      "equity": 95091.48487432172,
-      "cash": 95091.48487432172,
+      "equity": 95091.48569047326,
+      "cash": 95091.48569047326,
       "position": "flat",
       "new_trades": 1
     }
   ],
   "daily_log": [
     {
-      "run_at": "2026-09-10T23:52:51.831261+00:00",
+      "run_at": "2026-09-12T00:00:12.356086+00:00",
       "bars_processed": 24,
       "from_bar": "2026-08-07 00:00:00+00:00",
       "to_bar": "2026-09-10 00:00:00+00:00",
