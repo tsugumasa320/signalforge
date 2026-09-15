@@ -3,10 +3,10 @@
   "strategy": "vwap_reclaim",
   "cost_model": "alpaca",
   "initial_cash": 100000.0,
-  "cash": 92846.20273164265,
+  "cash": 92843.91983772896,
   "started_at": "2026-08-06T14:46:02.926962+00:00",
-  "last_processed_bar": "2026-09-11 15:55:00-04:00",
-  "last_run_at": "2026-09-12T00:00:17.914906+00:00",
+  "last_processed_bar": "2026-09-14 15:55:00-04:00",
+  "last_run_at": "2026-09-15T00:25:05.220168+00:00",
   "position": null,
   "closed_trades": [
     {
@@ -767,6 +767,29 @@
       "total_fees_usd": 2.0299999999999994,
       "total_slippage_usd": 55.9608301184621,
       "total_cost_usd": 57.9908301184621
+    },
+    {
+      "entry_time": "2026-09-14 09:55:00-04:00",
+      "exit_time": "2026-09-14 10:55:00-04:00",
+      "side": "short",
+      "entry_price": 210.56467581006075,
+      "exit_price": 210.56524934482454,
+      "pnl_pct": -0.0024587908245364827,
+      "gross_pnl_pct": -0.00027237864062001904,
+      "hold_bars": 12,
+      "reason": "max_hold_or_session",
+      "is_oos": false,
+      "buy_fees_usd": 0.01,
+      "sell_fees_usd": 2.0199999999999996,
+      "sec_fee_usd": 1.92,
+      "taf_fee_usd": 0.09,
+      "cat_fee_usd": 0.02,
+      "commission_usd": 0.0,
+      "slippage_entry_usd": 27.86221948532954,
+      "slippage_exit_usd": 27.845583012765612,
+      "total_fees_usd": 2.0299999999999994,
+      "total_slippage_usd": 55.70780249809515,
+      "total_cost_usd": 57.73780249809515
     }
   ],
   "equity_snapshots": [
@@ -957,6 +980,13 @@
       "cash": 92846.20273164265,
       "position": "flat",
       "new_trades": 1
+    },
+    {
+      "date": "2026-09-14 15:55:00-04:00",
+      "equity": 92843.91983772896,
+      "cash": 92843.91983772896,
+      "position": "flat",
+      "new_trades": 1
     }
   ],
   "daily_log": [
@@ -1140,6 +1170,13 @@
       "bars_processed": 78,
       "from_bar": "2026-09-11 09:30:00-04:00",
       "to_bar": "2026-09-11 15:55:00-04:00",
+      "new_trades": 1
+    },
+    {
+      "run_at": "2026-09-15T00:25:05.220168+00:00",
+      "bars_processed": 78,
+      "from_bar": "2026-09-14 09:30:00-04:00",
+      "to_bar": "2026-09-14 15:55:00-04:00",
       "new_trades": 1
     }
   ]
