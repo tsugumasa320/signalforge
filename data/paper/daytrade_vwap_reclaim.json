@@ -3,10 +3,10 @@
   "strategy": "vwap_reclaim",
   "cost_model": "alpaca",
   "initial_cash": 100000.0,
-  "cash": 92788.00755876898,
+  "cash": 92368.55377213976,
   "started_at": "2026-08-06T14:46:02.926962+00:00",
-  "last_processed_bar": "2026-10-01 15:55:00-04:00",
-  "last_run_at": "2026-10-02T01:28:13.419550+00:00",
+  "last_processed_bar": "2026-10-02 15:55:00-04:00",
+  "last_run_at": "2026-10-03T01:01:06.215949+00:00",
   "position": null,
   "closed_trades": [
     {
@@ -1112,6 +1112,29 @@
       "total_fees_usd": 2.0,
       "total_slippage_usd": 55.15241264624032,
       "total_cost_usd": 57.15241264624032
+    },
+    {
+      "entry_time": "2026-10-02 09:50:00-04:00",
+      "exit_time": "2026-10-02 09:50:00-04:00",
+      "side": "short",
+      "entry_price": 236.53168309853578,
+      "exit_price": 237.59578953568578,
+      "pnl_pct": -0.4520560336027846,
+      "gross_pnl_pct": -0.447864181107549,
+      "hold_bars": 0,
+      "reason": "stop_loss",
+      "is_oos": false,
+      "buy_fees_usd": 0.01,
+      "sell_fees_usd": 2.01,
+      "sec_fee_usd": 1.92,
+      "taf_fee_usd": 0.08,
+      "cat_fee_usd": 0.02,
+      "commission_usd": 0.0,
+      "slippage_entry_usd": 27.84475569433103,
+      "slippage_exit_usd": 27.953246429688463,
+      "total_fees_usd": 2.0199999999999996,
+      "total_slippage_usd": 55.79800212401949,
+      "total_cost_usd": 57.818002124019486
     }
   ],
   "equity_snapshots": [
@@ -1400,6 +1423,13 @@
       "cash": 92788.00755876898,
       "position": "flat",
       "new_trades": 2
+    },
+    {
+      "date": "2026-10-02 15:55:00-04:00",
+      "equity": 92368.55377213976,
+      "cash": 92368.55377213976,
+      "position": "flat",
+      "new_trades": 1
     }
   ],
   "daily_log": [
@@ -1682,6 +1712,13 @@
       "from_bar": "2026-10-01 09:30:00-04:00",
       "to_bar": "2026-10-01 15:55:00-04:00",
       "new_trades": 2
+    },
+    {
+      "run_at": "2026-10-03T01:01:06.215949+00:00",
+      "bars_processed": 78,
+      "from_bar": "2026-10-02 09:30:00-04:00",
+      "to_bar": "2026-10-02 15:55:00-04:00",
+      "new_trades": 1
     }
   ]
 }
