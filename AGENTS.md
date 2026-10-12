@@ -52,12 +52,25 @@ uv run pytest
 ## Data cache
 
 - Runtime data lives under `data/` (gitignored).
-- If backtests fail on missing OHLCV: `uv run signalforge fetch --ticker NVDA --timeframe 1d`
+- If backtests fail on missing OHLCV: `uv run signalforge fetch --ticker 7203.T --timeframe 1d` or `fetch --universe japan_liquid`
 
 ## PyArrow / macOS
 
 - Pickle cache (not parquet) for OHLCV to avoid Streamlit thread SIGSEGV.
 - `ARROW_DEFAULT_MEMORY_POOL=system` is set on dashboard start.
+
+## Izanami-style lab
+
+Rule palette backtests (capital-unconstrained rule study, then optional allocation):
+
+```bash
+uv run signalforge lab palette
+uv run signalforge lab backtest --rule iz_macd_buy --cohort prime
+uv run signalforge lab matrix --rules all --cohorts prime,standard,growth
+```
+
+Config: `config/lab/izanami_palette.yaml`, cohorts: `config/universe/compare_presets.yaml`.
+Parity checklist: `docs/izanami_parity.md`.
 
 ## Paper trading (forward virtual)
 

@@ -49,10 +49,14 @@ from signalforge.report.dashboard_glossary import (
     render_tab_intro,
 )
 from signalforge.report.dashboard_strategies import render_strategies_tab
+from signalforge.config import load_market_config
+from signalforge.report.dashboard_explorer import _cfg_override, _default_dates, render_explorer_tab
+from signalforge.report.dashboard_lab import render_lab_tab
 
 MACD_OPTIMIZED = CHAMPION_MACD_PARAMS  # backward compat for sidebar toggle label
 
 COST_LABELS = {
+    "japan": "日本株（手数料・スリッページ）",
     "legacy": "Legacy（簡易）",
     "alpaca": "Alpaca（公式料金表）",
     "alpaca_conservative": "Alpaca 保守（広スプレッド）",
@@ -89,12 +93,28 @@ def _run_backtest(
     ml_filter: bool,
     cost_model: str,
     use_macd_opt: bool,
+    ticker: str,
+    start_iso: str | None,
+    end_iso: str | None,
 ) -> dict[str, Any]:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=PendingDeprecationWarning)
-        cfg_override = None
+        cfg_override: dict[str, Any] | None = None
         if strategy == "macd_cross" and use_macd_opt:
             cfg_override = champion_cfg_override(style, strategy, load_style_config(style))
+        from datetime import date
+
+        start_d = date.fromisoformat(start_iso) if start_iso else None
+        end_d = date.fromisoformat(end_iso) if end_iso else None
+        window = _cfg_override(ticker or None, start_d, end_d)
+        if window:
+            base = dict(cfg_override or {})
+            for key, val in window.items():
+                if key == "backtest" and isinstance(val, dict):
+                    base["backtest"] = {**base.get("backtest", {}), **val}
+                else:
+                    base[key] = val
+            cfg_override = base
         return run_backtest_pipeline(
             style,
             strategy,
@@ -202,10 +222,22 @@ def _sidebar() -> dict[str, Any]:
     )
     cost_model = st.sidebar.selectbox(
         "コストモデル",
-        ["alpaca", "legacy", "alpaca_conservative"],
-        format_func=lambda x: COST_LABELS.get(x, x),
+        ["japan", "alpaca", "legacy", "alpaca_conservative"],
+        format_func=lambda x: COST_LABELS.get(x, x) if x in COST_LABELS else x,
         help=SIDEBAR_HELP["cost_model"],
     )
+    st.sidebar.subheader("📅 期間・銘柄")
+    default_start, _ = _default_dates()
+    bt_ticker = st.sidebar.text_input(
+        "銘柄",
+        value=str(load_market_config("japan").get("default_ticker", "7203.T")),
+        help="例: 7203.T（トヨタ）",
+    )
+    bt_start = st.sidebar.date_input("開始日", value=default_start)
+    use_end = st.sidebar.checkbox("終了日を指定", value=False)
+    bt_end = st.sidebar.date_input("終了日", value=default_start, disabled=not use_end)
+    start_iso = bt_start.isoformat()
+    end_iso = bt_end.isoformat() if use_end else None
     use_macd_opt = False
     if strategy == "macd_cross" and style not in ("swing_champion", "swing_high_winrate"):
         use_macd_opt = st.sidebar.toggle(
@@ -228,7 +260,16 @@ def _sidebar() -> dict[str, Any]:
     ):
         with st.spinner("バックテスト実行中..."):
             try:
-                st.session_state.result = _run_backtest(style, strategy, ml_filter, cost_model, use_macd_opt)
+                st.session_state.result = _run_backtest(
+                    style,
+                    strategy,
+                    ml_filter,
+                    cost_model,
+                    use_macd_opt,
+                    bt_ticker.strip(),
+                    start_iso,
+                    end_iso,
+                )
                 st.session_state.last_error = None
             except Exception as exc:
                 st.session_state.last_error = str(exc)
@@ -283,6 +324,9 @@ def _sidebar() -> dict[str, Any]:
         "cost_model": cost_model,
         "use_macd_opt": use_macd_opt,
         "saved_run": saved_run if saved_run != "（なし）" else None,
+        "ticker": bt_ticker.strip(),
+        "start_iso": start_iso,
+        "end_iso": end_iso,
     }
 
 
@@ -528,7 +572,7 @@ def run_dashboard() -> None:
 
     st.title("SignalForge")
     st.caption(
-        "NVDA テクニカル分析 — バックテスト・ML・Alpaca 実コスト検証。"
+        "日本株テクニカル分析 — バックテスト・ML・日本コスト検証。"
         "わからない用語は **📖 用語集**、各戦略の詳細は **📚 戦略解説** タブを参照。"
     )
 
@@ -551,8 +595,30 @@ def run_dashboard() -> None:
             meta += f"  |  ML folds: {mr.get('folds', 0)}, OOS accuracy: {acc_txt}"
         st.markdown(meta)
 
-    tab_overview, tab_charts, tab_compare, tab_cost, tab_trades, tab_ml, tab_strategies, tab_glossary = st.tabs(
-        ["📊 概要", "📈 チャート", "⚖️ 戦略比較", "💰 コスト", "📋 トレード", "🤖 ML/監査", "📚 戦略解説", "📖 用語集"]
+    (
+        tab_overview,
+        tab_charts,
+        tab_compare,
+        tab_cost,
+        tab_trades,
+        tab_ml,
+        tab_explorer,
+        tab_lab,
+        tab_strategies,
+        tab_glossary,
+    ) = st.tabs(
+        [
+            "📊 概要",
+            "📈 チャート",
+            "⚖️ 戦略比較",
+            "💰 コスト",
+            "📋 トレード",
+            "🤖 ML/監査",
+            "🔍 検証エクスプローラー",
+            "🔬 イザナミラボ",
+            "📚 戦略解説",
+            "📖 用語集",
+        ]
     )
 
     with tab_overview:
@@ -582,6 +648,12 @@ def run_dashboard() -> None:
 
     with tab_ml:
         _page_ml(result, cfg.get("saved_run"))
+
+    with tab_explorer:
+        render_explorer_tab()
+
+    with tab_lab:
+        render_lab_tab()
 
     with tab_strategies:
         render_strategies_tab()

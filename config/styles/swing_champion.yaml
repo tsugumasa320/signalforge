@@ -1,6 +1,7 @@
-# Champion — NVDA swing MACD (optimized TA + walk-forward ML)
-# Backtest 2023+: TA PF ~4.1, win ~72% (Alpaca costs). Not a guarantee of future returns.
-style: swing
+# Champion — 日本株スイング MACD（7203.T 等・最適化 TA + walk-forward ML）
+# 過去データの成績であり将来を保証しません。コストは japan プリセット。
+style: swing_champion
+market: japan
 timeframe: 1d
 data_source: yfinance
 

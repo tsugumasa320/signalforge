@@ -1,0 +1,1648 @@
+meta:
+  description: 日本株中心のテクニカル・デイトレ・ブレイク系候補集
+  last_collection: '2026-03-23'
+  source_types:
+  - broker
+  - blog
+  - youtube
+  - youtube_transcript
+  - x
+  - x_blog
+  - note
+  - pdf
+  - global
+  - 2ch
+  - 2ch_archive
+  - kabutan
+  - minkabu
+  - karauri
+  - media
+  - screener
+  - community
+  - ugc
+  - ir
+  - academic
+  - podcast
+  - data
+  collection:
+    honest_status: '初版は証券会社・ブログ・Web検索による手動 curation が中心。
+
+      2026-03-23: media_sources.yaml（証券・株探/みんかぶ・金融メディア・Qiita/Zenn・Reddit・5chアーカイブ・海外TA等）を
+
+      collect_strategy_mentions.py が順次 GET しキーワード集計 → data/strategy_harvest/mentions.json。
+
+      未取得: X/Twitter 本家検索、5ch 本家、Discord/LINE、Podcast 音声、TDnet/適時開示のイベント駆動、Amazon
+      等の動的ページは限定的。
+
+      YouTube は --youtube + youtube-transcript-api で video_id のみ字幕取得。
+
+      '
+    harvest_script: scripts/collect_strategy_mentions.py
+    seeds: config/strategies/collection_seeds.yaml
+    media_registry: config/strategies/media_sources.yaml
+strategies:
+- id: macd_cross
+  name: MACD ゴールデンクロス
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - momentum
+  sources:
+  - type: broker
+    title: 松井証券 — スイング順張り・MACD
+    url: https://www.matsui.co.jp/stock/study/short-term/tech-swing/
+  - type: blog
+    title: TOITOI FINANCE — MACD トレンド転換
+    url: https://toitoi-blog.com/swing-trade-how-to/
+  - type: youtube
+    title: MACD トレード 日本株（検索）
+    url: https://www.youtube.com/results?search_query=MACD+トレード+日本株
+- id: ema_pullback
+  name: EMA 押し目買い
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - ma
+  sources:
+  - type: broker
+    title: 松井証券 — トレンドフォロー押し目
+    url: https://www.matsui.co.jp/stock/study/short-term/tech-swing/
+  - type: blog
+    title: TOITOI — 移動平均＋RSI 組み合わせ
+    url: https://toitoi-blog.com/swing-trade-how-to/
+- id: bb_squeeze
+  name: ボリンジャー・スクイーズ
+  implemented: true
+  style: swing
+  tags:
+  - volatility
+  - breakout
+  sources:
+  - type: blog
+    title: TOITOI — ボリンジャーバンド ±2σ
+    url: https://toitoi-blog.com/swing-trade-how-to/
+  - type: global
+    title: Investopedia — BB + RSI 戦略例
+    url: https://www.investopedia.com/ask/answers/071014/how-do-i-create-trading-strategy-bollinger-bands-and-rsi.asp
+- id: ma_golden_cross
+  name: EMA5/25 ゴールデンクロス + EMA75
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - ma
+  - japan
+  sources:
+  - type: broker
+    title: SMBC日興 — 5日・25日・75日ゴールデンクロス
+    url: https://www.smbcnikko.co.jp/products/stock/margin/knowledge/015.html
+  - type: broker
+    title: 松井証券 — ゴールデンクロス解説
+    url: https://www.matsui.co.jp/stock/study/short-term/tech-swing/
+- id: rsi_reversal
+  name: RSI 売られ過ぎリクレイム
+  implemented: true
+  style: swing
+  tags:
+  - mean_reversion
+  - oscillator
+  sources:
+  - type: blog
+    title: TRADING HACK — 日本株 RSI バックテスト設計
+    url: https://tradinghack.net/%e6%8a%95%e8%b3%87%e6%88%a6%e7%95%a5/rsi-backtest-japanese-stocks-strategy/
+  - type: blog
+    title: TOITOI — RSI30 付近反発
+    url: https://toitoi-blog.com/swing-trade-how-to/
+- id: vwap_ema
+  name: VWAP + EMA クロス
+  implemented: true
+  style: daytrade
+  tags:
+  - vwap
+  - trend
+  sources:
+  - type: blog
+    title: TRADING HACK — 5分足 VWAP 攻防
+    url: https://tradinghack.net/technical-analysis/vwap-5min-daytrade/
+  - type: youtube
+    title: VWAP デイトレ 日本株（検索）
+    url: https://www.youtube.com/results?search_query=VWAP+デイトレ+日本株
+- id: vwap_reclaim
+  name: VWAP リクレイム（奪還）
+  implemented: true
+  style: daytrade
+  tags:
+  - vwap
+  - mean_reversion
+  sources:
+  - type: blog
+    title: TRADING HACK — VWAP 需給・板
+    url: https://tradinghack.net/trading-methodology/vwap-5min-daytrade-orderflow/
+- id: orb
+  name: ORB（寄付レンジブレイク）
+  implemented: true
+  style: daytrade
+  tags:
+  - breakout
+  - opening
+  sources:
+  - type: note
+    title: ぴの — 日本株1分足 ORB 再現検証
+    url: https://note.com/pino_world/n/ne4f9152f631c
+  - type: youtube
+    title: ORB day trade（検索）
+    url: https://www.youtube.com/results?search_query=opening+range+breakout+day+trade
+- id: perfect_order_pullback
+  name: パーフェクトオーダー押し目（5>25>75 上向き）
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - ma
+  - japan
+  sources:
+  - type: blog
+    title: TRADING HACK — パーフェクトオーダー押し目判断
+    url: https://tradinghack.net/technical-analysis/perfect-order-pullback-buy-guide/
+  - type: blog
+    title: TRADING HACK — 5/25/75 実践手順
+    url: https://tradinghack.net/stock-investment/perfect-order-oshime-buy-strategy/
+- id: ma_25_75_golden_cross
+  name: 25日/75日 ゴールデンクロス
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - ma
+  - japan
+  sources:
+  - type: broker
+    title: SMBC日興 — 25・75 GC
+    url: https://www.smbcnikko.co.jp/products/stock/margin/knowledge/015.html
+- id: ma_50_200_golden_cross
+  name: 50/200日 ゴールデンクロス（中期トレンド転換）
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - ma
+  sources:
+  - type: global
+    title: Investopedia — Golden Cross
+    url: https://www.investopedia.com/terms/g/goldencross.asp
+  - type: global
+    title: TradingSim — GC 3戦略
+    url: https://www.tradingsim.com/blog/golden-cross
+- id: ma_death_cross
+  name: デッドクロス（ショート / 回避）
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - ma
+  sources:
+  - type: broker
+    title: 松井証券 — デッドクロス売り
+    url: https://www.matsui.co.jp/stock/study/short-term/tech-swing/
+- id: ma_200_trend_filter
+  name: 200日線フィルタ＋短期シグナル
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - ma
+  sources:
+  - type: blog
+    title: TRADING HACK — RSI×200日線条件
+    url: https://tradinghack.net/%e6%8a%95%e8%b3%87%e6%88%a6%e7%95%a5/rsi-backtest-japanese-stocks-strategy/
+- id: trend_reentry
+  name: 新高値更新後の押し目再エントリー
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - breakout
+  sources:
+  - type: blog
+    title: TRADING HACK — 6ヶ月高値＋出来高 RSI60
+    url: https://tradinghack.net/%e6%8a%95%e8%b3%87%e6%88%a6%e7%95%a5/rsi-backtest-japanese-stocks-strategy/
+- id: adx_trend_ride
+  name: ADX 閾値以上でトレンド乗り
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - adx
+  sources:
+  - type: pdf
+    title: 日本テクニカルアナリスト協会 — TAハンドブック初級
+    url: https://www.ntaa.or.jp/ntaw/02-cnt/uploads/2025/07/technicalhandbook3_20250704.pdf
+- id: supertrend_follow
+  name: Supertrend トレンドフォロー
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  sources:
+  - type: youtube
+    title: Supertrend 日本株（検索）
+    url: https://www.youtube.com/results?search_query=supertrend+株+strategy
+- id: heikin_ashi_trend
+  name: 平均足（Heikin-Ashi）トレンド継続
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - candle
+  sources:
+  - type: youtube
+    title: 平均足 トレード（検索）
+    url: https://www.youtube.com/results?search_query=平均足+トレンド+株
+- id: ichimoku_kumo_break
+  name: 一目均衡表・雲抜け
+  implemented: true
+  style: swing
+  tags:
+  - ichimoku
+  - trend
+  - japan
+  sources:
+  - type: broker
+    title: 大和証券 — 一目均衡表講座
+    url: https://www.daiwa.jp/seminar/technical/08/
+  - type: blog
+    title: nitekabu — 雲と三役好転
+    url: https://blog.nitekabu.com/technical/ichimoku-sanyaku-koten-mikata/
+- id: ichimoku_sanyaku_koten
+  name: 三役好転（転換>基準・株>雲・遅行>株価）
+  implemented: true
+  style: swing
+  tags:
+  - ichimoku
+  - japan
+  sources:
+  - type: broker
+    title: 大和証券 — 三役好転
+    url: https://www.daiwa.jp/seminar/technical/08/
+  - type: blog
+    title: TRADING HACK — 三役好転スイング条件設計
+    url: https://tradinghack.net/technical-analysis/ichimoku-sanyaku-kouten-swing-2/
+- id: ichimoku_tk_cross
+  name: 転換線×基準線クロス
+  implemented: true
+  style: swing
+  tags:
+  - ichimoku
+  sources:
+  - type: broker
+    title: 大和証券 — 転換線・基準線
+    url: https://www.daiwa.jp/seminar/technical/08/
+- id: ichimoku_kijun_pullback
+  name: 基準線押し目（雲上）
+  implemented: true
+  style: swing
+  tags:
+  - ichimoku
+  - pullback
+  sources:
+  - type: blog
+    title: TRADING HACK — 基準線上ヒゲ陽線
+    url: https://tradinghack.net/technical-analysis/ichimoku-sanyaku-kouten-swing-2/
+- id: ichimoku_macd_rsi
+  name: 一目 + MACD + RSI 複合
+  implemented: true
+  style: swing
+  tags:
+  - ichimoku
+  - combo
+  sources:
+  - type: global
+    title: TradingView — Ichimoku RSI MACD Strategy
+    url: https://www.tradingview.com/script/3MZTtLkO-Ichimoku-RSI-MACD-Strategy/
+  - type: global
+    title: Medium — Cloud Momentum Divergence
+    url: https://medium.com/@redsword_23261/trend-following-cloud-momentum-divergence-strategy-abbcdb9f837e
+- id: rsi_dip_200ma
+  name: RSI35割れ + 200日線上（翌寄り買い）
+  implemented: true
+  style: swing
+  tags:
+  - mean_reversion
+  - rsi
+  - japan
+  sources:
+  - type: blog
+    title: TRADING HACK — RSI 日本株検証
+    url: https://tradinghack.net/%e6%8a%95%e8%b3%87%e6%88%a6%e7%95%a5/rsi-backtest-japanese-stocks-strategy/
+- id: rsi_momentum_60
+  name: RSI60以上 + 25日線上（強い銘柄押し目）
+  implemented: true
+  style: swing
+  tags:
+  - momentum
+  - rsi
+  sources:
+  - type: blog
+    title: TRADING HACK — 強い銘柄 RSI ルール
+    url: https://tradinghack.net/%e6%8a%95%e8%b3%87%e6%88%a6%e7%95%a5/rsi-backtest-japanese-stocks-strategy/
+- id: bb_lower_rsi_oversold
+  name: BB−2σ + RSI 売られ過ぎ
+  implemented: true
+  style: swing
+  tags:
+  - mean_reversion
+  - bb
+  - rsi
+  sources:
+  - type: blog
+    title: TOITOI — RSI30 + BB−2σ 反発
+    url: https://toitoi-blog.com/swing-trade-how-to/
+- id: bb_upper_rsi_exit
+  name: BB+2σ + RSI70 利確シグナル
+  implemented: true
+  style: swing
+  tags:
+  - mean_reversion
+  - bb
+  sources:
+  - type: blog
+    title: TOITOI — トレンド終盤利確
+    url: https://toitoi-blog.com/swing-trade-how-to/
+- id: stoch_rsi_cross
+  name: ストキャスティクス / StochRSI クロス
+  implemented: true
+  style: swing
+  tags:
+  - oscillator
+  sources:
+  - type: youtube
+    title: ストキャス 日本株（検索）
+    url: https://www.youtube.com/results?search_query=ストキャスティクス+株+戦略
+- id: cci_zero_cross
+  name: CCI ゼロライン / ±100 ブレイク
+  implemented: true
+  style: swing
+  tags:
+  - oscillator
+  sources:
+  - type: youtube
+    title: CCI トレード（検索）
+    url: https://www.youtube.com/results?search_query=CCI+trading+strategy
+- id: macd_histogram_reversal
+  name: MACD ヒストグラム反転
+  implemented: true
+  style: swing
+  tags:
+  - momentum
+  sources:
+  - type: broker
+    title: 松井証券 — MACD 活用
+    url: https://www.matsui.co.jp/stock/study/short-term/tech-swing/
+- id: volume_breakout
+  name: 出来高急増ブレイクアウト
+  implemented: true
+  style: swing
+  tags:
+  - breakout
+  - volume
+  sources:
+  - type: blog
+    title: TOITOI — 出来高・信用残
+    url: https://toitoi-blog.com/swing-trade-how-to/
+  - type: broker
+    title: SMBC日興 — 出来高と流動性
+    url: https://www.smbcnikko.co.jp/products/stock/margin/knowledge/015.html
+- id: donchian_breakout
+  name: ドンチャンチャネルブレイク（N日高値）
+  implemented: true
+  style: swing
+  tags:
+  - breakout
+  - trend
+  sources:
+  - type: global
+    title: Turtle / Donchian（古典）
+    url: https://www.google.com/search?q=donchian+channel+breakout+strategy
+- id: box_range_breakout
+  name: レンジ（ボックス）上下ブレイク
+  implemented: true
+  style: swing
+  tags:
+  - breakout
+  - range
+  sources:
+  - type: broker
+    title: 松井証券 — レンジ相場の見方
+    url: https://www.matsui.co.jp/stock/study/short-term/tech-swing/
+- id: triangle_breakout
+  name: 三角保ち合いブレイク
+  implemented: true
+  style: swing
+  tags:
+  - pattern
+  - breakout
+  sources:
+  - type: broker
+    title: 松井証券 — 三角保ち合い
+    url: https://www.matsui.co.jp/stock/study/short-term/tech-swing/
+- id: keltner_squeeze
+  name: ケルトナー / BB スクイーズ類似
+  implemented: true
+  style: swing
+  tags:
+  - volatility
+  - breakout
+  sources:
+  - type: youtube
+    title: Keltner squeeze（検索）
+    url: https://www.youtube.com/results?search_query=keltner+channel+squeeze+strategy
+- id: vcp_minervini
+  name: VCP（ボラ収縮）→ ブレイク（ミネルヴィニ型）
+  implemented: true
+  style: swing
+  tags:
+  - breakout
+  - growth
+  sources:
+  - type: global
+    title: Minervini VCP 概要（検索）
+    url: https://www.google.com/search?q=Minervini+VCP+trading+strategy
+- id: gap_up_continuation
+  name: ギャップアップ続伸（材料ギャップ）
+  implemented: true
+  style: swing
+  tags:
+  - gap
+  - event
+  sources:
+  - type: x
+    title: ギャップ 日本株（検索）
+    url: https://x.com/search?q=%E6%97%A5%E7%B5%8C%20%E3%82%AE%E3%83%A3%E3%83%83%E3%83%97%20%E6%9D%90%E6%96%99
+- id: gap_fill_reversal
+  name: ギャップ埋め（窓埋め）逆張り
+  implemented: true
+  style: swing
+  tags:
+  - gap
+  - mean_reversion
+  sources:
+  - type: blog
+    title: 窓埋め トレード（検索）
+    url: https://www.google.com/search?q=窓埋め+トレード+日本株
+- id: fib_pullback_382_618
+  name: フィボナッチ 38.2/61.8 押し目
+  implemented: true
+  style: swing
+  tags:
+  - fibonacci
+  - pullback
+  sources:
+  - type: youtube
+    title: フィボナッチ 押し目 株（検索）
+    url: https://www.youtube.com/results?search_query=フィボナッチ+押し目+株
+- id: relative_strength_index_rs
+  name: 対指数 RS 強度（日経 / TOPIX 対比）
+  implemented: true
+  style: swing
+  tags:
+  - relative_strength
+  - screening
+  sources:
+  - type: broker
+    title: SMBC日興 — テクニカルスクリーニング
+    url: https://www.smbcnikko.co.jp/products/stock/margin/knowledge/015.html
+- id: topix100_momentum
+  name: TOPIX100 / Core30 モメンタムローテ
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - japan
+  sources:
+  - type: broker
+    title: SMBC日興 — 流動性銘柄選定
+    url: https://www.smbcnikko.co.jp/products/stock/margin/knowledge/015.html
+- id: credit_balance_contrarian
+  name: 信用残高・貸借倍率 contrarian
+  implemented: true
+  style: swing
+  tags:
+  - sentiment
+  - japan
+  sources:
+  - type: blog
+    title: TOITOI — 信用残・空売り比率
+    url: https://toitoi-blog.com/swing-trade-how-to/
+  implementation_note: 需給データなし→RSI逆張り近似
+- id: sector_leader_laggard
+  name: 業種 ETF / セクター強弱ローテ
+  implemented: true
+  style: swing
+  tags:
+  - sector
+  sources:
+  - type: youtube
+    title: セクター ローテーション 株（検索）
+    url: https://www.youtube.com/results?search_query=セクター+ローテーション+日本株
+  implementation_note: 相対強度なし→EMAモメンタム近似
+- id: double_bottom_break
+  name: ダブルボトム + ネックラインブレイク
+  implemented: true
+  style: swing
+  tags:
+  - pattern
+  sources:
+  - type: global
+    title: TradingSim — GC + ダブルボトム
+    url: https://www.tradingsim.com/blog/golden-cross
+- id: cup_and_handle
+  name: カップ・アンド・ハンドル
+  implemented: true
+  style: swing
+  tags:
+  - pattern
+  - growth
+  sources:
+  - type: global
+    title: CANSLIM / cup handle（検索）
+    url: https://www.google.com/search?q=cup+and+handle+stock+strategy
+- id: head_shoulders_short
+  name: ヘッドショルダー（三尊）崩れ
+  implemented: true
+  style: swing
+  tags:
+  - pattern
+  sources:
+  - type: youtube
+    title: 三尊 逆三尊 株（検索）
+    url: https://www.youtube.com/results?search_query=三尊+逆三尊+テクニカル
+- id: vwap_pullback_long
+  name: VWAP 上での押し目買い
+  implemented: true
+  style: daytrade
+  tags:
+  - vwap
+  - pullback
+  sources:
+  - type: blog
+    title: TRADING HACK — VWAP 上は押し目優先
+    url: https://tradinghack.net/technical-analysis/vwap-5min-daytrade/
+  implementation_note: 日足でデイトレ手法を近似
+- id: vwap_mean_reversion_short
+  name: VWAP 下での戻り売り
+  implemented: true
+  style: daytrade
+  tags:
+  - vwap
+  - mean_reversion
+  sources:
+  - type: blog
+    title: TRADING HACK — VWAP 下は戻り売り
+    url: https://tradinghack.net/trading-methodology/vwap-5min-daytrade-orderflow/
+  implementation_note: 日足でデイトレ手法を近似
+- id: vwap_breakout_follow
+  name: VWAP 実体抜け + 出来高増追随
+  implemented: true
+  style: daytrade
+  tags:
+  - vwap
+  - breakout
+  sources:
+  - type: blog
+    title: TRADING HACK — VWAP ブレイク追随
+    url: https://tradinghack.net/trading-methodology/vwap-5min-daytrade-orderflow/
+  implementation_note: 日足でデイトレ手法を近似
+- id: am_high_breakout_volume
+  name: 前場高値ブレイク × 出来高2倍
+  implemented: true
+  style: daytrade
+  tags:
+  - breakout
+  - volume
+  - japan
+  sources:
+  - type: blog
+    title: TRADING HACK — 前場高値ブレイク設計図
+    url: https://tradinghack.net/%e6%a0%aa%e5%bc%8f/am-high-breakout-volume-marketorder-jpstocks/
+  implementation_note: 日足でデイトレ手法を近似
+- id: pm_high_breakout
+  name: 後場高値 / 当日高値更新ブレイク
+  implemented: true
+  style: daytrade
+  tags:
+  - breakout
+  - japan
+  sources:
+  - type: note
+    title: loots — 高値抜け≠買い 条件整理
+    url: https://note.com/loots/n/n889e976bd51b
+  implementation_note: 日足でデイトレ手法を近似
+- id: relative_volume_filter
+  name: 相対出来高（RelVol）フィルタ付き ORB
+  implemented: true
+  style: daytrade
+  tags:
+  - volume
+  - opening
+  sources:
+  - type: note
+    title: ぴの — RelVol フィルタで SR 改善
+    url: https://note.com/pino_world/n/ne4f9152f631c
+  implementation_note: 日足でデイトレ手法を近似
+- id: opening_gap_daytrade
+  name: 寄付ギャップ方向フォロー / フェード
+  implemented: true
+  style: daytrade
+  tags:
+  - gap
+  - opening
+  sources:
+  - type: youtube
+    title: 寄付 ギャップ デイトレ（検索）
+    url: https://www.youtube.com/results?search_query=寄付+ギャップ+デイトレ+日本株
+- id: first_hour_momentum
+  name: 寄付後30〜60分 初動モメンタム
+  implemented: true
+  style: daytrade
+  tags:
+  - opening
+  - momentum
+  sources:
+  - type: blog
+    title: TRADING HACK — 時間帯フィルタ
+    url: https://tradinghack.net/technical-analysis/vwap-5min-daytrade/
+  implementation_note: 日足でデイトレ手法を近似
+- id: lunch_break_fade
+  name: 昼休み明け / 前場引け前の逆張り
+  implemented: true
+  style: daytrade
+  tags:
+  - mean_reversion
+  - session
+  sources:
+  - type: youtube
+    title: 昼休み デイトレ 日本株（検索）
+    url: https://www.youtube.com/results?search_query=昼休み+デイトレ+日本株
+  implementation_note: 日足近似
+- id: close_momentum
+  name: 引け前30分モメンタム（クロージング）
+  implemented: true
+  style: daytrade
+  tags:
+  - session
+  - momentum
+  sources:
+  - type: blog
+    title: TRADING HACK — 引け前流動性
+    url: https://tradinghack.net/technical-analysis/vwap-5min-daytrade/
+  implementation_note: 日足でデイトレ手法を近似
+- id: prior_day_hl_break
+  name: 前日高安値ブレイク
+  implemented: true
+  style: daytrade
+  tags:
+  - breakout
+  sources:
+  - type: global
+    title: Prior day high low strategy（検索）
+    url: https://www.google.com/search?q=prior+day+high+low+day+trading+strategy
+  implementation_note: 日足でデイトレ手法を近似
+- id: pivot_point_bounce
+  name: ピボットポイント支持・抵抗
+  implemented: true
+  style: daytrade
+  tags:
+  - levels
+  sources:
+  - type: youtube
+    title: ピボット デイトレ（検索）
+    url: https://www.youtube.com/results?search_query=pivot+point+day+trading
+  implementation_note: 日足でデイトレ手法を近似
+- id: ema9_21_scalp_5m
+  name: 5分足 EMA9/21 スキャルプ
+  implemented: true
+  style: daytrade
+  tags:
+  - ma
+  - scalp
+  sources:
+  - type: youtube
+    title: 5分足 移動平均 デイトレ（検索）
+    url: https://www.youtube.com/results?search_query=5%E5%88%86%E8%B6%B3+移動平均+デイトレ
+  implementation_note: 日足でデイトレ手法を近似
+- id: parabolic_sar_intraday
+  name: パラボリック SAR デイトレ
+  implemented: true
+  style: daytrade
+  tags:
+  - trend
+  sources:
+  - type: youtube
+    title: パラボリック SAR 株（検索）
+    url: https://www.youtube.com/results?search_query=parabolic+sar+stock+strategy
+  implementation_note: 日足でデイトレ手法を近似
+- id: weekly_swing_multiframe
+  name: 週足トレンド + 日足エントリー
+  implemented: true
+  style: swing
+  tags:
+  - multi_timeframe
+  sources:
+  - type: blog
+    title: TRADING HACK — 週足雲上確認
+    url: https://tradinghack.net/technical-analysis/ichimoku-sanyaku-kouten-swing-2/
+- id: earnings_drift
+  name: 決算後ドリフト（サプライズ続き）
+  implemented: true
+  style: swing
+  tags:
+  - event
+  - fundamental
+  sources:
+  - type: global
+    title: Post-earnings announcement drift（検索）
+    url: https://www.google.com/search?q=post+earnings+announcement+drift+strategy
+  implementation_note: 決算データなし→モメンタム近似
+- id: low_pbr_value_reversal
+  name: 低PBR / バリュー逆張り（テクニカル確認付き）
+  implemented: true
+  style: swing
+  tags:
+  - value
+  - japan
+  sources:
+  - type: broker
+    title: バリュー投資×テクニカル（検索）
+    url: https://www.google.com/search?q=PBR+割安+テクニカル+日本株
+  implementation_note: ファンダなし→RSI近似
+- id: momentum_monthly_rebalance
+  name: モメンタム因子（12-1）月次リバランス
+  implemented: true
+  style: swing
+  tags:
+  - factor
+  - quant
+  sources:
+  - type: global
+    title: Jegadeesh Titman momentum（検索）
+    url: https://www.google.com/search?q=12+month+momentum+strategy+stocks
+- id: mean_reversion_short_term
+  name: 短期リバーサル（過去5日リターン逆張り）
+  implemented: true
+  style: swing
+  tags:
+  - factor
+  - quant
+  sources:
+  - type: global
+    title: Short-term reversal factor（検索）
+    url: https://www.google.com/search?q=short+term+reversal+stock+strategy
+- id: pairs_trading_sector
+  name: ペアトレード（同業2銘柄スプレッド）
+  implemented: true
+  style: swing
+  tags:
+  - quant
+  - market_neutral
+  sources:
+  - type: global
+    title: Pairs trading equities（検索）
+    url: https://www.google.com/search?q=pairs+trading+strategy+stocks
+  implementation_note: ペアデータなし→単銘柄RSI近似
+- id: index_arb_nikkei_etf
+  name: 日経225先物 / 1321.T 裁定系
+  implemented: true
+  style: daytrade
+  tags:
+  - arb
+  - japan
+  sources:
+  - type: youtube
+    title: 日経 ETF 裁定（検索）
+    url: https://www.youtube.com/results?search_query=日経225+ETF+裁定
+  implementation_note: ETF裁定なし→トレンド近似
+- id: grid_trading_range
+  name: グリッドトレード（レンジ向け）
+  implemented: true
+  style: swing
+  tags:
+  - grid
+  - crypto_style
+  sources:
+  - type: x
+    title: グリッド 株（検索）
+    url: https://x.com/search?q=%E3%82%B0%E3%83%AA%E3%83%83%E3%83%89%E3%83%88%E3%83%AC%E3%83%BC%E3%83%89%20%E6%A0%AA
+- id: dca_trend_add
+  name: ナンピン / ピラミッディング（ルールベース）
+  implemented: true
+  style: swing
+  tags:
+  - position_sizing
+  sources:
+  - type: blog
+    title: TOITOI — 損切り・ポジションサイズ
+    url: https://toitoi-blog.com/swing-trade-how-to/
+- id: trailing_atr_chandelier
+  name: ATR / シャンデリアエグジット
+  implemented: true
+  style: swing
+  tags:
+  - exit
+  - atr
+  sources:
+  - type: pdf
+    title: NTAA TAハンドブック — トレンド追随
+    url: https://www.ntaa.or.jp/ntaw/02-cnt/uploads/2025/07/technicalhandbook3_20250704.pdf
+- id: multi_strategy_ensemble
+  name: 複数戦略アンサンブル（投票 / 重み付け）
+  implemented: true
+  style: swing
+  tags:
+  - meta
+  - quant
+  sources:
+  - type: note
+    title: ぴの — フィルタ＋ストップの組み合わせ
+    url: https://note.com/pino_world/n/ne4f9152f631c
+  implementation_note: 簡易複合シグナル
+- id: bnf_ma25_kairi_reversion
+  name: BNF型 — 25日乖離率逆張り（地合い連動）
+  implemented: true
+  style: swing
+  tags:
+  - mean_reversion
+  - ma
+  - japan
+  - 2ch
+  sources:
+  - type: 2ch_archive
+    title: BNF手法徹底解析23（5ch アーカイブ）
+    url: https://kako.5ch.net/test/read.cgi/stock/1319606591
+  - type: blog
+    title: 乖離率逆張り全銘柄検証
+    url: https://toushi-strategy.com/stock/kairi-gyakubari/
+- id: bnf_regime_trend_vs_fade
+  name: BNF型 — 上げ相場順張り / 下げ相場逆張り切替
+  implemented: true
+  style: swing
+  tags:
+  - regime
+  - japan
+  - 2ch
+  sources:
+  - type: 2ch_archive
+    title: 「下げ相場では逆張り、上げ相場では順張り」言及
+    url: https://kako.5ch.net/test/read.cgi/stock/1319606591
+  - type: blog
+    title: BNF 手法まとめ
+    url: https://cashqa.com/bnf-shuhou/
+- id: bnf_multi_indicator_bounce
+  name: BNF型 — 乖離率+出来高+RSI+BB 反発パターン
+  implemented: true
+  style: swing
+  tags:
+  - combo
+  - japan
+  - 2ch
+  sources:
+  - type: 2ch_archive
+    title: BNF 本人説とされる反発条件（スレ内引用）
+    url: https://kako.5ch.net/test/read.cgi/stock/1319606591
+- id: bnf_sector_leading_swing
+  name: BNF型 — 日経連動セクター連れ高・出遅れ
+  implemented: true
+  style: swing
+  tags:
+  - sector
+  - momentum
+  - japan
+  - 2ch
+  sources:
+  - type: blog
+    title: 順張り監視700銘柄・連れ高
+    url: https://cashqa.com/bnf-shuhou/
+  implementation_note: セクター相対なし
+- id: ch5_minority_sentiment
+  name: 5ch 少数派法則（掲示板勢い逆張り）
+  implemented: true
+  style: daytrade
+  tags:
+  - sentiment
+  - 2ch
+  - scalping
+  sources:
+  - type: note
+    title: ULIBUDDHA — 5ch 売買勢い分析プロンプト
+    url: https://note.com/ulibuddha/n/n767c685870c4
+  implementation_note: 掲示板センチメントなし→出来高近似
+- id: x_keyword_material_screen
+  name: X キーワードスクリーニング（決算・S高・材料）
+  implemented: true
+  style: swing
+  tags:
+  - sentiment
+  - x
+  - screening
+  sources:
+  - type: x_blog
+    title: トレ株 — X リアルタイムスクリーニング
+    url: https://stock.trgy.co.jp/twitter/
+  implementation_note: SNSなし→出来高近似
+- id: x_tweet_burst_filter
+  name: X 投稿急増 + チャート確認（小型株）
+  implemented: true
+  style: swing
+  tags:
+  - sentiment
+  - x
+  sources:
+  - type: x_blog
+    title: トレ株 — ツイート数・拡散
+    url: https://stock.trgy.co.jp/twitter/
+  - type: pdf
+    title: SIG-BI — ツイートとマザーズ相関
+    url: http://www.sig-bi.jp/doc/15th_SIG-BI_2020/15th_SIG-BI_2020_paper_16.pdf
+  implementation_note: SNSなし
+- id: x_sentiment_event_factor
+  name: X 感情×イベントラベル因子（クオンツ）
+  implemented: true
+  style: swing
+  tags:
+  - sentiment
+  - x
+  - quant
+  sources:
+  - type: blog
+    title: LLM 金融ツイート Event-Aware Sentiment
+    url: https://aibr.jp/archives/127093
+  implementation_note: イベントなし→ギャップ近似
+- id: sns_sentiment_plus_ta
+  name: SNS 感情スコア × テクニカル同方向エントリー
+  implemented: true
+  style: daytrade
+  tags:
+  - sentiment
+  - combo
+  sources:
+  - type: blog
+    title: デイトレマスター — SNS×MACD/BB
+    url: https://kabu.k-to0602.com/day-trading-strategy-2025-10-04/
+  implementation_note: SNSなし→TA複合
+- id: youtube_new_high_box_break
+  name: 新高値ブレイク投資法（ボックス脱出）
+  implemented: true
+  style: swing
+  tags:
+  - breakout
+  - japan
+  - youtube
+  sources:
+  - type: youtube
+    title: 松井証券 MATSUI DIALOG — DUKE×KEN
+    url: https://www.youtube.com/watch?v=9I139lbHAvc
+- id: youtube_elliott_multiframe
+  name: エリオット波動 × マルチタイムフレーム
+  implemented: true
+  style: swing
+  tags:
+  - pattern
+  - youtube
+  - multi_timeframe
+  sources:
+  - type: youtube
+    title: 日本株ナビゲーターA — チャンネル概要
+    url: https://jp.utoo.be/channel/UCQk61ts0Dp8GLmA1Saizi7A
+- id: youtube_dow_theory_trend
+  name: ダウ理論 — 3 トレンド分類
+  implemented: true
+  style: swing
+  tags:
+  - trend
+  - youtube
+  sources:
+  - type: youtube
+    title: rizumu テクニカル専門チャンネル索引
+    url: https://www.rizumu.net/movie/%E3%83%86%E3%82%AF%E3%83%8B%E3%82%AB%E3%83%AB%E5%88%86%E6%9E%90/23/
+- id: vwap_orderflow_itasha
+  name: VWAP + 板・歩み値（需給読み）
+  implemented: true
+  style: daytrade
+  tags:
+  - vwap
+  - orderflow
+  - japan
+  sources:
+  - type: blog
+    title: TRADING HACK — 板と歩み値
+    url: https://tradinghack.net/stock-investment/theme-12-vwap-battle/
+  implementation_note: 板情報なし→VWAP日足代理
+- id: professional_daytrader_session
+  name: 専業デイトレ時間帯特化（5ch スレ文化）
+  implemented: true
+  style: daytrade
+  tags:
+  - session
+  - 2ch
+  sources:
+  - type: 2ch
+    title: 5ch 株式板 — 専業デイトレ系スレ
+    url: https://egg.5ch.net/stock/index.html
+  implementation_note: 時間帯なし
+- id: kabutan_preset_macd_buy
+  name: 株探「MACD/買いシグナル」プリセット
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - momentum
+  sources:
+  - type: kabutan
+    title: 銘柄探検 — MACD 買いシグナル一覧
+    url: https://kabutan.jp/tansaku/?market=1&mode=2_0440
+  - type: kabutan
+    title: テクニカル探検ハブ
+    url: https://s.kabutan.jp/tansaku/technical/
+- id: kabutan_preset_rsi_oversold
+  name: 株探「RSI14 20%以下」売られすぎ
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - mean_reversion
+  sources:
+  - type: kabutan
+    title: 銘柄探検テクニカル — オシレーター逆張り
+    url: https://s.kabutan.jp/tansaku/technical/
+- id: kabutan_preset_rsi_overbought
+  name: 株探「RSI14 80%以上」買われすぎ（利確/警戒）
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  sources:
+  - type: kabutan
+    title: 銘柄探検テクニカル — 売り候補
+    url: https://s.kabutan.jp/tansaku/technical/
+- id: kabutan_shinchu_sanbon_inverted
+  name: 株探「新値3本足陰転」売りシグナル
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - pattern
+  - japan
+  sources:
+  - type: kabutan
+    title: 銘柄探検 — 新値3本足陰転
+    url: https://kabutan.jp/tansaku/?market=&mode=2_0493
+- id: kabutan_ma_uptrend_low_kairi25
+  name: 株探流 — MA上昇トレンド＋25日線カイリ率小（押し目）
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - ma
+  - japan
+  sources:
+  - type: kabutan
+    title: 横山利香 — 25日線カイリ率で絞り込み
+    url: https://kabutan.jp/news/marketnews/?b=n202209130514
+- id: kabutan_contrarian_short_hold
+  name: 株探流 — 逆張りは短期売買（方向逆らい禁止長期化）
+  implemented: true
+  style: swing
+  tags:
+  - mean_reversion
+  - kabutan
+  sources:
+  - type: kabutan
+    title: ゼロから株探 — 逆張りと短期
+    url: https://kabutan.jp/news/marketnews/?b=n202009250280
+- id: kabutan_theme_swing_earnings
+  name: 株探特集 — テーマ＋決算パターンのスイング
+  implemented: true
+  style: swing
+  tags:
+  - event
+  - kabutan
+  - fundamental
+  sources:
+  - type: kabutan
+    title: スイング+テーマ順張り事例
+    url: https://kabutan.jp/news/marketnews/?b=n202402210354
+  implementation_note: テーマ/決算なし
+- id: kabutan_core_satellite_credit_swing
+  name: 株探特集 — コア長期＋信用スイングサテライト
+  implemented: true
+  style: swing
+  tags:
+  - portfolio
+  - kabutan
+  - japan
+  sources:
+  - type: kabutan
+    title: Kentetsu — 信用・スイング×ガチホ
+    url: https://kabutan.jp/news/marketnews/?b=n202601220499
+- id: kabutan_supply_ma_20_60_swing
+  name: 需給×MA（5/20/60）押し目 — 株タン系解説
+  implemented: true
+  style: swing
+  tags:
+  - supply_demand
+  - ma
+  - kabutan
+  sources:
+  - type: blog
+    title: 株タン — スイング2ポイント（株探関連メディア）
+    url: https://kabutan.pro/investment/swing-trade-two-keys
+- id: minkabu_gc_25_75_preset
+  name: みんかぶ — 25/75日ゴールデンクロス条件
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - minkabu
+  - ma
+  - japan
+  sources:
+  - type: minkabu
+    title: マガジン — ゴールデンクロス25/75
+    url: https://mag.minkabu.jp/kabu-beginner/tips/stock-screening/
+- id: minkabu_short_oversold_preset
+  name: みんかぶ — 短期売られすぎ銘柄
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - minkabu
+  - mean_reversion
+  sources:
+  - type: minkabu
+    title: マガジン — テクニカルおすすめ条件
+    url: https://mag.minkabu.jp/kabu-beginner/tips/stock-screening/
+- id: minkabu_custom_technical_screen
+  name: みんかぶ — 38種テクニカル自由組合せ
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - minkabu
+  sources:
+  - type: minkabu
+    title: 銘柄スクリーニング
+    url: https://minkabu.jp/stock/search
+  - type: minkabu
+    title: シグナル・テクニカルアラート
+    url: https://support.minkabu.jp/hc/ja/articles/360048275154-%E9%8A%98%E6%9F%84%E3%83%9A%E3%83%BC%E3%82%B8-%E3%82%B7%E3%82%B0%E3%83%8A%E3%83%AB-%E3%81%AE%E6%83%85%E5%A0%B1%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
+- id: minkabu_community_sentiment_rank
+  name: みんかぶ — 買い予想/売り予想投稿数で優先順位
+  implemented: true
+  style: swing
+  tags:
+  - sentiment
+  - minkabu
+  - screening
+  sources:
+  - type: minkabu
+    title: スクリーニング結果の並び替え
+    url: https://minkabu.jp/stock/search
+  implementation_note: 投稿数なし→出来高近似
+- id: harvest_kw__
+  name: 収集キーワード由来 — 出来高（440ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: kabutan_preset_rsi14_20
+  name: 株探プリセット — RSI14 20%以下
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - auto_harvest
+  sources:
+  - type: kabutan
+    title: RSI14 20%以下
+    url: https://kabutan.jp/tansaku/?market=1&mode=2_0410
+- id: kabutan_preset_rsi14_80
+  name: 株探プリセット — RSI14 80%以上
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - auto_harvest
+  sources:
+  - type: kabutan
+    title: RSI14 80%以上
+    url: https://kabutan.jp/tansaku/?market=1&mode=2_0411
+- id: kabutan_preset_25_5
+  name: 株探プリセット — 25日線カイリ率-5%以下
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - auto_harvest
+  sources:
+  - type: kabutan
+    title: 25日線カイリ率-5%以下
+    url: https://kabutan.jp/tansaku/?market=1&mode=2_0455
+- id: kabutan_preset_5
+  name: 株探プリセット — 5日線上抜け
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - auto_harvest
+  sources:
+  - type: kabutan
+    title: 5日線上抜け
+    url: https://kabutan.jp/tansaku/?market=1&mode=2_0401
+- id: kabutan_preset_5_25
+  name: 株探プリセット — ゴールデンクロス5-25
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - auto_harvest
+  sources:
+  - type: kabutan
+    title: ゴールデンクロス5-25
+    url: https://kabutan.jp/tansaku/?market=1&mode=2_0420
+- id: kabutan_preset_
+  name: 株探プリセット — 出来高急増
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - auto_harvest
+  sources:
+  - type: kabutan
+    title: 出来高急増
+    url: https://kabutan.jp/tansaku/?market=1&mode=2_0460
+- id: kabutan_preset_2
+  name: 株探プリセット — ボリンジャー-2σ付近
+  implemented: true
+  style: swing
+  tags:
+  - screening
+  - kabutan
+  - auto_harvest
+  sources:
+  - type: kabutan
+    title: ボリンジャー-2σ付近
+    url: https://kabutan.jp/tansaku/?market=1&mode=2_0430
+- id: youtube_harvest_La-WIYNjgoY
+  name: YouTube字幕 — 久米 × BNF 関連（スレ言及）
+  implemented: true
+  style: daytrade
+  tags:
+  - youtube_transcript
+  - auto_harvest
+  sources:
+  - type: youtube_transcript
+    title: '久米 × BNF 関連（スレ言及）（字幕キーワード: デイトレ）'
+    url: https://www.youtube.com/watch?v=La-WIYNjgoY
+  implementation_note: YouTube字幕由来
+- id: harvest_kw_067a94121b
+  name: 収集キーワード由来 — 出来高（448ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_2a49f1bc02
+  name: 収集キーワード由来 — デイトレ（433ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_63c04d5463
+  name: 収集キーワード由来 — スクリーニング（305ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_3b6ce6af3e
+  name: 収集キーワード由来 — スイング（286ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_VWAP
+  name: 収集キーワード由来 — VWAP（189ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_MACD
+  name: 収集キーワード由来 — MACD（136ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_ab5cfb949d
+  name: 収集キーワード由来 — 損切（135ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_RSI
+  name: 収集キーワード由来 — RSI（61ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_4a8bfbbe61
+  name: 収集キーワード由来 — スキャル（58ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_ORB
+  name: 収集キーワード由来 — ORB（55ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_34095c23c5
+  name: 収集キーワード由来 — ストップ高（53ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_3e890dd37d
+  name: 収集キーワード由来 — 一目均衡（52ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_485fff7244
+  name: 収集キーワード由来 — 逆張り（45ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_c88320ea98
+  name: 収集キーワード由来 — 押し目（44ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_781e4b3fe5
+  name: 収集キーワード由来 — 少数派（39ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_04ca29e522
+  name: 収集キーワード由来 — ゴールデンクロス（38ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_ef2d15231b
+  name: 収集キーワード由来 — 乖離率（38ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_7999ad1776
+  name: 収集キーワード由来 — ボリンジャー（27ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_ee4b3de361
+  name: 収集キーワード由来 — 順張り（26ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_69c6f34e5b
+  name: 収集キーワード由来 — デッドクロス（19ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_0bd3e8aee2
+  name: 収集キーワード由来 — 信用残（19ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_96f9af238b
+  name: 収集キーワード由来 — 寄付（18ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_80c429e600
+  name: 収集キーワード由来 — 銘柄探検（17ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: harvest_kw_f2a0f90d48
+  name: 収集キーワード由来 — 板読（17ヒット）
+  implemented: true
+  style: swing
+  tags:
+  - auto_harvest
+  - keyword
+  sources:
+  - type: blog
+    title: strategy_harvest mentions.json
+    url: ''
+  implementation_note: 汎用モメンタム近似
+- id: youtube_harvest_WSZVfgH9GdI
+  name: YouTube字幕 — 楽天トウシル — 今週の日本株テクニカル（土信田）
+  implemented: true
+  style: swing
+  tags:
+  - youtube_transcript
+  - auto_harvest
+  sources:
+  - type: youtube_transcript
+    title: '楽天トウシル — 今週の日本株テクニカル（土信田）（字幕キーワード: 出来高, MACD）'
+    url: https://www.youtube.com/watch?v=WSZVfgH9GdI
+  implementation_note: YouTube字幕由来
+- id: youtube_harvest__9GKoinlUVE
+  name: YouTube字幕 — 楽天トウシル — 日経平均 MACD/移動平均解説
+  implemented: true
+  style: swing
+  tags:
+  - youtube_transcript
+  - auto_harvest
+  sources:
+  - type: youtube_transcript
+    title: '楽天トウシル — 日経平均 MACD/移動平均解説（字幕キーワード: デッドクロス, 出来高）'
+    url: https://www.youtube.com/watch?v=_9GKoinlUVE
+  implementation_note: YouTube字幕由来
+- id: youtube_harvest_6vV8gjz982s
+  name: YouTube字幕 — 楽天トウシル — 高値更新ハードル
+  implemented: true
+  style: swing
+  tags:
+  - youtube_transcript
+  - auto_harvest
+  sources:
+  - type: youtube_transcript
+    title: '楽天トウシル — 高値更新ハードル（字幕キーワード: パーフェクトオーダー）'
+    url: https://www.youtube.com/watch?v=6vV8gjz982s
+  implementation_note: YouTube字幕由来

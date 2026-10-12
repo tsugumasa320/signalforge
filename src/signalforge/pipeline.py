@@ -7,7 +7,8 @@ import pandas as pd
 
 from signalforge.backtest.costs import load_cost_model
 from signalforge.backtest.engine import BacktestEngine
-from signalforge.config import load_style_config
+from signalforge.config import load_style_config, market_context, resolve_ticker
+from signalforge.data.correlations import load_benchmark_pair
 from signalforge.data.cache import ParquetCache
 from signalforge.data.fetcher import MarketDataFetcher
 from signalforge.data.window import (
@@ -25,6 +26,8 @@ from signalforge.strategies.registry import get_strategy
 
 def resolve_data_source(style: str, cfg: dict[str, Any]) -> str:
     preferred = cfg.get("data_source", "yfinance")
+    if preferred == "yfinance":
+        return "yfinance"
     if preferred == "alpaca" or style == "daytrade":
         if os.getenv("ALPACA_API_KEY") and os.getenv("ALPACA_SECRET_KEY"):
             return "alpaca"
@@ -58,9 +61,9 @@ def run_backtest_pipeline(
                 cfg[key] = value
 
     strategy_name = strategy_name or cfg.get("strategy", "ema_pullback")
-    nvda = cfg.get("_nvda", {})
-    ticker = nvda.get("ticker", "NVDA")
-    corr = nvda.get("correlation_tickers", [])
+    mc = market_context(cfg)
+    ticker = resolve_ticker(cfg, cfg_override)
+    corr = list(mc.get("correlation_tickers", []))
     timeframe = cfg.get("timeframe", "1d")
     data_source = resolve_data_source(style, cfg)
 
@@ -76,37 +79,26 @@ def run_backtest_pipeline(
         else:
             raise
 
-    qqq_df = soxx_df = None
-    for sym in corr:
-        try:
-            cdf = cache.load_or_fetch(sym, timeframe, fetcher, refresh=refresh_data)
-        except Exception:
-            cdf = cache.load_or_fetch(sym, timeframe, MarketDataFetcher("yfinance"), refresh=refresh_data)
-        if sym == "QQQ":
-            qqq_df = cdf
-        elif sym == "SOXX":
-            soxx_df = cdf
-
     bt_start, bt_end = resolve_backtest_dates(cfg)
     df = slice_for_indicators(df, bt_start)
-    if qqq_df is not None:
-        qqq_df = slice_for_indicators(qqq_df, bt_start)
-    if soxx_df is not None:
-        soxx_df = slice_for_indicators(soxx_df, bt_start)
 
     intraday = style == "daytrade" or style.startswith("daytrade")
-    engine_ind = IndicatorEngine(timezone=nvda.get("timezone", "America/New_York"))
+    tz = mc.get("timezone", "Asia/Tokyo")
+    engine_ind = IndicatorEngine(timezone=tz)
     df = engine_ind.compute(df, intraday=intraday)
-    if qqq_df is not None:
-        qqq_df = engine_ind.compute(qqq_df, intraday=intraday)
-    if soxx_df is not None:
-        soxx_df = engine_ind.compute(soxx_df, intraday=intraday)
+    qqq_df, soxx_df = load_benchmark_pair(
+        cache,
+        fetcher,
+        corr,
+        timeframe,
+        refresh=refresh_data,
+        engine_ind=engine_ind,
+        intraday=intraday,
+        bt_start=bt_start,
+        bt_end=bt_end,
+    )
 
     df = trim_to_backtest_window(df, bt_start, bt_end)
-    if qqq_df is not None:
-        qqq_df = trim_to_backtest_window(qqq_df, bt_start, bt_end)
-    if soxx_df is not None:
-        soxx_df = trim_to_backtest_window(soxx_df, bt_start, bt_end)
 
     profile = StyleProfile.from_config(cfg)
     strategy = get_strategy(strategy_name, cfg)
@@ -133,7 +125,12 @@ def run_backtest_pipeline(
         strategy,
         cfg,
         ml_filter=meta,
-        cost_model=load_cost_model(cost_model, style, cfg.get("_defaults")),
+        cost_model=load_cost_model(
+            cost_model,
+            style,
+            cfg.get("_defaults"),
+            market_cfg=mc,
+        ),
     )
     result = bt_engine.run(df, signals=signals)
 
@@ -164,6 +161,7 @@ def run_backtest_pipeline(
         "journal": bt_engine.journal,
         "strategy": strategy_name,
         "style": style,
+        "ticker": ticker,
         "data_source": data_source,
         "cost_model": cost_model,
         "backtest_window": window_label(bt_start, bt_end, len(df)),

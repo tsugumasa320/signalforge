@@ -1,4 +1,5 @@
 style: daytrade
+market: japan
 timeframe: 5m
 data_source: yfinance
 
@@ -16,7 +17,7 @@ rules:
     atr_tp_multiple: 2.0
     atr_sl_multiple: 1.0
     max_hold_bars: 12
-    force_flat_time: "15:55"
+    force_flat_time: "15:00"
 
 ml_filter:
   enabled: false
@@ -35,8 +36,8 @@ ml_filter:
     log_rejected_signals: true
 
 backtest:
-  session_start: "09:30"
-  session_end: "15:55"
+  session_start: "09:00"
+  session_end: "15:00"
   fill: next_bar_open
   slippage_pct: 0.0002
   max_trades_per_day: 3

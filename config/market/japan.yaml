@@ -1,0 +1,9 @@
+id: japan
+default_ticker: "7203.T"
+timezone: Asia/Tokyo
+correlation_tickers: ["1321.T", "1570.T"]
+earnings_blackout_days: 0
+backtest_start_date: "2020-01-01"
+universe_default: japan_liquid
+currency: JPY
+cost_preset: japan

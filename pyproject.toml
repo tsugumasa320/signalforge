@@ -27,6 +27,7 @@ dependencies = [
 
 [project.optional-dependencies]
 alpaca = ["alpaca-py>=0.21"]
+scrape = ["youtube-transcript-api>=0.6"]
 dev = ["pytest>=8.0", "pytest-cov>=4.1"]
 
 [project.scripts]

@@ -1,0 +1,311 @@
+# 考えうる投資メディアの収集台帳（fetch: false はログイン/API/利用規約で自動取得しない）
+# scripts/collect_strategy_mentions.py が url 付き outlet を順に GET する
+meta:
+  version: 1
+  updated: "2026-03-23"
+
+outlets:
+  # --- スクリーナー / データ ---
+  - id: kabutan
+    category: screener
+    name: 株探
+    urls:
+      - { url: "https://s.kabutan.jp/tansaku/technical/", label: "銘柄探検テクニカル" }
+      - { url: "https://kabutan.jp/tansaku/?market=1&mode=2_0440", label: "MACD買い" }
+      - { url: "https://kabutan.jp/tansaku/?market=&mode=2_0493", label: "新値3本足陰転" }
+      - { url: "https://kabutan.jp/news/marketnews/", label: "特集ニュース索引" }
+      - { url: "https://kabutan.jp/news/marketnews/?b=n202209130514", label: "横山利香 MAカイリ" }
+      - { url: "https://kabutan.jp/news/marketnews/?b=n202009250280", label: "逆張り短期" }
+      - { url: "https://support.kabutan.jp/hc/ja/articles/53644738258841-%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%8B%E3%83%B3%E3%82%B0%E6%A9%9F%E8%83%BD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6", label: "ヘルプ銘柄探検" }
+      - { url: "https://kabutan.jp/news/marketnews/?b=n202402210354", label: "スイング+テーマ順張り" }
+      - { url: "https://kabutan.jp/news/marketnews/?b=n202601220499", label: "信用スイング" }
+
+  - id: minkabu
+    category: screener
+    name: みんかぶ
+    urls:
+      - { url: "https://minkabu.jp/stock/search", label: "銘柄スクリーニング" }
+      - { url: "https://mag.minkabu.jp/kabu-beginner/tips/stock-screening/", label: "マガジン入門" }
+      - { url: "https://minkabu.jp/hikaku/screening/", label: "証券スクリーニング比較" }
+      - { url: "https://support.minkabu.jp/hc/ja/articles/360048275154-%E9%8A%98%E6%9F%84%E3%83%9A%E3%83%BC%E3%82%B8-%E3%82%B7%E3%82%B0%E3%83%8A%E3%83%AB-%E3%81%AE%E6%83%85%E5%A0%B1%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6", label: "シグナル・テクニカル" }
+
+  - id: karauri
+    category: screener
+    name: カラauri（空売り）
+    urls:
+      - { url: "https://karauri.net/", label: "トップ" }
+      - { url: "https://karauri.net/ranking/1", label: "空売りランキング" }
+
+  - id: tradingview
+    category: screener
+    name: TradingView
+    urls:
+      - { url: "https://jp.tradingview.com/support/solutions/43000502344/", label: "スクリーナー公式" }
+      - { url: "https://jp.tradingview.com/ideas/", label: "Ideas 索引" }
+
+  - id: yahoo_finance_jp
+    category: screener
+    name: Yahoo!ファイナンス
+    urls:
+      - { url: "https://finance.yahoo.co.jp/stocks/ranking/up", label: "値上がり率" }
+      - { url: "https://finance.yahoo.co.jp/stocks/ranking/volume", label: "出来高" }
+
+  # --- 証券会社・ネット証券（教育・コラム） ---
+  - id: matsui
+    category: broker
+    name: 松井証券
+    urls:
+      - { url: "https://www.matsui.co.jp/stock/study/short-term/tech-swing/", label: "スイングテクニカル" }
+
+  - id: smbc_nikko
+    category: broker
+    name: SMBC日興証券
+    urls:
+      - { url: "https://www.smbcnikko.co.jp/products/stock/margin/knowledge/015.html", label: "スイング銘柄探し" }
+
+  - id: daiwa
+    category: broker
+    name: 大和証券
+    urls:
+      - { url: "https://www.daiwa.jp/seminar/technical/08/", label: "一目均衡表講座" }
+
+  - id: sbi
+    category: broker
+    name: SBI証券
+    urls:
+      - { url: "https://www.sbisec.co.jp/ETGate/education", label: "投資教育ゲート" }
+
+  - id: rakuten
+    category: broker
+    name: 楽天証券
+    urls:
+      - { url: "https://www.rakuten-sec.co.jp/web/learn/", label: "マーケットラーニング" }
+
+  - id: monex
+    category: broker
+    name: マネックス証券
+    urls:
+      - { url: "https://info.monex.co.jp/market/stock/", label: "マーケット情報" }
+
+  - id: kabucom
+    category: broker
+    name: auカブコム
+    urls:
+      - { url: "https://kabu.com/item/default.aspx", label: "商品・サービス" }
+
+  - id: okasan
+    category: broker
+    name: 岡三オンライン
+    urls:
+      - { url: "https://www.okasan-online.co.jp/contents/stock/", label: "株式コンテンツ" }
+
+  # --- 金融メディア・雑誌 ---
+  - id: nikkei
+    category: media
+    name: 日本経済新聞
+    urls:
+      - { url: "https://www.nikkei.com/markets/", label: "マーケット" }
+
+  - id: diamond_zai
+    category: media
+    name: ダイヤモンドZAi
+    urls:
+      - { url: "https://diamond.jp/zai/", label: "ZAi トップ" }
+
+  - id: investars
+    category: media
+    name: インVESTARS
+    urls:
+      - { url: "https://investars.jp/", label: "トップ" }
+
+  - id: finet
+    category: media
+    name: フィネット
+    urls:
+      - { url: "https://www.finet.co.jp/", label: "トップ" }
+
+  - id: trgy
+    category: media
+    name: トレ株
+    urls:
+      - { url: "https://stock.trgy.co.jp/", label: "トップ" }
+      - { url: "https://stock.trgy.co.jp/twitter/", label: "X活用法" }
+
+  - id: toitoi
+    category: media
+    name: TOITOI FINANCE
+    urls:
+      - { url: "https://toitoi-blog.com/swing-trade-how-to/", label: "スイング入門" }
+
+  - id: trading_hack
+    category: media
+    name: TRADING HACK
+    urls:
+      - { url: "https://tradinghack.net/category/stock-investment/", label: "株式カテゴリ" }
+      - { url: "https://tradinghack.net/technical-analysis/vwap-5min-daytrade/", label: "VWAPデイトレ" }
+
+  - id: stinvest
+    category: media
+    name: stinvest（はてな）
+    urls:
+      - { url: "https://stinvest.hatenablog.jp/", label: "ブログトップ" }
+
+  - id: nikkei_xtech
+    category: media
+    name: 日経クロステック（マーケット）
+    urls:
+      - { url: "https://xtech.nikkei.com/", label: "トップ" }
+
+  # --- ブログ / note / 個人メディア ---
+  - id: note_com
+    category: ugc
+    name: note（投資記事）
+    urls:
+      - { url: "https://note.com/search?q=%E6%97%A5%E6%9C%AC%E6%A0%AA%20%E3%83%87%E3%82%A4%E3%83%88%E3%83%AC&sort=popular", label: "人気:日本株デイトレ" }
+      - { url: "https://note.com/pino_world/n/ne4f9152f631c", label: "ORB検証" }
+      - { url: "https://note.com/ulibuddha/n/n767c685870c4", label: "少数派法則" }
+
+  - id: hatena
+    category: ugc
+    name: はてなブログ／ブックマーク
+    urls:
+      - { url: "https://blog.hatena.ne.jp/", label: "ブログ索引" }
+
+  - id: qiita
+    category: ugc
+    name: Qiita
+    urls:
+      - { url: "https://qiita.com/tags/株", label: "タグ:株" }
+
+  - id: zenn
+    category: ugc
+    name: Zenn
+    urls:
+      - { url: "https://zenn.dev/topics/trading", label: "トピック:trading" }
+
+  # --- 掲示板 / SNS（取得可能な範囲） ---
+  - id: ch5_archive
+    category: community
+    name: 5ch アーカイブ
+    urls:
+      - { url: "https://kako.5ch.net/test/read.cgi/stock/1319606591", label: "BNF解析スレ" }
+      - { url: "https://egg.5ch.net/stock/index.html", label: "株式板索引" }
+
+  - id: reddit
+    category: community
+    name: Reddit
+    urls:
+      - { url: "https://www.reddit.com/r/JapanFinance/new/", label: "r/JapanFinance" }
+
+  - id: x_twitter
+    category: sns
+    name: X (Twitter)
+    fetch_policy: "search_pages_skipped_use_proxy_blogs"
+    urls:
+      - { url: "https://stock.trgy.co.jp/twitter/", label: "解説記事（代替）" }
+
+  - id: line_openchat
+    category: sns
+    name: LINE OpenChat
+    fetch_policy: skip
+    urls: []
+
+  - id: discord
+    category: sns
+    name: Discord
+    fetch_policy: skip
+    urls: []
+
+  # --- 動画 / 音声 ---
+  - id: youtube_search
+    category: video
+    name: YouTube
+    fetch_policy: "use_subtitles_flag"
+    urls:
+      - { url: "https://www.youtube.com/results?search_query=日本株+テクニカル+分析", label: "検索結果HTML" }
+
+  - id: nikkei_tv
+    category: video
+    name: 日経CNBC / テレ東
+    urls:
+      - { url: "https://www.nikkei.com/markets/marketdata/", label: "日経マーケットデータ" }
+
+  # --- 海外・英語 ---
+  - id: investopedia
+    category: global
+    name: Investopedia
+    urls:
+      - { url: "https://www.investopedia.com/terms/t/technicalanalysis.asp", label: "テクニカル分析" }
+      - { url: "https://www.investopedia.com/terms/g/goldencross.asp", label: "ゴールデンクロス" }
+
+  - id: tradingsim
+    category: global
+    name: TradingSim
+    urls:
+      - { url: "https://www.tradingsim.com/blog/golden-cross", label: "GC戦略" }
+
+  - id: babypips
+    category: global
+    name: BabyPips（FX→概念）
+    urls:
+      - { url: "https://www.babypips.com/learn/forex/technical-analysis", label: "TA入門" }
+
+  # --- 学術 / 業界 ---
+  - id: ntaa
+    category: academic
+    name: 日本テクニカルアナリスト協会
+    urls:
+      - { url: "https://www.ntaa.or.jp/ntaw/", label: "NTAA" }
+
+  - id: jpx
+    category: academic
+    name: 日本取引所（JPX）
+    urls:
+      - { url: "https://www.jpx.co.jp/markets/statistics-equities/index.html", label: "統計" }
+
+  - id: fsa
+    category: academic
+    name: 金融庁
+    urls:
+      - { url: "https://www.fsa.go.jp/policy/nisa2/", label: "NISA政策" }
+
+  # --- IR / 適時開示 ---
+  - id: tdnet
+    category: ir
+    name: TDnet（適時開示）
+    fetch_policy: "event_driven_not_ta"
+    urls:
+      - { url: "https://www.release.tdnet.info/", label: "TDnet" }
+
+  - id: prtimes
+    category: ir
+    name: PR TIMES
+    urls:
+      - { url: "https://prtimes.jp/main/html/searchrlp/release_id/", label: "検索索引" }
+
+  # --- 書籍・Podcast（Web上の紹介ページのみ） ---
+  - id: amazon_books
+    category: book
+    name: 書籍（テクニカル）
+    fetch_policy: limited
+    urls:
+      - { url: "https://www.amazon.co.jp/s?k=テクニカル分析+株", label: "Amazon検索" }
+
+  - id: spotify_podcast
+    category: podcast
+    name: Podcast
+    fetch_policy: skip
+    urls: []
+
+  # --- 取引ツール・API ---
+  - id: stooq
+    category: data
+    name: Stooq
+    urls:
+      - { url: "https://stooq.com/t/?i=518", label: "日本株データ" }
+
+  - id: yfinance_doc
+    category: data
+    name: yfinance（本プロジェクトデータ源）
+    urls:
+      - { url: "https://pypi.org/project/yfinance/", label: "PyPI" }

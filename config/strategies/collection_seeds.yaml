@@ -1,0 +1,58 @@
+# 戦略候補の「種」URL — scripts/collect_strategy_mentions.py がテキスト取得・キーワード抽出
+# 注意: 5ch 本家は BOT 制限あり。公開アーカイブ・note・YouTube 字幕を優先。
+seeds:
+  2ch_archive:
+    - url: https://kako.5ch.net/test/read.cgi/stock/1319606591
+      label: BNF手法徹底解析スレ（アーカイブ）
+    - url: https://egg.5ch.net/stock/index.html
+      label: 5ch 株式板インデックス（スレ名リスト）
+  youtube:
+    - video_id: 9I139lbHAvc
+      label: 松井証券 DUKE — 新高値ブレイク投資法
+    - video_id: La-WIYNjgoY
+      label: 久米 × BNF 関連（スレ言及）
+    - video_id: WSZVfgH9GdI
+      label: 楽天トウシル — 今週の日本株テクニカル（土信田）
+    - video_id: _9GKoinlUVE
+      label: 楽天トウシル — 日経平均 MACD/移動平均解説
+    - video_id: 6vV8gjz982s
+      label: 楽天トウシル — 高値更新ハードル
+    - channel_id: UCQk61ts0Dp8GLmA1Saizi7A
+      label: 日本株ナビゲーターA（チャンネル概要ページは手動）
+  x_search:
+    - url: https://x.com/search?q=%E6%97%A5%E7%B5%8C%20%E3%83%87%E3%82%A4%E3%83%88%E3%83%AC%20%E6%89%8B%E6%B3%95&f=live
+      label: 日経 デイトレ 手法（検索・要ログインのため HTML 取得は不完全）
+    - url: https://stock.trgy.co.jp/twitter/
+      label: トレ株 — X スクリーニング解説（ブログ）
+  note_blog:
+    - url: https://note.com/ulibuddha/n/n767c685870c4
+      label: 5ch 少数派法則プロンプト
+    - url: https://note.com/pino_world/n/ne4f9152f631c
+      label: 日本株 ORB 検証
+  kabutan:
+    - url: https://s.kabutan.jp/tansaku/technical/
+      label: 銘柄探検 — テクニカル一覧（買い/売り/警報）
+    - url: https://kabutan.jp/tansaku/?market=1&mode=2_0440
+      label: 銘柄探検 — MACD/買いシグナル
+    - url: https://kabutan.jp/tansaku/?market=&mode=2_0493
+      label: 銘柄探検 — 新値3本足陰転
+    - url: https://support.kabutan.jp/hc/ja/articles/53644738258841-%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%8B%E3%83%B3%E3%82%B0%E6%A9%9F%E8%83%BD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
+      label: 株探ヘルプ — 銘柄探検（プリセット条件）
+    - url: https://kabutan.jp/news/marketnews/?b=n202209130514
+      label: 横山利香 — 移動平均上昇トレンド×25日線カイリ率
+    - url: https://kabutan.jp/news/marketnews/?b=n202009250280
+      label: 横山利香 — 逆張りは短期売買
+    - url: https://kabutan.jp/news/marketnews/?b=n202402210354
+      label: 株探特集 — スイング+テーマ順張り
+    - url: https://kabutan.jp/news/marketnews/?b=n202601220499
+      label: 株探特集 — 信用スイング×コアサテライト
+  minkabu:
+    - url: https://mag.minkabu.jp/kabu-beginner/tips/stock-screening/
+      label: みんかぶマガジン — テクニカルスクリーニング入門
+    - url: https://minkabu.jp/stock/search
+      label: みんかぶ — 銘柄スクリーニング
+    - url: https://support.minkabu.jp/hc/ja/articles/360048275154-%E9%8A%98%E6%9F%84%E3%83%9A%E3%83%BC%E3%82%B8-%E3%82%B7%E3%82%B0%E3%83%8A%E3%83%AB-%E3%81%AE%E6%83%85%E5%A0%B1%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
+      label: みんかぶ — シグナル・テクニカルアラート
+  karauri:
+    - url: https://karauri.net/
+      label: 空売り情報（需給参考・スクレイプはトップのみ）

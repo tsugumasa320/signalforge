@@ -262,3 +262,62 @@ def test_static_dashboard_export(tmp_path, monkeypatch):
     assert out.name == "swing_test_strat.html"
     assert out.exists()
     assert "Paper" in out.read_text(encoding="utf-8")
+
+
+def test_dsl_conditions_golden_cross():
+    from signalforge.lab.conditions import signals_from_entry_spec
+
+    df = _sample_ohlcv(80)
+    from signalforge.indicators.engine import IndicatorEngine
+
+    df = IndicatorEngine(shift=0).compute(df, intraday=False)
+    entry = {"all": [{"op": "cross_up", "left": "ema5", "right": "ema25"}]}
+    sig = signals_from_entry_spec(df, entry)
+    assert sig.sum() >= 0
+
+
+def test_lab_rule_study_smoke():
+    from signalforge.lab.event_backtest import simulate_rule_study_longs
+
+    df = _sample_ohlcv(80)
+    from signalforge.indicators.engine import IndicatorEngine
+
+    df = IndicatorEngine(shift=0).compute(df, intraday=False)
+    signals = pd.Series(0, index=df.index)
+    signals.iloc[30] = 1
+    trades = simulate_rule_study_longs(df, signals, max_hold=10)
+    assert len(trades) >= 1
+    assert "pnl_pct" in trades.columns
+
+
+def test_cohort_filters_prime():
+    from signalforge.universe.filters import resolve_cohort_tickers
+
+    tickers = resolve_cohort_tickers({"segment": ["prime"], "exclude_etf": True})
+    assert "7203.T" in tickers
+    assert "1321.T" not in tickers
+    growth = resolve_cohort_tickers({"segment": ["growth"]})
+    assert "4478.T" in growth
+    assert "7203.T" not in growth
+
+
+def test_catalog_strategy_resolves():
+    from signalforge.config import load_style_config
+    from signalforge.strategies.registry import get_strategy
+
+    cfg = load_style_config("swing")
+    strat = get_strategy("perfect_order_pullback", cfg)
+    assert strat.name == "perfect_order_pullback"
+
+
+def test_media_sources_registry():
+    from signalforge.config import load_media_sources
+
+    reg = load_media_sources()
+    outlets = reg.get("outlets", [])
+    assert len(outlets) >= 20
+    ids = {o["id"] for o in outlets}
+    assert "kabutan" in ids
+    assert "minkabu" in ids
+    fetch_urls = sum(len(o.get("urls") or []) for o in outlets if o.get("fetch_policy") != "skip")
+    assert fetch_urls >= 40

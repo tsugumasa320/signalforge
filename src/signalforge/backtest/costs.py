@@ -4,7 +4,7 @@ import math
 from dataclasses import dataclass
 from typing import Any, Literal
 
-CostPreset = Literal["legacy", "alpaca", "alpaca_conservative"]
+CostPreset = Literal["legacy", "alpaca", "alpaca_conservative", "japan"]
 
 
 def _round_up_cent(amount: float) -> float:
@@ -288,12 +288,20 @@ def load_cost_model(
     preset: CostPreset,
     style: str,
     cfg_defaults: dict[str, Any] | None = None,
+    market_cfg: dict[str, Any] | None = None,
 ) -> LegacyCostModel | AlpacaCostModel:
     from signalforge.config import load_cost_config
 
     if preset == "legacy":
         defaults = cfg_defaults or {}
         return LegacyCostModel(commission_pct=float(defaults.get("commission_pct", 0.00005)))
+
+    if preset == "japan":
+        jp = load_cost_config("japan")
+        return LegacyCostModel(
+            commission_pct=float(jp.get("commission_pct", 0.00105)),
+            name="japan",
+        )
 
     alpaca_cfg = load_cost_config("alpaca")
     conservative = preset == "alpaca_conservative"

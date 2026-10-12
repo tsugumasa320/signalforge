@@ -1,0 +1,88 @@
+# バックテスト比較用コホート（戦略 × 銘柄群）
+meta:
+  description: プライム/スタンダード/グロース・業種・流動性などの比較軸
+  equity_meta: config/universe/japan_equity_meta.yaml
+
+presets:
+  - id: all
+    label: メタ登録全銘柄（ETF除く）
+    filter:
+      exclude_etf: true
+
+  - id: prime
+    label: プライム市場
+    filter:
+      segment: [prime]
+
+  - id: standard
+    label: スタンダード市場
+    filter:
+      segment: [standard]
+
+  - id: growth
+    label: グロース市場
+    filter:
+      segment: [growth]
+
+  - id: prime_liquid
+    label: プライム × japan_liquid 構成銘柄
+    filter:
+      segment: [prime]
+      universe: japan_liquid
+
+  - id: nikkei_large
+    label: 日経225系大型（プライム中心）
+    filter:
+      tags: [nikkei225]
+
+  - id: sector_transport
+    label: 業種 — 輸送用機器
+    filter:
+      sector_tse: [輸送用機器]
+
+  - id: sector_electric
+    label: 業種 — 電気機器
+    filter:
+      sector_tse: [電気機器]
+
+  - id: sector_it
+    label: 業種 — 情報・通信
+    filter:
+      sector_tse: [情報・通信]
+
+  - id: sector_pharma
+    label: 業種 — 医薬品
+    filter:
+      sector_tse: [医薬品]
+
+  - id: sector_banks
+    label: 業種 — 銀行
+    filter:
+      sector_tse: [銀行]
+
+  - id: sector_trading
+    label: 業種 — 卸売業
+    filter:
+      sector_tse: [卸売業]
+
+  - id: sector_retail
+    label: 業種 — 小売業
+    filter:
+      sector_tse: [小売業]
+
+  - id: sector_services
+    label: 業種 — サービス業
+    filter:
+      sector_tse: [サービス業]
+
+  - id: growth_tech
+    label: グロース × 情報・通信/ソフト系
+    filter:
+      segment: [growth]
+      sector_tse: [情報・通信, サービス業]
+
+  - id: prime_auto
+    label: プライム × 輸送用機器（自動車系）
+    filter:
+      segment: [prime]
+      sector_tse: [輸送用機器]

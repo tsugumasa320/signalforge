@@ -47,6 +47,30 @@ def atr(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 14) -> 
     return tr.rolling(period).mean()
 
 
+def ichimoku(high: pd.Series, low: pd.Series, close: pd.Series):
+    tenkan = (high.rolling(9).max() + low.rolling(9).min()) / 2
+    kijun = (high.rolling(26).max() + low.rolling(26).min()) / 2
+    span_a = ((tenkan + kijun) / 2).shift(26)
+    span_b = ((high.rolling(52).max() + low.rolling(52).min()) / 2).shift(26)
+    return tenkan, kijun, span_a, span_b
+
+
+def cci(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 20) -> pd.Series:
+    tp = (high + low + close) / 3
+    sma = tp.rolling(period).mean()
+    mad = tp.rolling(period).apply(lambda x: np.abs(x - x.mean()).mean(), raw=True)
+    return (tp - sma) / (0.015 * mad.replace(0, np.nan))
+
+
+def heikin_ashi(open_: pd.Series, high: pd.Series, low: pd.Series, close: pd.Series):
+    ha_close = (open_ + high + low + close) / 4
+    ha_open = pd.Series(index=close.index, dtype=float)
+    ha_open.iloc[0] = (open_.iloc[0] + close.iloc[0]) / 2
+    for i in range(1, len(close)):
+        ha_open.iloc[i] = (ha_open.iloc[i - 1] + ha_close.iloc[i - 1]) / 2
+    return ha_open, ha_close
+
+
 def adx(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 14) -> pd.Series:
     plus_dm = high.diff()
     minus_dm = -low.diff()
@@ -85,12 +109,16 @@ class IndicatorEngine:
 
     def compute(self, df: pd.DataFrame, intraday: bool = False) -> pd.DataFrame:
         out = df.copy()
-        c, h, l, v = out["close"], out["high"], out["low"], out["volume"]
+        o, c, h, l, v = out["open"], out["close"], out["high"], out["low"], out["volume"]
 
+        out["ema5"] = ema(c, 5)
         out["ema9"] = ema(c, 9)
         out["ema20"] = ema(c, 20)
         out["ema21"] = ema(c, 21)
+        out["ema25"] = ema(c, 25)
         out["ema50"] = ema(c, 50)
+        out["ema60"] = ema(c, 60)
+        out["ema75"] = ema(c, 75)
         out["ema200"] = ema(c, 200)
         out["rsi_14"] = rsi(c, 14)
         macd_line, macd_sig, macd_hist = macd(c)
@@ -108,6 +136,17 @@ class IndicatorEngine:
         out["volume_ma20"] = v.rolling(20).mean()
         out["volume_ratio_20"] = v / out["volume_ma20"]
         out["ema20_distance_pct"] = (c - out["ema20"]) / out["ema20"]
+        tenkan, kijun, span_a, span_b = ichimoku(h, l, c)
+        out["ichimoku_tenkan"] = tenkan
+        out["ichimoku_kijun"] = kijun
+        out["ichimoku_span_a"] = span_a
+        out["ichimoku_span_b"] = span_b
+        out["cci_20"] = cci(h, l, c, 20)
+        ha_o, ha_c = heikin_ashi(o, h, l, c)
+        out["ha_open"] = ha_o
+        out["ha_close"] = ha_c
+        for p in (2, 5, 10, 15, 20, 40):
+            out[f"donchian_high_{p}"] = h.rolling(p).max()
 
         if intraday:
             out["vwap"] = daily_vwap(out, self.timezone)

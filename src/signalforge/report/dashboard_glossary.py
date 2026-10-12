@@ -32,7 +32,7 @@ SIDEBAR_HELP: dict[str, str] = {
 }
 
 STYLE_DESCRIPTIONS: dict[str, str] = {
-    "swing": "日足チャート。数日前後〜数週間保有。NVDA の中長期トレンド向け。",
+    "swing": "日足チャート。数日前後〜数週間保有。日本株の中長期トレンド向け。",
     "swing_high_winrate": "日足・高勝率向けに調整した MACD 設定。ML フィルタ推奨。評価期間は AI ブーム以降（2023〜）。",
     "daytrade": "5分足。当日中にエントリー・決済。Alpaca API データ使用時のみ。",
 }
@@ -49,7 +49,7 @@ STRATEGY_DESCRIPTIONS: dict[str, str] = {
 GLOSSARY_SECTIONS: dict[str, list[tuple[str, str]]] = {
     "基本": [
         ("バックテスト", "過去の株価で戦略を仮想売買し、儲かったか検証すること。未来は保証されない。"),
-        ("NVDA", "このダッシュボードの対象銘柄（エヌビディア）。設定で他銘柄にも拡張可能。"),
+        ("7203.T", "デフォルト銘柄（トヨタ）。`config/market/japan.yaml` と scan でユニバース全体も評価可能。"),
         ("評価期間", "分析に使うデータの開始〜終了日。古すぎる相場は現在と乖離するため 2023 年以降に限定している。"),
         ("Run ID", "1回のバックテスト実行ごとの識別子。ジャーナル（取引ログ）のファイル名に使われる。"),
     ],

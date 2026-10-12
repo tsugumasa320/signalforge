@@ -5,7 +5,7 @@ from typing import Any
 import optuna
 
 
-SWING_STRATEGIES = ("ema_pullback", "macd_cross", "bb_squeeze")
+SWING_STRATEGIES = ("ema_pullback", "macd_cross", "ma_golden_cross", "rsi_reversal", "bb_squeeze")
 DAYTRADE_STRATEGIES = ("vwap_ema", "vwap_reclaim", "orb")
 
 

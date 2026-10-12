@@ -1,4 +1,5 @@
 style: swing
+market: japan
 timeframe: 1d
 data_source: yfinance
 

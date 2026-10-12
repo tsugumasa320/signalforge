@@ -1,4 +1,4 @@
-"""Champion preset — best validated NVDA swing configuration in this repo."""
+"""Champion preset — validated Japan swing MACD configuration in this repo."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Any
 from signalforge.config import load_style_config
 from signalforge.optimize.spaces import build_cfg_override
 
-# Bayesian + manual tuning on NVDA 2023+ (Alpaca costs): PF ~4.1, win ~72%
+# Bayesian + manual tuning on default JP ticker 2020+ (japan costs). Re-scan universe separately.
 CHAMPION_MACD_PARAMS: dict[str, Any] = {
     "adx_threshold": 23,
     "ema_trend": 200,

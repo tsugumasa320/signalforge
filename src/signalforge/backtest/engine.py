@@ -41,7 +41,9 @@ class BacktestEngine:
         self.atr_tp = exit_rules.get("atr_tp_multiple", 3.0)
         self.atr_sl = exit_rules.get("atr_sl_multiple", 1.5)
         self.max_hold = profile.max_hold_bars
-        self.blackout = cfg.get("_nvda", {}).get("earnings_blackout_days", 2)
+        from signalforge.config import market_context
+
+        self.blackout = int(market_context(cfg).get("earnings_blackout_days", 0))
         self._entry_signal_idx: int | None = None
         self._entry_is_oos = False
         self._entry_ml_expl: dict[str, Any] | None = None
@@ -194,7 +196,7 @@ class BacktestEngine:
                     self._entry_cost_breakdown = TradeCostBreakdown()
 
             if position == 0 and signals.iloc[i] != 0 and i + 1 < len(df):
-                if is_earnings_blackout(ts, self.blackout):
+                if self.blackout > 0 and is_earnings_blackout(ts, self.blackout):
                     continue
                 if isinstance(self.profile, DaytradeProfile) and trades_today >= self.profile.max_trades_per_day:
                     continue

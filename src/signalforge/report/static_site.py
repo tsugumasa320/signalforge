@@ -36,7 +36,7 @@ def _run_backtest_row(style: str, strategy: str) -> dict[str, Any] | None:
                 style,
                 strategy,
                 ml_filter=ml_filter,
-                cost_model="alpaca",
+                cost_model="japan",
                 cfg_override=cfg_override,
                 refresh_data=False,
             )
@@ -213,7 +213,7 @@ def export_hub(
 
     body = f"""
     <div class="info-box">
-      NVDA 向けテクニカル分析ダッシュボード（ローカル Streamlit 版と同等の比較・解説を静的サイト化）。
+      日本株向けテクニカル分析ダッシュボード（ローカル Streamlit 版と同等の比較・解説を静的サイト化）。
       Paper = フォワード仮想運用、バックテスト = 全期間（または OOS）シミュレーション。
     </div>
 
@@ -239,7 +239,7 @@ def export_hub(
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = wrap_page(
         title="SignalForge Dashboard",
-        subtitle="NVDA マルチ戦略分析 — Paper · バックテスト · 戦略解説",
+        subtitle="日本株マルチ戦略分析 — Paper · バックテスト · 戦略解説",
         body=body,
         generated=generated,
         nav_active="hub",

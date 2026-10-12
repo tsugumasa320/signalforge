@@ -1,0 +1,126 @@
+# イザナミ風：売買ルールパレット（SignalForge テンプレ / カタログ ID にマップ）
+meta:
+  description: 仕掛け条件を選んでバックテスト（lab コマンド）するためのルール一覧
+  reference: https://www.izanami.jp/v2support/bkt_summary.html
+
+defaults:
+  style: swing
+  verification:
+    # イザナミ「バックテスト」段階 — 資金制約なしのルール研究
+    mode: rule_study
+  exit:
+    atr_tp_multiple: 3.0
+    atr_sl_multiple: 1.5
+    max_hold_bars: 15
+
+rules:
+  - id: iz_golden_cross_5_25
+    name: ゴールデンクロス（5日/25日）
+    strategy: ma_golden_cross
+    tags: [trend, ma]
+
+  - id: iz_golden_cross_25_75
+    name: ゴールデンクロス（25日/75日）
+    strategy: ma_25_75_golden_cross
+    tags: [trend, ma, japan]
+
+  - id: iz_macd_buy
+    name: MACD 買いシグナル
+    strategy: macd_cross
+    tags: [momentum]
+
+  - id: iz_rsi_oversold
+    name: RSI 売られ過ぎ反発
+    strategy: rsi_reversal
+    tags: [mean_reversion]
+
+  - id: iz_bb_squeeze
+    name: ボリンジャー・スクイーズ
+    strategy: bb_squeeze
+    tags: [volatility]
+
+  - id: iz_perfect_order
+    name: パーフェクトオーダー押し目
+    strategy: perfect_order_pullback
+    tags: [trend, ma]
+
+  - id: iz_ichimoku_kumo
+    name: 一目均衡表・雲抜け
+    strategy: ichimoku_kumo_break
+    tags: [ichimoku]
+
+  - id: iz_volume_breakout
+    name: 出来高急増ブレイク
+    strategy: volume_breakout
+    tags: [breakout]
+
+  - id: iz_donchian_20
+    name: 20日高値ブレイク
+    strategy: donchian_breakout
+    tags: [breakout]
+
+  - id: iz_kabutan_macd
+    name: 株探 MACD/買い
+    strategy: kabutan_preset_macd_buy
+    tags: [kabutan, screening]
+
+  - id: iz_vwap_reclaim
+    name: VWAP リクレイム（日足近似）
+    strategy: vwap_reclaim
+    style: daytrade
+    tags: [vwap, daytrade]
+
+  - id: iz_orb
+    name: ORB 寄付レンジ
+    strategy: orb
+    style: daytrade
+    tags: [opening, daytrade]
+
+  # --- DSL パレット（イザナミ仕掛け条件に近い組み合わせ） ---
+  - id: iz_dsl_gc_5_25_200
+    name: DSL — 5/25 GC + 200日線上
+    tags: [dsl, trend]
+    entry:
+      all:
+        - { op: cross_up, left: ema5, right: ema25 }
+        - { op: gt_col, col: close, ref: ema200 }
+
+  - id: iz_dsl_bb_rsi
+    name: DSL — BB−2σ + RSI30割れ
+    tags: [dsl, mean_reversion]
+    entry:
+      all:
+        - { op: bb_touch_lower }
+        - { op: lt, col: rsi_14, value: 30 }
+
+  - id: iz_dsl_volume_break
+    name: DSL — 出来高1.8倍 + 高値ブレイク
+    tags: [dsl, breakout]
+    entry:
+      all:
+        - { op: volume_ratio_gte, value: 1.8 }
+        - { op: high_breakout, lookback: 20 }
+
+  - id: iz_dsl_harami_surge
+    name: DSL — 前日はらみ線 + 当日2%以上
+    tags: [dsl, pattern]
+    entry:
+      all:
+        - { op: harami_bullish, bars_ago: 1 }
+        - { op: pct_change_gte, value: 2.0 }
+
+  - id: iz_dsl_kairi25
+    name: DSL — 25日線乖離 -3% 以下（BNF系）
+    tags: [dsl, mean_reversion, japan]
+    entry:
+      all:
+        - { op: kairi_lte, ema: ema25, value: -3.0 }
+        - { op: gt_col, col: close, ref: ema75 }
+
+  - id: iz_dsl_ichimoku_cloud
+    name: DSL — 雲上 + 転換>基準
+    tags: [dsl, ichimoku]
+    entry:
+      all:
+        - { op: ichimoku_above_cloud }
+        - { op: gt_col, col: ichimoku_tenkan, ref: ichimoku_kijun }

@@ -7,11 +7,11 @@ echo "=== SignalForge daily (multi-strategy) ==="
 
 uv sync --extra dev --frozen 2>/dev/null || uv sync --extra dev
 
-echo "--- fetch swing (1d) ---"
-uv run signalforge fetch --ticker NVDA --timeframe 1d --refresh --with-correlations
+echo "--- fetch Japan universe (1d) ---"
+uv run signalforge fetch --universe japan_liquid --timeframe 1d --refresh --with-correlations
 
-echo "--- fetch daytrade (5m) ---"
-uv run signalforge fetch --ticker NVDA --timeframe 5m --refresh || echo "5m fetch skipped (Alpaca/yfinance limit)"
+echo "--- fetch daytrade benchmark (5m) ---"
+uv run signalforge fetch --ticker 7203.T --timeframe 5m --refresh || echo "5m fetch skipped (yfinance limit)"
 
 echo "--- paper run-all ---"
 uv run signalforge paper run-all --refresh

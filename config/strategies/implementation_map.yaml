@@ -1,0 +1,702 @@
+meta:
+  description: Catalog ID → backtest template (builtin or catalog_template)
+  generated_by: scripts/generate_implementation_map.py
+strategies:
+  macd_cross:
+    builtin: macd_cross
+    catalog_style: swing
+  ema_pullback:
+    builtin: ema_pullback
+    catalog_style: swing
+  bb_squeeze:
+    builtin: bb_squeeze
+    catalog_style: swing
+  ma_golden_cross:
+    builtin: ma_golden_cross
+    catalog_style: swing
+  rsi_reversal:
+    builtin: rsi_reversal
+    catalog_style: swing
+  vwap_ema:
+    builtin: vwap_ema
+    catalog_style: daytrade
+  vwap_reclaim:
+    builtin: vwap_reclaim
+    catalog_style: daytrade
+  orb:
+    builtin: orb
+    catalog_style: daytrade
+  perfect_order_pullback:
+    template: perfect_order_pullback
+    catalog_style: swing
+  ma_25_75_golden_cross:
+    template: ma_cross
+    params:
+      fast: ema25
+      slow: ema75
+    catalog_style: swing
+  ma_50_200_golden_cross:
+    template: ma_cross
+    params:
+      fast: ema50
+      slow: ema200
+    catalog_style: swing
+  ma_death_cross:
+    template: ma_cross
+    params:
+      fast: ema50
+      slow: ema200
+      direction: dead
+      long_only: false
+    catalog_style: swing
+  ma_200_trend_filter:
+    template: ema200_filter_macd
+    params:
+      require_ema200: true
+    catalog_style: swing
+  trend_reentry:
+    template: high_breakout_rsi
+    params:
+      lookback: 126
+      rsi_min: 60
+    catalog_style: swing
+  adx_trend_ride:
+    template: adx_trend
+    params:
+      adx_min: 25
+      ema_col: ema50
+    catalog_style: swing
+  supertrend_follow:
+    template: adx_trend
+    params:
+      adx_min: 20
+      ema_col: ema20
+    catalog_style: swing
+  heikin_ashi_trend:
+    template: heikin_ashi_trend
+    catalog_style: swing
+  ichimoku_kumo_break:
+    template: ichimoku_kumo_break
+    catalog_style: swing
+  ichimoku_sanyaku_koten:
+    template: ichimoku_sanyaku
+    catalog_style: swing
+  ichimoku_tk_cross:
+    template: ichimoku_tk_cross
+    catalog_style: swing
+  ichimoku_kijun_pullback:
+    template: ichimoku_kijun_pullback
+    catalog_style: swing
+  ichimoku_macd_rsi:
+    template: combo_macd_rsi_ichimoku
+    catalog_style: swing
+  rsi_dip_200ma:
+    template: rsi_oversold
+    params:
+      rsi_max: 35
+      require_ema200: true
+    catalog_style: swing
+  rsi_momentum_60:
+    template: rsi_momentum
+    params:
+      rsi_min: 60
+      ema_col: ema25
+    catalog_style: swing
+  bb_lower_rsi_oversold:
+    template: bb_rsi
+    params:
+      side: lower
+      rsi_max: 30
+    catalog_style: swing
+  bb_upper_rsi_exit:
+    template: bb_rsi
+    params:
+      side: upper
+      rsi_min: 70
+      signal: short
+    catalog_style: swing
+  stoch_rsi_cross:
+    template: rsi_oversold
+    params:
+      rsi_max: 25
+      rsi_reclaim: 25
+    catalog_style: swing
+  cci_zero_cross:
+    template: cci_cross
+    catalog_style: swing
+  macd_histogram_reversal:
+    template: macd_histogram_reversal
+    catalog_style: swing
+  volume_breakout:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 2.0
+    catalog_style: swing
+  donchian_breakout:
+    template: donchian_breakout
+    params:
+      period: 20
+    catalog_style: swing
+  box_range_breakout:
+    template: donchian_breakout
+    params:
+      period: 10
+    catalog_style: swing
+  triangle_breakout:
+    template: donchian_breakout
+    params:
+      period: 15
+    catalog_style: swing
+  keltner_squeeze:
+    template: bb_squeeze_proxy
+    catalog_style: swing
+  vcp_minervini:
+    template: high_breakout_rsi
+    params:
+      lookback: 60
+      rsi_min: 55
+    catalog_style: swing
+  gap_up_continuation:
+    template: gap_up
+    params:
+      min_gap_pct: 0.01
+    catalog_style: swing
+  gap_fill_reversal:
+    template: gap_fill_reversal
+    catalog_style: swing
+  fib_pullback_382_618:
+    template: swing_pullback_ema
+    params:
+      ema_col: ema50
+    catalog_style: swing
+  relative_strength_index_rs:
+    template: rsi_momentum
+    params:
+      rsi_min: 55
+    catalog_style: swing
+  topix100_momentum:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    catalog_style: swing
+  credit_balance_contrarian:
+    template: mean_reversion_rsi
+    approximation: 需給データなし→RSI逆張り近似
+    catalog_style: swing
+  sector_leader_laggard:
+    template: momentum_ema
+    approximation: 相対強度なし→EMAモメンタム近似
+    catalog_style: swing
+  double_bottom_break:
+    template: donchian_breakout
+    params:
+      period: 40
+    catalog_style: swing
+  cup_and_handle:
+    template: high_breakout_rsi
+    params:
+      lookback: 90
+      rsi_min: 50
+    catalog_style: swing
+  head_shoulders_short:
+    template: ma_cross
+    params:
+      fast: ema20
+      slow: ema50
+      direction: dead
+      long_only: false
+    catalog_style: swing
+  vwap_pullback_long:
+    template: vwap_proxy_daily
+    params:
+      mode: pullback
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  vwap_mean_reversion_short:
+    template: vwap_proxy_daily
+    params:
+      mode: mean_rev_short
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  vwap_breakout_follow:
+    template: vwap_proxy_daily
+    params:
+      mode: breakout
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  am_high_breakout_volume:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.5
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  pm_high_breakout:
+    template: donchian_breakout
+    params:
+      period: 5
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  relative_volume_filter:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.8
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  opening_gap_daytrade:
+    template: gap_up
+    params:
+      min_gap_pct: 0.005
+    catalog_style: daytrade
+  first_hour_momentum:
+    template: momentum_ema
+    params:
+      ema_col: ema9
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  lunch_break_fade:
+    template: mean_reversion_rsi
+    approximation: 日足近似
+    backtest_style: swing
+    catalog_style: daytrade
+  close_momentum:
+    template: momentum_ema
+    params:
+      ema_col: ema5
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  prior_day_hl_break:
+    template: donchian_breakout
+    params:
+      period: 2
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  pivot_point_bounce:
+    template: swing_pullback_ema
+    params:
+      ema_col: ema20
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  ema9_21_scalp_5m:
+    template: ma_cross
+    params:
+      fast: ema9
+      slow: ema21
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  parabolic_sar_intraday:
+    template: adx_trend
+    params:
+      adx_min: 15
+      ema_col: ema9
+    backtest_style: swing
+    approximation: 日足でデイトレ手法を近似
+    catalog_style: daytrade
+  weekly_swing_multiframe:
+    template: ma_cross
+    params:
+      fast: ema20
+      slow: ema50
+    catalog_style: swing
+  earnings_drift:
+    template: momentum_ema
+    approximation: 決算データなし→モメンタム近似
+    catalog_style: swing
+  low_pbr_value_reversal:
+    template: rsi_oversold
+    approximation: ファンダなし→RSI近似
+    catalog_style: swing
+  momentum_monthly_rebalance:
+    template: momentum_ema
+    params:
+      ema_col: ema50
+    catalog_style: swing
+  mean_reversion_short_term:
+    template: mean_reversion_rsi
+    catalog_style: swing
+  pairs_trading_sector:
+    template: mean_reversion_rsi
+    approximation: ペアデータなし→単銘柄RSI近似
+    catalog_style: swing
+  index_arb_nikkei_etf:
+    template: momentum_ema
+    approximation: ETF裁定なし→トレンド近似
+    backtest_style: swing
+    catalog_style: daytrade
+  grid_trading_range:
+    template: bb_rsi
+    params:
+      side: lower
+      rsi_max: 40
+    catalog_style: swing
+  dca_trend_add:
+    template: ema_pullback_proxy
+    catalog_style: swing
+  trailing_atr_chandelier:
+    template: adx_trend
+    params:
+      adx_min: 18
+      ema_col: ema20
+    catalog_style: swing
+  multi_strategy_ensemble:
+    template: combo_macd_rsi
+    approximation: 簡易複合シグナル
+    catalog_style: swing
+  bnf_ma25_kairi_reversion:
+    template: kairi_mean_reversion
+    params:
+      ema_col: ema25
+      kairi_max_pct: -3.0
+    catalog_style: swing
+  bnf_regime_trend_vs_fade:
+    template: adx_trend
+    params:
+      adx_min: 22
+      ema_col: ema25
+    catalog_style: swing
+  bnf_multi_indicator_bounce:
+    template: bb_rsi
+    params:
+      side: lower
+      rsi_max: 35
+    catalog_style: swing
+  bnf_sector_leading_swing:
+    template: momentum_ema
+    approximation: セクター相対なし
+    catalog_style: swing
+  ch5_minority_sentiment:
+    template: volume_breakout
+    approximation: 掲示板センチメントなし→出来高近似
+    backtest_style: swing
+    catalog_style: daytrade
+  x_keyword_material_screen:
+    template: volume_breakout
+    approximation: SNSなし→出来高近似
+    catalog_style: swing
+  x_tweet_burst_filter:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 2.5
+    approximation: SNSなし
+    catalog_style: swing
+  x_sentiment_event_factor:
+    template: gap_up
+    approximation: イベントなし→ギャップ近似
+    catalog_style: swing
+  sns_sentiment_plus_ta:
+    template: combo_macd_rsi
+    approximation: SNSなし→TA複合
+    backtest_style: swing
+    catalog_style: daytrade
+  youtube_new_high_box_break:
+    template: donchian_breakout
+    params:
+      period: 20
+    catalog_style: swing
+  youtube_elliott_multiframe:
+    template: ma_cross
+    params:
+      fast: ema20
+      slow: ema50
+    catalog_style: swing
+  youtube_dow_theory_trend:
+    template: ma_cross
+    params:
+      fast: ema50
+      slow: ema200
+    catalog_style: swing
+  vwap_orderflow_itasha:
+    template: vwap_proxy_daily
+    approximation: 板情報なし→VWAP日足代理
+    backtest_style: swing
+    catalog_style: daytrade
+  professional_daytrader_session:
+    template: momentum_ema
+    params:
+      ema_col: ema9
+    approximation: 時間帯なし
+    backtest_style: swing
+    catalog_style: daytrade
+  kabutan_preset_macd_buy:
+    template: builtin_macd
+    params:
+      ema_trend: 50
+    catalog_style: swing
+  kabutan_preset_rsi_oversold:
+    template: rsi_oversold
+    params:
+      rsi_max: 20
+      rsi_reclaim: 20
+    catalog_style: swing
+  kabutan_preset_rsi_overbought:
+    template: rsi_momentum
+    params:
+      rsi_min: 80
+      signal: exit_short
+    catalog_style: swing
+  kabutan_shinchu_sanbon_inverted:
+    template: three_bar_reversal
+    params:
+      direction: bearish
+    catalog_style: swing
+  kabutan_ma_uptrend_low_kairi25:
+    template: kairi_mean_reversion
+    params:
+      ema_col: ema25
+      kairi_max_pct: -1.5
+      trend_ema: ema75
+    catalog_style: swing
+  kabutan_contrarian_short_hold:
+    template: mean_reversion_rsi
+    params:
+      max_hold_hint: 5
+    catalog_style: swing
+  kabutan_theme_swing_earnings:
+    template: momentum_ema
+    approximation: テーマ/決算なし
+    catalog_style: swing
+  kabutan_core_satellite_credit_swing:
+    template: ma_cross
+    params:
+      fast: ema20
+      slow: ema60
+    catalog_style: swing
+  kabutan_supply_ma_20_60_swing:
+    template: ma_cross
+    params:
+      fast: ema20
+      slow: ema60
+      trend_col: ema5
+    catalog_style: swing
+  minkabu_gc_25_75_preset:
+    template: ma_cross
+    params:
+      fast: ema25
+      slow: ema75
+    catalog_style: swing
+  minkabu_short_oversold_preset:
+    template: rsi_oversold
+    params:
+      rsi_max: 25
+      rsi_reclaim: 25
+    catalog_style: swing
+  minkabu_custom_technical_screen:
+    template: combo_macd_rsi
+    catalog_style: swing
+  minkabu_community_sentiment_rank:
+    template: volume_breakout
+    approximation: 投稿数なし→出来高近似
+    catalog_style: swing
+  harvest_kw__:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  kabutan_preset_rsi14_20:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.5
+    catalog_style: swing
+  kabutan_preset_rsi14_80:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.5
+    catalog_style: swing
+  kabutan_preset_25_5:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.5
+    catalog_style: swing
+  kabutan_preset_5:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.5
+    catalog_style: swing
+  kabutan_preset_5_25:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.5
+    catalog_style: swing
+  kabutan_preset_:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.5
+    catalog_style: swing
+  kabutan_preset_2:
+    template: volume_breakout
+    params:
+      volume_ratio_min: 1.5
+    catalog_style: swing
+  youtube_harvest_La-WIYNjgoY:
+    template: vwap_proxy_daily
+    params:
+      mode: breakout
+    approximation: YouTube字幕由来
+    catalog_style: daytrade
+  harvest_kw_067a94121b:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_2a49f1bc02:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_63c04d5463:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_3b6ce6af3e:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_VWAP:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_MACD:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_ab5cfb949d:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_RSI:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_4a8bfbbe61:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_ORB:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_34095c23c5:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_3e890dd37d:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_485fff7244:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_c88320ea98:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_781e4b3fe5:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_04ca29e522:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_ef2d15231b:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_7999ad1776:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_ee4b3de361:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_69c6f34e5b:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_0bd3e8aee2:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_96f9af238b:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_80c429e600:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  harvest_kw_f2a0f90d48:
+    template: momentum_ema
+    params:
+      ema_col: ema20
+    approximation: 汎用モメンタム近似
+    catalog_style: swing
+  youtube_harvest_WSZVfgH9GdI:
+    template: combo_macd_rsi
+    approximation: YouTube字幕由来
+    catalog_style: swing
+  youtube_harvest__9GKoinlUVE:
+    template: combo_macd_rsi
+    approximation: YouTube字幕由来
+    catalog_style: swing
+  youtube_harvest_6vV8gjz982s:
+    template: combo_macd_rsi
+    approximation: YouTube字幕由来
+    catalog_style: swing

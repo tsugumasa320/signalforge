@@ -1,6 +1,7 @@
 # 高勝率プリセット — macd_cross + ML
 # OOS 勝率 ~73% (TP=2.0×ATR, SL=1.5×ATR)
-style: swing
+style: swing_high_winrate
+market: japan
 timeframe: 1d
 data_source: yfinance
 

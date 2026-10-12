@@ -12,7 +12,9 @@ class OrbStrategy(BaseStrategy):
     def __init__(self, cfg, or_minutes: int = 20) -> None:
         super().__init__(cfg)
         self.or_minutes = or_minutes
-        self.timezone = cfg.get("_nvda", {}).get("timezone", "America/New_York")
+        from signalforge.config import market_context
+
+        self.timezone = market_context(cfg).get("timezone", "Asia/Tokyo")
 
     def generate_signals(self, df: pd.DataFrame) -> pd.Series:
         signals = pd.Series(0, index=df.index)

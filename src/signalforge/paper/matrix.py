@@ -11,6 +11,8 @@ PAPER_SIMULATIONS: list[tuple[str, str]] = [
     ("swing_champion", "macd_cross"),
     ("swing", "ema_pullback"),
     ("swing", "macd_cross"),
+    ("swing", "ma_golden_cross"),
+    ("swing", "rsi_reversal"),
     ("swing", "bb_squeeze"),
     ("swing_high_winrate", "macd_cross"),
     ("daytrade", "vwap_ema"),

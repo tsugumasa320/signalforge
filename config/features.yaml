@@ -12,9 +12,9 @@ allowed_features:
   volume_ratio_20:
     desc: "20日平均出来高比"
   qqq_relative_strength:
-    desc: "QQQ に対する相対強度"
+    desc: "第1相関指数（日本: 1321.T 等）に対する相対強度"
   soxx_relative_strength:
-    desc: "SOXX に対する相対強度"
+    desc: "第2相関指数（日本: 1570.T 等）に対する相対強度"
   days_to_earnings:
     desc: "決算までの日数"
   hour_of_day:

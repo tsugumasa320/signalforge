@@ -8,7 +8,8 @@ import pandas as pd
 from signalforge.backtest.costs import load_cost_model
 from signalforge.backtest.engine import BacktestEngine
 from signalforge.backtest.metrics import compute_metrics
-from signalforge.config import load_style_config
+from signalforge.config import load_style_config, market_context, resolve_ticker
+from signalforge.data.correlations import load_benchmark_pair
 from signalforge.data.cache import ParquetCache
 from signalforge.data.fetcher import MarketDataFetcher
 from signalforge.indicators.engine import IndicatorEngine
@@ -31,9 +32,9 @@ def _bar_index(df: pd.DataFrame, ts_str: str | None) -> int | None:
 
 
 def _prepare_dataframe(style: str, cfg: dict[str, Any], refresh: bool) -> tuple[pd.DataFrame, str]:
-    nvda = cfg.get("_nvda", {})
-    ticker = nvda.get("ticker", "NVDA")
-    corr = nvda.get("correlation_tickers", [])
+    mc = market_context(cfg)
+    ticker = resolve_ticker(cfg, None)
+    corr = list(mc.get("correlation_tickers", []))
     timeframe = cfg.get("timeframe", "1d")
     data_source = resolve_data_source(style, cfg)
 
@@ -48,25 +49,21 @@ def _prepare_dataframe(style: str, cfg: dict[str, Any], refresh: bool) -> tuple[
         else:
             raise
 
-    qqq_df = soxx_df = None
-    for sym in corr:
-        try:
-            cdf = cache.load_or_fetch(sym, timeframe, fetcher, refresh=refresh)
-        except Exception:
-            cdf = cache.load_or_fetch(sym, timeframe, MarketDataFetcher("yfinance"), refresh=refresh)
-        if sym == "QQQ":
-            qqq_df = cdf
-        elif sym == "SOXX":
-            soxx_df = cdf
-
     intraday = style == "daytrade" or style.startswith("daytrade")
-    tz = nvda.get("timezone", "America/New_York")
+    tz = mc.get("timezone", "Asia/Tokyo")
     engine_ind = IndicatorEngine(timezone=tz)
     df = engine_ind.compute(df, intraday=intraday)
-    if qqq_df is not None:
-        qqq_df = engine_ind.compute(qqq_df, intraday=intraday)
-    if soxx_df is not None:
-        soxx_df = engine_ind.compute(soxx_df, intraday=intraday)
+    load_benchmark_pair(
+        cache,
+        fetcher,
+        corr,
+        timeframe,
+        refresh=refresh,
+        engine_ind=engine_ind,
+        intraday=intraday,
+        bt_start=None,
+        bt_end=None,
+    )
 
     return df, data_source
 
@@ -119,7 +116,7 @@ def init_paper_portfolio(
     style: str,
     strategy: str | None = None,
     *,
-    cost_model: str = "alpaca",
+    cost_model: str = "japan",
     refresh: bool = True,
 ) -> PaperPortfolio:
     cfg = load_style_config(style)
@@ -165,7 +162,7 @@ def run_paper_daily(
     strategy = strategy or cfg.get("strategy", "ema_pullback")
     portfolio = PaperPortfolio.load(style, strategy)
     if portfolio is None:
-        portfolio = init_paper_portfolio(style, strategy, cost_model=cost_model or "alpaca", refresh=refresh)
+        portfolio = init_paper_portfolio(style, strategy, cost_model=cost_model or "japan", refresh=refresh)
 
     cost_model = cost_model or portfolio.cost_model
     df, data_source = _prepare_dataframe(style, cfg, refresh)
@@ -199,7 +196,7 @@ def run_paper_daily(
         strat,
         cfg,
         ml_filter=None if not ml_filter else None,  # ML は paper 初版では TA のみ
-        cost_model=load_cost_model(cost_model, style, cfg.get("_defaults")),
+        cost_model=load_cost_model(cost_model, style, cfg.get("_defaults"), market_cfg=market_context(cfg)),
     )
 
     initial_state = _engine_state_from_portfolio(portfolio, df)

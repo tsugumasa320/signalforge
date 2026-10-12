@@ -1,0 +1,266 @@
+# 東証区分・33業種（簡略）付き銘柄メタ。segment は JPX 上場区分の手動キュレーション。
+# 更新: scripts/refresh_japan_equity_meta.py（yfinance 名寄せ・任意）
+meta:
+  version: 1
+  segments: [prime, standard, growth]
+  sector_tse_note: 東証33業種に準拠したラベル（比較用）
+
+tickers:
+  "7203.T":
+    name: トヨタ自動車
+    segment: prime
+    sector_tse: 輸送用機器
+    tags: [nikkei225, japan_liquid]
+  "6758.T":
+    name: ソニーグループ
+    segment: prime
+    sector_tse: 電気機器
+    tags: [nikkei225, japan_liquid]
+  "6861.T":
+    name: キーエンス
+    segment: prime
+    sector_tse: 電気機器
+    tags: [nikkei225, japan_liquid]
+  "8306.T":
+    name: 三菱UFJ
+    segment: prime
+    sector_tse: 銀行
+    tags: [nikkei225, japan_liquid]
+  "9432.T":
+    name: NTT
+    segment: prime
+    sector_tse: 情報・通信
+    tags: [nikkei225, japan_liquid]
+  "6098.T":
+    name: リクルート
+    segment: prime
+    sector_tse: サービス業
+    tags: [nikkei225, japan_liquid]
+  "8035.T":
+    name: 東京エレクトロン
+    segment: prime
+    sector_tse: 電気機器
+    tags: [nikkei225, japan_liquid]
+  "6501.T":
+    name: 日立製作所
+    segment: prime
+    sector_tse: 電気機器
+    tags: [nikkei225, japan_liquid]
+  "4063.T":
+    name: 信越化学
+    segment: prime
+    sector_tse: 化学
+    tags: [nikkei225, japan_liquid]
+  "7741.T":
+    name: HOYA
+    segment: prime
+    sector_tse: 精密機器
+    tags: [nikkei225, japan_liquid]
+  "6902.T":
+    name: デンソー
+    segment: prime
+    sector_tse: 輸送用機器
+    tags: [nikkei225, japan_liquid]
+  "4519.T":
+    name: 中外製薬
+    segment: prime
+    sector_tse: 医薬品
+    tags: [nikkei225, japan_liquid]
+  "6367.T":
+    name: ダイキン
+    segment: prime
+    sector_tse: 機械
+    tags: [nikkei225, japan_liquid]
+  "9984.T":
+    name: ソフトバンクG
+    segment: prime
+    sector_tse: 情報・通信
+    tags: [nikkei225, japan_liquid]
+  "6954.T":
+    name: ファナック
+    segment: prime
+    sector_tse: 電気機器
+    tags: [nikkei225, japan_liquid]
+  "7974.T":
+    name: 任天堂
+    segment: prime
+    sector_tse: その他製品
+    tags: [nikkei225, japan_liquid]
+  "4502.T":
+    name: 武田
+    segment: prime
+    sector_tse: 医薬品
+    tags: [nikkei225, japan_liquid]
+  "8058.T":
+    name: 三菱商事
+    segment: prime
+    sector_tse: 卸売業
+    tags: [nikkei225, japan_liquid]
+  "2914.T":
+    name: JT
+    segment: prime
+    sector_tse: 食料品
+    tags: [nikkei225, japan_liquid]
+  "3382.T":
+    name: セブン&アイ
+    segment: prime
+    sector_tse: 小売業
+    tags: [nikkei225, japan_liquid]
+  "7267.T":
+    name: ホンダ
+    segment: prime
+    sector_tse: 輸送用機器
+    tags: [nikkei225]
+  "7201.T":
+    name: 日産自動車
+    segment: prime
+    sector_tse: 輸送用機器
+    tags: [nikkei225]
+  "6273.T":
+    name: SMC
+    segment: prime
+    sector_tse: 機械
+    tags: [nikkei225]
+  "4568.T":
+    name: 第一三共
+    segment: prime
+    sector_tse: 医薬品
+    tags: [nikkei225]
+  "9433.T":
+    name: KDDI
+    segment: prime
+    sector_tse: 情報・通信
+    tags: [nikkei225]
+  "8802.T":
+    name: 三菱地所
+    segment: prime
+    sector_tse: 不動産
+    tags: [nikkei225]
+  "8411.T":
+    name: みずほFG
+    segment: prime
+    sector_tse: 銀行
+    tags: [nikkei225]
+  "8316.T":
+    name: 三井住友FG
+    segment: prime
+    sector_tse: 銀行
+    tags: [nikkei225]
+  "9020.T":
+    name: JR東日本
+    segment: prime
+    sector_tse: 陸運
+    tags: [nikkei225]
+  "6981.T":
+    name: 村田製作所
+    segment: prime
+    sector_tse: 電気機器
+    tags: [nikkei225]
+
+  "1802.T":
+    name: 大林組
+    segment: standard
+    sector_tse: 建設
+    tags: []
+  "3405.T":
+    name: クラレ
+    segment: standard
+    sector_tse: 化学
+    tags: []
+  "2802.T":
+    name: 味の素
+    segment: standard
+    sector_tse: 食料品
+    tags: []
+  "2503.T":
+    name: キリンHD
+    segment: standard
+    sector_tse: 食料品
+    tags: []
+  "7733.T":
+    name: オリンパス
+    segment: standard
+    sector_tse: 精密機器
+    tags: []
+  "6479.T":
+    name: ミネベアミツミ
+    segment: standard
+    sector_tse: 電気機器
+    tags: []
+  "9684.T":
+    name: スクウェア・エニックス
+    segment: standard
+    sector_tse: 情報・通信
+    tags: []
+  "4755.T":
+    name: 楽天グループ
+    segment: standard
+    sector_tse: サービス業
+    tags: []
+  "2413.T":
+    name: エムスリー
+    segment: standard
+    sector_tse: サービス業
+    tags: []
+  "4307.T":
+    name: 野村総研
+    segment: standard
+    sector_tse: サービス業
+    tags: []
+
+  "4478.T":
+    name: freee
+    segment: growth
+    sector_tse: 情報・通信
+    tags: []
+  "3696.T":
+    name: セレス
+    segment: growth
+    sector_tse: サービス業
+    tags: []
+  "4432.T":
+    name: ウォンテッドリー
+    segment: growth
+    sector_tse: サービス業
+    tags: []
+  "6525.T":
+    name: KOKUSAI ELECTRIC
+    segment: growth
+    sector_tse: 電気機器
+    tags: []
+  "7342.T":
+    name: ウェルスナビ
+    segment: growth
+    sector_tse: サービス業
+    tags: []
+  "5595.T":
+    name: QPSホールディングス
+    segment: growth
+    sector_tse: 情報・通信
+    tags: []
+  "4165.T":
+    name: プラスアルファ
+    segment: growth
+    sector_tse: 情報・通信
+    tags: []
+  "6770.T":
+    name: アルプスアルパイン
+    segment: growth
+    sector_tse: 電気機器
+    tags: []
+  "4443.T":
+    name: Sansan
+    segment: growth
+    sector_tse: 情報・通信
+    tags: []
+  "3923.T":
+    name: ラクス
+    segment: growth
+    sector_tse: 情報・通信
+    tags: []
+
+  "1321.T":
+    name: 日経225連動ETF
+    segment: prime
+    sector_tse: ETF
+    tags: [japan_liquid, etf]

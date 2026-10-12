@@ -27,7 +27,9 @@ class DaytradeProfile(StyleProfile):
         se = bt.get("session_end", "15:55")
         sh, sm = map(int, ss.split(":"))
         eh, em = map(int, se.split(":"))
-        nvda = cfg.get("_nvda", {})
+        from signalforge.config import market_context
+
+        mc = market_context(cfg)
         return cls(
             name="daytrade",
             timeframe=cfg.get("timeframe", "5m"),
@@ -38,7 +40,7 @@ class DaytradeProfile(StyleProfile):
             session_end=time(eh, em),
             force_flat_time=time(h, m),
             max_trades_per_day=bt.get("max_trades_per_day", 3),
-            timezone=nvda.get("timezone", "America/New_York"),
+            timezone=mc.get("timezone", "Asia/Tokyo"),
         )
 
     def apply_session_filter(self, df: pd.DataFrame) -> pd.DataFrame:

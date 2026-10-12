@@ -8,11 +8,13 @@ import pandas as pd
 def resolve_backtest_dates(cfg: dict[str, Any]) -> tuple[pd.Timestamp | None, pd.Timestamp | None]:
     """Return (start, end) timestamps for the evaluation window."""
     bt = cfg.get("backtest", {})
-    nvda = cfg.get("_nvda", {})
+    from signalforge.config import market_context
+
+    mc = market_context(cfg)
     defaults = cfg.get("_defaults", {})
 
-    start_raw = bt.get("start_date") or nvda.get("backtest_start_date") or defaults.get("backtest_start_date")
-    end_raw = bt.get("end_date") or nvda.get("backtest_end_date") or defaults.get("backtest_end_date")
+    start_raw = bt.get("start_date") or mc.get("backtest_start_date") or defaults.get("backtest_start_date")
+    end_raw = bt.get("end_date") or mc.get("backtest_end_date") or defaults.get("backtest_end_date")
 
     start = pd.Timestamp(start_raw) if start_raw else None
     end = pd.Timestamp(end_raw) if end_raw else None
