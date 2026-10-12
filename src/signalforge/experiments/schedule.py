@@ -50,6 +50,7 @@ class ExecutionBudget:
     sleep_seconds_per_ticker: float = 0
     sleep_seconds_per_strategy: float = 0
     ticker_progress_every: int = 100
+    checkpoint_every: int = 50
     parallel_workers: int = 0
     active_start: dt_time | None = None
     active_end: dt_time | None = None
@@ -83,6 +84,7 @@ class ExecutionBudget:
             sleep_seconds_per_ticker=_float("sleep_seconds_per_ticker", 0),
             sleep_seconds_per_strategy=_float("sleep_seconds_per_strategy", 0),
             ticker_progress_every=_int("ticker_progress_every", 100),
+            checkpoint_every=_int("checkpoint_every", 50),
             parallel_workers=_int("parallel_workers", 0),
             active_start=_parse_hhmm(ov.get("active_hours_start", ah.get("start"))),
             active_end=_parse_hhmm(ov.get("active_hours_end", ah.get("end"))),

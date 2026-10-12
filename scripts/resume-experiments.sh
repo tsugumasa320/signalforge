@@ -4,5 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 mkdir -p data/reports
-echo "=== experiments $(date -Iseconds) resume ===" >> data/reports/experiments_run.log
-exec uv run signalforge experiments run --ignore-schedule --workers 8 >> data/reports/experiments_run.log 2>&1
+LOG=data/reports/experiments_run.log
+echo "=== experiments $(date -Iseconds) resume ===" >> "$LOG"
+# 既存 JSON を compact（nested metrics 削除・sidecar 分離）
+uv run signalforge experiments compact >> "$LOG" 2>&1 || true
+uv run signalforge experiments aggregate >> "$LOG" 2>&1 || true
+exec uv run signalforge experiments run --ignore-schedule --workers 8 >> "$LOG" 2>&1

@@ -11,6 +11,7 @@ from typing import Any, Callable
 from signalforge.compare.runner import _aggregate, resolve_strategy_style, run_cohort_backtests
 from signalforge.config import CONFIG_DIR, data_dir, load_yaml
 from signalforge.experiments.schedule import ExecutionBudget
+from signalforge.experiments.storage import load_ticker_rows, persist_strategy_document
 from signalforge.universe.tse_listing import listing_by_ticker, list_tse_tickers
 
 
@@ -28,6 +29,10 @@ def _checkpoint_path(strategy_id: str) -> Path:
     return experiments_dir() / "strategies" / f"{strategy_id}.checkpoint.json"
 
 
+def _checkpoint_tickers_path(strategy_id: str) -> Path:
+    return experiments_dir() / "strategies" / f"{strategy_id}.checkpoint.tickers.json"
+
+
 def _strategy_path(strategy_id: str) -> Path:
     return experiments_dir() / "strategies" / f"{strategy_id}.json"
 
@@ -37,15 +42,32 @@ def _load_checkpoint(strategy_id: str) -> dict[str, Any]:
     if not path.exists():
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        meta = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return {}
+    if not isinstance(meta, dict):
+        return {}
+    side = _checkpoint_tickers_path(strategy_id)
+    if side.exists():
+        try:
+            rows = json.loads(side.read_text(encoding="utf-8"))
+            if isinstance(rows, list):
+                meta["tickers"] = rows
+        except json.JSONDecodeError:
+            pass
+    return meta
 
 
 def _save_checkpoint(strategy_id: str, payload: dict[str, Any]) -> None:
     path = _checkpoint_path(strategy_id)
     path.parent.mkdir(parents=True, exist_ok=True)
+    tickers = payload.pop("tickers", None)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    if tickers is not None:
+        _checkpoint_tickers_path(strategy_id).write_text(
+            json.dumps(tickers, ensure_ascii=False, separators=(",", ":")),
+            encoding="utf-8",
+        )
 
 
 def _is_complete(doc: dict[str, Any], n_target: int) -> bool:
@@ -98,7 +120,6 @@ def _finalize_strategy_doc(
         "n_tickers_target": len(tickers),
         "n_tickers_done": len(enriched),
         "complete": complete,
-        "tickers": enriched,
         "universe": _aggregate(ok),
         "by_segment": _aggregate_group(ok, "segment"),
         "by_sector": _aggregate_group(ok, "sector_tse"),
@@ -127,13 +148,21 @@ def run_strategy_pass(
             doc = json.loads(final_path.read_text(encoding="utf-8"))
             if _is_complete(doc, len(tickers)):
                 return doc
-            if doc.get("tickers"):
-                existing = {**existing, **_rows_to_map(doc["tickers"])}
+            resume_rows = load_ticker_rows(strategy_id, doc)
+            if resume_rows:
+                existing = {**existing, **_rows_to_map(resume_rows)}
 
     def _after_ticker() -> None:
         budget.sleep_after_ticker()
 
+    ck_every = max(1, int(budget.checkpoint_every or 1))
+    last_ck_n = [0]
+
     def _checkpoint(by_sym: dict[str, dict[str, Any]]) -> None:
+        n = len(by_sym)
+        if n < len(tickers) and ck_every > 1 and (n - last_ck_n[0]) < ck_every:
+            return
+        last_ck_n[0] = n
         rows = [by_sym[s] for s in tickers if s in by_sym]
         if not rows:
             return
@@ -142,9 +171,9 @@ def run_strategy_pass(
             strategy_id,
             {
                 "strategy_id": strategy_id,
-                "tickers": enriched,
                 "n_tickers_target": len(tickers),
                 "n_tickers_done": len(enriched),
+                "tickers": enriched,
             },
         )
 
@@ -163,16 +192,21 @@ def run_strategy_pass(
     )
     enriched = _enrich_ticker_rows(block.get("tickers") or [], meta)
     doc = _finalize_strategy_doc(strategy_id, style, tickers, enriched)
-
-    out_path = _strategy_path(strategy_id)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    doc["tickers"] = enriched
+    persist_strategy_document(strategy_id, doc, split_tickers=bool(enriched), compact=True)
     if doc.get("complete"):
-        ck_path = _checkpoint_path(strategy_id)
-        if ck_path.exists():
-            ck_path.unlink()
+        _checkpoint_path(strategy_id).unlink(missing_ok=True)
+        _checkpoint_tickers_path(strategy_id).unlink(missing_ok=True)
     else:
-        _save_checkpoint(strategy_id, {"tickers": enriched, "n_tickers_target": len(tickers)})
+        _save_checkpoint(
+            strategy_id,
+            {
+                "strategy_id": strategy_id,
+                "n_tickers_target": len(tickers),
+                "n_tickers_done": len(enriched),
+                "tickers": enriched,
+            },
+        )
     return doc
 
 
@@ -369,4 +403,4 @@ def default_parallel_workers(override: int = 0) -> int:
     budget = ExecutionBudget.from_config()
     if budget.parallel_workers > 0:
         return budget.parallel_workers
-    return min(8, max(1, (os.cpu_count() or 4)))
+    return max(1, os.cpu_count() or 4)

@@ -74,6 +74,18 @@ Outputs: `data/reports/catalog_backtests.json`, `compare_matrix.json`, `lab_matr
 
 Lab rules: `config/lab/izanami_palette.yaml`. Parity: `docs/izanami_parity.md`.
 
+## TSE experiments (optional long campaign)
+
+```bash
+uv run signalforge experiments run --ignore-schedule --workers 8
+uv run signalforge experiments status
+uv run signalforge experiments compact    # slim JSON + .tickers.json sidecar
+uv run signalforge experiments aggregate
+scripts/resume-experiments.sh             # compact + aggregate + resume
+```
+
+Details: `docs/experiments.md`. Dashboard: **📊 戦略結果 → TSE 実験** (segment heatmap when aggregates exist).
+
 ## Paper trading (forward virtual)
 
 Daily fetch + incremental virtual PnL (not historical backtest):

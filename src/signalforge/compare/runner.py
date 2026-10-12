@@ -4,6 +4,8 @@ import statistics
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
+from signalforge.compare.prep_cache import load_or_prepare_ticker
+from signalforge.config import load_style_config
 from signalforge.pipeline import run_backtest_pipeline
 from signalforge.universe.filters import get_preset, resolve_cohort_tickers
 
@@ -46,20 +48,21 @@ _METRIC_TOP_KEYS = (
 )
 
 
-def _row_from_pipeline_result(sym: str, result: dict[str, Any]) -> dict[str, Any]:
+def _row_from_pipeline_result(sym: str, result: dict[str, Any], *, compact: bool = False) -> dict[str, Any]:
     """Full metric bundles for experiment JSON; top-level keys for aggregators."""
     m = result.get("metrics") or {}
     row: dict[str, Any] = {
         "ticker": sym,
         "error": None,
-        "metrics": m,
-        "metrics_oos": result.get("metrics_oos") or {},
-        "metrics_in_sample": result.get("metrics_in_sample") or {},
         "backtest_window": result.get("backtest_window"),
         "backtest_start": result.get("backtest_start"),
         "backtest_end": result.get("backtest_end"),
         "cost_model": result.get("cost_model"),
     }
+    if not compact:
+        row["metrics"] = m
+        row["metrics_oos"] = result.get("metrics_oos") or {}
+        row["metrics_in_sample"] = result.get("metrics_in_sample") or {}
     for key in _METRIC_TOP_KEYS:
         if key in m:
             row[key] = m[key]
@@ -78,6 +81,12 @@ def _backtest_single_ticker(
 ) -> dict[str, Any]:
     try:
         sym_override = {**(cfg_override or {}), "ticker": sym}
+        prepared = None
+        if bulk_mode:
+            cfg = load_style_config(style)
+            ml_on = bool(cfg.get("ml_filter", {}).get("enabled"))
+            if not ml_on:
+                prepared = load_or_prepare_ticker(style, sym, refresh_data=refresh)
         result = run_backtest_pipeline(
             style,
             strategy_id,
@@ -86,8 +95,9 @@ def _backtest_single_ticker(
             cfg_override=sym_override,
             persist_journal=not bulk_mode,
             slim_return=bulk_mode,
+            prepared_bundle=prepared,
         )
-        return _row_from_pipeline_result(sym, result)
+        return _row_from_pipeline_result(sym, result, compact=bulk_mode)
     except Exception as exc:
         return {"ticker": sym, "error": str(exc)}
 

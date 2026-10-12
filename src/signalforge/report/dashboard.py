@@ -325,7 +325,7 @@ def run_dashboard() -> None:
     pick = render_results_sidebar()
 
     st.title("SignalForge")
-    st.caption("日本株 — **事前バックテスト結果** の閲覧。更新は CLI の `results build`。")
+    st.caption("日本株 — **TSE 実験・事前バックテスト** の閲覧。実行中も完了分が表示されます。")
 
     tab_results, tab_guide, tab_glossary, tab_advanced = st.tabs(
         ["📊 戦略結果", "📚 戦略解説", "📖 用語集", "⚙️ 上級者（再実行）"]

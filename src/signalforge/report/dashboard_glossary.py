@@ -101,6 +101,7 @@ def render_sidebar_glossary_link() -> None:
                 st.markdown(f"- **{term}**: {desc}")
 
 
+@st.fragment
 def render_glossary_tab() -> None:
     st.subheader("📖 用語集")
     st.markdown(

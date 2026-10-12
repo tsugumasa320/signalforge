@@ -191,10 +191,14 @@ def start(port: int = 8501, *, open_browser: bool = True, force: bool = False) -
 
     if force:
         stop()
-        time.sleep(0.5)
+        for _ in range(40):
+            if port_free(port):
+                break
+            time.sleep(0.25)
 
     warmup_native_libs()
-    port = pick_port(port)
+    if not port_free(port):
+        port = pick_port(port)
     url = f"http://127.0.0.1:{port}"
     root = _root()
     env = os.environ.copy()

@@ -21,13 +21,32 @@ uv run signalforge experiments plan
 uv run signalforge experiments run          # 全戦略・全銘柄（再開可能）
 uv run signalforge experiments status
 uv run signalforge experiments aggregate  # JSON のみから矩阵再生成
+uv run signalforge experiments compact    # 既存 JSON を slim 化 + 銘柄 sidecar 分離
+```
+
+### 静的サイト（CI 向け）
+
+```bash
+uv run signalforge dashboard export --guides-only --output _site
+```
+
+### 夜間自動再開（macOS launchd）
+
+```bash
+chmod +x scripts/install-experiments-launchd.sh
+./scripts/install-experiments-launchd.sh
+# 手動: launchctl start com.signalforge.experiments
+```
+
+Mac がスリープすると BT は止まります。夜間実行時は電源設定でスリープ無効、または `caffeinate -s` でラップしてください。
 ```
 
 ## 出力
 
 | ファイル | 内容 |
 |---------|------|
-| `data/reports/experiments/strategies/<id>.json` | 銘柄別 + segment/sector 集計 |
+| `data/reports/experiments/strategies/<id>.json` | 集計メタ（universe / segment / sector） |
+| `strategies/<id>.tickers.json` | 銘柄別行（本体 JSON から分離・ダッシュボードは必要時のみ読込） |
 | `matrix_segment.json` | 戦略 × 市場区分 |
 | `matrix_sector.json` | 戦略 × 33業種 |
 | `summary.json` | 全銘柄ランキング |
@@ -39,7 +58,7 @@ uv run signalforge experiments aggregate  # JSON のみから矩阵再生成
 
 | やめること | 残すこと |
 |------------|----------|
-| 銘柄ごとの `data/reports/journal_*.json`（47 万ファイル級） | 各銘柄の **metrics / metrics_oos / metrics_in_sample** 一式 |
+| 銘柄ごとの `data/reports/journal_*.json`（47 万ファイル級） | 各銘柄の **PF / Win率 / trades 等トップレベル指標**（nested metrics 三重は compact で削除） |
 | メモリ上の trades・equity・df の保持 | `strategies/<id>.json` の銘柄別行 + segment/sector/universe 集計 |
 
 ダッシュボードで **1 銘柄を詳細に再実行** するときは従来どおりジャーナル付き。一括結果の分析情報は **実験 JSON に集約** されます。
@@ -72,6 +91,11 @@ uv run signalforge experiments run --max-minutes 120   # 2時間で一旦停止�
 
 - `parallel_workers: 0` → CPU に応じて自動（最大 8）
 - `sleep_seconds_per_*` → API 負荷調整用（0 ならスリープなし）
+- `checkpoint_every: 50` → checkpoint JSON の書き込み間隔（I/O 軽減）
+
+## 実行順序
+
+`catalog:all` では **ML 重いスタイル（swing_champion / swing_high_winrate）を後回し** に並べます（`experiments/order.py`）。通常スイング・デイトレを先に完了させます。
 
 ## 所要時間の目安
 

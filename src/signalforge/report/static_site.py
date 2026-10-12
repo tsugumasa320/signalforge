@@ -17,7 +17,8 @@ from signalforge.paper.matrix import PAPER_SIMULATIONS, STYLE_LABELS
 from signalforge.pipeline import run_backtest_pipeline
 from signalforge.report.charts import plot_strategy_comparison
 from signalforge.report.dashboard_components import oos_metrics_from_trades
-from signalforge.report.dashboard_strategies import STRATEGY_GUIDES, STRATEGY_LABELS
+from signalforge.config import load_web_catalog
+from signalforge.report.strategy_guide_builder import resolve_strategy_guide, strategy_display_title
 from signalforge.report.static_dashboard import export_paper_page, paper_summary_row
 from signalforge.report.static_html import fig_to_html_block, wrap_page
 from signalforge.report.strategy_visuals import plot_strategy_demo
@@ -54,7 +55,7 @@ def _run_backtest_row(style: str, strategy: str) -> dict[str, Any] | None:
         "style": style,
         "strategy": strategy,
         "style_label": STYLE_LABELS.get(style, style),
-        "strategy_label": STRATEGY_LABELS.get(strategy, strategy),
+        "strategy_label": strategy_display_title(strategy),
         "scope": scope,
         "profit_factor": m.get("profit_factor", 0),
         "win_rate": m.get("win_rate", 0),
@@ -75,19 +76,30 @@ def collect_backtest_rows() -> list[dict[str, Any]]:
     return rows
 
 
+def _implemented_catalog_ids() -> list[str]:
+    return sorted(
+        str(s["id"])
+        for s in load_web_catalog().get("strategies", [])
+        if s.get("implemented") and s.get("id")
+    )
+
+
 def export_strategy_guide(output_dir: Path, strategy_key: str) -> Path:
-    guide = STRATEGY_GUIDES[strategy_key]
+    guide = resolve_strategy_guide(strategy_key)
     fig = plot_strategy_demo(strategy_key)
     chart_html = ""
     if fig is not None:
         chart_html = fig_to_html_block(fig, include_plotlyjs="cdn", div_id="strategy-demo")
 
+    def _esc(text: object) -> str:
+        return escape(str(text) if text is not None else "")
+
     def _list_items(items: list[str]) -> str:
-        return "<ul class='compact'>" + "".join(f"<li>{escape(i)}</li>" for i in items) + "</ul>"
+        return "<ul class='compact'>" + "".join(f"<li>{_esc(i)}</li>" for i in items if i) + "</ul>"
 
     sell_block = ""
     if guide.get("signal_sell"):
-        sell_block = f'<p class="negative"><strong>🔴 売り:</strong> {escape(guide["signal_sell"])}</p>'
+        sell_block = f'<p class="negative"><strong>🔴 売り:</strong> {_esc(guide["signal_sell"])}</p>'
     else:
         sell_block = '<p class="muted">🔴 売りシグナル: なし（買い専用）</p>'
 
@@ -96,10 +108,10 @@ def export_strategy_guide(output_dir: Path, strategy_key: str) -> Path:
     cons_html = _list_items(guide["cons"])
 
     body = f"""
-    <div class="info-box">{escape(guide["summary"])}</div>
-    <section><h2>考え方</h2><p>{escape(guide["concept"])}</p></section>
+    <div class="info-box">{_esc(guide.get("summary"))}</div>
+    <section><h2>考え方</h2><p>{_esc(guide.get("concept"))}</p></section>
     <div class="grid-2">
-      <section><h2>🟢 買いシグナル</h2><p>{escape(guide.get("signal_buy", "—"))}</p>{_list_items(guide["entry_long"])}</section>
+      <section><h2>🟢 買いシグナル</h2><p>{_esc(guide.get("signal_buy") or "—")}</p>{_list_items(guide["entry_long"])}</section>
       <section><h2>🔴 売りシグナル</h2>{sell_block}{_list_items(guide.get("entry_short", [])) if guide.get("entry_short") else ""}</section>
     </div>
     {chart_html}
@@ -111,9 +123,20 @@ def export_strategy_guide(output_dir: Path, strategy_key: str) -> Path:
       <section><h2>✅ 長所</h2>{pros_html}</section>
       <section><h2>⚠️ 短所</h2>{cons_html}</section>
     </div>
-    <section><h2>🎯 向いている相場</h2><p>{escape(guide["market"])}</p></section>
-    <section><h2>💡 使い方</h2><p>{escape(guide["tips"])}</p></section>
+    <section><h2>🎯 向いている相場</h2><p>{_esc(guide.get("market"))}</p></section>
+    <section><h2>💡 使い方</h2><p>{_esc(guide.get("tips"))}</p></section>
     """
+    sources = guide.get("sources") or []
+    if sources:
+        src_items = []
+        for src in sources[:30]:
+            title = escape(str(src.get("title") or src.get("url") or "—"))
+            url = src.get("url")
+            if url:
+                src_items.append(f'<li><a href="{escape(str(url))}">{title}</a></li>')
+            else:
+                src_items.append(f"<li>{title}</li>")
+        body += f"<section><h2>参考ソース</h2><ul class='compact'>{''.join(src_items)}</ul></section>"
 
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = wrap_page(
@@ -206,10 +229,13 @@ def export_hub(
         fig = plot_strategy_comparison(swing_bt, metric="profit_factor")
         chart_html = fig_to_html_block(fig, include_plotlyjs="cdn", div_id="bt-compare")
 
+    guide_ids = _implemented_catalog_ids()
     guide_links = "".join(
-        f'<a href="guide/{k}.html">{escape(STRATEGY_LABELS[k])}</a> '
-        for k in STRATEGY_GUIDES
+        f'<a href="guide/{k}.html">{escape(strategy_display_title(k))}</a> '
+        for k in guide_ids[:40]
     )
+    if len(guide_ids) > 40:
+        guide_links += f'<span class="muted"> …他 {len(guide_ids) - 40} 件（guide/ 配下）</span>'
 
     body = f"""
     <div class="info-box">
@@ -231,7 +257,7 @@ def export_hub(
     </section>
 
     <section id="guides">
-      <h2>📚 戦略解説（6 戦略）</h2>
+      <h2>📚 戦略解説（{len(guide_ids)} 戦略）</h2>
       <p>{guide_links}</p>
     </section>
     """
@@ -250,8 +276,44 @@ def export_hub(
     return path
 
 
-def export_full_site(output_dir: Path, *, refresh: bool = False) -> Path:
+def export_guides_index(output_dir: Path) -> Path:
+    guide_ids = _implemented_catalog_ids()
+    links = "".join(
+        f'<li><a href="{gid}.html">{escape(strategy_display_title(gid))}</a> '
+        f'<span class="muted">({gid})</span></li>'
+        for gid in guide_ids
+    )
+    body = f"<section><h1>戦略解説一覧</h1><ul class='compact'>{links}</ul></section>"
+    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    html = wrap_page(
+        title="戦略解説一覧",
+        subtitle=f"{len(guide_ids)} 戦略",
+        body=body,
+        generated=generated,
+        nav_active="guides",
+        depth=1,
+    )
+    guide_dir = output_dir / "guide"
+    guide_dir.mkdir(parents=True, exist_ok=True)
+    path = guide_dir / "index.html"
+    path.write_text(html, encoding="utf-8")
+    return path
+
+
+def export_guides_only(output_dir: Path) -> Path:
+    """Export strategy guide HTML only (fast CI / docs refresh)."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for strategy_key in _implemented_catalog_ids():
+        export_strategy_guide(output_dir, strategy_key)
+    (output_dir / ".nojekyll").touch()
+    return export_guides_index(output_dir)
+
+
+def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bool = False) -> Path:
     """Build complete GitHub Pages site."""
+    if guides_only:
+        return export_guides_only(output_dir)
+
     output_dir.mkdir(parents=True, exist_ok=True)
 
     paper_rows: list[dict] = []
@@ -261,8 +323,9 @@ def export_full_site(output_dir: Path, *, refresh: bool = False) -> Path:
         if row:
             paper_rows.append(row)
 
-    for strategy_key in STRATEGY_GUIDES:
+    for strategy_key in _implemented_catalog_ids():
         export_strategy_guide(output_dir, strategy_key)
+    export_guides_index(output_dir)
 
     backtest_rows = collect_backtest_rows()
     hub = export_hub(output_dir, paper_rows, backtest_rows)

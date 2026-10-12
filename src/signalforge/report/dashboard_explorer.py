@@ -397,6 +397,7 @@ def _render_live_runner() -> None:
             st.dataframe(pdf, width="stretch", hide_index=True)
 
 
+@st.fragment
 def render_explorer_tab(*, advanced: bool = False) -> None:
     """Browse saved reports; advanced=True runs live re-run only (avoid duplicate widget keys)."""
     if advanced:

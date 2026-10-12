@@ -28,6 +28,9 @@ execution:
   # ログの銘柄進捗間隔
   ticker_progress_every: 100
 
+  # checkpoint JSON の書き込み間隔（銘柄数）。毎銘柄だと I/O が重い
+  checkpoint_every: 50
+
 # cron / launchd に載せる例（自動実行は OS 側で設定）
 scheduling_hints:
   description: 夜間に少しずつ回す例

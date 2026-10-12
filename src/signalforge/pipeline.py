@@ -44,6 +44,7 @@ def run_backtest_pipeline(
     *,
     persist_journal: bool = True,
     slim_return: bool = False,
+    prepared_bundle: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     cfg = load_style_config(style)
     if cfg_override:
@@ -70,46 +71,59 @@ def run_backtest_pipeline(
     timeframe = cfg.get("timeframe", "1d")
     data_source = resolve_data_source(style, cfg)
 
-    fetcher = MarketDataFetcher(data_source=data_source)
     cache = ParquetCache()
+    fetcher = MarketDataFetcher(data_source=data_source)
 
-    try:
-        df = cache.load_or_fetch(ticker, timeframe, fetcher, refresh=refresh_data)
-    except Exception:
-        if data_source == "alpaca":
-            fetcher = MarketDataFetcher(data_source="yfinance")
+    if prepared_bundle is not None:
+        df = prepared_bundle["df"]
+        bt_start = prepared_bundle.get("bt_start")
+        bt_end = prepared_bundle.get("bt_end")
+        data_source = str(prepared_bundle.get("data_source") or data_source)
+        intraday = style == "daytrade" or style.startswith("daytrade")
+        tz = mc.get("timezone", "Asia/Tokyo")
+        engine_ind = IndicatorEngine(timezone=tz)
+    else:
+        try:
             df = cache.load_or_fetch(ticker, timeframe, fetcher, refresh=refresh_data)
-        else:
-            raise
+        except Exception:
+            if data_source == "alpaca":
+                fetcher = MarketDataFetcher(data_source="yfinance")
+                df = cache.load_or_fetch(ticker, timeframe, fetcher, refresh=refresh_data)
+            else:
+                raise
 
-    bt_start, bt_end = resolve_backtest_dates(cfg)
-    df = slice_for_indicators(df, bt_start)
+        bt_start, bt_end = resolve_backtest_dates(cfg)
+        df = slice_for_indicators(df, bt_start)
 
-    intraday = style == "daytrade" or style.startswith("daytrade")
-    tz = mc.get("timezone", "Asia/Tokyo")
-    engine_ind = IndicatorEngine(timezone=tz)
-    df = engine_ind.compute(df, intraday=intraday)
-    qqq_df, soxx_df = load_benchmark_pair(
-        cache,
-        fetcher,
-        corr,
-        timeframe,
-        refresh=refresh_data,
-        engine_ind=engine_ind,
-        intraday=intraday,
-        bt_start=bt_start,
-        bt_end=bt_end,
-    )
-
-    df = trim_to_backtest_window(df, bt_start, bt_end)
-
-    profile = StyleProfile.from_config(cfg)
-    strategy = get_strategy(strategy_name, cfg)
-    signals = strategy.generate_signals(df)
+        intraday = style == "daytrade" or style.startswith("daytrade")
+        tz = mc.get("timezone", "Asia/Tokyo")
+        engine_ind = IndicatorEngine(timezone=tz)
+        df = engine_ind.compute(df, intraday=intraday)
 
     ml_cfg = cfg.get("ml_filter", {}).copy()
     if ml_filter or ml_cfg.get("enabled"):
         ml_cfg["enabled"] = True
+
+    qqq_df, soxx_df = None, None
+    if ml_cfg.get("enabled"):
+        qqq_df, soxx_df = load_benchmark_pair(
+            cache,
+            fetcher,
+            corr,
+            timeframe,
+            refresh=refresh_data,
+            engine_ind=engine_ind,
+            intraday=intraday,
+            bt_start=bt_start,
+            bt_end=bt_end,
+        )
+
+    if prepared_bundle is None:
+        df = trim_to_backtest_window(df, bt_start, bt_end)
+
+    profile = StyleProfile.from_config(cfg)
+    strategy = get_strategy(strategy_name, cfg)
+    signals = strategy.generate_signals(df)
 
     meta: MetaLabelFilter | None = None
     ml_report: dict[str, Any] = {"trained": False}

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Callable
+
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -353,6 +355,152 @@ def plot_orb_demo() -> go.Figure:
     return fig
 
 
+def _plot_trend_entry_demo(title: str, subtitle: str, *, entry_i: int = 38) -> go.Figure:
+    n = 50
+    idx = pd.date_range("2024-05-01", periods=n, freq="D")
+    t = np.arange(n)
+    close = 100 + 0.4 * t + 1.5 * np.sin(t / 5)
+    ema_f = pd.Series(close).ewm(span=20).mean().values
+    ema_s = pd.Series(close).ewm(span=50).mean().values
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=idx, y=close, name="終値", line=dict(color="#e2e8f0", width=2)))
+    fig.add_trace(go.Scatter(x=idx, y=ema_f, name="短期 EMA", line=dict(color=C_EMA, width=1.5)))
+    fig.add_trace(go.Scatter(x=idx, y=ema_s, name="長期 EMA", line=dict(color=C_EMA200, width=1.5)))
+    fig.add_trace(
+        go.Scatter(
+            x=[idx[entry_i]],
+            y=[close[entry_i]],
+            mode="markers+text",
+            text=["買い"],
+            textposition="top center",
+            marker=dict(symbol="triangle-up", size=16, color=C_ENTRY, line=dict(width=2, color="white")),
+            name="🟢 買いシグナル",
+        )
+    )
+    _annotate(fig, idx[entry_i], close[entry_i], subtitle, ax=45, ay=-45, color=C_ENTRY)
+    _base_layout(fig, title)
+    return fig
+
+
+def plot_ma_cross_template_demo() -> go.Figure:
+    return _plot_trend_entry_demo("移動平均クロス（テンプレート）", "短期 EMA が長期 EMA を上抜け")
+
+
+def plot_rsi_oversold_template_demo() -> go.Figure:
+    n = 45
+    idx = pd.date_range("2024-06-01", periods=n, freq="D")
+    close = 100 + np.cumsum(np.random.default_rng(3).normal(0.1, 1.2, n))
+    rsi = 30 + 40 * np.sin(np.linspace(0, 3, n))
+    rsi[28:32] = [28, 26, 32, 35]
+    entry_i = 31
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.65, 0.35], vertical_spacing=0.08)
+    fig.add_trace(go.Scatter(x=idx, y=close, name="終値", line=dict(color="#e2e8f0", width=2)), row=1, col=1)
+    fig.add_trace(go.Scatter(x=idx, y=rsi, name="RSI", line=dict(color=C_SIGNAL, width=2)), row=2, col=1)
+    fig.add_hline(y=30, line_dash="dot", line_color="#94a3b8", row=2, col=1)
+    fig.add_trace(
+        go.Scatter(
+            x=[idx[entry_i]],
+            y=[close[entry_i]],
+            mode="markers+text",
+            text=["買い"],
+            textposition="top center",
+            marker=dict(symbol="triangle-up", size=16, color=C_ENTRY),
+            name="🟢 買い",
+        ),
+        row=1,
+        col=1,
+    )
+    _base_layout(fig, "RSI 売られ過ぎリクレイム（テンプレート）", height=460)
+    return fig
+
+
+def plot_breakout_template_demo() -> go.Figure:
+    n = 48
+    idx = pd.date_range("2024-08-01", periods=n, freq="D")
+    close = np.concatenate([100 + np.random.default_rng(1).normal(0, 0.4, 35), np.linspace(100, 106, 13)])
+    high_line = np.max(close[:35])
+    entry_i = 36
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=idx, y=close, name="終値", line=dict(color="#e2e8f0", width=2)))
+    fig.add_hline(y=high_line, line_dash="dash", line_color=C_ENTRY, annotation_text="レンジ高値")
+    fig.add_trace(
+        go.Scatter(
+            x=[idx[entry_i]],
+            y=[close[entry_i]],
+            mode="markers+text",
+            text=["買い"],
+            textposition="top center",
+            marker=dict(symbol="triangle-up", size=16, color=C_ENTRY),
+            name="🟢 ブレイク",
+        )
+    )
+    _base_layout(fig, "高値・出来高ブレイク（テンプレート）")
+    return fig
+
+
+def plot_bb_rsi_template_demo() -> go.Figure:
+    fig = plot_bb_squeeze_demo()
+    fig.update_layout(title="BB + RSI（テンプレート — バンド反発イメージ）")
+    return fig
+
+
+def plot_ichimoku_template_demo() -> go.Figure:
+    return _plot_trend_entry_demo("一目・トレンド（テンプレート）", "雲上 / 転換線クロス等のイメージ", entry_i=40)
+
+
+TEMPLATE_PLOT_FNS: dict[str, Callable[[], go.Figure]] = {
+    "ma_cross": plot_ma_cross_template_demo,
+    "momentum_ema": plot_ma_cross_template_demo,
+    "swing_pullback_ema": plot_ema_pullback_demo,
+    "ema_pullback_proxy": plot_ema_pullback_demo,
+    "perfect_order_pullback": plot_ema_pullback_demo,
+    "rsi_oversold": plot_rsi_oversold_template_demo,
+    "mean_reversion_rsi": plot_rsi_oversold_template_demo,
+    "rsi_momentum": plot_rsi_oversold_template_demo,
+    "volume_breakout": plot_breakout_template_demo,
+    "donchian_breakout": plot_breakout_template_demo,
+    "high_breakout_rsi": plot_breakout_template_demo,
+    "bb_rsi": plot_bb_rsi_template_demo,
+    "bb_squeeze_proxy": plot_bb_squeeze_demo,
+    "adx_trend": plot_ma_cross_template_demo,
+    "macd_histogram_reversal": plot_macd_cross_demo,
+    "combo_macd_rsi": plot_macd_cross_demo,
+    "combo_macd_rsi_ichimoku": plot_ichimoku_template_demo,
+    "ema200_filter_macd": plot_macd_cross_demo,
+    "builtin_macd": plot_macd_cross_demo,
+    "ichimoku_kumo_break": plot_ichimoku_template_demo,
+    "ichimoku_sanyaku": plot_ichimoku_template_demo,
+    "ichimoku_tk_cross": plot_ichimoku_template_demo,
+    "ichimoku_kijun_pullback": plot_ichimoku_template_demo,
+    "gap_up": plot_breakout_template_demo,
+    "gap_fill_reversal": plot_rsi_oversold_template_demo,
+    "kairi_mean_reversion": plot_rsi_oversold_template_demo,
+    "vwap_proxy_daily": plot_vwap_ema_demo,
+    "heikin_ashi_trend": plot_ma_cross_template_demo,
+    "cci_cross": plot_ma_cross_template_demo,
+    "three_bar_reversal": plot_breakout_template_demo,
+}
+
+BUILTIN_PLOT_ALIASES = {
+    "ma_golden_cross": plot_ma_cross_template_demo,
+    "rsi_reversal": plot_rsi_oversold_template_demo,
+}
+
+
+def _resolve_template_plot(strategy_key: str):
+    from signalforge.config import load_implementation_map
+
+    if strategy_key in BUILTIN_PLOT_ALIASES:
+        return BUILTIN_PLOT_ALIASES[strategy_key]
+    spec = (load_implementation_map().get("strategies") or {}).get(strategy_key) or {}
+    if spec.get("builtin") in PLOT_FNS:
+        return PLOT_FNS[spec["builtin"]]
+    tpl = spec.get("template")
+    if tpl == "builtin_macd":
+        tpl = "ema200_filter_macd"
+    return TEMPLATE_PLOT_FNS.get(str(tpl or ""))
+
+
 VISUAL_CHECKS_LONG: dict[str, list[tuple[str, str, str]]] = {
     "macd_cross": [
         ("①", "トレンド", "終値 > EMA50/200"),
@@ -423,7 +571,7 @@ PLOT_FNS = {
 
 
 def plot_strategy_demo(strategy_key: str) -> go.Figure | None:
-    fn = PLOT_FNS.get(strategy_key)
+    fn = PLOT_FNS.get(strategy_key) or _resolve_template_plot(strategy_key)
     return fn() if fn else None
 
 

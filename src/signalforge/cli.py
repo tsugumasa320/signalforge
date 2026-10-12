@@ -198,6 +198,11 @@ def _parse_strategy_ids(spec: str, style_filter: str | None, limit: int) -> list
                     ids.append(s["id"])
         if limit > 0:
             ids = ids[:limit]
+        if want_style is None and spec.split(":", 1)[1].strip() in ("all", ""):
+            from signalforge.experiments.order import sort_strategies_for_campaign
+
+            cat_by_id = {s["id"]: s for s in load_web_catalog().get("strategies", []) if s.get("id")}
+            ids = sort_strategies_for_campaign(ids, cat_by_id)
         return ids
     ids = [x.strip() for x in spec.split(",") if x.strip()]
     if limit > 0:
@@ -1145,17 +1150,36 @@ def experiments_plan_cmd() -> None:
 @experiments.command("status")
 def experiments_status_cmd() -> None:
     """Progress of the TSE experiment campaign."""
-    from signalforge.experiments.runner import experiments_dir
+    from signalforge.experiments.scan import scan_campaign_progress
 
-    man = experiments_dir() / "manifest.json"
-    strat_dir = experiments_dir() / "strategies"
-    n_files = len(list(strat_dir.glob("*.json"))) if strat_dir.is_dir() else 0
-    if man.exists():
-        doc = json.loads(man.read_text(encoding="utf-8"))
-        click.echo(json.dumps(doc, ensure_ascii=False, indent=2))
-    else:
+    scan = scan_campaign_progress()
+    n_done = len(scan["complete"])
+    n_plan = int(scan["total_planned"])
+    pool = scan.get("n_tickers_pool") or "—"
+    click.echo(f"TSE 実験: 完了戦略 {n_done} / {n_plan}  ·  銘柄プール {pool}")
+    if scan["complete"]:
+        click.echo("完了（median PF 上位 5）:")
+        for row in scan["complete"][:5]:
+            pf = row.get("median_pf")
+            pf_s = f"{float(pf):.2f}" if pf is not None else "—"
+            click.echo(f"  · {row['strategy_id']}: median PF {pf_s}")
+    if scan["in_progress"]:
+        click.echo("実行中・途中:")
+        for row in scan["in_progress"]:
+            tgt = max(1, int(row.get("n_target") or 1))
+            done = int(row.get("n_done") or 0)
+            pct = 100.0 * done / tgt
+            tag = " ← 実行中" if row.get("active") else "（checkpoint 保留）"
+            click.echo(f"  · {row['strategy_id']}: {done}/{tgt} ({pct:.1f}%){tag}")
+    man = scan.get("manifest") or {}
+    if man.get("finished_at"):
+        click.echo(f"\n直近 manifest（{man.get('finished_at')}）:")
+        click.echo(
+            f"  new={man.get('completed')} skip={man.get('skipped_complete')} "
+            f"fail={man.get('failed')} early_stop={man.get('stopped_early', 0)}"
+        )
+    elif not scan["complete"] and not scan["in_progress"]:
         click.echo("未実行（experiments run）")
-    click.echo(f"Per-strategy files: {n_files}")
 
 
 @experiments.command("schedule")
@@ -1254,6 +1278,36 @@ def experiments_run(
         f"fail={man['failed']} early_stop={man.get('stopped_early', 0)}"
     )
     click.echo(f"  manifest: {experiments_dir() / 'manifest.json'}")
+
+
+@experiments.command("compact")
+@click.option("--split-tickers/--inline-tickers", default=True, help="銘柄行を .tickers.json に分離")
+@click.option("--strategy", "only_strategy", default=None, help="1 戦略だけ処理")
+def experiments_compact_cmd(split_tickers: bool, only_strategy: str | None) -> None:
+    """既存 strategy JSON を compact 化（nested metrics 削除・sidecar 分離）。"""
+    from signalforge.experiments.migrate_checkpoint import migrate_oversized_checkpoints
+    from signalforge.experiments.storage import compact_strategy_file
+
+    ck = migrate_oversized_checkpoints()
+    if ck:
+        click.echo(f"checkpoint 分離: {', '.join(ck)}")
+
+    strat_dir = experiments_dir() / "strategies"
+    if not strat_dir.is_dir():
+        raise click.ClickException("experiments/strategies がありません")
+    paths = sorted(strat_dir.glob("*.json"))
+    paths = [p for p in paths if not p.name.endswith(".tickers.json") and not p.name.endswith(".checkpoint.json")]
+    if only_strategy:
+        paths = [p for p in paths if p.stem == only_strategy]
+    if not paths:
+        click.echo("対象ファイルなし")
+        return
+    total_saved = 0
+    for path in paths:
+        n, saved = compact_strategy_file(path, split_tickers=split_tickers)
+        total_saved += saved
+        click.echo(f"  {path.name}: {n} tickers, ~{saved // 1024} KB 削減")
+    click.echo(f"✓ {len(paths)} ファイル処理 · 合計 ~{total_saved // (1024 * 1024)} MB 削減")
 
 
 @experiments.command("aggregate")
@@ -1467,7 +1521,14 @@ def dashboard_run(port: int, no_browser: bool) -> None:
 @click.option("--style", default=None, help="Export single strategy only (legacy)")
 @click.option("--strategy", default=None)
 @click.option("--refresh/--no-refresh", default=False, help="Re-fetch market data before export")
-def dashboard_export(output: str, style: str | None, strategy: str | None, refresh: bool) -> None:
+@click.option("--guides-only", is_flag=True, help="戦略解説 HTML のみ（Paper/BT 省略）")
+def dashboard_export(
+    output: str,
+    style: str | None,
+    strategy: str | None,
+    refresh: bool,
+    guides_only: bool,
+) -> None:
     """Export static HTML site (hub + all strategies) for GitHub Pages."""
     out = Path(output)
     if style:
@@ -1484,8 +1545,11 @@ def dashboard_export(output: str, style: str | None, strategy: str | None, refre
 
     from signalforge.report.static_site import export_full_site
 
-    path = export_full_site(out, refresh=refresh)
-    click.echo(f"✅ 統合ダッシュボード: {path.resolve()}")
+    path = export_full_site(out, refresh=refresh, guides_only=guides_only)
+    if guides_only:
+        click.echo(f"✅ 戦略解説のみ: {path.resolve()}")
+    else:
+        click.echo(f"✅ 統合ダッシュボード: {path.resolve()}")
     click.echo(f"   Paper: {len(list((out / 'paper').glob('*.html')))} ページ")
     click.echo(f"   戦略解説: {len(list((out / 'guide').glob('*.html')))} ページ")
 

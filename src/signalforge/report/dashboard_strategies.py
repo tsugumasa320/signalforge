@@ -6,6 +6,8 @@ from typing import Any
 
 import streamlit as st
 
+from signalforge.config import load_web_catalog
+from signalforge.report.strategy_guide_builder import resolve_strategy_guide
 from signalforge.report.strategy_visuals import plot_strategy_demo, render_check_legend
 
 SIGNAL_LEGEND = "▲ 緑 = 買いシグナル　▼ 赤 = 売りシグナル（図はイメージ）"
@@ -271,51 +273,32 @@ STYLE_STRATEGY_MAP: dict[str, list[str]] = {
 
 STRATEGY_LABELS: dict[str, str] = {k: v["title"] for k, v in STRATEGY_GUIDES.items()}
 
+_STYLE_LABELS = {
+    "swing": "スイング（日足）",
+    "swing_high_winrate": "スイング・高勝率",
+    "swing_champion": "Champion プリセット",
+    "daytrade": "デイトレ（5分足）",
+}
 
-def render_strategies_tab() -> None:
-    st.subheader("📚 戦略解説")
-    st.markdown(
-        "SignalForge に実装されている **6 つの売買戦略** を、エントリー条件・イジット・向いている相場まで"
-        "詳しく解説します。サイドバーで選ぶ戦略名と対応しています。"
-    )
 
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        style_filter = st.selectbox(
-            "スタイルで絞り込み",
-            ["すべて", "swing", "swing_high_winrate", "daytrade"],
-            format_func=lambda x: {
-                "すべて": "すべて",
-                "swing": "スイング（日足）",
-                "swing_high_winrate": "スイング・高勝率",
-                "daytrade": "デイトレ（5分足）",
-            }.get(x, x),
-            key="strategy_guide_style",
-        )
-        if style_filter == "すべて":
-            options = list(STRATEGY_GUIDES.keys())
-        else:
-            options = STYLE_STRATEGY_MAP.get(style_filter, [])
+def _catalog_entries() -> list[dict[str, Any]]:
+    rows = [s for s in load_web_catalog().get("strategies", []) if s.get("implemented")]
+    return sorted(rows, key=lambda s: (str(s.get("style") or ""), str(s.get("name") or s.get("id") or "")))
 
-        strategy_key = st.radio(
-            "戦略を選択",
-            options,
-            format_func=lambda k: STRATEGY_LABELS.get(k, k),
-            key="strategy_guide_pick",
-        )
 
-    guide = STRATEGY_GUIDES[strategy_key]
-    with col2:
-        st.markdown(f"### {guide['title']}")
-        st.caption(f"**{guide['style']}**  |  キー: `{strategy_key}`")
-        st.info(guide["summary"])
+def _catalog_by_id() -> dict[str, dict[str, Any]]:
+    return {str(s["id"]): s for s in _catalog_entries() if s.get("id")}
 
+
+def _render_full_strategy_guide(strategy_key: str, guide: StrategyGuide) -> None:
+    kind = "図解付きガイド" if strategy_key in STRATEGY_GUIDES else "テンプレート解説（自動）"
+    st.markdown(f"### {guide['title']}")
+    st.caption(f"**{guide['style']}**  |  キー: `{strategy_key}` · **{kind}**")
+    st.info(guide["summary"])
     st.markdown("#### 考え方")
     st.write(guide["concept"])
-
     st.markdown("#### 📊 判断ポイント（図解）")
     st.caption(SIGNAL_LEGEND)
-
     sb1, sb2 = st.columns(2)
     with sb1:
         st.success(f"**🟢 買いシグナル:** {guide.get('signal_buy', '—')}")
@@ -325,14 +308,14 @@ def render_strategies_tab() -> None:
             st.error(f"**🔴 売りシグナル:** {sell}")
         else:
             st.warning("**🔴 売りシグナル:** なし（この戦略は買い専用）")
-
-    fig = plot_strategy_demo(strategy_key)
-    if fig is not None:
-        render_check_legend(strategy_key)
-        st.plotly_chart(fig, width="stretch", key=f"strategy_visual_{strategy_key}")
-    else:
-        st.info("この戦略の図解は準備中です。")
-
+    default_chart = strategy_key in STRATEGY_GUIDES
+    if st.checkbox("図解チャートを表示（Plotly）", value=default_chart, key=f"show_chart_{strategy_key}"):
+        fig = plot_strategy_demo(strategy_key)
+        if fig is not None:
+            render_check_legend(strategy_key)
+            st.plotly_chart(fig, width="stretch", key=f"strategy_visual_{strategy_key}")
+        else:
+            st.info("この戦略の図解は準備中です。")
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("**🟢 買いシグナル — 詳細条件**")
@@ -345,24 +328,17 @@ def render_strategies_tab() -> None:
                 st.markdown(f"- {rule}")
         else:
             st.caption("売りシグナルは発生しません。")
-
     c3, c4 = st.columns(2)
     with c3:
-        st.markdown("**🚪 イグジット（決済）**")
+        st.markdown("**🚪 エグジット（決済）**")
         for rule in guide["exit"]:
             st.markdown(f"- {rule}")
     with c4:
-        st.markdown("**📌 シグナルとポジションの関係**")
-        st.caption(
-            "買いシグナル → ロング（株を買って値上がりで儲ける）\n\n"
-            "売りシグナル → ショート（空売りして値下がりで儲ける）\n\n"
-            "バックテストの「▲」「▼」マーカーと対応しています。"
-        )
-
+        st.markdown("**📌 シグナルとポジション**")
+        st.caption("買い → ロング / 売り → ショート。BT の ▲▼ と対応。")
     with st.expander("⚙️ 主なパラメータ", expanded=False):
         for name, desc in guide["params"].items():
             st.markdown(f"- **{name}**: {desc}")
-
     c5, c6, c7 = st.columns(3)
     with c5:
         st.markdown("**🎯 向いている相場**")
@@ -375,20 +351,103 @@ def render_strategies_tab() -> None:
         st.markdown("**⚠️ 短所**")
         for c in guide["cons"]:
             st.markdown(f"- {c}")
+    sources = guide.get("sources") or []
+    if sources:
+        with st.expander(f"参考ソース（{len(sources)} 件）", expanded=False):
+            for src in sources[:25]:
+                title = src.get("title") or src.get("url") or "—"
+                url = src.get("url")
+                if url:
+                    st.markdown(f"- [{title}]({url})")
+                else:
+                    st.markdown(f"- {title}")
 
     st.markdown("---")
-    st.markdown(f"**💡 このダッシュボードでの使い方**")
+    st.markdown("**💡 このダッシュボードでの使い方**")
     st.caption(guide["tips"])
+    st.caption("東証全銘柄 BT 成績: **📊 戦略結果 → TSE 実験** またはサイドバーから戦略を選択。")
 
-    st.markdown("---")
-    st.markdown("#### スタイル別 対応表")
-    rows = []
-    for style, keys in STYLE_STRATEGY_MAP.items():
-        label = {
-            "swing": "スイング",
-            "swing_high_winrate": "スイング・高勝率",
-            "daytrade": "デイトレ",
-        }.get(style, style)
-        for k in keys:
-            rows.append({"スタイル": label, "戦略": STRATEGY_LABELS[k], "キー": k})
-    st.dataframe(rows, width="stretch", hide_index=True, key="df_strategy_map")
+
+@st.fragment
+def render_strategies_tab() -> None:
+    import pandas as pd
+
+    catalog = _catalog_entries()
+    n_deep = len(STRATEGY_GUIDES)
+    n_all = len(catalog)
+    st.subheader("📚 戦略解説")
+    st.markdown(
+        f"カタログ **{n_all} 戦略**すべてに、**エントリー条件・エグジット・パラメータ**を表示します。"
+        f"（**{n_deep} 件**は図解付きの手書きガイド、残りは実装テンプレートから自動生成）"
+    )
+
+    styles = sorted({str(s.get("style") or "") for s in catalog})
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        style_filter = st.selectbox(
+            "スタイルで絞り込み",
+            ["すべて"] + styles,
+            format_func=lambda x: "すべて" if x == "すべて" else _STYLE_LABELS.get(x, x),
+            key="strategy_guide_style",
+        )
+        q = st.text_input("名前 / ID で検索", key="strategy_guide_search", placeholder="例: macd, vwap")
+        pool = catalog
+        if style_filter != "すべて":
+            pool = [s for s in pool if s.get("style") == style_filter]
+        if q.strip():
+            needle = q.strip().lower()
+            pool = [
+                s
+                for s in pool
+                if needle in str(s.get("id", "")).lower() or needle in str(s.get("name", "")).lower()
+            ]
+        if not pool:
+            st.warning("該当する戦略がありません。")
+            return
+        strategy_key = st.selectbox(
+            "戦略を選択",
+            [str(s["id"]) for s in pool],
+            format_func=lambda k: f"{_catalog_by_id().get(k, {}).get('name', k)} ({k})",
+            key="strategy_guide_pick",
+        )
+        if strategy_key in STRATEGY_GUIDES:
+            st.success("図解付きガイド")
+        else:
+            st.caption("テンプレート解説（自動）")
+
+    with col2:
+        guide = resolve_strategy_guide(strategy_key)
+        _render_full_strategy_guide(strategy_key, guide)
+
+    with st.expander("カタログ全戦略一覧", expanded=False):
+        df = pd.DataFrame(
+            [
+                {
+                    "キー": s.get("id"),
+                    "名前": s.get("name"),
+                    "スタイル": _STYLE_LABELS.get(str(s.get("style")), s.get("style")),
+                    "図解": "✓" if s.get("id") in STRATEGY_GUIDES else "自動",
+                    "タグ": ", ".join(s.get("tags") or []),
+                }
+                for s in catalog
+            ]
+        )
+        st.dataframe(df, width="stretch", hide_index=True, key="df_strategy_catalog")
+
+
+def render_strategy_guide_summary(strategy_id: str) -> None:
+    """Compact guide block for strategy detail side panels."""
+    guide = resolve_strategy_guide(strategy_id)
+    st.info(guide.get("summary") or "—")
+    st.markdown("**考え方**")
+    st.caption(guide.get("concept") or "—")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("**買い**")
+        for rule in (guide.get("entry_long") or [])[:6]:
+            st.markdown(f"- {rule}")
+    with c2:
+        st.markdown("**エグジット**")
+        for rule in (guide.get("exit") or [])[:5]:
+            st.markdown(f"- {rule}")
+    st.caption("全文は **📚 戦略解説** タブで確認できます。")

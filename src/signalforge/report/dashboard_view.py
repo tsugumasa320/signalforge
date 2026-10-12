@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -10,6 +11,12 @@ import pandas as pd
 import streamlit as st
 
 from signalforge.config import data_dir, load_web_catalog
+from signalforge.report.dashboard_experiments import (
+    experiment_ranking_strategy_ids,
+    render_experiment_strategy_detail,
+    render_experiments_panel,
+    get_experiment_scan,
+)
 from signalforge.report.dashboard_explorer import _bar_fig, _load_report, _render_saved_results
 
 
@@ -47,17 +54,26 @@ def render_results_sidebar() -> str | None:
             f"ラボ {manifest.get('lab_cells', '?')}"
         )
 
+    exp_scan = get_experiment_scan()
+    if exp_scan.get("complete"):
+        st.sidebar.caption(
+            f"TSE 実験: 完了 {len(exp_scan['complete'])}/{exp_scan.get('total_planned', 133)} 戦略"
+        )
+
     st.sidebar.markdown(
         "**結果を更新する（ターミナル）**\n"
         "```\n"
-        "uv run signalforge results build\n"
+        "uv run signalforge experiments aggregate\n"
         "uv run signalforge hub open\n"
         "```"
     )
 
+    exp_ids = experiment_ranking_strategy_ids()
     catalog = _load_report("catalog_backtests.json")
     ids: list[str] = []
-    if catalog:
+    if exp_ids:
+        ids = list(exp_ids)
+    elif catalog:
         rows = catalog.get("results") or []
         ok = sorted(
             [r for r in rows if r.get("id") and not r.get("error")],
@@ -70,7 +86,7 @@ def render_results_sidebar() -> str | None:
         ids = sorted({s["id"] for s in cat.get("strategies", []) if s.get("implemented")})
 
     return st.sidebar.selectbox(
-        "戦略を詳しく見る",
+        "戦略を詳しく見る（TSE 実験）",
         ["（一覧のみ）"] + ids,
         key="results_strategy_pick",
     )
@@ -106,8 +122,28 @@ def _cohort_rows(strategy_id: str) -> list[dict[str, Any]]:
     return out
 
 
+def _load_strategy_doc_path(strategy_id: str) -> Path:
+    return _reports_dir() / "experiments" / "strategies" / f"{strategy_id}.json"
+
+
+def _strategy_doc_complete(strategy_id: str) -> bool:
+    path = _load_strategy_doc_path(strategy_id)
+    if not path.exists():
+        return False
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return False
+    target = int(doc.get("n_tickers_target") or 0)
+    return bool(doc.get("complete")) and target > 0
+
+
 def render_strategy_detail(strategy_id: str) -> None:
     st.subheader(f"戦略: `{strategy_id}`")
+    if _strategy_doc_complete(strategy_id):
+        render_experiment_strategy_detail(strategy_id)
+        return
+
     row = _strategy_row(strategy_id)
     if row:
         if row.get("error"):
@@ -141,6 +177,11 @@ def render_strategy_detail(strategy_id: str) -> None:
                 key=f"detail_cohort_{strategy_id}",
             )
 
+    from signalforge.report.dashboard_strategies import render_strategy_guide_summary
+
+    with st.expander("📖 戦略解説（エントリー・決済）", expanded=False):
+        render_strategy_guide_summary(strategy_id)
+
     meta = {s["id"]: s for s in load_web_catalog().get("strategies", [])}.get(strategy_id)
     if meta:
         with st.expander("カタログメタデータ"):
@@ -153,4 +194,7 @@ def render_results_home() -> None:
         "全戦略・コホート・ラボルールは **あらかじめバックテスト済み** です。"
         "ここでは保存された結果を **閲覧・比較** するだけで OK です。"
     )
-    _render_saved_results()
+    render_experiments_panel()
+    st.divider()
+    with st.expander("従来のカタログ / コホート / ラボ", expanded=False):
+        _render_saved_results()

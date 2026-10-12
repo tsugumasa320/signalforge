@@ -327,8 +327,8 @@ def test_cohort_bulk_mode_keeps_metrics_not_journal():
     )
     after = len(list(reports.glob("journal_*.json"))) if reports.is_dir() else 0
     assert row.get("error") is None
-    assert "metrics" in row and "metrics_oos" in row and "metrics_in_sample" in row
-    assert row.get("profit_factor") == row["metrics"].get("profit_factor")
+    assert row.get("profit_factor") is not None
+    assert "metrics" not in row  # bulk_mode = compact experiment rows
     assert after == before
 
 
