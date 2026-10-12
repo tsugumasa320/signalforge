@@ -10,6 +10,9 @@ def test_scan_campaign_progress_shape():
     scan = scan_campaign_progress()
     assert "complete" in scan and "in_progress" in scan
     assert scan["total_planned"] == planned_strategy_count()
+    ov = scan.get("overall") or {}
+    assert "strategy_overall_pct" in ov
+    assert "ticker_overall_pct" in ov
 
 
 def test_scan_ignores_tickers_sidecar_files(tmp_path):

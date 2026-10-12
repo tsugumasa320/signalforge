@@ -20,6 +20,11 @@ uv run signalforge fetch --universe tse_domestic --timeframe 1d   # 初回は並
 uv run signalforge experiments plan
 uv run signalforge experiments run          # 全戦略・全銘柄（再開可能）
 uv run signalforge experiments status
+uv run signalforge experiments watch        # tqdm 風に同一画面で更新（ETA 付き）
+
+./scripts/run-experiments-daemon.sh          # BT 起動 + このターミナルで watch
+WATCH_INTERVAL=3 ./scripts/run-experiments-daemon.sh
+
 uv run signalforge experiments aggregate  # JSON のみから矩阵再生成
 uv run signalforge experiments compact    # 既存 JSON を slim 化 + 銘柄 sidecar 分離
 ```
@@ -39,7 +44,19 @@ chmod +x scripts/install-experiments-launchd.sh
 ```
 
 Mac がスリープすると BT は止まります。夜間実行時は電源設定でスリープ無効、または `caffeinate -s` でラップしてください。
+
+### 途中で止まるとき（Cursor / ターミナルを閉じた等）
+
+ログに Traceback が **ない** のに `experiments run` だけ消える場合、**親シェルや IDE から SIGTERM が送られた**ことが多いです（`nohup` だけでは不十分な環境あり）。**Cursor 上の Agent が起動したバックグラウンド job もセッション終了で止まり得ます**。
+
+**推奨:**
+
+```bash
+./scripts/run-experiments-daemon.sh   # PID → data/reports/experiments.pid, caffeinate -i
+# または macOS 夜間: ./scripts/install-experiments-launchd.sh
 ```
+
+`experiments run | head` のように **パイプで途中切断** すると `Broken pipe` で戦略 JSON が壊れるので禁止。
 
 ## 出力
 

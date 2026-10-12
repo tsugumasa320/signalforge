@@ -1147,16 +1147,51 @@ def experiments_plan_cmd() -> None:
     click.echo("状態: uv run signalforge experiments status")
 
 
+def _print_experiment_progress(scan: dict) -> None:
+    from signalforge.experiments.scan import format_progress_bar
+
+    ov = scan.get("overall") or {}
+    n_done = int(ov.get("strategies_complete") or len(scan.get("complete") or []))
+    n_plan = int(ov.get("strategies_planned") or scan.get("total_planned") or 0)
+    pool = scan.get("n_tickers_pool") or "—"
+    click.echo(f"TSE 実験  ·  銘柄プール {pool}")
+    click.echo("")
+    click.echo("【全体】")
+    click.echo(
+        f"  戦略  {format_progress_bar(float(ov.get('strategy_overall_pct') or 0))}  "
+        f"（{ov.get('strategy_equiv', n_done):.2f} / {n_plan} 戦略相当）"
+    )
+    if ov.get("ticker_jobs_total"):
+        click.echo(
+            f"  銘柄BT {format_progress_bar(float(ov.get('ticker_overall_pct') or 0))}  "
+            f"（{ov.get('ticker_jobs_done'):,} / {ov.get('ticker_jobs_total'):,} 回）"
+        )
+    if ov.get("active_strategy_id"):
+        ad, at = ov.get("active_n_done"), ov.get("active_n_target")
+        ap = 100.0 * int(ad) / max(1, int(at)) if at else 0
+        click.echo(
+            f"\n【いま実行中】 `{ov['active_strategy_id']}`  "
+            f"{ad}/{at} ({ap:.1f}%)"
+        )
+    stale = ov.get("stale_checkpoints") or []
+    if stale:
+        click.echo("\n【checkpoint 保留（後で再開）】")
+        for row in stale:
+            tgt = max(1, int(row.get("n_target") or 1))
+            done = int(row.get("n_done") or 0)
+            click.echo(f"  · {row.get('strategy_id')}: {done}/{tgt} ({100.0 * done / tgt:.1f}%)")
+    click.echo("")
+
+
 @experiments.command("status")
 def experiments_status_cmd() -> None:
     """Progress of the TSE experiment campaign."""
     from signalforge.experiments.scan import scan_campaign_progress
 
     scan = scan_campaign_progress()
+    _print_experiment_progress(scan)
     n_done = len(scan["complete"])
     n_plan = int(scan["total_planned"])
-    pool = scan.get("n_tickers_pool") or "—"
-    click.echo(f"TSE 実験: 完了戦略 {n_done} / {n_plan}  ·  銘柄プール {pool}")
     if scan["complete"]:
         click.echo("完了（median PF 上位 5）:")
         for row in scan["complete"][:5]:
@@ -1180,6 +1215,34 @@ def experiments_status_cmd() -> None:
         )
     elif not scan["complete"] and not scan["in_progress"]:
         click.echo("未実行（experiments run）")
+
+
+@experiments.command("watch")
+@click.option("--interval", default=5, show_default=True, help="更新間隔（秒）")
+@click.option("--classic", is_flag=True, help="status 形式を毎回スクロール表示（旧）")
+@click.option("--no-alt-screen", is_flag=True, help="代替画面を使わず全画面クリア")
+def experiments_watch_cmd(interval: int, classic: bool, no_alt_screen: bool) -> None:
+    """tqdm 風に同一画面で進捗更新（Ctrl+C で監視のみ終了）。"""
+    if not classic:
+        from signalforge.experiments.live_progress import run_live_watch
+
+        run_live_watch(interval=float(interval), use_alt_screen=not no_alt_screen)
+        return
+
+    import time
+
+    from signalforge.experiments.scan import scan_campaign_progress
+
+    try:
+        while True:
+            click.echo("\033[2J\033[H", nl=False)
+            click.echo(f"TSE 実験進捗  （{interval}s 更新 · Ctrl+C で終了）\n")
+            scan = scan_campaign_progress()
+            _print_experiment_progress(scan)
+            click.echo(f"\n次回更新まで {interval}s …")
+            time.sleep(max(1, interval))
+    except KeyboardInterrupt:
+        click.echo("\nwatch 終了")
 
 
 @experiments.command("schedule")

@@ -122,10 +122,65 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
     else:
         pool = man_n or None
 
-    return {
+    out = {
         "complete": complete,
         "in_progress": in_progress,
         "total_planned": total_planned,
         "n_tickers_pool": pool,
         "manifest": manifest,
     }
+    out["overall"] = summarize_campaign_progress(out)
+    return out
+
+
+def summarize_campaign_progress(scan: dict[str, Any]) -> dict[str, Any]:
+    """Human-friendly rollup for CLI watch/status."""
+    n_plan = int(scan.get("total_planned") or 0)
+    pool = int(scan.get("n_tickers_pool") or 0)
+    n_complete = len(scan.get("complete") or [])
+    in_prog = scan.get("in_progress") or []
+
+    active_rows = [r for r in in_prog if r.get("active")]
+    stale_rows = [r for r in in_prog if not r.get("active")]
+
+    partial_equiv = 0.0
+    active = active_rows[0] if active_rows else None
+    if active:
+        tgt = max(1, int(active.get("n_target") or pool or 1))
+        partial_equiv = int(active.get("n_done") or 0) / tgt
+
+    strategy_equiv = n_complete + partial_equiv
+    strategy_pct = 100.0 * strategy_equiv / n_plan if n_plan else 0.0
+
+    ticker_done = n_complete * pool if pool else 0
+    if active and pool:
+        ticker_done += int(active.get("n_done") or 0)
+    ticker_total = n_plan * pool if pool and n_plan else 0
+    ticker_pct = 100.0 * ticker_done / ticker_total if ticker_total else 0.0
+
+    return {
+        "strategies_complete": n_complete,
+        "strategies_planned": n_plan,
+        "strategy_equiv": strategy_equiv,
+        "strategy_overall_pct": strategy_pct,
+        "ticker_jobs_done": ticker_done,
+        "ticker_jobs_total": ticker_total,
+        "ticker_overall_pct": ticker_pct,
+        "active_strategy_id": active.get("strategy_id") if active else None,
+        "active_n_done": int(active.get("n_done") or 0) if active else 0,
+        "active_n_target": int(active.get("n_target") or pool or 0) if active else 0,
+        "stale_checkpoints": [
+            {
+                "strategy_id": r.get("strategy_id"),
+                "n_done": int(r.get("n_done") or 0),
+                "n_target": int(r.get("n_target") or pool or 0),
+            }
+            for r in stale_rows
+        ],
+    }
+
+
+def format_progress_bar(pct: float, width: int = 32) -> str:
+    pct = max(0.0, min(100.0, pct))
+    filled = int(round(width * pct / 100.0))
+    return "[" + "#" * filled + "-" * (width - filled) + f"] {pct:5.1f}%"
