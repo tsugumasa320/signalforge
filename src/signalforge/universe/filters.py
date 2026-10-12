@@ -20,6 +20,25 @@ def _tag_set(meta: dict[str, Any]) -> set[str]:
 def resolve_cohort_tickers(filter_spec: dict[str, Any] | None) -> list[str]:
     """Return tickers matching filter keys: segment, sector_tse, tags, universe."""
     spec = filter_spec or {}
+
+    if spec.get("universe") == "tse_domestic":
+        from signalforge.universe.tse_listing import list_tse_tickers
+
+        segments = spec.get("segment")
+        return list_tse_tickers(segments=segments if segments else None)
+
+    if spec.get("segment") and not spec.get("universe"):
+        from signalforge.universe.tse_listing import list_tse_tickers
+
+        try:
+            tse = list_tse_tickers(segments=list(spec["segment"]))
+            if tse:
+                if spec.get("exclude_etf"):
+                    pass  # JPX domestic list has no ETFs
+                return tse
+        except Exception:
+            pass  # fall back to manual meta yaml
+
     equity = load_equity_meta()
     all_meta: dict[str, dict] = equity.get("tickers", {})
 

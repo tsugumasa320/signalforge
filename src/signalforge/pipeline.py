@@ -41,6 +41,9 @@ def run_backtest_pipeline(
     ml_filter: bool = False,
     cfg_override: dict[str, Any] | None = None,
     cost_model: str = "alpaca",
+    *,
+    persist_journal: bool = True,
+    slim_return: bool = False,
 ) -> dict[str, Any]:
     cfg = load_style_config(style)
     if cfg_override:
@@ -146,19 +149,16 @@ def run_backtest_pipeline(
         compute_metrics(in_sample_trades, result.equity_curve) if not in_sample_trades.empty else result.metrics
     )
 
-    reports_dir = cache.base / "reports"
-    bt_engine.journal.save(reports_dir)
+    if persist_journal:
+        reports_dir = cache.base / "reports"
+        bt_engine.journal.save(reports_dir)
 
-    return {
+    payload: dict[str, Any] = {
         "metrics": result.metrics,
         "metrics_oos": oos_metrics,
         "metrics_in_sample": in_sample_metrics,
         "run_id": result.journal_run_id,
-        "trades": result.trades,
-        "equity": result.equity_curve,
-        "df": df,
         "ml_report": ml_report,
-        "journal": bt_engine.journal,
         "strategy": strategy_name,
         "style": style,
         "ticker": ticker,
@@ -168,3 +168,13 @@ def run_backtest_pipeline(
         "backtest_start": str(bt_start.date()) if bt_start is not None else None,
         "backtest_end": str(bt_end.date()) if bt_end is not None else None,
     }
+    if not slim_return:
+        payload.update(
+            {
+                "trades": result.trades,
+                "equity": result.equity_curve,
+                "df": df,
+                "journal": bt_engine.journal,
+            }
+        )
+    return payload

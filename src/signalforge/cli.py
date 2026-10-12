@@ -206,12 +206,45 @@ def _parse_strategy_ids(spec: str, style_filter: str | None, limit: int) -> list
 
 
 @main.group()
+def universe() -> None:
+    """TSE listed issues (JPX official master)."""
+
+
+@universe.command("refresh")
+@click.option("--include-all-products", is_flag=True, help="Include ETF/REIT/foreign (not just domestic equity)")
+def universe_refresh(include_all_products: bool) -> None:
+    """Download JPX 東証上場銘柄一覧 → data/universe/tse_listing.json."""
+    from signalforge.universe.tse_listing import refresh_tse_listing
+
+    doc = refresh_tse_listing(include_non_domestic_equity=include_all_products)
+    click.echo(f"✓ {doc['n_tickers']} 銘柄 · {doc['source_url']}")
+    click.echo(f"  → {data_dir() / 'universe' / 'tse_listing.json'}")
+
+
+@universe.command("count")
+def universe_count() -> None:
+    """Show cached TSE listing counts by segment."""
+    from signalforge.universe.tse_listing import load_tse_listing
+
+    doc = load_tse_listing(refresh=False)
+    rows = doc.get("tickers") or []
+    by: dict[str, int] = {}
+    for r in rows:
+        seg = r.get("segment") or r.get("market") or "?"
+        by[seg] = by.get(seg, 0) + 1
+    click.echo(f"Listing fetched: {doc.get('fetched_at', '?')}")
+    for k, v in sorted(by.items(), key=lambda x: -x[1]):
+        click.echo(f"  {k}: {v}")
+    click.echo(f"Total rows: {len(rows)}")
+
+
+@main.group()
 def hub() -> None:
     """Run all verifications and build ranking/chart hub."""
 
 
 @hub.command("build")
-@click.option("--fetch-data", is_flag=True, default=True, help="Fetch OHLCV for cohort tickers first")
+@click.option("--fetch-data/--no-fetch-data", default=False, help="Fetch OHLCV for cohort tickers before build")
 @click.option("--ticker-limit", default=0, type=int, help="Cap tickers per cohort (0=all meta)")
 @click.option("--skip-catalog", is_flag=True, help="Skip catalog backtest-all (reuse catalog_backtests.json)")
 @click.option("--skip-cohort", is_flag=True, help="Skip strategy×cohort matrix (faster)")
@@ -237,10 +270,10 @@ def hub_build(
     n_strat = len(impl.get("strategies", {}))
 
     if fetch_data:
-        tickers = sorted(load_equity_meta().get("tickers", {}).keys())
-        if ticker_limit > 0:
-            tickers = tickers[:ticker_limit]
-        click.echo(f"Fetching OHLCV for {len(tickers)} tickers…")
+        from signalforge.compare.runner import default_universe_tickers
+
+        tickers = default_universe_tickers(ticker_limit, refresh_listing=False)
+        click.echo(f"Fetching OHLCV for {len(tickers)} TSE tickers (JPX list)…")
         from signalforge.data.cache import ParquetCache
         from signalforge.data.fetcher import MarketDataFetcher
 
@@ -255,41 +288,48 @@ def hub_build(
     strategy_ids = _parse_strategy_ids("catalog:all", None, 0)
     cat_by_id = {s["id"]: s for s in load_web_catalog().get("strategies", [])}
     catalog_path = data_dir() / "reports" / "catalog_backtests.json"
-    if skip_catalog and catalog_path.exists():
-        click.echo(f"\n=== [1/3] Catalog backtest-all — skipped (using {catalog_path.name}) ===")
-    else:
-        click.echo(f"\n=== [1/3] Catalog backtest-all ({n_strat} strategies) ===")
-        catalog_rows: list[dict] = []
-        for i, sid in enumerate(strategy_ids, 1):
-            cat = cat_by_id.get(sid, {})
-            style = cat.get("style") or "swing"
-            try:
-                result = run_backtest_pipeline(style, sid, cost_model="japan")
-                m = result.get("metrics") or {}
-                catalog_rows.append(
-                    {
-                        "id": sid,
-                        "style": style,
-                        "ticker": result.get("ticker"),
-                        "profit_factor": m.get("profit_factor"),
-                        "win_rate": m.get("win_rate"),
-                        "total_trades": m.get("total_trades"),
-                        "total_return_pct": m.get("total_return_pct"),
-                        "error": None,
-                    }
-                )
-            except Exception as exc:
-                catalog_rows.append({"id": sid, "style": style, "error": str(exc)})
-            if i % 20 == 0:
-                click.echo(f"  … {i}/{len(strategy_ids)}")
+    catalog_rows: list[dict] = []
+    cohort_cells = 0
+    cmp_result: dict | None = None
+
+    if skip_cohort and not skip_catalog:
+        from signalforge.compare.runner import build_universe_catalog_rows, default_universe_tickers
+
+        uni = default_universe_tickers(ticker_limit)
+        click.echo(
+            f"\n=== [1/3] Catalog · {n_strat} strategies × {len(uni)} 銘柄 (median PF) ==="
+        )
+
+        def _cat_prog(i: int, total: int, sid: str) -> None:
+            click.echo(f"  … {i}/{total} · {sid[:24]}")
+
+        catalog_rows = build_universe_catalog_rows(
+            strategy_ids=strategy_ids,
+            tickers=uni,
+            cost_model="japan",
+            catalog_by_id=cat_by_id,
+            progress_cb=_cat_prog,
+        )
         catalog_path.parent.mkdir(parents=True, exist_ok=True)
         catalog_path.write_text(
-            json.dumps({"results": catalog_rows}, ensure_ascii=False, indent=2),
+            json.dumps(
+                {
+                    "meta": {"evaluation": "multi_ticker_median", "n_tickers": len(uni)},
+                    "results": catalog_rows,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
             encoding="utf-8",
         )
         click.echo(f"Saved {catalog_path}")
+    elif skip_catalog and catalog_path.exists():
+        click.echo(f"\n=== [1/3] Catalog — skipped (using {catalog_path.name}) ===")
+    else:
+        click.echo(
+            f"\n=== [1/3] Catalog — コホート行列完了後に全銘柄集計で生成 ==="
+        )
 
-    cohort_cells = 0
     if not skip_cohort:
         click.echo("\n=== [2/3] Strategy × cohort (catalog:all) ===")
         cohort_specs = preset_specs(["prime", "standard", "growth"])
@@ -312,6 +352,28 @@ def hub_build(
             json.dumps(cmp_result, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
+        if not skip_catalog:
+            from signalforge.compare.runner import catalog_rows_from_compare_matrix
+
+            catalog_rows = catalog_rows_from_compare_matrix(cmp_result)
+            n_pool = max((r.get("n_tickers") or 0) for r in catalog_rows) if catalog_rows else 0
+            catalog_path.parent.mkdir(parents=True, exist_ok=True)
+            catalog_path.write_text(
+                json.dumps(
+                    {
+                        "meta": {
+                            "evaluation": "multi_ticker_median",
+                            "n_tickers": n_pool,
+                            "source": "compare_matrix_pooled",
+                        },
+                        "results": catalog_rows,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+            click.echo(f"Saved {catalog_path} ({len(catalog_rows)} strategies · pooled cohort tickers)")
 
     lab_cells = 0
     if not skip_lab:
@@ -1008,31 +1070,6 @@ def report(run_id: str | None, fmt: str) -> None:
 
 @main.command()
 @click.option("--style", default="swing")
-@click.option("--strategies", default="ema_pullback,macd_cross")
-@click.option("--ml-filter", is_flag=True, help="Compare with walk-forward ML filter (OOS metrics)")
-def compare(style: str, strategies: str, ml_filter: bool) -> None:
-    """Compare multiple strategies."""
-    names = [s.strip() for s in strategies.split(",")]
-    click.echo(f"\n=== Compare ({style}) — TA only ===")
-    for name in names:
-        result = run_backtest_pipeline(style, name)
-        m = result["metrics"]
-        click.echo(f"{name:20s} PF={m['profit_factor']:.2f}  Sharpe={m['sharpe']:.2f}  Trades={m['total_trades']}")
-
-    if ml_filter:
-        click.echo(f"\n=== Compare ({style}) — TA + ML (OOS) ===")
-        for name in names:
-            result = run_backtest_pipeline(style, name, ml_filter=True)
-            m = result.get("metrics_oos", {})
-            click.echo(
-                f"{name:20s} OOS PF={m.get('profit_factor', 0):.2f}  "
-                f"Trades={m.get('total_trades', 0)}  "
-                f"Win={m.get('win_rate', 0):.1%}"
-            )
-
-
-@main.command()
-@click.option("--style", default="swing")
 @click.option("--strategy", default="ema_pullback")
 @click.option("--trials", default=30)
 @click.option(
@@ -1083,112 +1120,239 @@ def optimize(style: str, strategy: str, trials: int, metric: str, ml_filter: boo
                 click.echo(f"Avg OOS label accuracy: {avg:.1%}")
 
 
-@main.command()
-@click.option("--style", default="swing", type=click.Choice(["swing", "daytrade"]))
-@click.option("--ml-filter", is_flag=True, help="Rank strategies by OOS metrics with ML filter")
-@click.option("--optimize-trials", default=20, help="Optuna trials for the top TA strategy (0=skip)")
-@click.option("--top-strategy", default=None, help="Force optimization target strategy")
-def explore(style: str, ml_filter: bool, optimize_trials: int, top_strategy: str | None) -> None:
-    """Compare all strategies, optionally optimize the best candidate."""
-    names = list(strategies_for_style(style))
-    click.echo(f"\n=== Explore ({style}) — TA only ===")
-    ta_rows: list[tuple[str, dict]] = []
+@main.group()
+def experiments() -> None:
+    """Multi-axis TSE backtest campaigns (universe / segment / sector)."""
+
+
+@experiments.command("plan")
+def experiments_plan_cmd() -> None:
+    """Show experiment design (one BT pass → many aggregations)."""
+    from signalforge.experiments.runner import load_plan
+
+    plan = load_plan()
+    meta = plan.get("meta", {})
+    click.echo(meta.get("title", "Experiment plan"))
+    click.echo(meta.get("description", "").strip())
+    click.echo(f"\n戦略: {plan.get('strategies')}")
+    click.echo("\n集計軸:")
+    for agg in plan.get("aggregations") or []:
+        click.echo(f"  · {agg.get('id')}: {agg.get('label')} ({agg.get('group')})")
+    click.echo("\n実行: uv run signalforge experiments run")
+    click.echo("状態: uv run signalforge experiments status")
+
+
+@experiments.command("status")
+def experiments_status_cmd() -> None:
+    """Progress of the TSE experiment campaign."""
+    from signalforge.experiments.runner import experiments_dir
+
+    man = experiments_dir() / "manifest.json"
+    strat_dir = experiments_dir() / "strategies"
+    n_files = len(list(strat_dir.glob("*.json"))) if strat_dir.is_dir() else 0
+    if man.exists():
+        doc = json.loads(man.read_text(encoding="utf-8"))
+        click.echo(json.dumps(doc, ensure_ascii=False, indent=2))
+    else:
+        click.echo("未実行（experiments run）")
+    click.echo(f"Per-strategy files: {n_files}")
+
+
+@experiments.command("schedule")
+def experiments_schedule_cmd() -> None:
+    """Show execution schedule (config/experiments/schedule.yaml)."""
+    from signalforge.experiments.runner import default_parallel_workers
+    from signalforge.experiments.schedule import ExecutionBudget, load_schedule
+
+    doc = load_schedule()
+    b = ExecutionBudget.from_config(doc)
+    click.echo("execution (schedule.yaml):")
+    click.echo(json.dumps(b.to_manifest_fragment(), ensure_ascii=False, indent=2))
+    click.echo(f"effective parallel_workers: {default_parallel_workers()}")
+
+
+@experiments.command("run")
+@click.option("--strategy-limit", default=0, type=int, help="Cap strategies (0=all, 省略なし)")
+@click.option("--ticker-limit", default=0, type=int, help="Cap tickers (0=全TSE内国株式)")
+@click.option("--workers", default=0, type=int, help="Parallel workers (0=schedule/auto)")
+@click.option("--max-minutes", default=-1.0, type=float, help="Wall clock limit (-1=schedule.yaml)")
+@click.option("--ignore-schedule", is_flag=True, help="Run outside active_hours window")
+@click.option("--no-resume", is_flag=True, help="Ignore checkpoints (未完了戦略は銘柄単位で再開)")
+@click.option("--aggregate-only", is_flag=True, help="Rebuild matrices from saved strategy JSON")
+def experiments_run(
+    strategy_limit: int,
+    ticker_limit: int,
+    workers: int,
+    max_minutes: float,
+    ignore_schedule: bool,
+    no_resume: bool,
+    aggregate_only: bool,
+) -> None:
+    """Run JPX universe experiment: 全銘柄×全戦略、並列+再開。schedule.yaml で時間調整可。"""
+    from signalforge.experiments.runner import (
+        build_experiment_summaries,
+        default_parallel_workers,
+        load_plan,
+        run_experiment_campaign,
+    )
+    from signalforge.experiments.schedule import ExecutionBudget
+    from signalforge.universe.tse_listing import list_tse_tickers
+
+    plan = load_plan()
+    cost = (plan.get("meta") or {}).get("cost_model", "japan")
+    strategy_ids = _parse_strategy_ids(plan.get("strategies", "catalog:all"), None, strategy_limit)
+    cat_by_id = {s["id"]: s for s in load_web_catalog().get("strategies", [])}
+
+    if aggregate_only:
+        n = ticker_limit or len(list_tse_tickers())
+        build_experiment_summaries(strategy_ids, tickers_count=n)
+        click.echo("Aggregates refreshed → data/reports/experiments/")
+        return
+
+    overrides: dict = {}
+    if max_minutes >= 0:
+        overrides["max_minutes_per_run"] = max_minutes
+    if workers > 0:
+        overrides["parallel_workers"] = workers
+    budget = ExecutionBudget.from_config(overrides=overrides)
+    if workers <= 0 and budget.parallel_workers <= 0:
+        budget.parallel_workers = default_parallel_workers()
+
+    ok, msg = budget.check_may_run(ignore_window=ignore_schedule)
+    if not ok:
+        raise click.ClickException(msg)
+
+    n_tickers = ticker_limit or len(list_tse_tickers())
+    if ticker_limit == 0 and budget.max_tickers_per_strategy > 0:
+        n_tickers = budget.max_tickers_per_strategy
+
+    current_sid: list[str] = [""]
+
+    def _prog(i: int, total: int, sid: str) -> None:
+        current_sid[0] = sid.replace(" (skip)", "").replace(" (完了済み)", "")
+        click.echo(f"  [{i}/{total}] {sid}")
+
+    def _tprog(i: int, n: int, sym: str) -> None:
+        click.echo(f"      … {current_sid[0]} tickers {i}/{n} ({sym})")
+
+    click.echo(
+        f"\n=== TSE experiment: {len(strategy_ids)} strategies × {n_tickers} tickers "
+        f"(workers={budget.parallel_workers}) ===\n"
+    )
+    man = run_experiment_campaign(
+        strategy_ids,
+        ticker_limit=ticker_limit,
+        cost_model=cost,
+        catalog_by_id=cat_by_id,
+        resume=not no_resume,
+        budget=budget,
+        progress_cb=_prog,
+        ticker_progress_cb=_tprog,
+    )
+    click.echo(
+        f"\n✓ new={man['completed']} 完了済skip={man['skipped_complete']} "
+        f"fail={man['failed']} early_stop={man.get('stopped_early', 0)}"
+    )
+    click.echo(f"  manifest: {experiments_dir() / 'manifest.json'}")
+
+
+@experiments.command("aggregate")
+def experiments_aggregate_cmd() -> None:
+    """Rebuild segment/sector matrices and catalog_backtests from strategy JSON."""
+    ctx = click.get_current_context()
+    ctx.invoke(
+        experiments_run,
+        strategy_limit=0,
+        ticker_limit=0,
+        workers=0,
+        max_minutes=-1.0,
+        ignore_schedule=True,
+        no_resume=False,
+        aggregate_only=True,
+    )
+
+
+def experiments_dir() -> Path:
+    from signalforge.experiments.runner import experiments_dir as _d
+
+    return _d()
+
+
+@main.group()
+def results() -> None:
+    """Precomputed strategy reports (catalog / cohort / lab) for dashboard & hub."""
+
+
+@results.command("status")
+def results_status() -> None:
+    """Show ages of report JSON files."""
+    from datetime import datetime
+
+    rep = data_dir() / "reports"
+    names = [
+        "catalog_backtests.json",
+        "compare_matrix.json",
+        "lab_matrix.json",
+        "hub/index.html",
+        "hub/manifest.json",
+    ]
+    click.echo("事前バックテスト結果:")
     for name in names:
-        result = run_backtest_pipeline(style, name)
-        m = result["metrics"]
-        ta_rows.append((name, m))
-        click.echo(
-            f"{name:16s} PF={m['profit_factor']:.2f}  Sharpe={m['sharpe']:.2f}  "
-            f"Trades={m['total_trades']}  DD={m['max_drawdown_pct']:.1f}%"
-        )
-
-    oos_rows: list[tuple[str, dict]] = []
-    if ml_filter:
-        click.echo(f"\n=== Explore ({style}) — TA + ML (OOS) ===")
-        for name in names:
-            result = run_backtest_pipeline(style, name, ml_filter=True)
-            m = result.get("metrics_oos", {})
-            oos_rows.append((name, m))
-            click.echo(
-                f"{name:16s} OOS PF={m.get('profit_factor', 0):.2f}  "
-                f"Trades={m.get('total_trades', 0)}  Win={m.get('win_rate', 0):.1%}"
-            )
-
-    rank_source = oos_rows if ml_filter and oos_rows else ta_rows
-    best_name = top_strategy or max(rank_source, key=lambda x: x[1].get("profit_factor", 0))[0]
-    best_pf = next(m for n, m in rank_source if n == best_name).get("profit_factor", 0)
-    click.echo(f"\nTop strategy: {best_name} (PF={best_pf:.2f})")
-
-    if optimize_trials > 0:
-        click.echo(f"\n=== Quick optimize: {best_name} ({optimize_trials} trials) ===")
-        metric = "oos_pf" if ml_filter else "pf"
-        objective = make_objective(style, best_name, metric=metric, ml_filter=ml_filter)
-        best = bayesian_optimize(objective, n_trials=optimize_trials)
-        click.echo(f"Best params: {best['best_params']}")
-        click.echo(f"Best {metric}: {best['best_value']:.3f}")
-
-
-@main.command("verify-profit")
-@click.option("--style", default="swing", type=click.Choice(["swing", "daytrade"]))
-@click.option("--strategy", default=None, help="Single strategy (default: all for style)")
-@click.option("--ml-filter", is_flag=True, help="Include walk-forward ML filter")
-def verify_profit(style: str, strategy: str | None, ml_filter: bool) -> None:
-    """Compare profitability under legacy vs Alpaca fee schedules."""
-    from signalforge.backtest.metrics import compute_metrics
-    from signalforge.config import load_style_config
-    from signalforge.optimize.spaces import build_cfg_override, strategies_for_style
-
-    names = [strategy] if strategy else list(strategies_for_style(style))
-    presets = ("legacy", "alpaca", "alpaca_conservative")
-    optimized_macd = CHAMPION_MACD_PARAMS
-
-    click.echo("\n=== Profit verification (NVDA) ===")
-    click.echo("Broker model: Alpaca API (commission-free equities + SEC/TAF/CAT pass-through)")
-    click.echo("Sources: BrokFeeSched Jul 2026, docs.alpaca.markets/us/docs/regulatory-fees")
-    if style == "swing":
-        click.echo("Note: Alpaca cash accounts are long-only; short signals require margin.")
-    click.echo("")
-
-    for name in names:
-        click.echo(f"--- {name} {'+ ML' if ml_filter else '(TA only)'} ---")
-        rows = []
-        base_cfg = load_style_config(style)
-        cfg_override = None
-        if name == "macd_cross":
-            cfg_override = build_cfg_override("macd_cross", optimized_macd, base_cfg)
-            click.echo("  (optimized: ADX>23, EMA200, long_only)")
-
-        for preset in presets:
-            result = run_backtest_pipeline(
-                style,
-                name,
-                ml_filter=ml_filter,
-                cost_model=preset,
-                cfg_override=cfg_override,
-            )
-            if ml_filter and not result["trades"].empty and "is_oos" in result["trades"].columns:
-                oos_trades = result["trades"][result["trades"]["is_oos"]]
-                m = compute_metrics(oos_trades, result["equity"])
-            else:
-                m = result["metrics"]
-            label = preset
-            pf = m.get("profit_factor", 0)
-            ret = m.get("total_return_pct", 0)
-            cost = m.get("total_cost_usd", 0)
-            rows.append((label, pf, ret, m.get("total_trades", 0), cost))
-            click.echo(
-                f"  {label:22s} PF={pf:5.2f}  Return={ret:7.1f}%  "
-                f"Trades={m.get('total_trades', 0):3d}  Costs=${cost:,.0f}"
-            )
-
-        alpaca = next(r for r in rows if r[0] == "alpaca")
-        if alpaca[1] >= 1.05 and alpaca[2] > 0:
-            verdict = "✓ Alpaca costs下でも利益余地あり"
-        elif alpaca[1] >= 1.0:
-            verdict = "△ ギリギリ（コストで優位性ほぼ消失）"
+        p = rep / name
+        if p.is_file():
+            ts = datetime.fromtimestamp(p.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+            click.echo(f"  ✓ {name}  ({ts})")
         else:
-            verdict = "✗ Alpaca 実コスト込みでは期待値マイナス"
-        click.echo(f"  → {verdict}\n")
+            click.echo(f"  — {name}  (未生成)")
+    click.echo("\n生成: uv run signalforge results build")
+    click.echo("閲覧: uv run signalforge dashboard start  /  uv run signalforge hub open")
+
+
+@results.command("sync-catalog")
+def results_sync_catalog() -> None:
+    """Rebuild catalog_backtests.json from compare_matrix (multi-ticker, no re-run)."""
+    cmp_path = data_dir() / "reports" / "compare_matrix.json"
+    if not cmp_path.exists():
+        raise click.ClickException("compare_matrix.json がありません。先に results build を実行してください。")
+    cmp_result = json.loads(cmp_path.read_text(encoding="utf-8"))
+    from signalforge.compare.runner import catalog_rows_from_compare_matrix
+
+    rows = catalog_rows_from_compare_matrix(cmp_result)
+    n_pool = max((r.get("n_tickers") or 0) for r in rows) if rows else 0
+    out = data_dir() / "reports" / "catalog_backtests.json"
+    out.write_text(
+        json.dumps(
+            {
+                "meta": {
+                    "evaluation": "multi_ticker_median",
+                    "n_tickers": n_pool,
+                    "source": "compare_matrix_pooled",
+                },
+                "results": rows,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    click.echo(f"✓ {out} — {len(rows)} 戦略 · 最大 {n_pool} 銘柄プール")
+
+
+@results.command("build")
+@click.option("--quick", is_flag=True, help="Catalog + lab only; cohort matrix skipped")
+@click.option("--fetch-data", is_flag=True, help="Refresh OHLCV for meta tickers first")
+@click.option("--ticker-limit", default=0, type=int, help="Cap tickers per cohort/lab (0=all)")
+def results_build(quick: bool, fetch_data: bool, ticker_limit: int) -> None:
+    """Run hub build (all strategies pre-backtested). Default: use cached OHLCV."""
+    ctx = click.get_current_context()
+    ctx.invoke(
+        hub_build,
+        fetch_data=fetch_data,
+        ticker_limit=ticker_limit,
+        skip_catalog=False,
+        skip_cohort=quick,
+        skip_lab=False,
+    )
 
 
 @main.command()

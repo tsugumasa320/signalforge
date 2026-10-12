@@ -98,7 +98,11 @@ def _render_saved_results() -> None:
 
     source = st.selectbox(
         "データセット",
-        ["カタログ単一銘柄 (catalog_backtests.json)", "コホート行列 (compare_matrix.json)", "ラボ行列 (lab_matrix.json)"],
+        [
+            "全銘柄ユニバース (catalog_backtests.json)",
+            "コホート行列 (compare_matrix.json)",
+            "ラボ行列 (lab_matrix.json)",
+        ],
         key="explorer_saved_source",
     )
 
@@ -115,11 +119,11 @@ def _render_saved_results() -> None:
         sort_col = st.selectbox("並び替え", ["profit_factor", "total_return_pct", "win_rate", "total_trades"], key="cat_sort")
         top_n = st.slider("表示件数", 10, min(133, len(df)), 25, key="cat_top")
         df = df.sort_values(sort_col, ascending=False).head(top_n)
-        st.dataframe(
-            df[["id", "style", "ticker", "profit_factor", "win_rate", "total_trades", "total_return_pct"]],
-            width="stretch",
-            hide_index=True,
-        )
+        cols = [c for c in ["id", "style", "ticker", "n_tickers", "profit_factor", "win_rate", "total_trades", "total_return_pct", "pct_pf_above_1"] if c in df.columns]
+        st.dataframe(df[cols], width="stretch", hide_index=True)
+        meta = doc.get("meta") or {}
+        if meta.get("n_tickers"):
+            st.caption(f"評価: 銘柄あたりの median PF を **{meta['n_tickers']} 銘柄** プールで集計")
         st.plotly_chart(
             _bar_fig(
                 df["id"].tolist(),
@@ -393,13 +397,9 @@ def _render_live_runner() -> None:
             st.dataframe(pdf, width="stretch", hide_index=True)
 
 
-def render_explorer_tab() -> None:
-    st.markdown(
-        "事前に `hub build` / `cohort run` / `lab matrix` で溜めた結果の閲覧と、"
-        "**期間・銘柄・コホートを変えた再実行**ができます。"
-    )
-    tab_saved, tab_live = st.tabs(["📁 保存済み結果", "▶ 条件を変えて実行"])
-    with tab_saved:
-        _render_saved_results()
-    with tab_live:
+def render_explorer_tab(*, advanced: bool = False) -> None:
+    """Browse saved reports; advanced=True runs live re-run only (avoid duplicate widget keys)."""
+    if advanced:
         _render_live_runner()
+    else:
+        _render_saved_results()

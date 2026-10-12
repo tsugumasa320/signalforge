@@ -23,6 +23,7 @@ dependencies = [
     "optuna>=3.6",
     "vectorbt>=0.26",
     "streamlit>=1.32",
+    "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]

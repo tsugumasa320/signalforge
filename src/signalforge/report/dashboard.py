@@ -23,12 +23,10 @@ from signalforge.optimize.spaces import strategies_for_style
 from signalforge.pipeline import run_backtest_pipeline
 from signalforge.report.charts import (
     plot_cost_breakdown,
-    plot_cost_comparison,
     plot_cumulative_pnl,
     plot_equity_and_drawdown,
     plot_oos_comparison,
     plot_price_and_trades,
-    plot_strategy_comparison,
     plot_trade_pnl,
 )
 from signalforge.report.dashboard_components import (
@@ -40,18 +38,20 @@ from signalforge.report.dashboard_components import (
     verdict_badge,
 )
 from signalforge.report.dashboard_glossary import (
-    SIDEBAR_HELP,
     STRATEGY_DESCRIPTIONS,
     STYLE_DESCRIPTIONS,
     TAB_INTROS,
     render_glossary_tab,
-    render_sidebar_glossary_link,
     render_tab_intro,
 )
 from signalforge.report.dashboard_strategies import render_strategies_tab
 from signalforge.config import load_market_config
 from signalforge.report.dashboard_explorer import _cfg_override, _default_dates, render_explorer_tab
-from signalforge.report.dashboard_lab import render_lab_tab
+from signalforge.report.dashboard_view import (
+    render_results_home,
+    render_results_sidebar,
+    render_strategy_detail,
+)
 
 MACD_OPTIMIZED = CHAMPION_MACD_PARAMS  # backward compat for sidebar toggle label
 
@@ -124,141 +124,59 @@ def _run_backtest(
         )
 
 
-@st.cache_data(show_spinner=False, ttl=300)
-def _compare_strategies(style: str, ml_filter: bool, cost_model: str) -> list[dict[str, Any]]:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=PendingDeprecationWarning)
-        rows = []
-        for name in strategies_for_style(style):
-            use_opt = name == "macd_cross"
-            result = _run_backtest(style, name, ml_filter, cost_model, use_opt)
-            trades = result["trades"]
-            if ml_filter and not trades.empty and "is_oos" in trades.columns:
-                m = oos_metrics_from_trades(trades, result["equity"])
-                scope = "OOS"
-            else:
-                m = result["metrics"]
-                scope = "全期間"
-            rows.append(
-                {
-                    "strategy": name,
-                    "scope": scope,
-                    "profit_factor": m.get("profit_factor", 0),
-                    "win_rate": m.get("win_rate", 0),
-                    "sharpe": m.get("sharpe", 0),
-                    "total_trades": m.get("total_trades", 0),
-                    "max_drawdown_pct": m.get("max_drawdown_pct", 0),
-                    "total_return_pct": m.get("total_return_pct", 0),
-                    "total_cost_usd": m.get("total_cost_usd", 0),
-                }
-            )
-        return rows
-
-
-@st.cache_data(show_spinner=False, ttl=300)
-def _verify_costs(style: str, strategy: str, ml_filter: bool, use_macd_opt: bool) -> list[dict[str, Any]]:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=PendingDeprecationWarning)
-        rows = []
-        for preset in ("legacy", "alpaca", "alpaca_conservative"):
-            cfg_override = None
-            if strategy == "macd_cross" and use_macd_opt:
-                cfg_override = champion_cfg_override(style, strategy, load_style_config(style))
-            result = run_backtest_pipeline(
-                style,
-                strategy,
-                ml_filter=ml_filter,
-                cost_model=preset,
-                cfg_override=cfg_override,
-            )
-            trades = result["trades"]
-            if ml_filter and not trades.empty and "is_oos" in trades.columns:
-                m = oos_metrics_from_trades(trades, result["equity"])
-            else:
-                m = result["metrics"]
-            label, _ = verdict_badge(m.get("profit_factor", 0), m.get("total_return_pct", 0))
-            rows.append(
-                {
-                    "cost_model": COST_LABELS.get(preset, preset),
-                    "preset": preset,
-                    "profit_factor": m.get("profit_factor", 0),
-                    "total_return_pct": m.get("total_return_pct", 0),
-                    "total_trades": m.get("total_trades", 0),
-                    "total_cost_usd": m.get("total_cost_usd", 0),
-                    "verdict": label,
-                }
-            )
-        return rows
-
-
 def _load_journal(run_id: str) -> dict[str, Any]:
     path = data_dir() / "reports" / f"journal_{run_id}.json"
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
-def _sidebar() -> dict[str, Any]:
-    st.sidebar.header("⚙️ 設定")
-    style = st.sidebar.selectbox(
-        "スタイル",
-        ["swing", "swing_champion", "swing_high_winrate", "daytrade"],
-        format_func=lambda x: STYLE_LABELS.get(x, x),
-        help=SIDEBAR_HELP["style"],
-    )
-    st.sidebar.caption(STYLE_DESCRIPTIONS.get(style, ""))
-    strategies = list(strategies_for_style(style))
-    default_strategy = "macd_cross" if style.startswith("swing") else "vwap_ema"
-    strategy = st.sidebar.selectbox(
-        "戦略",
-        strategies,
-        index=strategies.index(default_strategy) if default_strategy in strategies else 0,
-        help=SIDEBAR_HELP["strategy"],
-    )
-    st.sidebar.caption(STRATEGY_DESCRIPTIONS.get(strategy, ""))
-    ml_filter = st.sidebar.toggle(
-        "ML フィルタ（Walk-Forward OOS）",
-        value=(style in ("swing_champion", "swing_high_winrate")),
-        help=SIDEBAR_HELP["ml_filter"],
-    )
-    cost_model = st.sidebar.selectbox(
-        "コストモデル",
-        ["japan", "alpaca", "legacy", "alpaca_conservative"],
-        format_func=lambda x: COST_LABELS.get(x, x) if x in COST_LABELS else x,
-        help=SIDEBAR_HELP["cost_model"],
-    )
-    st.sidebar.subheader("📅 期間・銘柄")
-    default_start, _ = _default_dates()
-    bt_ticker = st.sidebar.text_input(
-        "銘柄",
-        value=str(load_market_config("japan").get("default_ticker", "7203.T")),
-        help="例: 7203.T（トヨタ）",
-    )
-    bt_start = st.sidebar.date_input("開始日", value=default_start)
-    use_end = st.sidebar.checkbox("終了日を指定", value=False)
-    bt_end = st.sidebar.date_input("終了日", value=default_start, disabled=not use_end)
-    start_iso = bt_start.isoformat()
-    end_iso = bt_end.isoformat() if use_end else None
-    use_macd_opt = False
-    if strategy == "macd_cross" and style not in ("swing_champion", "swing_high_winrate"):
-        use_macd_opt = st.sidebar.toggle(
-            "macd_cross 最適化パラメータ",
-            value=True,
-            help=SIDEBAR_HELP["macd_opt"],
+def _render_inline_backtest() -> None:
+    """Single-strategy backtest controls (main panel, not sidebar)."""
+    st.subheader("単一戦略を再実行")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        style = st.selectbox(
+            "スタイル",
+            ["swing", "swing_champion", "daytrade"],
+            format_func=lambda x: STYLE_LABELS.get(x, x),
+            key="adv_style",
         )
-        if use_macd_opt:
-            st.sidebar.caption("ADX>23, EMA200, 利確=2.0×ATR, 損切=1.5×ATR")
+    with c2:
+        strategies = list(strategies_for_style(style))
+        default_strategy = "macd_cross" if style.startswith("swing") else "vwap_ema"
+        strategy = st.selectbox(
+            "戦略",
+            strategies,
+            index=strategies.index(default_strategy) if default_strategy in strategies else 0,
+            key="adv_strategy",
+        )
+    with c3:
+        cost_model = st.selectbox(
+            "コスト",
+            ["japan", "legacy", "alpaca"],
+            format_func=lambda x: COST_LABELS.get(x, x),
+            key="adv_cost",
+        )
+    ml_filter = st.toggle("ML フィルタ", value=style == "swing_champion", key="adv_ml")
+    default_start, _ = _default_dates()
+    r1, r2, r3 = st.columns(3)
+    with r1:
+        bt_ticker = st.text_input(
+            "銘柄",
+            value=str(load_market_config("japan").get("default_ticker", "7203.T")),
+            key="adv_ticker",
+        )
+    with r2:
+        bt_start = st.date_input("開始日", value=default_start, key="adv_start")
+    with r3:
+        use_end = st.checkbox("終了日", value=False, key="adv_use_end")
+        bt_end = st.date_input("終了日", value=default_start, disabled=not use_end, key="adv_end")
+    use_macd_opt = strategy == "macd_cross" and style != "swing_champion"
+    if use_macd_opt:
+        use_macd_opt = st.toggle("macd_cross 最適化", value=True, key="adv_macd_opt")
 
-    st.sidebar.divider()
-    st.sidebar.subheader("▶ 実行")
-
-    if st.sidebar.button(
-        "バックテスト実行",
-        type="primary",
-        width="stretch",
-        key="btn_backtest",
-        help=SIDEBAR_HELP["backtest"],
-    ):
-        with st.spinner("バックテスト実行中..."):
+    if st.button("バックテスト実行", type="primary", key="adv_run"):
+        with st.spinner("実行中…"):
             try:
                 st.session_state.result = _run_backtest(
                     style,
@@ -267,67 +185,22 @@ def _sidebar() -> dict[str, Any]:
                     cost_model,
                     use_macd_opt,
                     bt_ticker.strip(),
-                    start_iso,
-                    end_iso,
+                    bt_start.isoformat(),
+                    bt_end.isoformat() if use_end else None,
                 )
                 st.session_state.last_error = None
             except Exception as exc:
                 st.session_state.last_error = str(exc)
 
-    if st.sidebar.button(
-        "全戦略を比較",
-        width="stretch",
-        key="btn_compare",
-        help=SIDEBAR_HELP["compare"],
-    ):
-        with st.spinner("全戦略を評価中..."):
-            try:
-                st.session_state.compare_rows = _compare_strategies(style, ml_filter, cost_model)
-                st.session_state.last_error = None
-            except Exception as exc:
-                st.session_state.last_error = str(exc)
-
-    if st.sidebar.button(
-        "コスト検証（3モデル）",
-        width="stretch",
-        key="btn_verify",
-        help=SIDEBAR_HELP["verify_costs"],
-    ):
-        with st.spinner("コストモデル検証中..."):
-            try:
-                st.session_state.verify_rows = _verify_costs(style, strategy, ml_filter, use_macd_opt)
-                st.session_state.last_error = None
-            except Exception as exc:
-                st.session_state.last_error = str(exc)
-
-    st.sidebar.divider()
-    st.sidebar.caption(
-        "Alpaca 想定: 株式手数料 $0 + SEC/TAF/CAT 規制費 + スリッページ（詳細は「コスト」タブ）"
-    )
-    render_sidebar_glossary_link()
-
-    reports_dir = data_dir() / "reports"
-    reports_dir.mkdir(exist_ok=True)
-    journals = sorted(reports_dir.glob("journal_*.json"))
-    saved_run = None
-    if journals:
-        saved_run = st.sidebar.selectbox(
-            "保存済みジャーナル",
-            ["（なし）"] + [p.stem.replace("journal_", "") for p in journals],
-            key="saved_journal",
-        )
-
-    return {
-        "style": style,
-        "strategy": strategy,
-        "ml_filter": ml_filter,
-        "cost_model": cost_model,
-        "use_macd_opt": use_macd_opt,
-        "saved_run": saved_run if saved_run != "（なし）" else None,
-        "ticker": bt_ticker.strip(),
-        "start_iso": start_iso,
-        "end_iso": end_iso,
-    }
+    if st.session_state.last_error:
+        st.error(st.session_state.last_error)
+    result = st.session_state.result
+    if result:
+        cfg = {"ml_filter": ml_filter, "cost_model": cost_model}
+        _page_overview(result, cfg)
+        _page_charts(result)
+        with st.expander("トレード一覧"):
+            _page_trades(result, None)
 
 
 def _page_overview(result: dict[str, Any], cfg: dict[str, Any]) -> None:
@@ -379,76 +252,6 @@ def _page_charts(result: dict[str, Any]) -> None:
         _plotly(plot_trade_pnl(trades, "取引別 PnL"), "chart_pnl_bars")
     with c2:
         _plotly(plot_cumulative_pnl(trades, "累積 PnL"), "chart_pnl_cum")
-
-
-def _page_compare(rows: list[dict[str, Any]]) -> None:
-    title, body = TAB_INTROS["compare"]
-    render_tab_intro(title, body)
-
-    if not rows:
-        st.info("サイドバーの「全戦略を比較」を実行してください。")
-        return
-
-    st.subheader("📈 戦略比較")
-    df = pd.DataFrame(rows)
-    st.dataframe(
-        df,
-        width="stretch",
-        hide_index=True,
-        key="df_compare",
-        column_config={
-            "strategy": st.column_config.TextColumn("戦略"),
-            "scope": st.column_config.TextColumn("評価範囲", help="OOS = 未学習期間、全期間 = データ全体"),
-            "profit_factor": st.column_config.NumberColumn("損益比(PF)", format="%.2f"),
-            "win_rate": st.column_config.NumberColumn("Win率", format="%.1%%"),
-            "sharpe": st.column_config.NumberColumn("Sharpe", format="%.2f"),
-            "total_trades": st.column_config.NumberColumn("取引数"),
-            "max_drawdown_pct": st.column_config.NumberColumn("Max DD %", format="%.1f"),
-            "total_return_pct": st.column_config.NumberColumn("総リターン %", format="%.1f"),
-            "total_cost_usd": st.column_config.NumberColumn("コスト($)", format="$%.0f"),
-        },
-    )
-    _plotly(plot_strategy_comparison(rows, "profit_factor"), "chart_strategy_cmp")
-
-    best = max(rows, key=lambda r: r["profit_factor"])
-    label, level = verdict_badge(best["profit_factor"], best["total_return_pct"])
-    if level == "success":
-        st.success(f"最良: **{best['strategy']}** ({best['scope']}) — PF {best['profit_factor']:.2f} {label}")
-    elif level == "warning":
-        st.warning(f"最良: **{best['strategy']}** ({best['scope']}) — PF {best['profit_factor']:.2f} {label}")
-    else:
-        st.error(f"最良: **{best['strategy']}** ({best['scope']}) — PF {best['profit_factor']:.2f} {label}")
-
-
-def _page_costs(verify_rows: list[dict[str, Any]], result: dict[str, Any] | None) -> None:
-    title, body = TAB_INTROS["costs"]
-    render_tab_intro(title, body)
-
-    st.subheader("💰 コスト分析")
-    st.markdown(
-        """
-**Alpaca（API 経由・米国株）の実コスト構成**
-
-| 項目 | 金額 | タイミング |
-|------|------|-----------|
-| 手数料 | **$0** | — |
-| SEC 規制費 | $0.0000206 × 売却代金 | 売りのみ |
-| FINRA TAF | $0.000195/株（上限 $9.79） | 売りのみ |
-| FINRA CAT | $0.000003/株 | 買い・売り |
-| スリッページ | 設定 bps（寄付/バー始値） | 約定時 |
-
-※ 規制費用は $0.01 単位で切り上げ。コストの大半は **スリッページ** です。
-        """
-    )
-
-    if verify_rows:
-        _plotly(plot_cost_comparison(verify_rows), "chart_cost_cmp")
-        st.dataframe(pd.DataFrame(verify_rows), width="stretch", hide_index=True, key="df_verify")
-    else:
-        st.info("サイドバーの「コスト検証（3モデル）」を実行してください。")
-
-    if result is not None and not result["trades"].empty:
-        _plotly(plot_cost_breakdown(result["trades"]), "chart_cost_breakdown")
 
 
 def _page_trades(result: dict[str, Any] | None, saved_run: str | None) -> None:
@@ -511,54 +314,6 @@ def _page_trades(result: dict[str, Any] | None, saved_run: str | None) -> None:
                 )
 
 
-def _page_ml(result: dict[str, Any] | None, saved_run: str | None) -> None:
-    title, body = TAB_INTROS["ml"]
-    render_tab_intro(title, body)
-
-    st.subheader("🤖 ML 説明 & 拒否シグナル")
-
-    run_id = result.get("run_id") if result is not None else saved_run
-    if not run_id:
-        st.info("バックテストを実行するか、保存済みジャーナルを選択してください。")
-        return
-
-    path = data_dir() / "reports" / f"journal_{run_id}.json"
-    if not path.exists():
-        st.warning(f"ジャーナルが見つかりません: {path}")
-        return
-
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
-
-    journal_trades = data.get("trades", [])
-    rejected = data.get("rejected", [])
-
-    st.markdown("#### ML が採用した取引の SHAP 説明")
-    st.caption("SHAP: 各テクニカル指標が「この取引を採用した理由」にどれだけ寄与したか。🟩=プラス要因、🟥=マイナス要因。")
-    ml_trades = [t for t in journal_trades if t.get("ml_explanation")]
-    if not ml_trades:
-        st.caption("ML 説明付きトレードなし（ML フィルタ OFF、または ML 未学習）")
-    for t in ml_trades[:15]:
-        ml = t.get("ml_explanation") or {}
-        st.markdown(f"**Trade #{t.get('trade_id', '?')}** — {t.get('summary_ja', '')}")
-        for feat in ml.get("top_features") or []:
-            shap_val = float(feat.get("shap") or 0)
-            bar = "🟩" * min(int(abs(shap_val) * 10), 5) if shap_val > 0 else "🟥" * min(int(abs(shap_val) * 10), 5)
-            desc = feat.get("desc") or ""
-            st.write(
-                f"{bar} `{feat.get('name', '?')}` = {float(feat.get('value', 0)):.3f} "
-                f"(SHAP {shap_val:+.3f}) — {desc}"
-            )
-
-    st.markdown("#### ML が拒否したシグナル")
-    st.caption("テクニカルでは買いシグナルが出たが、ML が「勝率が低そう」と判断して見送った場面。")
-    if not rejected:
-        st.caption("拒否シグナルなし")
-    for r in rejected[:30]:
-        tag = " [OOS]" if r.get("is_oos") else ""
-        st.write(f"- `{r.get('timestamp')}`{tag}: {r.get('summary_ja', '')}")
-
-
 def run_dashboard() -> None:
     st.set_page_config(
         page_title="SignalForge",
@@ -567,99 +322,33 @@ def run_dashboard() -> None:
         initial_sidebar_state="expanded",
     )
 
-    _init_session()
-    cfg = _sidebar()
+    pick = render_results_sidebar()
 
     st.title("SignalForge")
-    st.caption(
-        "日本株テクニカル分析 — バックテスト・ML・日本コスト検証。"
-        "わからない用語は **📖 用語集**、各戦略の詳細は **📚 戦略解説** タブを参照。"
+    st.caption("日本株 — **事前バックテスト結果** の閲覧。更新は CLI の `results build`。")
+
+    tab_results, tab_guide, tab_glossary, tab_advanced = st.tabs(
+        ["📊 戦略結果", "📚 戦略解説", "📖 用語集", "⚙️ 上級者（再実行）"]
     )
 
-    if st.session_state.last_error:
-        st.error(f"エラー: {st.session_state.last_error}")
+    with tab_results:
+        render_results_home()
+        if pick and pick != "（一覧のみ）":
+            st.divider()
+            render_strategy_detail(pick)
 
-    result = st.session_state.result
-    if result:
-        meta = (
-            f"**{result['strategy']}** / {result['style']}  |  "
-            f"データ: {result.get('data_source', '?')}  |  "
-            f"コスト: {COST_LABELS.get(cfg['cost_model'], cfg['cost_model'])}"
-        )
-        if result.get("backtest_window"):
-            meta += f"  |  期間: {result['backtest_window']}"
-        mr = result.get("ml_report", {})
-        if mr.get("trained"):
-            avg_acc = mr.get("avg_oos_accuracy")
-            acc_txt = f"{avg_acc:.1%}" if avg_acc is not None else "—"
-            meta += f"  |  ML folds: {mr.get('folds', 0)}, OOS accuracy: {acc_txt}"
-        st.markdown(meta)
-
-    (
-        tab_overview,
-        tab_charts,
-        tab_compare,
-        tab_cost,
-        tab_trades,
-        tab_ml,
-        tab_explorer,
-        tab_lab,
-        tab_strategies,
-        tab_glossary,
-    ) = st.tabs(
-        [
-            "📊 概要",
-            "📈 チャート",
-            "⚖️ 戦略比較",
-            "💰 コスト",
-            "📋 トレード",
-            "🤖 ML/監査",
-            "🔍 検証エクスプローラー",
-            "🔬 イザナミラボ",
-            "📚 戦略解説",
-            "📖 用語集",
-        ]
-    )
-
-    with tab_overview:
-        if result:
-            _page_overview(result, cfg)
-        else:
-            st.info("👈 サイドバーから **バックテスト実行** をクリックしてください。")
-            st.markdown(
-                "**初めての方へ:** まず「スタイル」と「戦略」を選び、**バックテスト実行** で過去データでの"
-                "シミュレーション結果を表示します。用語がわからない場合は **📖 用語集** タブを開いてください。"
-            )
-
-    with tab_charts:
-        if result:
-            _page_charts(result)
-        else:
-            st.info("バックテスト実行後にチャートが表示されます。")
-
-    with tab_compare:
-        _page_compare(st.session_state.compare_rows)
-
-    with tab_cost:
-        _page_costs(st.session_state.verify_rows, result)
-
-    with tab_trades:
-        _page_trades(result, cfg.get("saved_run"))
-
-    with tab_ml:
-        _page_ml(result, cfg.get("saved_run"))
-
-    with tab_explorer:
-        render_explorer_tab()
-
-    with tab_lab:
-        render_lab_tab()
-
-    with tab_strategies:
+    with tab_guide:
         render_strategies_tab()
 
     with tab_glossary:
         render_glossary_tab()
+
+    with tab_advanced:
+        st.caption("条件を変えてその場で BT する場合のみ。通常は **戦略結果** タブで十分です。")
+        _init_session()
+        _render_inline_backtest()
+        with st.expander("条件を変えて一括再実行", expanded=True):
+            render_explorer_tab(advanced=True)
 
 
 if __name__ == "__main__":

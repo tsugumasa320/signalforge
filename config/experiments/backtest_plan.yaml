@@ -1,0 +1,43 @@
+meta:
+  title: 東証ユニバース多軸バックテスト実験
+  description: |
+    各戦略を JPX 全内国株式で1回ずつ BT し、結果を市場区分・33業種・全銘柄で集計する。
+    銘柄ごとの再計算は1パスのみ（実験条件は事後集計）。
+  tse_listing: data/universe/tse_listing.json
+  cost_model: japan
+
+strategies: catalog:all
+
+# 集計軸（run 後に自動生成）
+aggregations:
+  - id: universe_all
+    label: 東証内国株式 全銘柄（~3520）
+    group: segment
+    values: [prime, standard, growth]
+
+  - id: segment_prime
+    label: プライム市場
+    group: segment
+    values: [prime]
+
+  - id: segment_standard
+    label: スタンダード市場
+    group: segment
+    values: [standard]
+
+  - id: segment_growth
+    label: グロース市場
+    group: segment
+    values: [growth]
+
+  - id: by_sector
+    label: 33業種区分（JPX）
+    group: sector_tse
+    values: auto
+
+outputs:
+  per_strategy: data/reports/experiments/strategies/{strategy_id}.json
+  summary: data/reports/experiments/summary.json
+  matrix_segment: data/reports/experiments/matrix_segment.json
+  matrix_sector: data/reports/experiments/matrix_sector.json
+  manifest: data/reports/experiments/manifest.json

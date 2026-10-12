@@ -112,8 +112,9 @@ def build_verification_hub() -> Path:
         )[:25]
         ids = [r["id"] for r in top]
         pfs = [float(r["profit_factor"]) for r in top]
-        fig = _bar_chart(ids, pfs, "カタログ戦略ランキング（Top 25 · 単一銘柄 PF）", "Profit Factor")
-        sections.append("<section id='catalog'><h2>📊 カタログ全戦略（単一銘柄）</h2>")
+        n_t = (catalog.get("meta") or {}).get("n_tickers", "?")
+        fig = _bar_chart(ids, pfs, f"カタログ戦略ランキング（Top 25 · 東証{n_t}銘柄 median PF）", "Profit Factor")
+        sections.append("<section id='catalog'><h2>📊 カタログ全戦略（東証ユニバース）</h2>")
         sections.append(fig_to_html_block(fig, include_plotlyjs="cdn", div_id="chart_catalog"))
         sections.append("<h3>ランキング表</h3>")
         sections.append(_rank_table(rows, "profit_factor", limit=133))

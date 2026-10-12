@@ -1,11 +1,17 @@
 # バックテスト比較用コホート（戦略 × 銘柄群）
 meta:
-  description: プライム/スタンダード/グロース・業種・流動性などの比較軸
+  description: プライム/スタンダード/グロース（JPX 上場内国株式 ~3800）・業種など
   equity_meta: config/universe/japan_equity_meta.yaml
+  tse_listing: data/universe/tse_listing.json  # uv run signalforge universe refresh
 
 presets:
+  - id: tse_all
+    label: 東証内国株式 全銘柄（JPX）
+    filter:
+      universe: tse_domestic
+
   - id: all
-    label: メタ登録全銘柄（ETF除く）
+    label: メタ登録全銘柄（ETF除く・サンプル用）
     filter:
       exclude_etf: true
 

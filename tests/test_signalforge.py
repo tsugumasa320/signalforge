@@ -310,6 +310,28 @@ def test_catalog_strategy_resolves():
     assert strat.name == "perfect_order_pullback"
 
 
+def test_cohort_bulk_mode_keeps_metrics_not_journal():
+    from signalforge.compare.runner import _backtest_single_ticker
+    from signalforge.config import data_dir
+
+    reports = data_dir() / "reports"
+    before = len(list(reports.glob("journal_*.json"))) if reports.is_dir() else 0
+    row = _backtest_single_ticker(
+        style="swing",
+        strategy_id="ema_pullback",
+        sym="7203.T",
+        cost_model="japan",
+        refresh=False,
+        cfg_override=None,
+        bulk_mode=True,
+    )
+    after = len(list(reports.glob("journal_*.json"))) if reports.is_dir() else 0
+    assert row.get("error") is None
+    assert "metrics" in row and "metrics_oos" in row and "metrics_in_sample" in row
+    assert row.get("profit_factor") == row["metrics"].get("profit_factor")
+    assert after == before
+
+
 def test_media_sources_registry():
     from signalforge.config import load_media_sources
 

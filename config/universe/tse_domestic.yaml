@@ -1,0 +1,5 @@
+name: tse_domestic
+description: >
+  東証プライム/スタンダード/グロースの内国普通株式（JPX 公式「東証上場銘柄一覧」）。
+  銘柄リストは data/universe/tse_listing.json（universe refresh で更新）。
+dynamic: true

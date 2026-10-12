@@ -33,10 +33,23 @@ def load_nvda_config() -> dict[str, Any]:
 def load_universe(name: str | None = None) -> dict[str, Any]:
     if name is None:
         name = load_market_config("japan").get("universe_default", "japan_liquid")
+    if name == "tse_domestic":
+        from signalforge.universe.tse_listing import list_tse_tickers
+
+        return {
+            "name": "tse_domestic",
+            "description": "JPX TSE domestic equities (Prime/Standard/Growth)",
+            "tickers": list_tse_tickers(),
+        }
     path = CONFIG_DIR / "universe" / f"{name}.yaml"
     if not path.exists():
         raise FileNotFoundError(f"Universe config not found: {path}")
-    return load_yaml(path)
+    doc = load_yaml(path)
+    if doc.get("dynamic"):
+        from signalforge.universe.tse_listing import list_tse_tickers
+
+        doc["tickers"] = list_tse_tickers()
+    return doc
 
 
 def load_web_catalog() -> dict[str, Any]:

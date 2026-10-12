@@ -1,0 +1,35 @@
+# 実験の「いつ・どれだけ」実行するか（後から編集して OK）
+# CLI の --max-minutes 等が指定された場合はここより CLI が優先されます。
+
+execution:
+  timezone: Asia/Tokyo
+
+  # 実行を許可する時間帯（未設定 = 24h）。end < start なら日をまたぐ（例: 22:00〜07:00）
+  active_hours:
+    start: null   # "22:00"
+    end: null     # "07:00"
+
+  # 1 回の `experiments run` で新規処理する戦略数（0 = 全部まで）
+  max_strategies_per_run: 0
+
+  # 銘柄数上限（0 = 省略なし・全 TSE 内国株式）。明示指定時のみ縮小
+  max_tickers_per_strategy: 0
+
+  # 並列 BT ワーカー数（0 = CPU に応じて自動、最大8）
+  parallel_workers: 0
+
+  # 1 回の実行の壁時計上限（分）。0 = 無制限。時間になったら安全に終了（resume 可）
+  max_minutes_per_run: 0
+
+  # 負荷調整（秒）
+  sleep_seconds_per_ticker: 0
+  sleep_seconds_per_strategy: 0
+
+  # ログの銘柄進捗間隔
+  ticker_progress_every: 100
+
+# cron / launchd に載せる例（自動実行は OS 側で設定）
+scheduling_hints:
+  description: 夜間に少しずつ回す例
+  cron_example: "0 22 * * 1-5 cd /path/to/signalforge && uv run signalforge experiments run"
+  launchd_note: macOS なら ~/Library/LaunchAgents/ に plist を置き StartCalendarInterval で指定

@@ -59,18 +59,20 @@ uv run pytest
 - Pickle cache (not parquet) for OHLCV to avoid Streamlit thread SIGSEGV.
 - `ARROW_DEFAULT_MEMORY_POOL=system` is set on dashboard start.
 
-## Izanami-style lab
+## Precomputed strategy results (default UX)
 
-Rule palette backtests (capital-unconstrained rule study, then optional allocation):
+Users **browse** reports; they do not run full catalog backtests from the dashboard by default.
 
 ```bash
-uv run signalforge lab palette
-uv run signalforge lab backtest --rule iz_macd_buy --cohort prime
-uv run signalforge lab matrix --rules all --cohorts prime,standard,growth
+uv run signalforge results status
+uv run signalforge results build          # or: hub build
+uv run signalforge hub open
+uv run signalforge dashboard start --force
 ```
 
-Config: `config/lab/izanami_palette.yaml`, cohorts: `config/universe/compare_presets.yaml`.
-Parity checklist: `docs/izanami_parity.md`.
+Outputs: `data/reports/catalog_backtests.json`, `compare_matrix.json`, `lab_matrix.json`, `hub/index.html`.
+
+Lab rules: `config/lab/izanami_palette.yaml`. Parity: `docs/izanami_parity.md`.
 
 ## Paper trading (forward virtual)
 
