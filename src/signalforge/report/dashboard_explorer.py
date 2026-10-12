@@ -123,7 +123,9 @@ def _render_saved_results() -> None:
         st.dataframe(df[cols], width="stretch", hide_index=True)
         meta = doc.get("meta") or {}
         if meta.get("n_tickers"):
-            st.caption(f"評価: 銘柄あたりの median PF を **{meta['n_tickers']} 銘柄** プールで集計")
+            from signalforge.report.metrics_ja import MEDIAN_PF
+
+            st.caption(f"評価: 銘柄ごとの {MEDIAN_PF} を **{meta['n_tickers']} 銘柄** プールで集計")
         st.plotly_chart(
             _bar_fig(
                 df["id"].tolist(),
@@ -166,8 +168,14 @@ def _render_saved_results() -> None:
             return
         agg = df.groupby("strategy", as_index=False)["median_pf"].mean().sort_values("median_pf", ascending=False).head(40)
         st.dataframe(df.sort_values("median_pf", ascending=False), width="stretch", hide_index=True)
+        from signalforge.report.metrics_ja import MEDIAN_PF
+
         st.plotly_chart(
-            _bar_fig(agg["strategy"].tolist(), agg["median_pf"].astype(float).tolist(), "戦略別・平均 Median PF"),
+            _bar_fig(
+                agg["strategy"].tolist(),
+                agg["median_pf"].astype(float).tolist(),
+                f"戦略別・平均 {MEDIAN_PF}",
+            ),
             width="stretch",
             key="explorer_cmp_chart",
         )

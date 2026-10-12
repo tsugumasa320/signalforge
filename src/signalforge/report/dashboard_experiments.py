@@ -12,6 +12,18 @@ import streamlit as st
 
 from signalforge.config import data_dir, load_web_catalog
 from signalforge.report.dashboard_explorer import _bar_fig, _load_report
+from signalforge.report.dashboard_glossary import TAB_INTROS, render_tab_intro
+from signalforge.report.metrics_ja import (
+    EXPERIMENT_SORT_OPTIONS,
+    HELP_MEDIAN_PF,
+    HELP_MEAN_PF,
+    HELP_PCT_PF_ABOVE_1,
+    MEDIAN_PF,
+    MEAN_PF,
+    PCT_PF_ABOVE_1,
+    PROFIT_FACTOR,
+    rename_experiment_columns,
+)
 
 
 def _strategies_dir() -> Path:
@@ -79,6 +91,8 @@ def _load_strategy_doc(strategy_id: str) -> dict[str, Any] | None:
 @st.fragment
 def render_experiments_panel() -> None:
     st.subheader("🇯🇵 東証 TSE 実験（experiments run）")
+    title, body = TAB_INTROS["experiments"]
+    render_tab_intro(title, body)
     st.caption(
         "全内国株式 × 各戦略の **事前バックテスト JSON** を表示。実行中も **完了分だけ** 随時更新されます。"
     )
@@ -104,12 +118,22 @@ def render_experiments_panel() -> None:
         return
 
     pool = scan.get("n_tickers_pool") or "—"
-    st.caption(f"評価: 銘柄ごと BT → **median PF** を {pool} 銘柄プールで集計（2020-01-01〜キャッシュ最新・`cost_model: japan`）")
+    st.caption(
+        f"評価: 銘柄ごとにバックテスト → **{MEDIAN_PF}** で {pool} 銘柄を集計"
+        "（2020-01-01〜キャッシュ最新・日本株コスト `cost_model: japan`）"
+    )
+    with st.expander("📖 この画面の指標の意味", expanded=False):
+        st.markdown(f"**{MEDIAN_PF}** — {HELP_MEDIAN_PF}")
+        st.markdown(f"**{MEAN_PF}** — {HELP_MEAN_PF}")
+        st.markdown(f"**{PCT_PF_ABOVE_1}** — {HELP_PCT_PF_ABOVE_1}")
+        st.caption("一覧はダッシュボードの「📖 用語集 → TSE 実験」にもあります。")
 
     df = pd.DataFrame(scan["complete"])
+    sort_labels = {k: v for k, v in EXPERIMENT_SORT_OPTIONS}
     sort_col = st.selectbox(
         "並び替え",
-        ["median_pf", "mean_pf", "pct_pf_gt_1", "n_tickers"],
+        options=[k for k, _ in EXPERIMENT_SORT_OPTIONS],
+        format_func=lambda k: sort_labels.get(k, k),
         key="exp_sort",
     )
     n_rows = len(df)
@@ -122,13 +146,13 @@ def render_experiments_panel() -> None:
         top_n = st.slider("表示件数", 5, hi, default, key="exp_top")
     show = df.sort_values(sort_col, ascending=False).head(top_n)
     cols = [c for c in ["strategy_id", "style", "median_pf", "mean_pf", "pct_pf_gt_1", "n_tickers"] if c in show.columns]
-    st.dataframe(show[cols], width="stretch", hide_index=True)
+    st.dataframe(rename_experiment_columns(show[cols]), width="stretch", hide_index=True)
 
     st.plotly_chart(
         _bar_fig(
             show["strategy_id"].astype(str).tolist(),
             show["median_pf"].astype(float).fillna(0).tolist(),
-            f"TSE 実験 Top {top_n}（median PF）",
+            f"TSE 実験 Top {top_n}（{MEDIAN_PF}）",
         ),
         width="stretch",
         key="exp_rank_chart",
@@ -136,7 +160,7 @@ def render_experiments_panel() -> None:
 
     seg_doc = _load_report("experiments/matrix_segment.json")
     if seg_doc and (seg_doc.get("cells") or []):
-        st.markdown("#### 市場区分 × 戦略（median PF）")
+        st.markdown(f"#### 市場区分 × 戦略（{MEDIAN_PF}）")
         seg_df = pd.DataFrame(seg_doc["cells"])
         if not seg_df.empty and "median_pf" in seg_df.columns:
             pivot = seg_df.pivot_table(
@@ -156,10 +180,10 @@ def render_experiments_panel() -> None:
 
                         fig = px.imshow(
                             heat.astype(float),
-                            labels=dict(x="市場区分", y="戦略", color="median PF"),
+                            labels=dict(x="市場区分", y="戦略", color=MEDIAN_PF),
                             color_continuous_scale="RdYlGn",
                             aspect="auto",
-                            title="市場区分 × 戦略（median PF ヒートマップ）",
+                            title=f"市場区分 × 戦略（{MEDIAN_PF}）",
                         )
                         fig.update_layout(template="plotly_dark", height=max(280, 28 * len(heat.index)))
                         st.plotly_chart(fig, width="stretch", key="exp_segment_heatmap")
@@ -180,10 +204,22 @@ def render_experiment_strategy_detail(strategy_id: str) -> None:
 
     u = doc.get("universe") or {}
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Median PF", f"{float(u.get('median_profit_factor') or 0):.2f}")
-    c2.metric("Mean PF", f"{float(u.get('mean_profit_factor') or 0):.2f}")
-    c3.metric("PF>1 銘柄比率", f"{float(u.get('pct_pf_above_1') or 0):.1%}")
-    c4.metric("評価銘柄数", u.get("n_tickers", "—"))
+    c1.metric(
+        MEDIAN_PF,
+        f"{float(u.get('median_profit_factor') or 0):.2f}",
+        help=HELP_MEDIAN_PF,
+    )
+    c2.metric(
+        MEAN_PF,
+        f"{float(u.get('mean_profit_factor') or 0):.2f}",
+        help=HELP_MEAN_PF,
+    )
+    c3.metric(
+        PCT_PF_ABOVE_1,
+        f"{float(u.get('pct_pf_above_1') or 0):.1%}",
+        help=HELP_PCT_PF_ABOVE_1,
+    )
+    c4.metric("評価銘柄数", u.get("n_tickers", "—"), help="バックテストに成功した銘柄数。")
 
     st.caption(
         f"スタイル: {doc.get('style', '?')} · "
@@ -202,12 +238,12 @@ def render_experiment_strategy_detail(strategy_id: str) -> None:
 
     by_sec = doc.get("by_sector") or {}
     if by_sec:
-        st.markdown("#### 33 業種（median PF 上位 15）")
+        st.markdown(f"#### 33 業種（{MEDIAN_PF} 上位 15）")
         sec_rows = [{"sector_tse": k, **(v or {})} for k, v in by_sec.items()]
         sdf = pd.DataFrame(sec_rows)
         if "median_profit_factor" in sdf.columns:
             sdf = sdf.sort_values("median_profit_factor", ascending=False).head(15)
-        st.dataframe(sdf, width="stretch", hide_index=True)
+        st.dataframe(rename_experiment_columns(sdf), width="stretch", hide_index=True)
 
     from signalforge.experiments.storage import tickers_sidecar_path
 
@@ -238,11 +274,11 @@ def render_experiment_strategy_detail(strategy_id: str) -> None:
         ]
         if c in tdf.columns
     ]
-    tab_top, tab_bot, tab_all = st.tabs(["PF 上位 30", "PF 下位 30", "検索"])
+    tab_top, tab_bot, tab_all = st.tabs([f"{PROFIT_FACTOR} 上位 30", f"{PROFIT_FACTOR} 下位 30", "検索"])
     with tab_top:
-        st.dataframe(tdf[show_cols].head(30), width="stretch", hide_index=True)
+        st.dataframe(rename_experiment_columns(tdf[show_cols].head(30)), width="stretch", hide_index=True)
     with tab_bot:
-        st.dataframe(tdf[show_cols].tail(30), width="stretch", hide_index=True)
+        st.dataframe(rename_experiment_columns(tdf[show_cols].tail(30)), width="stretch", hide_index=True)
     with tab_all:
         q = st.text_input("銘柄コード（例: 7203.T）", key=f"exp_ticker_q_{strategy_id}")
         if q.strip():

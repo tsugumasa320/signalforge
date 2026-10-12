@@ -549,7 +549,7 @@ def resolve_strategy_guide(strategy_id: str) -> dict[str, Any]:
             "market": "—",
             "pros": ["実装済み"],
             "cons": ["—"],
-            "tips": "TSE 実験タブで全銘柄 median PF を確認。",
+            "tips": "TSE 実験タブで全銘柄の「中央値の損益比」を確認。",
         }
 
     template = impl.get("template")

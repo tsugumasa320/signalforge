@@ -1193,11 +1193,17 @@ def experiments_status_cmd() -> None:
     n_done = len(scan["complete"])
     n_plan = int(scan["total_planned"])
     if scan["complete"]:
-        click.echo("完了（median PF 上位 5）:")
+        from signalforge.report.metrics_ja import MEDIAN_PF
+
+        click.echo(f"完了（{MEDIAN_PF} 上位 5）:")
         for row in scan["complete"][:5]:
             pf = row.get("median_pf")
             pf_s = f"{float(pf):.2f}" if pf is not None else "—"
-            click.echo(f"  · {row['strategy_id']}: median PF {pf_s}")
+            click.echo(f"  · {row['strategy_id']}: {MEDIAN_PF} {pf_s}")
+        click.echo(
+            f"  ※ {MEDIAN_PF} = 銘柄ごとの損益比の真ん中。"
+            "詳細はダッシュボード「用語集 → TSE 実験」"
+        )
     if scan["in_progress"]:
         click.echo("実行中・途中:")
         for row in scan["in_progress"]:
