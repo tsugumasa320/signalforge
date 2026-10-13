@@ -195,4 +195,8 @@ def run_backtest_pipeline(
                 "journal": bt_engine.journal,
             }
         )
+    else:
+        from signalforge.experiments.series import series_fields_from_backtest
+
+        payload.update(series_fields_from_backtest(result.trades, result.equity_curve))
     return payload

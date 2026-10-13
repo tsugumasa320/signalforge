@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,11 @@ from signalforge.backtest.capital import capital_records_match
 from signalforge.compare.runner import _aggregate
 from signalforge.config import data_dir, load_web_catalog
 from signalforge.experiments.checkpoint_meta import read_checkpoint_progress
-from signalforge.experiments.storage import load_ticker_rows, ticker_row_has_core_metrics
+from signalforge.experiments.storage import (
+    load_ticker_rows,
+    rows_for_universe_aggregate,
+    ticker_row_has_core_metrics,
+)
 from signalforge.paper.matrix import paper_portfolio_exists
 
 
@@ -19,25 +24,173 @@ def _header_metrics_poisoned(header_universe: dict[str, Any]) -> bool:
     return exp is not None and float(exp) <= -20.0
 
 
-def _universe_from_valid_sidecar(
+TSE_SEGMENT_LABELS: dict[str, str] = {
+    "prime": "プライム",
+    "standard": "スタンダード",
+    "growth": "グロース",
+}
+
+
+def _filter_ticker_rows(
+    rows: list[dict[str, Any]],
+    *,
+    segment: str | None = None,
+    sector_tse: str | None = None,
+) -> list[dict[str, Any]]:
+    out = rows
+    if segment:
+        out = [r for r in out if r.get("segment") == segment]
+    if sector_tse:
+        out = [r for r in out if r.get("sector_tse") == sector_tse]
+    return out
+
+
+def _load_ticker_rows_in_dir(
     strategy_id: str,
     doc: dict[str, Any],
-    header_universe: dict[str, Any],
+    strategies_dir: Path | None,
+) -> list[dict[str, Any]]:
+    if strategies_dir is None or strategies_dir == _strategies_dir():
+        return load_ticker_rows(strategy_id, doc)
+    inline = doc.get("tickers")
+    if inline:
+        return list(inline)
+    side = doc.get("tickers_file")
+    if side:
+        path = strategies_dir / side
+        if path.exists():
+            try:
+                raw = json.loads(path.read_text(encoding="utf-8"))
+                return raw if isinstance(raw, list) else []
+            except json.JSONDecodeError:
+                return []
+    path = strategies_dir / f"{strategy_id}.tickers.json"
+    if path.exists():
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            return raw if isinstance(raw, list) else []
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
+def _cohort_from_valid_sidecar(
+    strategy_id: str,
+    doc: dict[str, Any],
+    header_group: dict[str, Any],
+    *,
+    segment: str | None = None,
+    sector_tse: str | None = None,
+    strategies_dir: Path | None = None,
 ) -> tuple[dict[str, Any], int, int]:
     """Prefer live aggregate from sidecar rows with valid 期待値/DD (during metric refresh)."""
-    rows = load_ticker_rows(strategy_id, doc)
-    ok = [r for r in rows if not r.get("error")]
+    rows = _load_ticker_rows_in_dir(strategy_id, doc, strategies_dir)
+    ok = _filter_ticker_rows([r for r in rows if not r.get("error")], segment=segment, sector_tse=sector_tse)
     valid = [r for r in ok if ticker_row_has_core_metrics(r)]
     n_valid = len(valid)
     min_show = 5
     if n_valid >= min_show:
         return _aggregate(valid), n_valid, len(ok)
-    if _header_metrics_poisoned(header_universe):
+    if _header_metrics_poisoned(header_group):
         return {}, n_valid, len(ok)
-    exp = header_universe.get("median_avg_pnl_pct")
+    exp = header_group.get("median_avg_pnl_pct")
     if exp is not None and float(exp) > -20.0:
-        return header_universe, n_valid, len(ok)
+        return header_group, n_valid, len(ok)
+    agg_rows = rows_for_universe_aggregate(ok)
+    if agg_rows:
+        return _aggregate(agg_rows), n_valid, len(ok)
     return {}, n_valid, len(ok)
+
+
+def _universe_from_valid_sidecar(
+    strategy_id: str,
+    doc: dict[str, Any],
+    header_universe: dict[str, Any],
+) -> tuple[dict[str, Any], int, int]:
+    return _cohort_from_valid_sidecar(strategy_id, doc, header_universe)
+
+
+def _ranking_row_from_aggregate(
+    base: dict[str, Any],
+    u: dict[str, Any],
+    *,
+    n_valid: int,
+    n_ok: int,
+) -> dict[str, Any]:
+    return {
+        **base,
+        "expectancy_pct": u.get("median_avg_pnl_pct"),
+        "profit_factor": u.get("median_profit_factor"),
+        "win_rate": u.get("median_win_rate"),
+        "total_trades": u.get("median_trades"),
+        "max_drawdown_pct": u.get("median_max_drawdown_pct"),
+        "n_tickers": u.get("n_tickers"),
+        "metrics_valid_tickers": n_valid,
+        "metrics_total_tickers": n_ok,
+        "metrics_partial": n_valid < n_ok,
+    }
+
+
+def list_campaign_sectors(*, strategies_dir: Path | None = None) -> list[str]:
+    d = strategies_dir or _strategies_dir()
+    sectors: set[str] = set()
+    if not d.is_dir():
+        return []
+    for path in sorted(d.glob("*.json")):
+        if path.name.endswith(".tickers.json") or path.name.endswith(".checkpoint.json"):
+            continue
+        doc = _load_json(path)
+        if not doc or not doc.get("complete"):
+            continue
+        for sec in (doc.get("by_sector") or {}):
+            if sec:
+                sectors.add(str(sec))
+    return sorted(sectors)
+
+
+def apply_cohort_to_complete(
+    complete: list[dict[str, Any]],
+    *,
+    segment: str | None = None,
+    sector_tse: str | None = None,
+    strategies_dir: Path | None = None,
+) -> list[dict[str, Any]]:
+    """Rebuild ranking rows for Prime / Standard / Growth / sector cohorts."""
+    if not segment and not sector_tse:
+        return list(complete)
+    d = strategies_dir or _strategies_dir()
+    out: list[dict[str, Any]] = []
+    for base in complete:
+        sid = str(base.get("strategy_id") or "")
+        path = d / f"{sid}.json"
+        doc = _load_json(path)
+        if not doc:
+            continue
+        if segment:
+            header = (doc.get("by_segment") or {}).get(segment) or {}
+        else:
+            header = (doc.get("by_sector") or {}).get(sector_tse or "") or {}
+        u, n_valid, n_ok = _cohort_from_valid_sidecar(
+            sid,
+            doc,
+            header,
+            segment=segment,
+            sector_tse=sector_tse,
+            strategies_dir=d,
+        )
+        if not u and n_ok == 0:
+            continue
+        keep = {
+            k: base[k]
+            for k in ("strategy_id", "style", "capital_ok", "paper_active", "mtime")
+            if k in base
+        }
+        out.append(_ranking_row_from_aggregate(keep, u, n_valid=n_valid, n_ok=n_ok))
+    out.sort(
+        key=lambda x: float(x.get("expectancy_pct") or x.get("profit_factor") or 0),
+        reverse=True,
+    )
+    return out
 
 
 def _strategies_dir() -> Path:
@@ -179,6 +332,73 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
     }
     out["overall"] = summarize_campaign_progress(out)
     return out
+
+
+def apply_cohort_period_slice(
+    complete: list[dict[str, Any]],
+    *,
+    start: date | None,
+    end: date | None,
+    segment: str | None = None,
+    sector_tse: str | None = None,
+    strategies_dir: Path | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Rebuild ranking from trades_compact / equity_daily (no re-backtest)."""
+    from signalforge.experiments.series import (
+        aggregate_sliced_rows,
+        slice_row_metrics,
+        strategy_series_coverage,
+        ticker_row_has_series,
+    )
+
+    if start is None:
+        return [], {"n_strategies": 0, "series_tickers": 0, "total_tickers": 0}
+    d = strategies_dir or _strategies_dir()
+    out: list[dict[str, Any]] = []
+    series_tickers = 0
+    total_tickers = 0
+    for base in complete:
+        sid = str(base.get("strategy_id") or "")
+        path = d / f"{sid}.json"
+        doc = _load_json(path)
+        if not doc:
+            continue
+        rows = _load_ticker_rows_in_dir(sid, doc, d)
+        ok = _filter_ticker_rows(
+            [r for r in rows if not r.get("error")],
+            segment=segment,
+            sector_tse=sector_tse,
+        )
+        n_series, n_ok = strategy_series_coverage(ok)
+        total_tickers += n_ok
+        series_tickers += n_series
+        sliced: list[dict[str, Any]] = []
+        for r in ok:
+            if not ticker_row_has_series(r):
+                continue
+            sm = slice_row_metrics(r, start, end)
+            if sm:
+                sliced.append({**r, **sm})
+        if not sliced:
+            continue
+        u = aggregate_sliced_rows(sliced)
+        n_valid = sum(1 for r in sliced if ticker_row_has_core_metrics(r))
+        keep = {
+            k: base[k]
+            for k in ("strategy_id", "style", "capital_ok", "paper_active", "mtime")
+            if k in base
+        }
+        out.append(_ranking_row_from_aggregate(keep, u, n_valid=n_valid, n_ok=len(sliced)))
+    out.sort(
+        key=lambda x: float(x.get("expectancy_pct") or x.get("profit_factor") or 0),
+        reverse=True,
+    )
+    meta = {
+        "n_strategies": len(out),
+        "series_tickers": series_tickers,
+        "total_tickers": total_tickers,
+    }
+    return out, meta
 
 
 def summarize_campaign_progress(scan: dict[str, Any]) -> dict[str, Any]:

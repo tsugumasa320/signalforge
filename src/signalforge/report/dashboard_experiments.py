@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -14,10 +14,20 @@ from signalforge.report.dashboard_explorer import _bar_fig
 from signalforge.report.experiment_context import (
     apply_ranking_filters,
     experiment_premises,
+    live_strategy_breakdown,
     live_strategy_universe,
     paper_forward_summary,
 )
 from signalforge.experiments.storage import ticker_row_has_core_metrics
+from signalforge.experiments.period import infer_stored_backtest_period, period_label, periods_match
+from signalforge.experiments.scan import (
+    TSE_SEGMENT_LABELS,
+    apply_cohort_period_slice,
+    apply_cohort_to_complete,
+    list_campaign_sectors,
+)
+from signalforge.experiments.series import period_sliceable
+from signalforge.report.dashboard_explorer import _default_dates
 from signalforge.report.metrics_ja import (
     EXPECTANCY,
     EXPERIMENT_RANKING_COLUMNS,
@@ -156,7 +166,7 @@ def render_experiments_panel() -> None:
         f"{TSE_TABLE_NOTE}  \n"
         f"データ更新 **{experiments_data_updated_label()}** · "
         f"期待値あり **{n_with_exp}** / {len(scan.get('complete') or [])} 戦略{extra} · "
-        "30秒ごとに自動更新"
+        "30秒ごとに自動更新 · 市場区分・業種・期間（系列データがあれば再BT不要）"
     )
 
     manifest = scan.get("manifest") or {}
@@ -193,7 +203,133 @@ def render_experiments_panel() -> None:
             "`uv run signalforge experiments run --ignore-schedule --workers 8 --refresh-metrics`"
         )
 
-    df = pd.DataFrame(scan["complete"])
+    ref_start, ref_end = infer_stored_backtest_period(scan["complete"])
+    cfg_start, _ = _default_dates()
+    period_presets = [
+        "保存済みBTと同じ",
+        "直近365日",
+        "2020-01-01〜",
+        "2023-01-01〜",
+        "手動",
+    ]
+    c_pre, c_ps, c_pe, c_pl = st.columns([1, 1, 1, 1])
+    with c_pre:
+        period_preset = st.selectbox("期間プリセット", period_presets, key="exp_period_preset")
+    preset_start = ref_start or cfg_start
+    preset_end = ref_end
+    if period_preset == "直近365日":
+        preset_start, preset_end = date.today() - timedelta(days=365), None
+    elif period_preset == "2020-01-01〜":
+        preset_start, preset_end = date(2020, 1, 1), None
+    elif period_preset == "2023-01-01〜":
+        preset_start, preset_end = date(2023, 1, 1), None
+    elif period_preset == "保存済みBTと同じ":
+        preset_start, preset_end = ref_start or cfg_start, ref_end
+    with c_ps:
+        bt_start = st.date_input(
+            "開始日",
+            value=preset_start,
+            disabled=period_preset != "手動",
+            key="exp_bt_start",
+        )
+    with c_pe:
+        end_default = preset_end or date.today()
+        bt_end_input = st.date_input(
+            "終了日",
+            value=end_default,
+            disabled=period_preset != "手動",
+            key="exp_bt_end",
+        )
+    with c_pl:
+        end_is_latest = st.checkbox(
+            "終了=最新OHLCV",
+            value=preset_end is None,
+            disabled=period_preset != "手動",
+            key="exp_bt_end_latest",
+        )
+    if period_preset != "手動":
+        bt_start, bt_end = preset_start, preset_end
+    else:
+        bt_end = None if end_is_latest else bt_end_input
+
+    use_stored_period = periods_match(bt_start, bt_end, ref_start, ref_end)
+    period_note = period_label(bt_start, bt_end)
+    stored_note = period_label(ref_start, ref_end)
+
+    cohort_labels = ["全体", "プライムのみ", "スタンダードのみ", "グロースのみ", "業種別"]
+    c_seg, c_sec = st.columns([1, 1])
+    with c_seg:
+        cohort_pick = st.selectbox("成績の集計対象", cohort_labels, key="exp_cohort_mode")
+    segment: str | None = None
+    sector_tse: str | None = None
+    cohort_note = "全銘柄（プライム・スタンダード・グロース）"
+    if cohort_pick == "プライムのみ":
+        segment = "prime"
+        cohort_note = TSE_SEGMENT_LABELS["prime"]
+    elif cohort_pick == "スタンダードのみ":
+        segment = "standard"
+        cohort_note = TSE_SEGMENT_LABELS["standard"]
+    elif cohort_pick == "グロースのみ":
+        segment = "growth"
+        cohort_note = TSE_SEGMENT_LABELS["growth"]
+    elif cohort_pick == "業種別":
+        sectors = list_campaign_sectors()
+        with c_sec:
+            if not sectors:
+                st.caption("業種集計は `experiments aggregate` 後に選べます。")
+            else:
+                sector_tse = st.selectbox("業種（TSE33）", sectors, key="exp_cohort_sector")
+                cohort_note = sector_tse or "—"
+
+    st.session_state["exp_period_start"] = bt_start.isoformat() if bt_start else None
+    st.session_state["exp_period_end"] = bt_end.isoformat() if bt_end else None
+    st.session_state["exp_period_use_stored"] = use_stored_period
+    st.session_state["exp_cohort_segment"] = segment
+    st.session_state["exp_cohort_sector"] = sector_tse
+
+    complete_rows: list[dict[str, Any]]
+    if use_stored_period:
+        complete_rows = apply_cohort_to_complete(
+            scan["complete"],
+            segment=segment,
+            sector_tse=sector_tse,
+        )
+    else:
+        if not period_sliceable(bt_start, bt_end, ref_start, ref_end):
+            st.warning(
+                f"保存済みBT（{stored_note}）より **前／後** には伸ばせません。"
+                "より長い期間が必要ならキャンペーンをその開始日で再実行してください。"
+            )
+            return
+        complete_rows, slice_meta = apply_cohort_period_slice(
+            scan["complete"],
+            start=bt_start,
+            end=bt_end,
+            segment=segment,
+            sector_tse=sector_tse,
+        )
+        n_series = int(slice_meta.get("series_tickers") or 0)
+        n_total = int(slice_meta.get("total_tickers") or 0)
+        if n_total and n_series < n_total:
+            st.info(
+                f"期間 **{period_note}** をトレード系列から切り出し（系列あり {n_series}/{n_total} 銘柄）。"
+                "未追記分: `./scripts/rerun-experiments-series.sh` または "
+                "`uv run signalforge experiments run --ignore-schedule --workers 8 --refresh-series`"
+            )
+        else:
+            st.caption(f"期間 **{period_note}** — 保存BT内の切り出し集計（再BTなし）")
+        if not complete_rows:
+            st.warning(
+                "トレード系列（`trades_compact` / `equity_daily`）がまだありません。"
+                "上記 `--refresh-series` で1回だけ追記してください。"
+            )
+            return
+
+    if (segment or sector_tse) and not complete_rows:
+        st.warning(f"「{cohort_note}」に該当する sidecar 行がまだありません。")
+        return
+
+    df = pd.DataFrame(complete_rows)
     if "expectancy_pct" in df.columns:
         df.loc[df["expectancy_pct"].notna() & (df["expectancy_pct"] <= -20.0), "expectancy_pct"] = None
     f1, f2, f3 = st.columns(3)
@@ -236,7 +372,16 @@ def render_experiments_panel() -> None:
         )
     if "paper_active" in show.columns and show["paper_active"].any():
         st.caption("📈 = ペーパー稼働中（詳細で BT との比較）")
-    cols = [c for c in EXPERIMENT_RANKING_COLUMNS if c in display.columns]
+    rank_cols = list(EXPERIMENT_RANKING_COLUMNS)
+    if segment or sector_tse:
+        if "n_tickers" not in rank_cols and "n_tickers" in display.columns:
+            rank_cols.append("n_tickers")
+    cols = [c for c in rank_cols if c in display.columns]
+    if segment or sector_tse or not use_stored_period:
+        bits = [cohort_note]
+        if not use_stored_period:
+            bits.append(period_note)
+        st.caption(f"表示中: **{' · '.join(bits)}**（該当銘柄のみの典型値）")
     st.dataframe(
         _format_ranking_table(display[cols]),
         width="stretch",
@@ -313,7 +458,28 @@ def render_experiment_strategy_detail(strategy_id: str) -> None:
         st.warning(f"`{strategy_id}` は未完了です。")
         return
 
-    u = live_strategy_universe(strategy_id, doc)
+    ps_raw = st.session_state.get("exp_period_start")
+    pe_raw = st.session_state.get("exp_period_end")
+    period_start = date.fromisoformat(ps_raw) if ps_raw else None
+    period_end = date.fromisoformat(pe_raw) if pe_raw else None
+    use_stored = bool(st.session_state.get("exp_period_use_stored", True))
+    segment = st.session_state.get("exp_cohort_segment")
+    sector_tse = st.session_state.get("exp_cohort_sector")
+    ref_start, ref_end = infer_stored_backtest_period([{"strategy_id": strategy_id}])
+
+    u = live_strategy_universe(
+        strategy_id,
+        doc,
+        segment=segment,
+        sector_tse=sector_tse,
+        period_start=period_start if not use_stored else None,
+        period_end=period_end if not use_stored else None,
+        stored_period=(ref_start, ref_end),
+    )
+    if not use_stored:
+        st.caption(
+            f"詳細指標: 期間 **{period_label(period_start or ref_start, period_end)}**（系列から切り出し）"
+        )
     c1, c2, c3, c4, c5 = st.columns(5)
     exp = u.get("median_avg_pnl_pct")
     if exp is not None and float(exp) <= -20.0:
@@ -332,6 +498,57 @@ def render_experiment_strategy_detail(strategy_id: str) -> None:
         st.caption(
             f"BT 前提: ¥{int(stored_cap['initial_cash_jpy']):,} · 1回上限 {pct:.0f}%"
         )
+
+    by_seg, by_sec = live_strategy_breakdown(strategy_id, doc)
+    if by_seg or by_sec:
+        with st.expander("市場区分・業種別（典型値）", expanded=False):
+            if not use_stored:
+                st.caption("期間を変更中のため、内訳は **保存済みBT期間** の sidecar 集計です。")
+            if by_seg:
+                seg_rows = []
+                for seg, s in sorted(by_seg.items(), key=lambda x: x[0]):
+                    exp_s = s.get("median_avg_pnl_pct")
+                    if exp_s is not None and float(exp_s) <= -20.0:
+                        exp_s = None
+                    seg_rows.append(
+                        {
+                            "市場区分": TSE_SEGMENT_LABELS.get(seg, seg),
+                            "期待値（%）": exp_s,
+                            PROFIT_FACTOR: s.get("median_profit_factor"),
+                            WIN_RATE: s.get("median_win_rate"),
+                            TRADES: s.get("median_trades"),
+                            MAX_DRAWDOWN: s.get("median_max_drawdown_pct"),
+                            "評価銘柄数": s.get("n_tickers"),
+                        }
+                    )
+                st.markdown("**市場区分**")
+                st.dataframe(
+                    _format_ranking_table(pd.DataFrame(seg_rows)),
+                    width="stretch",
+                    hide_index=True,
+                )
+            if by_sec:
+                sec_rows = []
+                for sec, s in sorted(by_sec.items(), key=lambda x: x[0]):
+                    exp_s = s.get("median_avg_pnl_pct")
+                    if exp_s is not None and float(exp_s) <= -20.0:
+                        exp_s = None
+                    sec_rows.append(
+                        {
+                            "業種": sec,
+                            "期待値（%）": exp_s,
+                            PROFIT_FACTOR: s.get("median_profit_factor"),
+                            WIN_RATE: s.get("median_win_rate"),
+                            TRADES: s.get("median_trades"),
+                            "評価銘柄数": s.get("n_tickers"),
+                        }
+                    )
+                st.markdown("**業種（TSE33）**")
+                st.dataframe(
+                    _format_ranking_table(pd.DataFrame(sec_rows)),
+                    width="stretch",
+                    hide_index=True,
+                )
 
     paper = paper_forward_summary(strategy_id)
     if paper:

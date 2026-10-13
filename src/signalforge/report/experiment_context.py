@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -154,9 +154,87 @@ def format_capital_rerun_command(record: dict[str, Any]) -> str:
     )
 
 
-def live_strategy_universe(strategy_id: str, doc: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Dashboard 用: 毒データを除いた universe 集計。"""
-    from signalforge.compare.runner import _aggregate
+def live_strategy_universe(
+    strategy_id: str,
+    doc: dict[str, Any] | None = None,
+    *,
+    segment: str | None = None,
+    sector_tse: str | None = None,
+    period_start: date | None = None,
+    period_end: date | None = None,
+    stored_period: tuple[date, date | None] | None = None,
+) -> dict[str, Any]:
+    """Dashboard 用: 毒データを除いた集計（全体 / 市場区分 / 業種 / 期間）。"""
+    from signalforge.experiments.period import infer_stored_backtest_period, periods_match
+    from signalforge.experiments.scan import _cohort_from_valid_sidecar
+    from signalforge.experiments.storage import load_strategy_header
+
+    doc = doc or load_strategy_header(strategy_id) or {}
+    ref_start, ref_end = stored_period or infer_stored_backtest_period(
+        [{"strategy_id": strategy_id}]
+    )
+    ps = period_start if period_start is not None else ref_start
+    pe = period_end
+    if period_start is None and period_end is None:
+        use_stored_period = True
+    else:
+        use_stored_period = periods_match(ps, pe, ref_start, ref_end)
+
+    if not use_stored_period:
+        from signalforge.experiments.scan import (
+            _filter_ticker_rows,
+            _load_ticker_rows_in_dir,
+            _strategies_dir,
+        )
+        from signalforge.experiments.series import (
+            aggregate_sliced_rows,
+            period_sliceable,
+            slice_row_metrics,
+            ticker_row_has_series,
+        )
+
+        if not period_sliceable(ps, pe, ref_start, ref_end):
+            return {}
+        doc = doc or load_strategy_header(strategy_id) or {}
+        rows = _load_ticker_rows_in_dir(strategy_id, doc, _strategies_dir())
+        ok = _filter_ticker_rows(
+            [r for r in rows if not r.get("error")],
+            segment=segment,
+            sector_tse=sector_tse,
+        )
+        sliced: list[dict[str, Any]] = []
+        for r in ok:
+            if not ticker_row_has_series(r):
+                continue
+            sm = slice_row_metrics(r, ps, pe)
+            if sm:
+                sliced.append({**r, **sm})
+        if sliced:
+            return aggregate_sliced_rows(sliced)
+        return {}
+
+    if segment:
+        header = (doc.get("by_segment") or {}).get(segment) or {}
+    elif sector_tse:
+        header = (doc.get("by_sector") or {}).get(sector_tse) or {}
+    else:
+        header = doc.get("universe") or {}
+    u, _, _ = _cohort_from_valid_sidecar(
+        strategy_id,
+        doc,
+        header,
+        segment=segment,
+        sector_tse=sector_tse,
+    )
+    return u
+
+
+def live_strategy_breakdown(
+    strategy_id: str,
+    doc: dict[str, Any] | None = None,
+) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+    """市場区分・業種別の典型値（sidecar から再集計）。"""
+    from signalforge.experiments.runner import _aggregate_group
     from signalforge.experiments.storage import (
         load_strategy_header,
         load_ticker_rows,
@@ -164,17 +242,10 @@ def live_strategy_universe(strategy_id: str, doc: dict[str, Any] | None = None) 
     )
 
     doc = doc or load_strategy_header(strategy_id) or {}
-    header = doc.get("universe") or {}
-    ok = [r for r in load_ticker_rows(strategy_id, doc) if not r.get("error")]
-    valid = rows_for_universe_aggregate(ok)
-    header_exp = header.get("median_avg_pnl_pct")
-    poisoned = header_exp is not None and float(header_exp) <= -20.0
-    if len(valid) >= 5 or (poisoned and len(valid) >= 1):
-        return _aggregate(valid)
-    exp = header.get("median_avg_pnl_pct")
-    if exp is not None and float(exp) > -20.0:
-        return header
-    return {}
+    ok = rows_for_universe_aggregate(
+        [r for r in load_ticker_rows(strategy_id, doc) if not r.get("error")]
+    )
+    return _aggregate_group(ok, "segment"), _aggregate_group(ok, "sector_tse")
 
 
 def apply_ranking_filters(

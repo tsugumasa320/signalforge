@@ -75,6 +75,9 @@ def _row_from_pipeline_result(sym: str, result: dict[str, Any], *, compact: bool
     for key in _METRIC_TOP_KEYS:
         if key in m:
             row[key] = m[key]
+    for key in ("trades_compact", "equity_daily", "series_schema"):
+        if key in result:
+            row[key] = result[key]
     return row
 
 

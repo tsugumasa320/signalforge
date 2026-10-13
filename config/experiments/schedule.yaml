@@ -15,8 +15,8 @@ execution:
   # 銘柄数上限（0 = 省略なし・全 TSE 内国株式）。明示指定時のみ縮小
   max_tickers_per_strategy: 0
 
-  # 並列 BT ワーカー数（0 = CPU に応じて自動、最大8）
-  parallel_workers: 0
+  # 並列 BT ワーカー数（0 = CPU に応じて自動、最大8）。CLI --workers が最優先
+  parallel_workers: 8
 
   # 1 回の実行の壁時計上限（分）。0 = 無制限。時間になったら安全に終了（resume 可）
   max_minutes_per_run: 0

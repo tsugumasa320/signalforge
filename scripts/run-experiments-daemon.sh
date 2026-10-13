@@ -8,11 +8,16 @@ LOG=data/reports/experiments_run.log
 PIDFILE=data/reports/experiments.pid
 WATCH_INTERVAL="${WATCH_INTERVAL:-5}"
 REFRESH_METRICS="${REFRESH_METRICS:-0}"
+REFRESH_SERIES="${REFRESH_SERIES:-0}"
 REFRESH_CAPITAL="${REFRESH_CAPITAL:-0}"
 RUN_EXTRA=()
 if [[ "$REFRESH_METRICS" == "1" ]]; then
   RUN_EXTRA+=(--refresh-metrics)
   echo "モード: 指標更新（完了戦略を期待値・最大DD 付きで再BT）"
+fi
+if [[ "$REFRESH_SERIES" == "1" ]]; then
+  RUN_EXTRA+=(--refresh-series)
+  echo "モード: 系列追記（期間スライス用 trades_compact / equity_daily）"
 fi
 if [[ "$REFRESH_CAPITAL" == "1" ]]; then
   RUN_EXTRA+=(--refresh-capital)

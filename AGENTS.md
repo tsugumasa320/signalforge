@@ -84,6 +84,7 @@ uv run signalforge experiments aggregate
 scripts/resume-experiments.sh             # compact + aggregate + resume
 scripts/start-experiments-supervisor.sh   # BT 停止を監視して自動再開
 scripts/rerun-experiments-metrics.sh      # 期待値・最大DD 用に完了戦略を再BT（--refresh-metrics）
+scripts/rerun-experiments-series.sh      # 期間スライス用系列データ追記（--refresh-series）
 scripts/rerun-experiments-capital.sh      # 口座/上限変更後（--refresh-capital、INITIAL_CASH_JPY 等）
 ```
 

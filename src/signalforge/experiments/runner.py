@@ -17,6 +17,7 @@ from signalforge.backtest.capital import (
 from signalforge.compare.runner import _aggregate, resolve_strategy_style, run_cohort_backtests
 from signalforge.config import CONFIG_DIR, data_dir, load_yaml
 from signalforge.experiments.schedule import ExecutionBudget
+from signalforge.experiments.series import SERIES_SCHEMA, ticker_row_has_series
 from signalforge.experiments.storage import (
     load_strategy_header,
     load_ticker_rows,
@@ -183,6 +184,24 @@ def list_strategies_needing_metric_refresh(strategy_ids: list[str]) -> list[str]
     return [sid for sid in strategy_ids if strategy_needs_metric_refresh(sid)]
 
 
+def strategy_needs_series_refresh(strategy_id: str) -> bool:
+    """True if completed strategy lacks trades_compact / equity_daily for period slicing."""
+    doc = load_strategy_header(strategy_id)
+    if not doc or not doc.get("complete"):
+        return False
+    if doc.get("series_schema") != SERIES_SCHEMA:
+        pass
+    rows = [r for r in load_ticker_rows(strategy_id, doc) if not r.get("error")]
+    if not rows:
+        return True
+    sample = rows[: min(50, len(rows))]
+    return any(not ticker_row_has_series(r) for r in sample)
+
+
+def list_strategies_needing_series_refresh(strategy_ids: list[str]) -> list[str]:
+    return [sid for sid in strategy_ids if strategy_needs_series_refresh(sid)]
+
+
 def strategy_needs_capital_refresh(
     strategy_id: str,
     current_capital: dict[str, Any],
@@ -242,6 +261,7 @@ def run_strategy_pass(
     resume: bool = True,
     force_redo: bool = False,
     upgrade_incomplete_metrics: bool = False,
+    upgrade_incomplete_series: bool = False,
     cfg_override: dict[str, Any] | None = None,
     backtest_capital: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -249,7 +269,7 @@ def run_strategy_pass(
     existing: dict[str, dict[str, Any]] = {}
     if force_redo:
         clear_strategy_checkpoints(strategy_id)
-    elif resume or upgrade_incomplete_metrics:
+    elif resume or upgrade_incomplete_metrics or upgrade_incomplete_series:
         ck = _load_checkpoint(strategy_id)
         if ck.get("tickers"):
             existing = _resume_rows_map(ck["tickers"])
@@ -257,7 +277,12 @@ def run_strategy_pass(
         if final_path.exists():
             doc = json.loads(final_path.read_text(encoding="utf-8"))
             complete = _is_complete(doc, len(tickers))
-            if complete and resume and not upgrade_incomplete_metrics:
+            if (
+                complete
+                and resume
+                and not upgrade_incomplete_metrics
+                and not upgrade_incomplete_series
+            ):
                 return doc
             resume_rows = load_ticker_rows(strategy_id, doc)
             if resume_rows:
@@ -269,6 +294,11 @@ def run_strategy_pass(
             sym: row
             for sym, row in existing.items()
             if ticker_row_has_core_metrics(row)
+        }
+
+    if upgrade_incomplete_series and existing:
+        existing = {
+            sym: row for sym, row in existing.items() if ticker_row_has_series(row)
         }
 
     def _after_ticker() -> None:
@@ -318,6 +348,8 @@ def run_strategy_pass(
         enriched,
         backtest_capital=backtest_capital,
     )
+    if any(ticker_row_has_series(r) for r in enriched if not r.get("error")):
+        doc["series_schema"] = SERIES_SCHEMA
     doc["tickers"] = enriched
     persist_strategy_document(strategy_id, doc, split_tickers=bool(enriched), compact=True)
     if doc.get("complete"):
@@ -348,6 +380,7 @@ def run_experiment_campaign(
     ticker_progress_cb: Callable[[int, int, str], None] | None = None,
     aggregate_every: int = 5,
     refresh_metrics: bool = False,
+    refresh_series: bool = False,
     refresh_capital: bool = False,
     initial_cash_jpy: float | None = None,
     max_position_pct: float | None = None,
@@ -372,7 +405,7 @@ def run_experiment_campaign(
     out_dir = experiments_dir() / "strategies"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    done = skipped = failed = stopped = processed_new = refreshed = refreshed_capital = 0
+    done = skipped = failed = stopped = processed_new = refreshed = refreshed_series = refreshed_capital = 0
     total = len(strategy_ids)
 
     for i, sid in enumerate(strategy_ids, 1):
@@ -387,7 +420,7 @@ def run_experiment_campaign(
 
         final_path = _strategy_path(sid)
         force_redo = False
-        redo_metrics = redo_capital = False
+        redo_metrics = redo_series = redo_capital = False
         if final_path.exists():
             try:
                 doc = json.loads(final_path.read_text(encoding="utf-8"))
@@ -399,7 +432,9 @@ def run_experiment_campaign(
                         redo_capital = True
                     elif refresh_metrics and strategy_needs_metric_refresh(sid):
                         redo_metrics = True
-                    if not force_redo and not redo_metrics and resume:
+                    elif refresh_series and strategy_needs_series_refresh(sid):
+                        redo_series = True
+                    if not force_redo and not redo_metrics and not redo_series and resume:
                         skipped += 1
                         if progress_cb:
                             progress_cb(i, total, f"{sid} (完了済み)")
@@ -412,6 +447,8 @@ def run_experiment_campaign(
                 tag = f"{sid} (資金条件の再BT)"
             elif redo_metrics and not force_redo:
                 tag = f"{sid} (期待値・DD 差し替え)"
+            elif redo_series and not force_redo:
+                tag = f"{sid} (トレード系列 追記)"
             elif force_redo:
                 tag = f"{sid} (再BT)"
             else:
@@ -429,6 +466,7 @@ def run_experiment_campaign(
                 resume=resume and not force_redo,
                 force_redo=force_redo,
                 upgrade_incomplete_metrics=redo_metrics and not force_redo,
+                upgrade_incomplete_series=redo_series and not force_redo,
                 cfg_override=cfg_override,
                 backtest_capital=backtest_capital,
             )
@@ -438,6 +476,8 @@ def run_experiment_campaign(
                 refreshed_capital += 1
             if redo_metrics:
                 refreshed += 1
+            if redo_series:
+                refreshed_series += 1
             budget.sleep_after_strategy()
             if aggregate_every > 0 and done % aggregate_every == 0:
                 build_experiment_summaries(strategy_ids, tickers_count=len(tickers))
@@ -463,9 +503,10 @@ def run_experiment_campaign(
         "failed": failed,
         "stopped_early": stopped,
         "refreshed_metrics": refreshed,
+        "refreshed_series": refreshed_series,
         "refreshed_capital": refreshed_capital,
         "backtest_capital": backtest_capital,
-        "note": "skipped_complete = 全銘柄済み。--refresh-metrics / --refresh-capital で完了分を再BT。",
+        "note": "skipped_complete = 全銘柄済み。--refresh-metrics / --refresh-series / --refresh-capital で完了分を再BT。",
     }
     (experiments_dir() / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2),
@@ -610,4 +651,4 @@ def default_parallel_workers(override: int = 0) -> int:
     budget = ExecutionBudget.from_config()
     if budget.parallel_workers > 0:
         return budget.parallel_workers
-    return max(1, os.cpu_count() or 4)
+    return min(8, max(1, os.cpu_count() or 4))

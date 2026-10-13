@@ -57,8 +57,12 @@ def compact_ticker_row(row: dict[str, Any]) -> dict[str, Any]:
     """Drop redundant nested metric blobs; keep top-level aggregator keys."""
     if row.get("error"):
         return dict(row)
+    keep_series = ("trades_compact", "equity_daily", "series_schema")
     nested = row.get("metrics") if isinstance(row.get("metrics"), dict) else {}
     out = {k: v for k, v in row.items() if k not in ("metrics", "metrics_oos", "metrics_in_sample")}
+    for k in keep_series:
+        if k in row:
+            out[k] = row[k]
     for key in CORE_TICKER_METRIC_KEYS:
         if out.get(key) is None and nested.get(key) is not None:
             out[key] = nested[key]

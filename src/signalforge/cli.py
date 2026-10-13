@@ -1348,6 +1348,11 @@ def experiments_schedule_cmd() -> None:
     help="完了済み戦略のうち期待値・最大DD が未保存のものだけ全銘柄を再BT",
 )
 @click.option(
+    "--refresh-series",
+    is_flag=True,
+    help="期間スライス用に trades_compact / equity_daily が無い銘柄だけ再BT",
+)
+@click.option(
     "--refresh-capital",
     is_flag=True,
     help="完了済みのうち backtest_capital が現設定と違う戦略を全銘柄再BT",
@@ -1369,6 +1374,7 @@ def experiments_run(
     ignore_schedule: bool,
     no_resume: bool,
     refresh_metrics: bool,
+    refresh_series: bool,
     refresh_capital: bool,
     initial_cash_jpy: float | None,
     max_position_pct: float | None,
@@ -1431,6 +1437,7 @@ def experiments_run(
     from signalforge.experiments.runner import (
         list_strategies_needing_capital_refresh,
         list_strategies_needing_metric_refresh,
+        list_strategies_needing_series_refresh,
         resolve_campaign_backtest_capital,
     )
 
@@ -1447,11 +1454,15 @@ def experiments_run(
     if refresh_metrics:
         need_metrics = list_strategies_needing_metric_refresh(strategy_ids)
         click.echo(f"指標更新が必要な完了戦略: {len(need_metrics)} / {len(strategy_ids)}")
+    need_series: list[str] = []
+    if refresh_series:
+        need_series = list_strategies_needing_series_refresh(strategy_ids)
+        click.echo(f"系列データ追記が必要な完了戦略: {len(need_series)} / {len(strategy_ids)}")
     if refresh_capital:
         need_capital = list_strategies_needing_capital_refresh(strategy_ids, capital_record)
         click.echo(f"資金条件が古い完了戦略: {len(need_capital)} / {len(strategy_ids)}")
 
-    if (refresh_metrics or refresh_capital) and not need_metrics and not need_capital:
+    if (refresh_metrics or refresh_series or refresh_capital) and not need_metrics and not need_series and not need_capital:
         click.echo("再BT不要。aggregate のみ実行します。")
         ctx = click.get_current_context()
         ctx.invoke(
@@ -1463,6 +1474,7 @@ def experiments_run(
             ignore_schedule=ignore_schedule,
             no_resume=no_resume,
             refresh_metrics=False,
+            refresh_series=False,
             refresh_capital=False,
             initial_cash_jpy=initial_cash_jpy,
             max_position_pct=max_position_pct,
@@ -1474,6 +1486,8 @@ def experiments_run(
     extras = []
     if refresh_metrics:
         extras.append("refresh-metrics")
+    if refresh_series:
+        extras.append("refresh-series")
     if refresh_capital:
         extras.append("refresh-capital")
     click.echo(
@@ -1491,6 +1505,7 @@ def experiments_run(
         progress_cb=_prog,
         ticker_progress_cb=_tprog,
         refresh_metrics=refresh_metrics,
+        refresh_series=refresh_series,
         refresh_capital=refresh_capital,
         initial_cash_jpy=initial_cash_jpy,
         max_position_pct=max_position_pct,
