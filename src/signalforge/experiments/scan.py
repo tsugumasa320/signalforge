@@ -197,6 +197,13 @@ def _strategies_dir() -> Path:
     return data_dir() / "reports" / "experiments" / "strategies"
 
 
+def _safe_mtime(path: Path) -> float:
+    try:
+        return path.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -238,15 +245,19 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
         if path.name.endswith(".tickers.json"):
             continue
         if path.name.endswith(".checkpoint.json"):
+            if not path.exists():
+                continue
             sid = path.name.replace(".checkpoint.json", "")
             prog = read_checkpoint_progress(path)
+            if prog["n_tickers_target"] <= 0 and prog["n_tickers_done"] <= 0:
+                continue
             in_progress.append(
                 {
                     "strategy_id": sid,
                     "n_done": prog["n_tickers_done"],
                     "n_target": prog["n_tickers_target"],
                     "source": "checkpoint",
-                    "mtime": path.stat().st_mtime,
+                    "mtime": _safe_mtime(path),
                 }
             )
             continue
@@ -281,7 +292,7 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
                     "metrics_partial": n_valid < n_ok,
                     "capital_ok": cap_ok,
                     "paper_active": paper_portfolio_exists(sid),
-                    "mtime": path.stat().st_mtime,
+                    "mtime": _safe_mtime(path),
                 }
             )
         elif done > 0 and not doc.get("complete"):
@@ -291,7 +302,7 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
                     "n_done": done,
                     "n_target": target or done,
                     "source": "partial",
-                    "mtime": path.stat().st_mtime,
+                    "mtime": _safe_mtime(path),
                 }
             )
 

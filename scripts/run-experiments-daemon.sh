@@ -35,11 +35,19 @@ fi
 
 if [[ -f "$PIDFILE" ]]; then
   old="$(cat "$PIDFILE" 2>/dev/null || true)"
+  running_pid="$(pgrep -f "signalforge experiments run" 2>/dev/null | tail -1 || true)"
+  if [[ -n "$running_pid" ]]; then
+    echo "$running_pid" > "$PIDFILE"
+    echo "既に実行中 (PID $running_pid). このターミナルで進捗だけ表示します。"
+    echo ""
+    exec uv run signalforge experiments watch --interval "$WATCH_INTERVAL"
+  fi
   if [[ -n "$old" ]] && kill -0 "$old" 2>/dev/null; then
     echo "既に実行中 (PID $old). このターミナルで進捗だけ表示します。"
     echo ""
     exec uv run signalforge experiments watch --interval "$WATCH_INTERVAL"
   fi
+  rm -f "$PIDFILE"
 fi
 
 export PYTHONUNBUFFERED=1
