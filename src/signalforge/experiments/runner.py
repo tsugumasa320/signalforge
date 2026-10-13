@@ -8,10 +8,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from signalforge.backtest.capital import (
+    backtest_capital_record,
+    capital_records_match,
+    pipeline_cfg_override_from_capital,
+    resolve_experiment_capital,
+)
 from signalforge.compare.runner import _aggregate, resolve_strategy_style, run_cohort_backtests
 from signalforge.config import CONFIG_DIR, data_dir, load_yaml
 from signalforge.experiments.schedule import ExecutionBudget
-from signalforge.experiments.storage import load_ticker_rows, persist_strategy_document
+from signalforge.experiments.storage import (
+    load_strategy_header,
+    load_ticker_rows,
+    persist_strategy_document,
+    rows_for_universe_aggregate,
+    ticker_row_has_core_metrics,
+)
 from signalforge.universe.tse_listing import listing_by_ticker, list_tse_tickers
 
 
@@ -78,6 +90,15 @@ def _rows_to_map(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return {str(r["ticker"]): r for r in rows if r.get("ticker")}
 
 
+def _resume_rows_map(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Keep checkpoint rows that already have 期待値・最大DD (re-BT the rest)."""
+    return {
+        str(r["ticker"]): r
+        for r in rows
+        if r.get("ticker") and ticker_row_has_core_metrics(r)
+    }
+
+
 def _enrich_ticker_rows(rows: list[dict[str, Any]], meta: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for r in rows:
@@ -111,19 +132,102 @@ def _finalize_strategy_doc(
     style: str,
     tickers: list[str],
     enriched: list[dict[str, Any]],
+    *,
+    backtest_capital: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     ok = [r for r in enriched if not r.get("error")]
+    agg_rows = rows_for_universe_aggregate(ok)
     complete = len(enriched) >= len(tickers)
-    return {
+    doc: dict[str, Any] = {
         "strategy_id": strategy_id,
         "style": style,
         "n_tickers_target": len(tickers),
         "n_tickers_done": len(enriched),
         "complete": complete,
-        "universe": _aggregate(ok),
-        "by_segment": _aggregate_group(ok, "segment"),
-        "by_sector": _aggregate_group(ok, "sector_tse"),
+        "universe": _aggregate(agg_rows),
+        "by_segment": _aggregate_group(agg_rows, "segment"),
+        "by_sector": _aggregate_group(agg_rows, "sector_tse"),
     }
+    if backtest_capital:
+        doc["backtest_capital"] = backtest_capital
+    doc["metrics_schema"] = {"pnl_basis": PNL_METRICS_SCHEMA}
+    return doc
+
+
+def clear_strategy_checkpoints(strategy_id: str) -> None:
+    _checkpoint_path(strategy_id).unlink(missing_ok=True)
+    _checkpoint_tickers_path(strategy_id).unlink(missing_ok=True)
+
+
+PNL_METRICS_SCHEMA = "entry_cost_v3"
+
+
+def strategy_needs_metric_refresh(strategy_id: str) -> bool:
+    """True if completed strategy sidecar lacks avg_pnl_pct / max_drawdown_pct."""
+    doc = load_strategy_header(strategy_id)
+    if not doc or not doc.get("complete"):
+        return False
+    schema = doc.get("metrics_schema") or {}
+    if schema.get("pnl_basis") != PNL_METRICS_SCHEMA:
+        return True
+    rows = [r for r in load_ticker_rows(strategy_id, doc) if not r.get("error")]
+    if not rows:
+        return True
+    if any(not ticker_row_has_core_metrics(r) for r in rows[: min(50, len(rows))]):
+        return True
+    sample = rows[0]
+    return sample.get("avg_pnl_pct") is None or sample.get("max_drawdown_pct") is None
+
+
+def list_strategies_needing_metric_refresh(strategy_ids: list[str]) -> list[str]:
+    return [sid for sid in strategy_ids if strategy_needs_metric_refresh(sid)]
+
+
+def strategy_needs_capital_refresh(
+    strategy_id: str,
+    current_capital: dict[str, Any],
+    *,
+    doc: dict[str, Any] | None = None,
+) -> bool:
+    if doc is None:
+        doc = load_strategy_header(strategy_id) or {}
+    if not doc or not doc.get("complete"):
+        return False
+    stored = doc.get("backtest_capital")
+    if not isinstance(stored, dict):
+        return True
+    return not capital_records_match(stored, current_capital)
+
+
+def list_strategies_needing_capital_refresh(
+    strategy_ids: list[str],
+    current_capital: dict[str, Any],
+) -> list[str]:
+    return [
+        sid
+        for sid in strategy_ids
+        if strategy_needs_capital_refresh(sid, current_capital)
+    ]
+
+
+def resolve_campaign_backtest_capital(
+    plan: dict[str, Any] | None = None,
+    *,
+    initial_cash_jpy: float | None = None,
+    max_position_pct: float | None = None,
+    min_cash_reserve_pct: float | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    plan = plan or load_plan()
+    plan_cap = (plan.get("meta") or {}).get("backtest_capital")
+    policy = resolve_experiment_capital(
+        plan_capital=plan_cap if isinstance(plan_cap, dict) else None,
+        initial_cash_jpy=initial_cash_jpy,
+        max_position_pct=max_position_pct,
+        min_cash_reserve_pct=min_cash_reserve_pct,
+    )
+    record = backtest_capital_record(policy)
+    cfg_override = pipeline_cfg_override_from_capital(policy)
+    return record, cfg_override
 
 
 def run_strategy_pass(
@@ -136,21 +240,36 @@ def run_strategy_pass(
     budget: ExecutionBudget,
     ticker_progress_cb=None,
     resume: bool = True,
+    force_redo: bool = False,
+    upgrade_incomplete_metrics: bool = False,
+    cfg_override: dict[str, Any] | None = None,
+    backtest_capital: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     style = resolve_strategy_style(strategy_id, catalog_by_id)
     existing: dict[str, dict[str, Any]] = {}
-    if resume:
+    if force_redo:
+        clear_strategy_checkpoints(strategy_id)
+    elif resume or upgrade_incomplete_metrics:
         ck = _load_checkpoint(strategy_id)
         if ck.get("tickers"):
-            existing = _rows_to_map(ck["tickers"])
+            existing = _resume_rows_map(ck["tickers"])
         final_path = _strategy_path(strategy_id)
         if final_path.exists():
             doc = json.loads(final_path.read_text(encoding="utf-8"))
-            if _is_complete(doc, len(tickers)):
+            complete = _is_complete(doc, len(tickers))
+            if complete and resume and not upgrade_incomplete_metrics:
                 return doc
             resume_rows = load_ticker_rows(strategy_id, doc)
             if resume_rows:
-                existing = {**existing, **_rows_to_map(resume_rows)}
+                existing = {**existing, **_resume_rows_map(resume_rows)}
+
+    if upgrade_incomplete_metrics and existing:
+        # 旧 sidecar（期待値 ≈ -65% 等）はそのまま載せると pending が空になり再BTされない
+        existing = {
+            sym: row
+            for sym, row in existing.items()
+            if ticker_row_has_core_metrics(row)
+        }
 
     def _after_ticker() -> None:
         budget.sleep_after_ticker()
@@ -183,6 +302,7 @@ def run_strategy_pass(
         tickers=tickers,
         cost_model=cost_model,
         refresh=False,
+        cfg_override=cfg_override,
         ticker_progress_cb=ticker_progress_cb,
         ticker_progress_every=budget.ticker_progress_every,
         max_workers=budget.parallel_workers,
@@ -191,7 +311,13 @@ def run_strategy_pass(
         existing_rows=existing,
     )
     enriched = _enrich_ticker_rows(block.get("tickers") or [], meta)
-    doc = _finalize_strategy_doc(strategy_id, style, tickers, enriched)
+    doc = _finalize_strategy_doc(
+        strategy_id,
+        style,
+        tickers,
+        enriched,
+        backtest_capital=backtest_capital,
+    )
     doc["tickers"] = enriched
     persist_strategy_document(strategy_id, doc, split_tickers=bool(enriched), compact=True)
     if doc.get("complete"):
@@ -221,9 +347,21 @@ def run_experiment_campaign(
     progress_cb: Callable[[int, int, str], None] | None = None,
     ticker_progress_cb: Callable[[int, int, str], None] | None = None,
     aggregate_every: int = 5,
+    refresh_metrics: bool = False,
+    refresh_capital: bool = False,
+    initial_cash_jpy: float | None = None,
+    max_position_pct: float | None = None,
+    min_cash_reserve_pct: float | None = None,
+    plan: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     started = datetime.now(timezone.utc).astimezone().isoformat()
     budget = budget or ExecutionBudget.from_config()
+    backtest_capital, cfg_override = resolve_campaign_backtest_capital(
+        plan,
+        initial_cash_jpy=initial_cash_jpy,
+        max_position_pct=max_position_pct,
+        min_cash_reserve_pct=min_cash_reserve_pct,
+    )
     meta = listing_by_ticker()
     tickers = list_tse_tickers()
     if ticker_limit > 0:
@@ -234,7 +372,7 @@ def run_experiment_campaign(
     out_dir = experiments_dir() / "strategies"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    done = skipped = failed = stopped = processed_new = 0
+    done = skipped = failed = stopped = processed_new = refreshed = refreshed_capital = 0
     total = len(strategy_ids)
 
     for i, sid in enumerate(strategy_ids, 1):
@@ -248,19 +386,37 @@ def run_experiment_campaign(
             break
 
         final_path = _strategy_path(sid)
-        if resume and final_path.exists():
+        force_redo = False
+        redo_metrics = redo_capital = False
+        if final_path.exists():
             try:
                 doc = json.loads(final_path.read_text(encoding="utf-8"))
                 if _is_complete(doc, len(tickers)):
-                    skipped += 1
-                    if progress_cb:
-                        progress_cb(i, total, f"{sid} (完了済み)")
-                    continue
+                    if refresh_capital and strategy_needs_capital_refresh(
+                        sid, backtest_capital, doc=doc
+                    ):
+                        force_redo = True
+                        redo_capital = True
+                    elif refresh_metrics and strategy_needs_metric_refresh(sid):
+                        redo_metrics = True
+                    if not force_redo and not redo_metrics and resume:
+                        skipped += 1
+                        if progress_cb:
+                            progress_cb(i, total, f"{sid} (完了済み)")
+                        continue
             except json.JSONDecodeError:
                 pass
 
         if progress_cb:
-            progress_cb(i, total, sid)
+            if force_redo and redo_capital:
+                tag = f"{sid} (資金条件の再BT)"
+            elif redo_metrics and not force_redo:
+                tag = f"{sid} (期待値・DD 差し替え)"
+            elif force_redo:
+                tag = f"{sid} (再BT)"
+            else:
+                tag = sid
+            progress_cb(i, total, tag)
         try:
             run_strategy_pass(
                 sid,
@@ -270,10 +426,18 @@ def run_experiment_campaign(
                 meta=meta,
                 budget=budget,
                 ticker_progress_cb=ticker_progress_cb,
-                resume=resume,
+                resume=resume and not force_redo,
+                force_redo=force_redo,
+                upgrade_incomplete_metrics=redo_metrics and not force_redo,
+                cfg_override=cfg_override,
+                backtest_capital=backtest_capital,
             )
             processed_new += 1
             done += 1
+            if redo_capital:
+                refreshed_capital += 1
+            if redo_metrics:
+                refreshed += 1
             budget.sleep_after_strategy()
             if aggregate_every > 0 and done % aggregate_every == 0:
                 build_experiment_summaries(strategy_ids, tickers_count=len(tickers))
@@ -298,7 +462,10 @@ def run_experiment_campaign(
         "skipped_complete": skipped,
         "failed": failed,
         "stopped_early": stopped,
-        "note": "skipped_complete = 全銘柄済み。省略ではなく再計算不要。",
+        "refreshed_metrics": refreshed,
+        "refreshed_capital": refreshed_capital,
+        "backtest_capital": backtest_capital,
+        "note": "skipped_complete = 全銘柄済み。--refresh-metrics / --refresh-capital で完了分を再BT。",
     }
     (experiments_dir() / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2),
@@ -312,8 +479,42 @@ def run_experiment_campaign(
     return manifest
 
 
+def refresh_completed_strategy_aggregates(strategy_ids: list[str] | None = None) -> int:
+    """Recompute universe / segment / sector from ticker sidecars (no re-backtest)."""
+    strat_dir = experiments_dir() / "strategies"
+    if strategy_ids is None:
+        strategy_ids = sorted(
+            p.stem
+            for p in strat_dir.glob("*.json")
+            if not p.name.endswith(".checkpoint.json") and not p.name.endswith(".tickers.json")
+        )
+    updated = 0
+    for sid in strategy_ids:
+        path = strat_dir / f"{sid}.json"
+        if not path.exists():
+            continue
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if doc.get("error") or not doc.get("complete"):
+            continue
+        rows = load_ticker_rows(sid, doc)
+        if not rows:
+            continue
+        ok = [r for r in rows if not r.get("error")]
+        agg_rows = rows_for_universe_aggregate(ok)
+        doc["universe"] = _aggregate(agg_rows)
+        doc["by_segment"] = _aggregate_group(agg_rows, "segment")
+        doc["by_sector"] = _aggregate_group(agg_rows, "sector_tse")
+        path.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+        updated += 1
+    return updated
+
+
 def build_experiment_summaries(strategy_ids: list[str], *, tickers_count: int) -> dict[str, Any]:
     """Roll up per-strategy JSON into segment / sector matrices."""
+    refresh_completed_strategy_aggregates(strategy_ids)
     seg_matrix: list[dict[str, Any]] = []
     sec_matrix: list[dict[str, Any]] = []
     universe_rows: list[dict[str, Any]] = []
@@ -330,9 +531,13 @@ def build_experiment_summaries(strategy_ids: list[str], *, tickers_count: int) -
         universe_rows.append(
             {
                 "strategy": sid,
+                "median_return_pct": u.get("median_total_return_pct"),
+                "mean_return_pct": u.get("mean_return_pct"),
                 "median_pf": u.get("median_profit_factor"),
                 "mean_pf": u.get("mean_profit_factor"),
+                "median_trades": u.get("median_trades"),
                 "n_tickers": u.get("n_tickers"),
+                "pct_return_gt_0": u.get("pct_return_above_0"),
                 "pct_pf_gt_1": u.get("pct_pf_above_1"),
             }
         )
@@ -356,7 +561,7 @@ def build_experiment_summaries(strategy_ids: list[str], *, tickers_count: int) -
                 }
             )
 
-    universe_rows.sort(key=lambda x: float(x.get("median_pf") or 0), reverse=True)
+    universe_rows.sort(key=lambda x: float(x.get("median_return_pct") or 0), reverse=True)
     out = {
         "universe_ranking": universe_rows,
         "n_tickers_pool": tickers_count,
@@ -384,6 +589,8 @@ def build_experiment_summaries(strategy_ids: list[str], *, tickers_count: int) -
                 "n_tickers": r.get("n_tickers"),
                 "profit_factor": r.get("median_pf"),
                 "mean_profit_factor": r.get("mean_pf"),
+                "total_return_pct": r.get("median_return_pct"),
+                "mean_return_pct": r.get("mean_return_pct"),
                 "pct_pf_above_1": r.get("pct_pf_gt_1"),
                 "evaluation": "multi_ticker_median",
             }

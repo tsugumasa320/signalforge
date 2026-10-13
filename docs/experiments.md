@@ -25,6 +25,10 @@ uv run signalforge experiments watch        # tqdm 風に同一画面で更新�
 ./scripts/run-experiments-daemon.sh          # BT 起動 + このターミナルで watch
 WATCH_INTERVAL=3 ./scripts/run-experiments-daemon.sh
 
+./scripts/start-experiments-supervisor.sh    # BT が落ちたら自動再開（推奨・長時間）
+./scripts/stop-experiments-supervisor.sh
+uv run signalforge experiments supervisor-status
+
 uv run signalforge experiments aggregate  # JSON のみから矩阵再生成
 uv run signalforge experiments compact    # 既存 JSON を slim 化 + 銘柄 sidecar 分離
 ```
@@ -67,7 +71,61 @@ Mac がスリープすると BT は止まります。夜間実行時は電源設
 | **平均の損益比** | 銘柄損益比の平均。外れ値の影響を受けやすい。 |
 | **損益比が1超の銘柄比率** | 損益比 > 1.0 の銘柄が何割か。 |
 
-ダッシュボード **📖 用語集 → TSE 実験** に同じ説明があります。
+### 儲かるかどうか — 見る指標（早見表）
+
+| 優先 | 指標 | 見る場所 | 儲かる目安 | 補足 |
+|------|------|----------|------------|------|
+| 1 | 総リターン（%） | 戦略詳細 · 銘柄別 · 単銘柄 BT | プラス | 期間トータルで資金が増えたか |
+| 2 | 1トレード期待値（%） | ラボ「期待値%」· CLI Avg PnL | 0 より大 | 取引数が少ないと偶然に注意 |
+| 3 | 損益比（PF） | TSE 一覧 · 各種表 | 1.05 以上目安 | 1 未満は期待値マイナス方向 |
+| 4 | 取引数 | 各画面 | 十分な回数 | 目安 100 回以上で 1〜3 が信頼しやすい |
+| 5 | Max DD | 単銘柄 BT · 資産曲線 | 許容できる下落 | 儲かっても途中のドローダウンで運用不可になり得る |
+
+| やりたいこと | まず見る | 次に見る |
+|--------------|----------|----------|
+| 1銘柄で使う？ | 総リターン · PF · 取引数 | 資産曲線 · Max DD |
+| TSE 全銘柄比較 | 中央値の損益比 | 詳細 → 銘柄別総リターン |
+| ラボルール | 期待値% | PF · 勝率 |
+| これから先 | ペーパートレード資産 | — |
+
+ダッシュボード **📖 用語集** 冒頭にも同じ表があります。
+
+### 資金制約（同時に使える金）
+
+バックテストでは `config/backtest.yaml` の **capital** と `config/market/japan.yaml` の **backtest_capital_hint** で調整できます。
+
+| キー | 意味 |
+|------|------|
+| `initial_cash_jpy` | 口座サイズ（円） |
+| `max_position_pct` | 1エントリーで使える口座の上限（例 0.35 = 35%） |
+| `min_cash_reserve_pct` | 常に残す現金（例 0.10 = 10%） |
+
+**TSE 実験**は銘柄ごとに上記ルールで **独立口座** として BT します（1口座で全銘柄を同時保有するポートフォリオ制約は別途将来拡張）。
+
+実験だけ別口座にしたい場合は `config/experiments/backtest_plan.yaml` の `meta.backtest_capital`、または run 時の CLI / 環境変数を使います。
+
+```bash
+uv run signalforge experiments capital   # 有効な条件と「古い」完了戦略数
+uv run signalforge experiments run --ignore-schedule --workers 8 \
+  --initial-cash-jpy 5000000 --max-position-pct 0.25 --refresh-capital
+# 環境変数: INITIAL_CASH_JPY, MAX_POSITION_PCT, MIN_CASH_RESERVE_PCT
+# スクリプト: INITIAL_CASH_JPY=5000000 ./scripts/rerun-experiments-capital.sh
+```
+
+完了戦略 JSON には `backtest_capital` が記録されます。設定を変えたら `--refresh-capital` で再BTしないと表の数値は古い条件のままです。
+
+### 指標更新の再BT（期待値・最大DD）
+
+旧 sidecar には `avg_pnl_pct` / `max_drawdown_pct` が無いことがあります。
+
+```bash
+chmod +x scripts/rerun-experiments-metrics.sh
+./scripts/rerun-experiments-metrics.sh
+# 同等: REFRESH_METRICS=1 ./scripts/run-experiments-daemon.sh
+# CLI: uv run signalforge experiments run --ignore-schedule --workers 8 --refresh-metrics
+```
+
+`--refresh-metrics` は **期待値・最大DD が無い銘柄だけ** 再BTします（済み銘柄は sidecar を再利用）。未完了戦略も resume 時に同様。資金変更は `--refresh-capital` で戦略丸ごと再BT。
 
 ## 出力
 

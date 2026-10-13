@@ -10,6 +10,9 @@ from signalforge.config import data_dir
 
 TICKERS_SUFFIX = ".tickers.json"
 
+# Top-level sidecar keys required for TSE 期待値 / 最大DD 集計
+CORE_TICKER_METRIC_KEYS = ("avg_pnl_pct", "max_drawdown_pct")
+
 
 def _strategies_dir() -> Path:
     d = data_dir() / "reports" / "experiments" / "strategies"
@@ -25,11 +28,40 @@ def tickers_sidecar_path(strategy_id: str) -> Path:
     return _strategies_dir() / tickers_sidecar_name(strategy_id)
 
 
+def rows_for_universe_aggregate(rows: list[dict[str, Any]], *, min_valid: int = 1) -> list[dict[str, Any]]:
+    """Universe 集計に使う行（旧バグの期待値 -65% 等を除外）。"""
+    ok = [r for r in rows if not r.get("error")]
+    valid = [r for r in ok if ticker_row_has_core_metrics(r)]
+    if len(valid) >= min_valid:
+        return valid
+    return ok
+
+
+def ticker_row_has_core_metrics(row: dict[str, Any]) -> bool:
+    if row.get("error"):
+        return True
+    trades = int(row.get("total_trades") or 0)
+    if trades <= 0:
+        return False
+    avg = row.get("avg_pnl_pct")
+    dd = row.get("max_drawdown_pct")
+    if avg is None or dd is None:
+        return False
+    # 旧バグ: 部分投入なのに口座全額基準 → 1トレードあたり約 -65% 前後
+    if avg <= -20.0:
+        return False
+    return True
+
+
 def compact_ticker_row(row: dict[str, Any]) -> dict[str, Any]:
     """Drop redundant nested metric blobs; keep top-level aggregator keys."""
     if row.get("error"):
         return dict(row)
+    nested = row.get("metrics") if isinstance(row.get("metrics"), dict) else {}
     out = {k: v for k, v in row.items() if k not in ("metrics", "metrics_oos", "metrics_in_sample")}
+    for key in CORE_TICKER_METRIC_KEYS:
+        if out.get(key) is None and nested.get(key) is not None:
+            out[key] = nested[key]
     return out
 
 

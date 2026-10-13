@@ -6,36 +6,69 @@ from __future__ import annotations
 
 PROFIT_FACTOR = "損益比"
 PROFIT_FACTOR_LONG = "損益比（PF）"
-MEDIAN_PF = "中央値の損益比"
-MEAN_PF = "平均の損益比"
-PCT_PF_ABOVE_1 = "損益比が1超の銘柄比率"
+EXPECTANCY = "期待値（%）"
+WIN_RATE = "勝率"
+MAX_DRAWDOWN = "最大DD（%）"
+TRADES = "取引数"
+TSE_TABLE_NOTE = "各列は全銘柄バックテスト結果の典型値（順位の真ん中の銘柄）"
+
+# 旧ラベル（CLI・互換）
+MEDIAN_PF = "損益比"
+MEDIAN_TRADES = TRADES
+MEDIAN_EXPECTANCY = EXPECTANCY
 
 EXPERIMENT_DF_COLUMNS: dict[str, str] = {
     "strategy_id": "戦略",
+    "strategy": "戦略",
+    "id": "戦略ID",
     "style": "スタイル",
-    "median_pf": MEDIAN_PF,
-    "mean_pf": MEAN_PF,
-    "pct_pf_gt_1": PCT_PF_ABOVE_1,
-    "n_tickers": "評価銘柄数",
+    "expectancy_pct": EXPECTANCY,
     "profit_factor": PROFIT_FACTOR,
-    "win_rate": "勝率",
-    "total_trades": "取引数",
+    "win_rate": WIN_RATE,
+    "total_trades": TRADES,
+    "max_drawdown_pct": MAX_DRAWDOWN,
+    "n_tickers": "評価銘柄数",
     "total_return_pct": "総リターン（%）",
-    "median_profit_factor": MEDIAN_PF,
-    "mean_profit_factor": MEAN_PF,
-    "pct_pf_above_1": PCT_PF_ABOVE_1,
+    "avg_pnl_pct": EXPECTANCY,
     "segment": "市場区分",
     "sector_tse": "業種（TSE33）",
     "ticker": "銘柄コード",
     "name": "銘柄名",
+    "cohort": "コホート",
+    "rule_id": "ラボルール",
+    "expectancy_pct_lab": EXPECTANCY,
+    "window": "評価期間",
+    "error": "エラー",
 }
 
 EXPERIMENT_SORT_OPTIONS: list[tuple[str, str]] = [
-    ("median_pf", f"{MEDIAN_PF}（おすすめ）"),
-    ("mean_pf", MEAN_PF),
-    ("pct_pf_gt_1", PCT_PF_ABOVE_1),
-    ("n_tickers", "評価銘柄数"),
+    ("expectancy_pct", EXPECTANCY),
+    ("profit_factor", PROFIT_FACTOR),
+    ("win_rate", WIN_RATE),
+    ("total_trades", TRADES),
+    ("max_drawdown_pct", MAX_DRAWDOWN),
 ]
+
+EXPERIMENT_RANKING_COLUMNS: list[str] = [
+    "strategy_id",
+    "style",
+    "expectancy_pct",
+    "profit_factor",
+    "win_rate",
+    "total_trades",
+    "max_drawdown_pct",
+]
+
+CATALOG_SORT_OPTIONS: list[tuple[str, str]] = [
+    ("profit_factor", PROFIT_FACTOR),
+    ("total_return_pct", "総リターン（%）"),
+    ("win_rate", "勝率"),
+    ("total_trades", "取引数"),
+]
+
+
+def sort_option_label(options: list[tuple[str, str]], key: str) -> str:
+    return dict(options).get(key, key)
 
 # --- Help text (st.metric help= / CLI footnotes) ---
 
@@ -57,40 +90,99 @@ HELP_MEAN_PF = (
 
 HELP_PCT_PF_ABOVE_1 = (
     "損益比が 1.0 を超えた銘柄が、評価銘柄のうち何割か。"
-    "「勝ち銘柄がどれだけ多いか」の割合。中央値PFとは別の見方。"
+    "「勝ち銘柄がどれだけ多いか」の割合。中央値の損益比とは別の見方。"
 )
+
+HELP_EXPECTANCY = "1トレードあたりの平均損益（%）。0超なら1回ごとの期待はプラス。"
+HELP_WIN_RATE = "勝ちトレード ÷ 全トレード。"
+HELP_MAX_DD = "資産ピークからの最大下落（%）。マイナスが大きいほど含み損が深い。"
 
 METRIC_HELP_JA: dict[str, str] = {
     "PF": HELP_PROFIT_FACTOR,
     PROFIT_FACTOR: HELP_PROFIT_FACTOR,
-    MEDIAN_PF: HELP_MEDIAN_PF,
-    MEAN_PF: HELP_MEAN_PF,
-    PCT_PF_ABOVE_1: HELP_PCT_PF_ABOVE_1,
-    "Median PF": HELP_MEDIAN_PF,
-    "Mean PF": HELP_MEAN_PF,
+    EXPECTANCY: HELP_EXPECTANCY,
+    WIN_RATE: HELP_WIN_RATE,
+    MAX_DRAWDOWN: HELP_MAX_DD,
+    TRADES: "バックテスト期間中の売買回数。少なすぎると偶然の可能性。",
 }
 
+# --- 「儲かるか」早見表（ダッシュボード・docs 共通） ---
+
+PROFIT_CHECK_COLUMNS = ["優先", "指標", "見る場所", "儲かる目安", "補足"]
+
+PROFIT_CHECK_ROWS: list[tuple[str, str, str, str, str]] = [
+    ("1", EXPECTANCY, "TSE 一覧 · 銘柄別", "0 より大", "1回あたりの損益期待"),
+    ("2", PROFIT_FACTOR, "TSE 一覧", "1.05 以上目安", "勝ち÷負け"),
+    ("3", WIN_RATE, "TSE 一覧 · 銘柄別", "参考", "高くても1回大負けで崩れることあり"),
+    ("4", TRADES, "TSE 一覧", "十分な回数", "目安 100 回以上"),
+    ("5", MAX_DRAWDOWN, "TSE 一覧 · 銘柄別", "許容内", "途中の最大下落"),
+]
+
+PROFIT_CHECK_SCENARIO_COLUMNS = ["やりたいこと", "まず見る指標", "次に見る"]
+
+PROFIT_CHECK_SCENARIO_ROWS: list[tuple[str, str, str]] = [
+    (
+        "この戦略を1銘柄（例 7203.T）で使う？",
+        "総リターン · 損益比 · 取引数",
+        "資産曲線 · Max DD",
+    ),
+    (
+        "東証全銘柄で戦略を比較（TSE 実験）",
+        f"{EXPECTANCY} · {PROFIT_FACTOR}",
+        "戦略詳細 → 銘柄別",
+    ),
+    (
+        "イザナミラボのルール",
+        "期待値（%）",
+        "損益比 · 勝率",
+    ),
+    (
+        "これから先の成績（forward）",
+        "ペーパートレードの資産推移",
+        "—",
+    ),
+]
+
+PROFIT_CHECK_FOOTNOTE = (
+    "**損益比だけ** では「いくら儲かるか」は分かりません。"
+    "**総リターン** と **期待値%** をセットで確認してください。"
+    "TSE 実験は銘柄ごとの BT の横並びで、1口座に全銘柄を載せた合計円ではありません。"
+)
+
+
+def profit_check_priority_df():
+    import pandas as pd
+
+    return pd.DataFrame(PROFIT_CHECK_ROWS, columns=PROFIT_CHECK_COLUMNS)
+
+
+def profit_check_scenario_df():
+    import pandas as pd
+
+    return pd.DataFrame(PROFIT_CHECK_SCENARIO_ROWS, columns=PROFIT_CHECK_SCENARIO_COLUMNS)
+
+
+def render_profit_check_guide(*, expanded: bool = True) -> None:
+    """Streamlit: 儲かるかどうかの早見表."""
+    import streamlit as st
+
+    with st.expander("💰 儲かるかどうか — 見る指標（早見表）", expanded=expanded):
+        st.markdown("コスト込みバックテストで **本当に増えるか** を確認するときの目安です。")
+        st.dataframe(profit_check_priority_df(), width="stretch", hide_index=True)
+        st.markdown("#### 場面別")
+        st.dataframe(profit_check_scenario_df(), width="stretch", hide_index=True)
+        st.markdown(PROFIT_CHECK_FOOTNOTE)
+
+
 GLOSSARY_TSE_EXPERIMENTS: list[tuple[str, str]] = [
+    (EXPECTANCY, HELP_EXPECTANCY),
+    (PROFIT_FACTOR, HELP_PROFIT_FACTOR),
+    (WIN_RATE, HELP_WIN_RATE),
+    (TRADES, "期間中の売買回数。"),
+    (MAX_DRAWDOWN, HELP_MAX_DD),
     (
-        MEDIAN_PF,
-        HELP_MEDIAN_PF.replace("**", ""),
-    ),
-    (
-        MEAN_PF,
-        HELP_MEAN_PF.replace("**", ""),
-    ),
-    (
-        PCT_PF_ABOVE_1,
-        HELP_PCT_PF_ABOVE_1.replace("**", ""),
-    ),
-    (
-        "銘柄ごと BT",
-        "1 戦略 × 1 銘柄で過去データを売買シミュレーション。"
-        "TSE 実験は内国株式プール全銘柄に対してこれを繰り返し、あとで集計する。",
-    ),
-    (
-        "市場区分",
-        "プライム / スタンダード / グロースなど。同じ戦略でも市場によって成績が変わることがある。",
+        TSE_TABLE_NOTE,
+        "3521銘柄それぞれでBTし、同じ指標を並べたときの真ん中の銘柄の値。",
     ),
 ]
 

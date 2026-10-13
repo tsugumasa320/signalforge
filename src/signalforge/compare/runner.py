@@ -17,7 +17,10 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     wins = [float(r["win_rate"]) for r in rows if r.get("win_rate") is not None]
     trades = [int(r["total_trades"]) for r in rows if r.get("total_trades") is not None]
     rets = [float(r["total_return_pct"]) for r in rows if r.get("total_return_pct") is not None]
+    avg_pnls = [float(r["avg_pnl_pct"]) for r in rows if r.get("avg_pnl_pct") is not None]
+    dds = [float(r["max_drawdown_pct"]) for r in rows if r.get("max_drawdown_pct") is not None]
     pf_gt_1 = sum(1 for p in pfs if p > 1.0) / len(pfs) if pfs else 0.0
+    ret_gt_0 = sum(1 for r in rets if r > 0.0) / len(rets) if rets else 0.0
     return {
         "n_tickers": len(rows),
         "n_ok": sum(1 for r in rows if not r.get("error")),
@@ -28,6 +31,11 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "median_win_rate": statistics.median(wins) if wins else None,
         "median_trades": statistics.median(trades) if trades else None,
         "mean_return_pct": statistics.mean(rets) if rets else None,
+        "median_total_return_pct": statistics.median(rets) if rets else None,
+        "pct_return_above_0": ret_gt_0,
+        "median_avg_pnl_pct": statistics.median(avg_pnls) if avg_pnls else None,
+        "mean_avg_pnl_pct": statistics.mean(avg_pnls) if avg_pnls else None,
+        "median_max_drawdown_pct": statistics.median(dds) if dds else None,
     }
 
 
@@ -37,6 +45,7 @@ _METRIC_TOP_KEYS = (
     "win_rate",
     "total_trades",
     "total_return_pct",
+    "avg_pnl_pct",
     "sharpe",
     "sortino",
     "max_drawdown_pct",

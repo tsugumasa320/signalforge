@@ -182,7 +182,7 @@ def plot_cost_comparison(rows: list[dict[str, Any]]) -> go.Figure:
     df = pd.DataFrame(rows)
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(
-        go.Bar(x=df["cost_model"], y=df["profit_factor"], name="PF (net)", marker_color="#3b82f6"),
+        go.Bar(x=df["cost_model"], y=df["profit_factor"], name="損益比（ネット）", marker_color="#3b82f6"),
         secondary_y=False,
     )
     fig.add_trace(
@@ -190,7 +190,7 @@ def plot_cost_comparison(rows: list[dict[str, Any]]) -> go.Figure:
         secondary_y=True,
     )
     fig.update_layout(title="コストモデル別 PF vs 総コスト", height=420, template="plotly_dark")
-    fig.update_yaxes(title_text="Profit Factor", secondary_y=False)
+    fig.update_yaxes(title_text="損益比", secondary_y=False)
     fig.update_yaxes(title_text="Cost (USD)", secondary_y=True)
     return fig
 
@@ -211,7 +211,7 @@ def plot_cost_breakdown(trades: pd.DataFrame) -> go.Figure:
 
 
 def plot_oos_comparison(full_metrics: dict, oos_metrics: dict) -> go.Figure:
-    labels = ["Win rate", "Profit Factor", "Sharpe×10"]
+    labels = ["勝率", "損益比", "Sharpe×10"]
     full_vals = [
         full_metrics.get("win_rate", 0) * 100,
         full_metrics.get("profit_factor", 0),

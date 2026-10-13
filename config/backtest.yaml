@@ -8,3 +8,10 @@ daily_loss_limit_swing: 800
 
 # デフォルト評価開始日（nvda.yaml と併用、style/backtest で上書き可）
 backtest_start_date: "2023-01-01"
+
+# 資金制約（全スタイル共通。style の backtest.capital で上書き可）
+capital:
+  initial_cash_jpy: 3000000      # 日本株 BT の想定口座（円）
+  initial_cash_usd: 100000         # 米株系
+  max_position_pct: 1.0            # 1回のエントリーで使える口座の上限（1.0=従来どおり全額）
+  min_cash_reserve_pct: 0.0        # 常に残す現金比率（例: 0.1 = 10% は触らない）

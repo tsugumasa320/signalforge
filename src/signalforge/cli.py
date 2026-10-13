@@ -1193,17 +1193,16 @@ def experiments_status_cmd() -> None:
     n_done = len(scan["complete"])
     n_plan = int(scan["total_planned"])
     if scan["complete"]:
-        from signalforge.report.metrics_ja import MEDIAN_PF
+        from signalforge.report.metrics_ja import EXPECTANCY, PROFIT_FACTOR, TSE_TABLE_NOTE
 
-        click.echo(f"完了（{MEDIAN_PF} 上位 5）:")
+        click.echo(f"完了（{EXPECTANCY} 上位 5）:")
         for row in scan["complete"][:5]:
-            pf = row.get("median_pf")
+            exp = row.get("expectancy_pct")
+            pf = row.get("profit_factor")
+            exp_s = f"{float(exp):+.3f}%" if exp is not None else "—"
             pf_s = f"{float(pf):.2f}" if pf is not None else "—"
-            click.echo(f"  · {row['strategy_id']}: {MEDIAN_PF} {pf_s}")
-        click.echo(
-            f"  ※ {MEDIAN_PF} = 銘柄ごとの損益比の真ん中。"
-            "詳細はダッシュボード「用語集 → TSE 実験」"
-        )
+            click.echo(f"  · {row['strategy_id']}: {EXPECTANCY} {exp_s}  {PROFIT_FACTOR} {pf_s}")
+        click.echo(f"  ※ {TSE_TABLE_NOTE}")
     if scan["in_progress"]:
         click.echo("実行中・途中:")
         for row in scan["in_progress"]:
@@ -1251,6 +1250,78 @@ def experiments_watch_cmd(interval: int, classic: bool, no_alt_screen: bool) -> 
         click.echo("\nwatch 終了")
 
 
+@experiments.command("supervise")
+@click.option("--interval", default=60, show_default=True, help="BT 停止検知の間隔（秒）")
+@click.option(
+    "--mode",
+    type=click.Choice(["auto", "campaign", "metrics"], case_sensitive=False),
+    default="auto",
+    show_default=True,
+    help="auto=指標差し替え優先、metrics=--refresh-metrics 固定",
+)
+@click.option("--workers", default=0, type=int, help="再開時 workers（0=schedule/CPU）")
+@click.option("--once", is_flag=True, help="1 回だけ確認（未実行なら起動して終了）")
+def experiments_supervise_cmd(interval: int, mode: str, workers: int, once: bool) -> None:
+    """BT プロセスを監視し、止まっていれば experiments run を再開（Ctrl+C で監視のみ終了）。"""
+    from signalforge.experiments.supervisor import RunMode, supervise_loop
+
+    supervise_loop(
+        interval_sec=float(interval),
+        mode=mode.lower(),  # type: ignore[arg-type]
+        workers=workers,
+        run_once=once,
+    )
+
+
+@experiments.command("supervisor-status")
+def experiments_supervisor_status_cmd() -> None:
+    """監視・BT プロセスの状態（experiments supervise 用）。"""
+    from signalforge.experiments.supervisor import supervisor_status
+
+    st = supervisor_status()
+    work = st["work"]
+    click.echo(f"BT 実行中: {'はい' if st['run_alive'] else 'いいえ'}  pids={st['run_pids']}")
+    click.echo(f"作業: {'あり' if work.needs_run else 'なし'} — {work.reason}")
+    if work.needs_run:
+        click.echo(
+            f"  完了 {work.n_complete}/{work.n_planned} · checkpoint {work.n_in_progress} · "
+            f"指標待ち {work.n_metrics_pending}"
+        )
+    click.echo(f"監視ログ: {st['supervisor_log']}")
+    click.echo(f"BT ログ: {st['run_log']}")
+
+
+@experiments.command("capital")
+@click.option("--initial-cash-jpy", default=None, type=float)
+@click.option("--max-position-pct", default=None, type=float)
+@click.option("--min-cash-reserve-pct", default=None, type=float)
+def experiments_capital_cmd(
+    initial_cash_jpy: float | None,
+    max_position_pct: float | None,
+    min_cash_reserve_pct: float | None,
+) -> None:
+    """Show effective TSE experiment capital settings and stale strategy counts."""
+    from signalforge.experiments.runner import (
+        list_strategies_needing_capital_refresh,
+        load_plan,
+        resolve_campaign_backtest_capital,
+    )
+
+    plan = load_plan()
+    strategy_ids = _parse_strategy_ids(plan.get("strategies", "catalog:all"), None, 0)
+    record, _ = resolve_campaign_backtest_capital(
+        plan,
+        initial_cash_jpy=initial_cash_jpy,
+        max_position_pct=max_position_pct,
+        min_cash_reserve_pct=min_cash_reserve_pct,
+    )
+    stale = list_strategies_needing_capital_refresh(strategy_ids, record)
+    click.echo("有効な資金条件（この run で使われる値）:")
+    click.echo(json.dumps(record, ensure_ascii=False, indent=2))
+    click.echo(f"\nbacktest_capital 未記録 or 不一致の完了戦略: {len(stale)} / {len(strategy_ids)}")
+    click.echo("再BT: experiments run --refresh-capital （必要なら --initial-cash-jpy 等）")
+
+
 @experiments.command("schedule")
 def experiments_schedule_cmd() -> None:
     """Show execution schedule (config/experiments/schedule.yaml)."""
@@ -1271,6 +1342,24 @@ def experiments_schedule_cmd() -> None:
 @click.option("--max-minutes", default=-1.0, type=float, help="Wall clock limit (-1=schedule.yaml)")
 @click.option("--ignore-schedule", is_flag=True, help="Run outside active_hours window")
 @click.option("--no-resume", is_flag=True, help="Ignore checkpoints (未完了戦略は銘柄単位で再開)")
+@click.option(
+    "--refresh-metrics",
+    is_flag=True,
+    help="完了済み戦略のうち期待値・最大DD が未保存のものだけ全銘柄を再BT",
+)
+@click.option(
+    "--refresh-capital",
+    is_flag=True,
+    help="完了済みのうち backtest_capital が現設定と違う戦略を全銘柄再BT",
+)
+@click.option("--initial-cash-jpy", default=None, type=float, help="実験BTの口座サイズ（円）")
+@click.option("--max-position-pct", default=None, type=float, help="1エントリー上限（口座比、例 0.35）")
+@click.option(
+    "--min-cash-reserve-pct",
+    default=None,
+    type=float,
+    help="常に残す現金比率（例 0.1）",
+)
 @click.option("--aggregate-only", is_flag=True, help="Rebuild matrices from saved strategy JSON")
 def experiments_run(
     strategy_limit: int,
@@ -1279,6 +1368,11 @@ def experiments_run(
     max_minutes: float,
     ignore_schedule: bool,
     no_resume: bool,
+    refresh_metrics: bool,
+    refresh_capital: bool,
+    initial_cash_jpy: float | None,
+    max_position_pct: float | None,
+    min_cash_reserve_pct: float | None,
     aggregate_only: bool,
 ) -> None:
     """Run JPX universe experiment: 全銘柄×全戦略、並列+再開。schedule.yaml で時間調整可。"""
@@ -1298,8 +1392,14 @@ def experiments_run(
 
     if aggregate_only:
         n = ticker_limit or len(list_tse_tickers())
+        from signalforge.experiments.runner import refresh_completed_strategy_aggregates
+
+        refreshed = refresh_completed_strategy_aggregates(strategy_ids)
         build_experiment_summaries(strategy_ids, tickers_count=n)
-        click.echo("Aggregates refreshed → data/reports/experiments/")
+        click.echo(
+            f"Aggregates refreshed → data/reports/experiments/ "
+            f"（{refreshed} 戦略の universe を銘柄 sidecar から再集計）"
+        )
         return
 
     overrides: dict = {}
@@ -1328,9 +1428,58 @@ def experiments_run(
     def _tprog(i: int, n: int, sym: str) -> None:
         click.echo(f"      … {current_sid[0]} tickers {i}/{n} ({sym})")
 
+    from signalforge.experiments.runner import (
+        list_strategies_needing_capital_refresh,
+        list_strategies_needing_metric_refresh,
+        resolve_campaign_backtest_capital,
+    )
+
+    capital_record, _ = resolve_campaign_backtest_capital(
+        plan,
+        initial_cash_jpy=initial_cash_jpy,
+        max_position_pct=max_position_pct,
+        min_cash_reserve_pct=min_cash_reserve_pct,
+    )
+    click.echo(f"資金条件: {json.dumps(capital_record, ensure_ascii=False)}")
+
+    need_metrics: list[str] = []
+    need_capital: list[str] = []
+    if refresh_metrics:
+        need_metrics = list_strategies_needing_metric_refresh(strategy_ids)
+        click.echo(f"指標更新が必要な完了戦略: {len(need_metrics)} / {len(strategy_ids)}")
+    if refresh_capital:
+        need_capital = list_strategies_needing_capital_refresh(strategy_ids, capital_record)
+        click.echo(f"資金条件が古い完了戦略: {len(need_capital)} / {len(strategy_ids)}")
+
+    if (refresh_metrics or refresh_capital) and not need_metrics and not need_capital:
+        click.echo("再BT不要。aggregate のみ実行します。")
+        ctx = click.get_current_context()
+        ctx.invoke(
+            experiments_run,
+            strategy_limit=strategy_limit,
+            ticker_limit=ticker_limit,
+            workers=workers,
+            max_minutes=max_minutes,
+            ignore_schedule=ignore_schedule,
+            no_resume=no_resume,
+            refresh_metrics=False,
+            refresh_capital=False,
+            initial_cash_jpy=initial_cash_jpy,
+            max_position_pct=max_position_pct,
+            min_cash_reserve_pct=min_cash_reserve_pct,
+            aggregate_only=True,
+        )
+        return
+
+    extras = []
+    if refresh_metrics:
+        extras.append("refresh-metrics")
+    if refresh_capital:
+        extras.append("refresh-capital")
     click.echo(
         f"\n=== TSE experiment: {len(strategy_ids)} strategies × {n_tickers} tickers "
-        f"(workers={budget.parallel_workers}) ===\n"
+        f"(workers={budget.parallel_workers}"
+        f"{', ' + ', '.join(extras) if extras else ''}) ===\n"
     )
     man = run_experiment_campaign(
         strategy_ids,
@@ -1341,9 +1490,17 @@ def experiments_run(
         budget=budget,
         progress_cb=_prog,
         ticker_progress_cb=_tprog,
+        refresh_metrics=refresh_metrics,
+        refresh_capital=refresh_capital,
+        initial_cash_jpy=initial_cash_jpy,
+        max_position_pct=max_position_pct,
+        min_cash_reserve_pct=min_cash_reserve_pct,
+        plan=plan,
     )
     click.echo(
         f"\n✓ new={man['completed']} 完了済skip={man['skipped_complete']} "
+        f"指標再BT={man.get('refreshed_metrics', 0)} "
+        f"資金再BT={man.get('refreshed_capital', 0)} "
         f"fail={man['failed']} early_stop={man.get('stopped_early', 0)}"
     )
     click.echo(f"  manifest: {experiments_dir() / 'manifest.json'}")

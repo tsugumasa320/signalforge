@@ -82,6 +82,9 @@ uv run signalforge experiments status
 uv run signalforge experiments compact    # slim JSON + .tickers.json sidecar
 uv run signalforge experiments aggregate
 scripts/resume-experiments.sh             # compact + aggregate + resume
+scripts/start-experiments-supervisor.sh   # BT 停止を監視して自動再開
+scripts/rerun-experiments-metrics.sh      # 期待値・最大DD 用に完了戦略を再BT（--refresh-metrics）
+scripts/rerun-experiments-capital.sh      # 口座/上限変更後（--refresh-capital、INITIAL_CASH_JPY 等）
 ```
 
 Details: `docs/experiments.md`. Dashboard: **📊 戦略結果 → TSE 実験** (segment heatmap when aggregates exist).

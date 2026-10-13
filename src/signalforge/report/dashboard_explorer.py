@@ -16,6 +16,14 @@ from signalforge.config import data_dir, load_backtest_defaults, load_implementa
 from signalforge.lab.palette import list_palette_rules, resolve_rule_ids
 from signalforge.lab.runner import run_rule_study_universe
 from signalforge.pipeline import run_backtest_pipeline
+from signalforge.report.metrics_ja import (
+    CATALOG_SORT_OPTIONS,
+    MEDIAN_PF,
+    PROFIT_FACTOR,
+    HELP_PROFIT_FACTOR,
+    rename_experiment_columns,
+    sort_option_label,
+)
 from signalforge.universe.filters import get_preset, list_preset_ids, load_equity_meta, resolve_cohort_tickers
 
 
@@ -57,7 +65,11 @@ def _cfg_override(
     return out or None
 
 
-def _bar_fig(labels: list[str], values: list[float], title: str, ytitle: str = "PF") -> go.Figure:
+def _bar_fig(labels: list[str], values: list[float], title: str, ytitle: str | None = None) -> go.Figure:
+    from signalforge.report.metrics_ja import PROFIT_FACTOR
+
+    if ytitle is None:
+        ytitle = PROFIT_FACTOR
     fig = go.Figure(
         data=[
             go.Bar(
@@ -116,21 +128,24 @@ def _render_saved_results() -> None:
         if df.empty:
             st.info("有効な行がありません。")
             return
-        sort_col = st.selectbox("並び替え", ["profit_factor", "total_return_pct", "win_rate", "total_trades"], key="cat_sort")
+        sort_col = st.selectbox(
+            "並び替え",
+            options=[k for k, _ in CATALOG_SORT_OPTIONS],
+            format_func=lambda k: sort_option_label(CATALOG_SORT_OPTIONS, k),
+            key="cat_sort",
+        )
         top_n = st.slider("表示件数", 10, min(133, len(df)), 25, key="cat_top")
         df = df.sort_values(sort_col, ascending=False).head(top_n)
         cols = [c for c in ["id", "style", "ticker", "n_tickers", "profit_factor", "win_rate", "total_trades", "total_return_pct", "pct_pf_above_1"] if c in df.columns]
-        st.dataframe(df[cols], width="stretch", hide_index=True)
+        st.dataframe(rename_experiment_columns(df[cols]), width="stretch", hide_index=True)
         meta = doc.get("meta") or {}
         if meta.get("n_tickers"):
-            from signalforge.report.metrics_ja import MEDIAN_PF
-
             st.caption(f"評価: 銘柄ごとの {MEDIAN_PF} を **{meta['n_tickers']} 銘柄** プールで集計")
         st.plotly_chart(
             _bar_fig(
                 df["id"].tolist(),
                 df["profit_factor"].astype(float).tolist(),
-                f"カタログ Top {top_n}（{sort_col}）",
+                f"カタログ Top {top_n}（{sort_option_label(CATALOG_SORT_OPTIONS, sort_col)}）",
             ),
             width="stretch",
             key="explorer_cat_chart",
@@ -167,14 +182,17 @@ def _render_saved_results() -> None:
             st.info("集計可能なデータがありません（古いサンプル行列の可能性）。")
             return
         agg = df.groupby("strategy", as_index=False)["median_pf"].mean().sort_values("median_pf", ascending=False).head(40)
-        st.dataframe(df.sort_values("median_pf", ascending=False), width="stretch", hide_index=True)
-        from signalforge.report.metrics_ja import MEDIAN_PF
-
+        st.dataframe(
+            rename_experiment_columns(df.sort_values("median_pf", ascending=False)),
+            width="stretch",
+            hide_index=True,
+        )
         st.plotly_chart(
             _bar_fig(
                 agg["strategy"].tolist(),
                 agg["median_pf"].astype(float).tolist(),
                 f"戦略別・平均 {MEDIAN_PF}",
+                ytitle=MEDIAN_PF,
             ),
             width="stretch",
             key="explorer_cmp_chart",
@@ -200,7 +218,11 @@ def _render_saved_results() -> None:
             }
         )
     df = pd.DataFrame(rows)
-    st.dataframe(df.sort_values("expectancy_pct", ascending=False), width="stretch", hide_index=True)
+    st.dataframe(
+        rename_experiment_columns(df.sort_values("expectancy_pct", ascending=False)),
+        width="stretch",
+        hide_index=True,
+    )
     if not df.empty and df["expectancy_pct"].notna().any():
         pivot = df.pivot_table(index="rule_id", columns="cohort", values="expectancy_pct", aggfunc="mean")
         st.plotly_chart(
@@ -358,14 +380,14 @@ def _render_live_runner() -> None:
         rows = st.session_state.get("explorer_live_rows") or []
         if rows:
             df = pd.DataFrame(rows)
-            st.dataframe(df, width="stretch", hide_index=True)
+            st.dataframe(rename_experiment_columns(df), width="stretch", hide_index=True)
             ok = df[df["profit_factor"].notna()] if "profit_factor" in df.columns else df
             if not ok.empty and "strategy" in ok.columns:
                 st.plotly_chart(
                     _bar_fig(
                         ok["strategy"].astype(str).tolist(),
                         ok["profit_factor"].astype(float).tolist(),
-                        "実行結果（PF）",
+                        f"実行結果（{PROFIT_FACTOR}）",
                     ),
                     width="stretch",
                     key="live_cat_result_chart",
@@ -395,14 +417,14 @@ def _render_live_runner() -> None:
         ov = lab_res.get("overview") or lab_res.get("summary") or {}
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("期待値%", f"{ov.get('expectancy_pct', 0):+.3f}")
-        c2.metric("PF", f"{ov.get('profit_factor', 0):.2f}")
+        c2.metric(PROFIT_FACTOR, f"{ov.get('profit_factor', 0):.2f}", help=HELP_PROFIT_FACTOR)
         c3.metric("勝率", f"{ov.get('win_rate', 0):.1%}")
         c4.metric("トレード数", ov.get("total_trades", "—"))
         st.json({k: lab_res[k] for k in ("rule_id", "rule_name", "fingerprint") if k in lab_res})
         per = lab_res.get("per_ticker") or []
         if per:
             pdf = pd.DataFrame(per)
-            st.dataframe(pdf, width="stretch", hide_index=True)
+            st.dataframe(rename_experiment_columns(pdf), width="stretch", hide_index=True)
 
 
 @st.fragment

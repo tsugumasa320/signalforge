@@ -58,7 +58,11 @@ def run_backtest_pipeline(
             elif key == "strategy_params" and isinstance(value, dict):
                 cfg["strategy_params"] = {**cfg.get("strategy_params", {}), **value}
             elif key == "backtest" and isinstance(value, dict):
-                cfg["backtest"] = {**cfg.get("backtest", {}), **value}
+                base = cfg.get("backtest", {})
+                merged = {**base, **value}
+                if "capital" in value and isinstance(value["capital"], dict):
+                    merged["capital"] = {**base.get("capital", {}), **value["capital"]}
+                cfg["backtest"] = merged
             elif key == "ml_filter" and isinstance(value, dict):
                 cfg["ml_filter"] = {**cfg.get("ml_filter", {}), **value}
             else:

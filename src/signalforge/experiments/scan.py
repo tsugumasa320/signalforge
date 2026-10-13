@@ -6,8 +6,38 @@ import json
 from pathlib import Path
 from typing import Any
 
+from signalforge.backtest.capital import capital_records_match
+from signalforge.compare.runner import _aggregate
 from signalforge.config import data_dir, load_web_catalog
 from signalforge.experiments.checkpoint_meta import read_checkpoint_progress
+from signalforge.experiments.storage import load_ticker_rows, ticker_row_has_core_metrics
+from signalforge.paper.matrix import paper_portfolio_exists
+
+
+def _header_metrics_poisoned(header_universe: dict[str, Any]) -> bool:
+    exp = header_universe.get("median_avg_pnl_pct")
+    return exp is not None and float(exp) <= -20.0
+
+
+def _universe_from_valid_sidecar(
+    strategy_id: str,
+    doc: dict[str, Any],
+    header_universe: dict[str, Any],
+) -> tuple[dict[str, Any], int, int]:
+    """Prefer live aggregate from sidecar rows with valid 期待値/DD (during metric refresh)."""
+    rows = load_ticker_rows(strategy_id, doc)
+    ok = [r for r in rows if not r.get("error")]
+    valid = [r for r in ok if ticker_row_has_core_metrics(r)]
+    n_valid = len(valid)
+    min_show = 5
+    if n_valid >= min_show:
+        return _aggregate(valid), n_valid, len(ok)
+    if _header_metrics_poisoned(header_universe):
+        return {}, n_valid, len(ok)
+    exp = header_universe.get("median_avg_pnl_pct")
+    if exp is not None and float(exp) > -20.0:
+        return header_universe, n_valid, len(ok)
+    return {}, n_valid, len(ok)
 
 
 def _strategies_dir() -> Path:
@@ -38,13 +68,17 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
     in_progress: list[dict[str, Any]] = []
     total_planned = planned_strategy_count()
 
+    manifest_path = data_dir() / "reports" / "experiments" / "manifest.json"
+    manifest = _load_json(manifest_path) or {}
+    manifest_cap = manifest.get("backtest_capital") if isinstance(manifest.get("backtest_capital"), dict) else None
+
     if not d.is_dir():
         return {
             "complete": complete,
             "in_progress": in_progress,
             "total_planned": total_planned,
             "n_tickers_pool": None,
-            "manifest": {},
+            "manifest": manifest,
         }
 
     for path in sorted(d.glob("*.json")):
@@ -72,15 +106,28 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
         target = int(doc.get("n_tickers_target") or 0)
         done = int(doc.get("n_tickers_done") or 0)
         if doc.get("complete") and target > 0 and done >= target:
-            u = doc.get("universe") or {}
+            header_u = doc.get("universe") or {}
+            u, n_valid, n_ok = _universe_from_valid_sidecar(sid, doc, header_u)
+            stored_cap = doc.get("backtest_capital")
+            if manifest_cap and isinstance(stored_cap, dict):
+                cap_ok = capital_records_match(stored_cap, manifest_cap)
+            else:
+                cap_ok = stored_cap is not None
             complete.append(
                 {
                     "strategy_id": sid,
                     "style": doc.get("style"),
-                    "median_pf": u.get("median_profit_factor"),
-                    "mean_pf": u.get("mean_profit_factor"),
+                    "expectancy_pct": u.get("median_avg_pnl_pct"),
+                    "profit_factor": u.get("median_profit_factor"),
+                    "win_rate": u.get("median_win_rate"),
+                    "total_trades": u.get("median_trades"),
+                    "max_drawdown_pct": u.get("median_max_drawdown_pct"),
                     "n_tickers": u.get("n_tickers"),
-                    "pct_pf_gt_1": u.get("pct_pf_above_1"),
+                    "metrics_valid_tickers": n_valid,
+                    "metrics_total_tickers": n_ok,
+                    "metrics_partial": n_valid < n_ok,
+                    "capital_ok": cap_ok,
+                    "paper_active": paper_portfolio_exists(sid),
                     "mtime": path.stat().st_mtime,
                 }
             )
@@ -95,7 +142,10 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
                 }
             )
 
-    complete.sort(key=lambda x: float(x.get("median_pf") or 0), reverse=True)
+    complete.sort(
+        key=lambda x: float(x.get("expectancy_pct") or x.get("profit_factor") or 0),
+        reverse=True,
+    )
     # Prefer checkpoint row when both exist for same strategy
     by_sid: dict[str, dict[str, Any]] = {}
     for row in in_progress:
@@ -109,8 +159,6 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
         for row in in_progress:
             row["active"] = float(row.get("mtime") or 0) >= latest_mtime - 1.0
 
-    manifest_path = data_dir() / "reports" / "experiments" / "manifest.json"
-    manifest = _load_json(manifest_path) or {}
     targets = [int(r.get("n_target") or 0) for r in in_progress if int(r.get("n_target") or 0) > 0]
     man_n = int(manifest.get("n_tickers") or 0)
     if targets:

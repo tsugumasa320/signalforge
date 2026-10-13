@@ -33,6 +33,7 @@ def compute_metrics(trades: pd.DataFrame, equity: pd.Series) -> dict[str, Any]:
             "max_drawdown_pct": 0.0,
             "total_return_pct": 0.0,
             "avg_hold_bars": 0.0,
+            "avg_pnl_pct": 0.0,
         }
 
     wins = trades[trades["pnl_pct"] > 0]

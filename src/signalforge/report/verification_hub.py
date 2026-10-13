@@ -10,6 +10,7 @@ from typing import Any
 import plotly.graph_objects as go
 
 from signalforge.config import data_dir
+from signalforge.report.metrics_ja import MEDIAN_PF, PROFIT_FACTOR
 from signalforge.report.static_html import BASE_CSS, fig_to_html_block, wrap_page
 
 
@@ -34,8 +35,8 @@ def _rank_table(rows: list[dict], sort_key: str, limit: int = 50) -> str:
     valid = [r for r in rows if r.get(sort_key) is not None and r.get("error") is None]
     valid.sort(key=lambda x: float(x.get(sort_key) or 0), reverse=True)
     lines = [
-        "<table><thead><tr><th>#</th><th>ID</th><th>PF</th><th>Win%</th>"
-        "<th>Trades</th><th>Return%</th></tr></thead><tbody>"
+        "<table><thead><tr><th>#</th><th>戦略ID</th><th>損益比</th><th>勝率%</th>"
+        "<th>取引数</th><th>リターン%</th></tr></thead><tbody>"
     ]
     for i, r in enumerate(valid[:limit], 1):
         pf = float(r.get("profit_factor") or 0)
@@ -113,7 +114,12 @@ def build_verification_hub() -> Path:
         ids = [r["id"] for r in top]
         pfs = [float(r["profit_factor"]) for r in top]
         n_t = (catalog.get("meta") or {}).get("n_tickers", "?")
-        fig = _bar_chart(ids, pfs, f"カタログ戦略ランキング（Top 25 · 東証{n_t}銘柄 median PF）", "Profit Factor")
+        fig = _bar_chart(
+            ids,
+            pfs,
+            f"カタログ戦略ランキング（Top 25 · 東証{n_t}銘柄 · {PROFIT_FACTOR}）",
+            PROFIT_FACTOR,
+        )
         sections.append("<section id='catalog'><h2>📊 カタログ全戦略（東証ユニバース）</h2>")
         sections.append(fig_to_html_block(fig, include_plotlyjs="cdn", div_id="chart_catalog"))
         sections.append("<h3>ランキング表</h3>")
@@ -137,7 +143,7 @@ def build_verification_hub() -> Path:
         scored.sort(key=lambda x: -x[1])
         top_s = [s[0] for s in scored[:40]]
         mat = [[pivot.get(s, {}).get(c) for c in cohort_ids] for s in top_s]
-        fig_h = _heatmap(top_s, cohort_ids, mat, "戦略 × コホート（Median PF · Top 40）")
+        fig_h = _heatmap(top_s, cohort_ids, mat, f"戦略 × コホート（{MEDIAN_PF} · Top 40）")
         sections.append("<section id='cohort'><h2>🏢 市場区分・コホート比較</h2>")
         sections.append(fig_to_html_block(fig_h, include_plotlyjs=False, div_id="chart_cohort"))
         sections.append("</section>")

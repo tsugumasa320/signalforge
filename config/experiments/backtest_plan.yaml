@@ -5,6 +5,19 @@ meta:
     銘柄ごとの再計算は1パスのみ（実験条件は事後集計）。
   tse_listing: data/universe/tse_listing.json
   cost_model: japan
+  # 実験専用の口座（省略時は config/backtest.yaml + market/japan.yaml）
+  # backtest_capital:
+  #   initial_cash_jpy: 3000000
+  #   max_position_pct: 0.35
+  #   min_cash_reserve_pct: 0.10
+  # ダッシュボード「資金シナリオ」比較用（再BTは --refresh-capital + CLI/env）
+  capital_compare_presets:
+    - id: default
+      label: 既定（分散想定）
+    - id: full
+      label: 全額上限
+      max_position_pct: 1.0
+      min_cash_reserve_pct: 0.0
 
 strategies: catalog:all
 

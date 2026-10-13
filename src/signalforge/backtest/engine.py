@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 
+from signalforge.backtest.capital import CapitalPolicy
 from signalforge.backtest.metrics import BacktestResult, compute_metrics
 from signalforge.backtest.costs import LegacyCostModel, TradeCostBreakdown, load_cost_model
 from signalforge.data.calendar import is_earnings_blackout
@@ -48,6 +49,7 @@ class BacktestEngine:
         self._entry_is_oos = False
         self._entry_ml_expl: dict[str, Any] | None = None
         self._cash_at_entry = 0.0
+        self._entry_cost_basis = 0.0
 
     def run(
         self,
@@ -65,7 +67,8 @@ class BacktestEngine:
             signals = self.strategy.generate_signals(df)
 
         trade_rows = []
-        start_cash = initial_cash if initial_cash is not None else 100_000.0
+        self._capital = CapitalPolicy.from_config(self.cfg)
+        start_cash = initial_cash if initial_cash is not None else self._capital.initial_cash
         equity = pd.Series(start_cash, index=df.index)
         cash = start_cash
         position = 0
@@ -89,6 +92,7 @@ class BacktestEngine:
             self._entry_is_oos = bool(initial_state.get("entry_is_oos", False))
             self._entry_ml_expl = initial_state.get("entry_ml_expl")
             self._cash_at_entry = float(initial_state.get("cash_at_entry", cash))
+            self._entry_cost_basis = float(initial_state.get("entry_cost_basis", 0.0))
             bd = initial_state.get("entry_cost_breakdown")
             if isinstance(bd, dict):
                 self._entry_cost_breakdown = TradeCostBreakdown(**bd)
@@ -144,12 +148,23 @@ class BacktestEngine:
                     )
                     if side == "long":
                         cash, net_pnl_pct, gross_pnl_pct, breakdown = self.cost_model.settle_long(
-                            self._cash_at_entry, shares, entry_price, exit_price, breakdown
+                            cash,
+                            self._entry_cost_basis,
+                            shares,
+                            entry_price,
+                            exit_price,
+                            breakdown,
                         )
                     else:
                         cash, net_pnl_pct, gross_pnl_pct, breakdown = self.cost_model.settle_short(
-                            self._cash_at_entry, shares, entry_price, exit_price, breakdown
+                            cash,
+                            self._entry_cost_basis,
+                            shares,
+                            entry_price,
+                            exit_price,
+                            breakdown,
                         )
+                    self._entry_cost_basis = 0.0
 
                     signal_idx = self._entry_signal_idx if self._entry_signal_idx is not None else max(entry_idx - 1, 0)
                     audit_rec = self._find_audit(str(df.index[signal_idx]), side)
@@ -229,13 +244,29 @@ class BacktestEngine:
                 entry_price = self.profile.entry_fill_price(df, i, sig_side)
                 raw_entry = entry_price
                 entry_price = self.cost_model.apply_entry_slippage(raw_entry, sig_side)
-                self._cash_at_entry = cash
+                equity_now = float(cash)
+                if position != 0 and position_shares > 0 and entry_price > 0:
+                    mark = float(df.iloc[i]["close"])
+                    if side == "long":
+                        equity_now = cash + position_shares * mark
+                    else:
+                        equity_now = cash + (entry_price - mark) * position_shares
+                budget = self._capital.entry_budget(cash, equity=equity_now)
+                if budget <= 0:
+                    continue
                 if sig_side == "long":
-                    shares, _, breakdown = self.cost_model.solve_entry(cash, entry_price)
+                    shares, fee, breakdown = self.cost_model.solve_entry(budget, entry_price)
+                    entry_cost = shares * entry_price + fee
+                    self._entry_cost_basis = entry_cost
+                    self._cash_at_entry = cash
+                    cash -= entry_cost
                 else:
-                    shares, _, breakdown = self.cost_model.open_short(cash, entry_price)
+                    shares, fee, breakdown = self.cost_model.open_short(budget, entry_price)
+                    self._entry_cost_basis = budget
+                    self._cash_at_entry = cash
                 self.cost_model.record_slippage(shares, raw_entry, entry_price, breakdown, is_entry=True)
                 if shares <= 0:
+                    self._entry_cost_basis = 0.0
                     continue
                 position = 1
                 position_shares = shares
@@ -253,10 +284,11 @@ class BacktestEngine:
                 if side == "long":
                     equity.iloc[i] = cash + position_shares * mark
                 else:
-                    equity.iloc[i] = cash + self._cash_at_entry + (entry_price - mark) * position_shares
+                    equity.iloc[i] = cash + (entry_price - mark) * position_shares
 
         trades_df = pd.DataFrame(trade_rows)
         metrics = compute_metrics(trades_df, equity)
+        metrics.update(self._capital.to_metrics_fragment())
         return BacktestResult(
             trades=trades_df,
             equity_curve=equity,
@@ -274,6 +306,7 @@ class BacktestEngine:
                 "entry_is_oos": self._entry_is_oos,
                 "entry_ml_expl": self._entry_ml_expl,
                 "cash_at_entry": self._cash_at_entry,
+                "entry_cost_basis": self._entry_cost_basis,
                 "entry_cost_breakdown": self._entry_cost_breakdown.to_dict(),
             },
         )

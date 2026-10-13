@@ -7,6 +7,26 @@ mkdir -p data/reports
 LOG=data/reports/experiments_run.log
 PIDFILE=data/reports/experiments.pid
 WATCH_INTERVAL="${WATCH_INTERVAL:-5}"
+REFRESH_METRICS="${REFRESH_METRICS:-0}"
+REFRESH_CAPITAL="${REFRESH_CAPITAL:-0}"
+RUN_EXTRA=()
+if [[ "$REFRESH_METRICS" == "1" ]]; then
+  RUN_EXTRA+=(--refresh-metrics)
+  echo "モード: 指標更新（完了戦略を期待値・最大DD 付きで再BT）"
+fi
+if [[ "$REFRESH_CAPITAL" == "1" ]]; then
+  RUN_EXTRA+=(--refresh-capital)
+  echo "モード: 資金条件更新（backtest_capital 不一致の完了戦略を再BT）"
+fi
+if [[ -n "${INITIAL_CASH_JPY:-}" ]]; then
+  RUN_EXTRA+=(--initial-cash-jpy "$INITIAL_CASH_JPY")
+fi
+if [[ -n "${MAX_POSITION_PCT:-}" ]]; then
+  RUN_EXTRA+=(--max-position-pct "$MAX_POSITION_PCT")
+fi
+if [[ -n "${MIN_CASH_RESERVE_PCT:-}" ]]; then
+  RUN_EXTRA+=(--min-cash-reserve-pct "$MIN_CASH_RESERVE_PCT")
+fi
 
 if [[ -f "$PIDFILE" ]]; then
   old="$(cat "$PIDFILE" 2>/dev/null || true)"
@@ -26,9 +46,9 @@ nohup bash -c "
   uv run signalforge experiments compact >> \"$LOG\" 2>&1 || true
   uv run signalforge experiments aggregate >> \"$LOG\" 2>&1 || true
   if command -v caffeinate >/dev/null 2>&1; then
-    exec caffeinate -i uv run signalforge experiments run --ignore-schedule --workers 8
+    exec caffeinate -i uv run signalforge experiments run --ignore-schedule --workers 8 ${RUN_EXTRA[*]:-}
   else
-    exec uv run signalforge experiments run --ignore-schedule --workers 8
+    exec uv run signalforge experiments run --ignore-schedule --workers 8 ${RUN_EXTRA[*]:-}
   fi
 " >> "$LOG" 2>&1 &
 

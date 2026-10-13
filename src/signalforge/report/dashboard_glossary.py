@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from signalforge.report.metrics_ja import GLOSSARY_TSE_EXPERIMENTS, METRIC_HELP_JA
+from signalforge.report.metrics_ja import GLOSSARY_TSE_EXPERIMENTS, METRIC_HELP_JA, render_profit_check_guide
 
 # --- Metric tooltips (st.metric help=) ---
 
@@ -83,6 +83,28 @@ GLOSSARY_SECTIONS: dict[str, list[tuple[str, str]]] = {
         ("Alpaca 保守", "スリッページを広めに見積もった pessimistic シナリオ。"),
     ],
     "TSE 実験（全銘柄バックテスト）": GLOSSARY_TSE_EXPERIMENTS,
+    "資金・ポジション制約": [
+        (
+            "初期資金（initial_cash_jpy 等）",
+            "バックテスト開始時の口座サイズ。日本株は既定 300 万円（config/backtest.yaml）。",
+        ),
+        (
+            "max_position_pct",
+            "1回の買いに使える上限（口座評価額に対する割合）。例: 0.35 なら 300 万口座で最大約 105 万まで。",
+        ),
+        (
+            "min_cash_reserve_pct",
+            "常に現金で残す比率。同時に全額を建てられない想定。",
+        ),
+        (
+            "TSE 実験との関係",
+            "全銘柄 BT は **銘柄ごとに別口座** として同じルールを適用（3521 銘柄を1口座で同時保有するシミュレーションではない）。",
+        ),
+        (
+            "設定場所",
+            "config/backtest.yaml · config/market/japan.yaml · 各 style の backtest.capital",
+        ),
+    ],
     "チャート・テクニカル": [
         ("MACD", "移動平均の差とそのシグナル線。ゴールデンクロス = 買いシグナルの例。"),
         ("EMA", "指数移動平均。直近の価格を重視したトレンド線。"),
@@ -112,6 +134,7 @@ def render_glossary_tab() -> None:
         "ダッシュボード内の略語・専門用語の意味をまとめています。"
         "サイドバーの各項目にも `?` マークで短い説明があります。"
     )
+    render_profit_check_guide(expanded=False)
     for section, items in GLOSSARY_SECTIONS.items():
         with st.expander(f"**{section}**", expanded=(section == "基本")):
             for term, desc in items:
@@ -162,8 +185,7 @@ TAB_INTROS: dict[str, tuple[str, str]] = {
     ),
     "experiments": (
         "TSE 実験タブの見方",
-        "各戦略を **東証内国株式プール全銘柄** でバックテストし、銘柄ごとの **損益比** を集計した結果です。"
-        "戦略同士の比較は **中央値の損益比** を主に見てください（極端な1銘柄の影響を抑えるため）。"
-        "詳細は **📖 用語集 → TSE 実験** を参照。",
+        "各戦略を全銘柄でBTした **期待値・損益比・勝率・取引数・最大DD** の5列です。"
+        "数値は典型銘柄（3521銘柄の真ん中）の目安。",
     ),
 }

@@ -7,3 +7,8 @@ backtest_start_date: "2020-01-01"
 universe_default: japan_liquid
 currency: JPY
 cost_preset: japan
+# BT 口座（数値はシミュレーション用。評価は銘柄独立・1回フル投入）
+backtest_capital_hint:
+  initial_cash_jpy: 3000000
+  max_position_pct: 1.0
+  min_cash_reserve_pct: 0.0

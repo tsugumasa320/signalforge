@@ -48,6 +48,7 @@ from signalforge.report.dashboard_strategies import render_strategies_tab
 from signalforge.config import load_market_config
 from signalforge.report.dashboard_explorer import _cfg_override, _default_dates, render_explorer_tab
 from signalforge.report.dashboard_view import (
+    apply_pending_sidebar_strategy,
     render_results_home,
     render_results_sidebar,
     render_strategy_detail,
@@ -322,10 +323,11 @@ def run_dashboard() -> None:
         initial_sidebar_state="expanded",
     )
 
+    apply_pending_sidebar_strategy()
     pick = render_results_sidebar()
 
     st.title("SignalForge")
-    st.caption("日本株 — **TSE 実験・事前バックテスト** の閲覧。実行中も完了分が表示されます。")
+    st.caption("東証全銘柄 × 戦略の事前バックテスト結果")
 
     tab_results, tab_guide, tab_glossary, tab_advanced = st.tabs(
         ["📊 戦略結果", "📚 戦略解説", "📖 用語集", "⚙️ 上級者（再実行）"]
@@ -333,9 +335,6 @@ def run_dashboard() -> None:
 
     with tab_results:
         render_results_home()
-        if pick and pick != "（一覧のみ）":
-            st.divider()
-            render_strategy_detail(pick)
 
     with tab_guide:
         render_strategies_tab()

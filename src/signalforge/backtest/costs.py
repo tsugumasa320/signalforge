@@ -95,20 +95,22 @@ class LegacyCostModel:
 
     def settle_long(
         self,
-        cash_at_entry: float,
+        cash_free: float,
+        entry_cost_basis: float,
         shares: float,
         entry_price: float,
         exit_price: float,
         breakdown: TradeCostBreakdown,
     ) -> tuple[float, float, float, TradeCostBreakdown]:
         proceeds, breakdown = self.exit_proceeds(shares, exit_price, breakdown)
-        net_pct = (proceeds - cash_at_entry) / cash_at_entry * 100 if cash_at_entry else 0.0
+        net_pct = (proceeds - entry_cost_basis) / entry_cost_basis * 100 if entry_cost_basis else 0.0
         gross_pct = (exit_price / entry_price - 1) * 100 if entry_price else 0.0
-        return proceeds, net_pct, gross_pct, breakdown
+        return cash_free + proceeds, net_pct, gross_pct, breakdown
 
     def settle_short(
         self,
-        cash_at_entry: float,
+        cash_free: float,
+        entry_cost_basis: float,
         shares: float,
         entry_price: float,
         exit_price: float,
@@ -119,8 +121,8 @@ class LegacyCostModel:
         breakdown.buy_fees_usd += fee
         breakdown.commission_usd += fee
         net_dollar = shares * (entry_price - exit_price) - breakdown.sell_fees_usd - fee
-        cash_after = cash_at_entry + net_dollar
-        net_pct = net_dollar / cash_at_entry * 100 if cash_at_entry else 0.0
+        cash_after = cash_free + net_dollar
+        net_pct = net_dollar / entry_cost_basis * 100 if entry_cost_basis else 0.0
         gross_pct = (entry_price / exit_price - 1) * 100 if exit_price else 0.0
         return cash_after, net_pct, gross_pct, breakdown
 
@@ -253,20 +255,22 @@ class AlpacaCostModel:
 
     def settle_long(
         self,
-        cash_at_entry: float,
+        cash_free: float,
+        entry_cost_basis: float,
         shares: float,
         entry_price: float,
         exit_price: float,
         breakdown: TradeCostBreakdown,
     ) -> tuple[float, float, float, TradeCostBreakdown]:
         proceeds, breakdown = self.exit_proceeds(shares, exit_price, breakdown)
-        net_pct = (proceeds - cash_at_entry) / cash_at_entry * 100 if cash_at_entry else 0.0
+        net_pct = (proceeds - entry_cost_basis) / entry_cost_basis * 100 if entry_cost_basis else 0.0
         gross_pct = (exit_price / entry_price - 1) * 100 if entry_price else 0.0
-        return proceeds, net_pct, gross_pct, breakdown
+        return cash_free + proceeds, net_pct, gross_pct, breakdown
 
     def settle_short(
         self,
-        cash_at_entry: float,
+        cash_free: float,
+        entry_cost_basis: float,
         shares: float,
         entry_price: float,
         exit_price: float,
@@ -278,8 +282,8 @@ class AlpacaCostModel:
         net_dollar = entry_credit - cover_cost
         breakdown.buy_fees_usd += cover_fee
         breakdown.cat_fee_usd += cover_fee
-        cash_after = cash_at_entry + net_dollar
-        net_pct = net_dollar / cash_at_entry * 100 if cash_at_entry else 0.0
+        cash_after = cash_free + net_dollar
+        net_pct = net_dollar / entry_cost_basis * 100 if entry_cost_basis else 0.0
         gross_pct = (entry_price / exit_price - 1) * 100 if exit_price else 0.0
         return cash_after, net_pct, gross_pct, breakdown
 

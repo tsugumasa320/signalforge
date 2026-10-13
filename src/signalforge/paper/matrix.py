@@ -35,6 +35,15 @@ def ensure_paper_portfolio(style: str, strategy: str, *, refresh: bool) -> None:
         init_paper_portfolio(style, strategy, refresh=refresh)
 
 
+def paper_portfolio_exists(strategy_id: str) -> bool:
+    from signalforge.paper.portfolio import PaperPortfolio
+
+    for style, strat in PAPER_SIMULATIONS:
+        if strat == strategy_id and PaperPortfolio.load(style, strat) is not None:
+            return True
+    return False
+
+
 def run_all_paper_daily(
     *,
     refresh: bool = True,
