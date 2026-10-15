@@ -7,16 +7,27 @@
   "initial_capital": 3000000.0,
   "max_positions": 5,
   "position_pct": 0.2,
+  "entry_priority": "sector_liquidity",
   "currency": "JPY",
-  "started_at": "2026-10-15T16:07:18.504913+00:00",
+  "started_at": "2026-10-15T17:59:39.735776+00:00",
   "entry_cutoff": "2026-10-15 00:00:00+00:00",
-  "last_run_at": "2026-10-15T16:40:57.269009+00:00",
+  "last_run_at": "2026-10-15T20:58:05.498664+00:00",
   "universe_size": 1530,
   "last_sim": {
     "final_equity": 3000000.0,
     "total_return_pct": 0.0,
     "accepted_trades": 0,
-    "skipped": 0
+    "skipped_overlap": 0,
+    "skipped": 0,
+    "equity_daily": {
+      "d": [
+        "2026-10-15"
+      ],
+      "v": [
+        3000000.0
+      ]
+    },
+    "entry_priority": "sector_liquidity"
   },
   "tickers": [
     "1301.T",
