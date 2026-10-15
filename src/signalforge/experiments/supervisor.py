@@ -209,7 +209,7 @@ def spawn_experiments_run(
 
     cmd: list[str]
     if sys.platform == "darwin" and shutil.which("caffeinate"):
-        cmd = ["caffeinate", "-dims", *inner]
+        cmd = ["caffeinate", "-dims", "-s", *inner]
     else:
         cmd = inner
 

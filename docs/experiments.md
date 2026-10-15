@@ -47,7 +47,16 @@ chmod +x scripts/install-experiments-launchd.sh
 # 手動: launchctl start com.signalforge.experiments
 ```
 
-Mac がスリープすると BT は止まります。夜間実行時は電源設定でスリープ無効、または `caffeinate -s` でラップしてください。
+Mac がスリープすると BT は止まります。
+
+**蓋を閉じる（バッテリーのまま）:** `caffeinate` だけでは足りないことが多いです。次を使うと **バッテリー pmset でスリープを抑止**します（初回 `sudo` パスワード・発熱・消費増・**閉じた本体をバッグに入れない**）。
+
+```bash
+./scripts/rerun-experiments-series-closed-lid.sh
+# 完了後: ./scripts/restore-battery-sleep.sh
+```
+
+**電源接続時:** `./scripts/rerun-experiments-series.sh`（`caffeinate -dims -u -s`）で十分なことが多いです。
 
 ### 途中で止まるとき（Cursor / ターミナルを閉じた等）
 
@@ -56,7 +65,9 @@ Mac がスリープすると BT は止まります。夜間実行時は電源設
 **推奨:**
 
 ```bash
-./scripts/run-experiments-daemon.sh   # PID → data/reports/experiments.pid, caffeinate -i
+./scripts/run-experiments-daemon.sh   # PID → data/reports/experiments.pid, caffeinate -dims -s
+./scripts/rerun-experiments-series.sh # 系列追記（上と同じ daemon・蓋閉じ向け）
+# 落ちたら自動再開: ./scripts/start-experiments-supervisor.sh（内部も caffeinate -dims）
 # または macOS 夜間: ./scripts/install-experiments-launchd.sh
 ```
 
@@ -100,7 +111,15 @@ Mac がスリープすると BT は止まります。夜間実行時は電源設
 | `max_position_pct` | 1エントリーで使える口座の上限（例 0.35 = 35%） |
 | `min_cash_reserve_pct` | 常に残す現金（例 0.10 = 10%） |
 
-**TSE 実験**は銘柄ごとに上記ルールで **独立口座** として BT します（1口座で全銘柄を同時保有するポートフォリオ制約は別途将来拡張）。
+**TSE 実験**は銘柄ごとに上記ルールで **独立口座** として BT します。  
+**1口座・分散制約**（実運用に近い近似）: 口座 ¥300万 · 同時最大 5 銘柄 · 1 回 20% · 先着（枠が埋まればスキップ）。
+
+```bash
+uv run signalforge experiments portfolio macd_cross
+uv run signalforge paper diversified-init --strategy macd_cross --cohort prime --workers 8
+uv run signalforge paper diversified-run-all --refresh --workers 8
+./scripts/run-diversified-paper-prime.sh   # bb_lower + bnf_multi · プライム全銘柄（ログ: data/logs/diversified-paper-prime.log）
+```
 
 実験だけ別口座にしたい場合は `config/experiments/backtest_plan.yaml` の `meta.backtest_capital`、または run 時の CLI / 環境変数を使います。
 

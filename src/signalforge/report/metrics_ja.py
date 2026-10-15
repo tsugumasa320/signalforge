@@ -10,7 +10,80 @@ EXPECTANCY = "期待値（%）"
 WIN_RATE = "勝率"
 MAX_DRAWDOWN = "最大DD（%）"
 TRADES = "取引数"
+STRATEGY_SUMMARY = "解説"
+STRATEGY_CATEGORY = "分類"
+STRATEGY_RANK = "#"
+METRICS_NOTE = "データ"
 TSE_TABLE_NOTE = "各列は全銘柄バックテスト結果の典型値（順位の真ん中の銘柄）"
+
+STRATEGY_TAG_LABELS: dict[str, str] = {
+    "trend": "トレンド",
+    "momentum": "モメンタム",
+    "ma": "移動平均",
+    "mean_reversion": "逆張り",
+    "breakout": "ブレイクアウト",
+    "volatility": "ボラティリティ",
+    "vwap": "VWAP",
+    "daytrade": "デイトレ",
+    "opening": "寄り付き",
+    "ichimoku": "一目",
+    "oscillator": "オシレーター",
+    "rsi": "RSI",
+    "bb": "ボリンジャー",
+    "pattern": "パターン",
+    "pullback": "押し目",
+    "japan": "日本株定番",
+    "screening": "スクリーニング",
+    "kabutan": "株探系",
+    "minkabu": "みんかぶ系",
+    "dsl": "DSL",
+    "combo": "複合",
+    "gap": "ギャップ",
+    "volume": "出来高",
+    "adx": "ADX",
+    "atr": "ATR",
+    "candle": "ローソク",
+    "fibonacci": "フィボナッチ",
+    "sector": "セクター",
+    "relative_strength": "相対強度",
+    "multi_timeframe": "マルチTF",
+    "regime": "レジーム",
+    "quant": "クオンツ",
+    "factor": "ファクター",
+    "value": "バリュー",
+    "growth": "グロース",
+    "event": "イベント",
+    "sentiment": "センチメント",
+    "orderflow": "フロー",
+    "scalp": "スキャル",
+    "scalping": "スキャル",
+    "range": "レンジ",
+    "grid": "グリッド",
+    "portfolio": "ポートフォリオ",
+    "position_sizing": "ポジションサイズ",
+    "market_neutral": "マーケットニュートラル",
+    "arb": "アービトラージ",
+    "fundamental": "ファンダ",
+    "supply_demand": "需給",
+    "session": "セッション",
+    "levels": "水平線",
+    "exit": "出口",
+    "meta": "メタ",
+    "auto_harvest": "収集候補",
+    "keyword": "キーワード",
+    "crypto_style": "暗号資産型",
+    "2ch": "2ch",
+    "x": "X",
+    "youtube": "YouTube",
+    "youtube_transcript": "YouTube字幕",
+}
+
+
+def format_strategy_tags(tags: list[str] | None) -> str:
+    if not tags:
+        return "—"
+    labels = [STRATEGY_TAG_LABELS.get(str(t).strip(), str(t)) for t in tags if str(t).strip()]
+    return " · ".join(labels) if labels else "—"
 
 # 旧ラベル（CLI・互換）
 MEDIAN_PF = "損益比"
@@ -19,6 +92,10 @@ MEDIAN_EXPECTANCY = EXPECTANCY
 
 EXPERIMENT_DF_COLUMNS: dict[str, str] = {
     "strategy_id": "戦略",
+    "strategy_summary": STRATEGY_SUMMARY,
+    "strategy_category": STRATEGY_CATEGORY,
+    "rank": STRATEGY_RANK,
+    "metrics_note": METRICS_NOTE,
     "strategy": "戦略",
     "id": "戦略ID",
     "style": "スタイル",
@@ -50,13 +127,17 @@ EXPERIMENT_SORT_OPTIONS: list[tuple[str, str]] = [
 ]
 
 EXPERIMENT_RANKING_COLUMNS: list[str] = [
+    "rank",
     "strategy_id",
     "style",
+    "strategy_category",
+    "strategy_summary",
     "expectancy_pct",
     "profit_factor",
     "win_rate",
     "total_trades",
     "max_drawdown_pct",
+    "metrics_note",
 ]
 
 CATALOG_SORT_OPTIONS: list[tuple[str, str]] = [

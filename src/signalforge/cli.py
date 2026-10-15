@@ -52,6 +52,12 @@ def _print_metrics(label: str, m: dict) -> None:
 @click.group()
 def main() -> None:
     """SignalForge — 日本株マルチホライズン・テクニカル分析。"""
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        pass
 
 
 @main.command()
@@ -1125,6 +1131,217 @@ def optimize(style: str, strategy: str, trials: int, metric: str, ml_filter: boo
                 click.echo(f"Avg OOS label accuracy: {avg:.1%}")
 
 
+@main.group("alt-data")
+def alt_data_group() -> None:
+    """Fetch sector / earnings datasets and re-run strategies that depend on them."""
+
+
+@alt_data_group.command("status")
+def alt_data_status_cmd() -> None:
+    """Show alt-data cache coverage and strategies wired to real datasets."""
+    from signalforge.alt_data.deps import PLANNED_DATASETS, strategies_using_dataset
+    from signalforge.alt_data.status import alt_data_status
+
+    st = alt_data_status()
+    click.echo("=== 代替データ（OHLCV 以外）===")
+    click.echo(f"業種指数: {st['sector_indices_built']} / {st['sector_groups']} 業種")
+    click.echo(f"決算日ファイル: {st['earnings_files']} / {st['tse_tickers']} 銘柄")
+    click.echo(f"信用残（J-Quants）: {st.get('credit_margin_files', 0)} 銘柄")
+    click.echo(f"data_deps 付き戦略: {st['strategies_with_data_deps']}")
+    click.echo(f"まだ approximation の戦略: {st['strategies_still_approximation']}")
+    click.echo("\n--- データセット別の戦略数 ---")
+    for key in ("sector_index", "earnings", "credit_balance"):
+        n = len(strategies_using_dataset(key))
+        if n:
+            click.echo(f"  {key}: {n}")
+    click.echo("\n--- 未実装（要 API / スクレイプ）---")
+    for k, msg in PLANNED_DATASETS.items():
+        click.echo(f"  {k}: {msg}")
+
+
+@alt_data_group.command("fetch")
+@click.option("--sectors", is_flag=True, help="業種別 EW 指数（キャッシュ OHLCV から構築）")
+@click.option(
+    "--earnings",
+    is_flag=True,
+    help="銘柄ごと決算日（JQUANTS_API_KEY あれば J-Quants、なければ yfinance）",
+)
+@click.option("--all", "fetch_all", is_flag=True, help="--sectors と --earnings")
+@click.option("--refresh", is_flag=True, help="既存ファイルも再取得")
+@click.option("--limit", default=0, type=int, help="earnings / jquants-credit の銘柄数上限（0=全 TSE）")
+@click.option(
+    "--jquants-credit",
+    is_flag=True,
+    help="J-Quants 信用残（要 JQUANTS_API_KEY）",
+)
+def alt_data_fetch_cmd(
+    sectors: bool,
+    earnings: bool,
+    fetch_all: bool,
+    refresh: bool,
+    limit: int,
+    jquants_credit: bool,
+) -> None:
+    """Collect alt datasets under data/alt/."""
+    from signalforge.alt_data.earnings import fetch_earnings_universe
+    from signalforge.alt_data.sector_index import build_all_sector_indices
+    from signalforge.universe.tse_listing import list_tse_tickers
+
+    if fetch_all:
+        sectors = earnings = True
+    if not sectors and not earnings and not jquants_credit:
+        raise click.ClickException(
+            "--sectors / --earnings / --jquants-credit / --all のいずれかを指定"
+        )
+
+    if sectors:
+        click.echo("業種指数を構築中…")
+
+        def _sp(i: int, n: int, name: str) -> None:
+            if i % 5 == 0 or i == n:
+                click.echo(f"  [{i}/{n}] {name}")
+
+        stats = build_all_sector_indices(refresh=refresh, progress_cb=_sp)
+        click.echo(f"✅ 業種指数: {stats['sectors_built']} / {stats['sectors_total']}")
+
+    if earnings:
+        import os
+
+        tickers = list_tse_tickers()
+        if limit > 0:
+            tickers = tickers[:limit]
+        use_jq = bool((os.getenv("JQUANTS_API_KEY") or "").strip())
+        src = "J-Quants earnings-calendar" if use_jq else "yfinance"
+        click.echo(f"決算日を取得中… ({len(tickers)} 銘柄, {src})")
+
+        def _ep(i: int, n: int, sym: str) -> None:
+            if i % 200 == 0 or i == n:
+                click.echo(f"  [{i}/{n}] {sym}")
+
+        if use_jq:
+            from signalforge.alt_data.earnings_jquants import fetch_earnings_jquants_universe
+
+            stats = fetch_earnings_jquants_universe(tickers, refresh=refresh, progress_cb=_ep)
+        else:
+            stats = fetch_earnings_universe(tickers, refresh=refresh, progress_cb=_ep)
+        click.echo(f"✅ 決算日ファイル: {stats['with_dates']} / {stats['tickers']} に日付あり")
+
+    if jquants_credit:
+        from signalforge.alt_data.credit_balance import fetch_margin_universe
+
+        tickers = list_tse_tickers()
+        if limit > 0:
+            tickers = tickers[:limit]
+        click.echo(f"J-Quants 信用残を取得中… ({len(tickers)} 銘柄)")
+
+        def _cp(i: int, n: int, sym: str) -> None:
+            if i % 50 == 0 or i == n:
+                click.echo(f"  [{i}/{n}] {sym}")
+
+        stats = fetch_margin_universe(tickers, refresh=refresh, progress_cb=_cp)
+        click.echo(
+            f"✅ 信用残: {stats['with_margin']} / {stats['tickers']} "
+            f"(errors {stats.get('errors', 0)})"
+        )
+
+
+@alt_data_group.command("jquants-test")
+def alt_data_jquants_test_cmd() -> None:
+    """Verify JQUANTS_API_KEY with one margin-interest request (72030)."""
+    from signalforge.alt_data.jquants_client import JQuantsError, test_connection
+
+    try:
+        info = test_connection()
+    except JQuantsError as e:
+        raise click.ClickException(str(e)) from e
+    click.echo(
+        f"✅ J-Quants 接続 OK（{info['code']} master={info['master_rows']} "
+        f"決算カレンダー={info['earnings_calendar_rows']}）"
+    )
+    if not info.get("margin_interest_available"):
+        click.echo(
+            "⚠️  信用残 API (/markets/margin-interest) は現在のプランでは利用不可です。"
+            " credit_balance_contrarian には有料プランが必要です。"
+        )
+        if info.get("margin_note"):
+            click.echo(f"    ({info['margin_note'][:120]})")
+
+
+@alt_data_group.command("refresh-trusted")
+@click.option("--fetch-earnings", is_flag=True, help="J-Quants/yfinance で決算日を先に取得")
+@click.option("--limit", default=0, type=int, help="決算 fetch の銘柄上限（0=全件）")
+@click.option("--run-experiments", is_flag=True, help="invalidate 後に experiments run を起動")
+def alt_data_refresh_trusted_cmd(fetch_earnings: bool, limit: int, run_experiments: bool) -> None:
+    """本データが揃った戦略だけ JSON を消して再BT可能にする。"""
+    import os
+    import subprocess
+
+    from signalforge.alt_data.trust import _coverage_snapshot, strategies_ready_for_rerun
+    from signalforge.universe.tse_listing import list_tse_tickers
+
+    if fetch_earnings:
+        tickers = list_tse_tickers()
+        if limit > 0:
+            tickers = tickers[:limit]
+        use_jq = bool((os.getenv("JQUANTS_API_KEY") or "").strip())
+        if use_jq:
+            from signalforge.alt_data.earnings_jquants import fetch_earnings_jquants_universe
+
+            click.echo(f"決算日取得（J-Quants）… {len(tickers)} 銘柄")
+            fetch_earnings_jquants_universe(tickers, refresh=True)
+        else:
+            from signalforge.alt_data.earnings import fetch_earnings_universe
+
+            click.echo(f"決算日取得（yfinance）… {len(tickers)} 銘柄")
+            fetch_earnings_universe(tickers, refresh=True)
+        _coverage_snapshot.cache_clear()
+
+    ready = strategies_ready_for_rerun()
+    click.echo(f"再BT可能（代理なし・data 充足）: {len(ready)} 戦略")
+    for sid in ready:
+        click.echo(f"  · {sid}")
+
+    from signalforge.alt_data.invalidate import invalidate_trusted_alt_strategies
+
+    touched = invalidate_trusted_alt_strategies()
+    click.echo(f"削除した experiment JSON: {len(touched)} 件")
+
+    if run_experiments and touched:
+        click.echo("experiments run を起動…")
+        subprocess.Popen(
+            [
+                "uv",
+                "run",
+                "signalforge",
+                "experiments",
+                "run",
+                "--ignore-schedule",
+                "--workers",
+                "8",
+            ],
+            cwd=str(Path(__file__).resolve().parents[2]),
+        )
+        click.echo("バックグラウンドで開始しました。")
+    elif touched:
+        click.echo("再BT: uv run signalforge experiments run --ignore-schedule --workers 8")
+
+
+@alt_data_group.command("invalidate-experiments")
+def alt_data_invalidate_cmd() -> None:
+    """Remove completed experiment JSON for strategies with data_deps (再BT用)."""
+    from signalforge.alt_data.invalidate import invalidate_alt_data_strategies
+
+    touched = invalidate_alt_data_strategies()
+    if not touched:
+        click.echo("data_deps 付き戦略がありません。")
+        return
+    click.echo(f"削除・再BT対象: {len(touched)} 戦略")
+    for sid in touched:
+        click.echo(f"  · {sid}")
+    click.echo("\n再実行例:")
+    click.echo("  uv run signalforge experiments run --ignore-schedule --workers 8")
+
+
 @main.group()
 def experiments() -> None:
     """Multi-axis TSE backtest campaigns (universe / segment / sector)."""
@@ -1320,6 +1537,44 @@ def experiments_capital_cmd(
     click.echo(json.dumps(record, ensure_ascii=False, indent=2))
     click.echo(f"\nbacktest_capital 未記録 or 不一致の完了戦略: {len(stale)} / {len(strategy_ids)}")
     click.echo("再BT: experiments run --refresh-capital （必要なら --initial-cash-jpy 等）")
+
+
+@experiments.command("portfolio")
+@click.argument("strategy_id")
+@click.option("--initial-cash-jpy", default=None, type=float)
+@click.option("--max-positions", default=5, show_default=True, type=int)
+@click.option("--position-pct", default=0.2, show_default=True, type=float)
+def experiments_portfolio_cmd(
+    strategy_id: str,
+    initial_cash_jpy: float | None,
+    max_positions: int,
+    position_pct: float,
+) -> None:
+    """1口座・分散制約で TSE 実験トレードを再シミュレーション（先着・同時保有上限）。"""
+    from signalforge.portfolio.diversified import simulate_from_experiment_strategy
+
+    try:
+        out = simulate_from_experiment_strategy(
+            strategy_id,
+            initial_cash_jpy=initial_cash_jpy,
+            max_positions=max_positions,
+            position_pct=position_pct,
+        )
+    except FileNotFoundError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    click.echo(f"戦略: {strategy_id}")
+    click.echo(
+        f"銘柄: {out['n_tickers_with_trades']} / {out['n_tickers']} "
+        f"(系列あり {out['n_tickers_with_series']})"
+    )
+    click.echo(f"プール内トレード: {out['n_trades_in_pool']}")
+    click.echo(
+        f"口座 ¥{out['initial_capital']:,.0f} · 同時最大 {out['max_positions']} · "
+        f"1回 {out['position_pct'] * 100:.0f}%"
+    )
+    click.echo(f"採用トレード: {out['accepted_trades']} · スキップ（枠/重複）: {out['skipped_overlap']}")
+    click.echo(f"最終評価額: ¥{out['final_equity']:,.0f} · 総リターン: {out['total_return_pct']:+.2f}%")
 
 
 @experiments.command("schedule")
@@ -1684,6 +1939,17 @@ def doctor() -> None:
         f"Data cache: {'OK' if data.is_file() else 'MISSING — run: uv run signalforge fetch --ticker 7203.T --timeframe 1d'}"
     )
 
+    import os
+
+    jq = (os.getenv("JQUANTS_API_KEY") or "").strip()
+    if jq:
+        click.echo(f"J-Quants API key: set ({len(jq)} chars) — uv run signalforge alt-data jquants-test")
+    else:
+        click.echo(
+            "J-Quants API key: 未設定 — 信用残戦略用: "
+            "https://jpx-jquants.com/ → export JQUANTS_API_KEY=…"
+        )
+
     click.echo("\nLaunch (background, survives terminal close):")
     click.echo("  uv run signalforge dashboard start")
     click.echo("Stop: uv run signalforge dashboard stop")
@@ -1806,7 +2072,7 @@ def paper() -> None:
 @click.option("--cost-model", default="japan", type=COST_MODEL_CHOICE)
 def paper_init(style: str, strategy: str | None, cost_model: str) -> None:
     """Start a new paper account from the latest bar (forward-only)."""
-    from signalforge.paper.portfolio import PaperPortfolio
+    from signalforge.paper.portfolio import PaperPortfolio, format_paper_amount
     from signalforge.paper.runner import init_paper_portfolio
 
     cfg = load_style_config(style)
@@ -1819,7 +2085,7 @@ def paper_init(style: str, strategy: str | None, cost_model: str) -> None:
     p = init_paper_portfolio(style, strategy, cost_model=cost_model, refresh=True)
     click.echo(f"✅ Paper 口座を作成しました: {style} / {strategy}")
     click.echo(f"   開始時点の最終足: {p.last_processed_bar}")
-    click.echo(f"   初期資金: ${p.initial_cash:,.0f}")
+    click.echo(f"   初期資金: {format_paper_amount(p, p.initial_cash)}")
     click.echo(f"   保存先: {p.save()}")
     click.echo(f"\n毎日実行: uv run signalforge paper run --style {style} --strategy {strategy}")
 
@@ -1850,6 +2116,7 @@ def paper_run_all(refresh: bool, cost_model: str | None) -> None:
 @click.option("--cost-model", default=None, type=COST_MODEL_CHOICE)
 def paper_run(style: str, strategy: str | None, refresh: bool, cost_model: str | None) -> None:
     """Fetch latest data and process new bars (run daily via cron)."""
+    from signalforge.paper.portfolio import format_paper_amount
     from signalforge.paper.runner import run_paper_daily
 
     cfg = load_style_config(style)
@@ -1865,7 +2132,7 @@ def paper_run(style: str, strategy: str | None, refresh: bool, cost_model: str |
 
     if out["status"] == "up_to_date":
         click.echo(f"\n{out['message']}")
-        click.echo(f"現在評価額: ${out['equity']:,.0f}")
+        click.echo(f"現在評価額: {format_paper_amount(p, out['equity'])}")
         return
 
     click.echo(f"処理した新規足: {out['new_bars']} 本")
@@ -1886,7 +2153,7 @@ def paper_run(style: str, strategy: str | None, refresh: bool, cost_model: str |
         click.echo("\n建玉: なし")
 
     click.echo(f"\n--- 累積成績（paper 開始以降） ---")
-    click.echo(f"評価額: ${out['equity']:,.0f}")
+    click.echo(f"評価額: {format_paper_amount(p, out['equity'])}")
     click.echo(f"総リターン: {out.get('total_return_pct', 0):.2f}%")
     m = out.get("metrics", {})
     click.echo(f"クローズドトレード: {m.get('total_trades', 0)}")
@@ -1900,7 +2167,7 @@ def paper_run(style: str, strategy: str | None, refresh: bool, cost_model: str |
 @click.option("--strategy", default=None)
 def paper_status(style: str, strategy: str | None) -> None:
     """Show paper account status."""
-    from signalforge.paper.portfolio import PaperPortfolio
+    from signalforge.paper.portfolio import PaperPortfolio, format_paper_amount
 
     cfg = load_style_config(style)
     strategy = strategy or cfg.get("strategy", "ema_pullback")
@@ -1913,11 +2180,139 @@ def paper_status(style: str, strategy: str | None) -> None:
     click.echo(f"開始: {p.started_at}")
     click.echo(f"最終処理足: {p.last_processed_bar}")
     click.echo(f"最終実行: {p.last_run_at}")
-    click.echo(f"現金: ${p.cash:,.0f}")
-    click.echo(f"最新評価額: ${eq:,.0f}")
+    click.echo(f"現金: {format_paper_amount(p, p.cash)}")
+    click.echo(f"最新評価額: {format_paper_amount(p, eq)}")
     click.echo(f"クローズドトレード: {len(p.closed_trades)}")
     if p.position:
         click.echo(f"建玉: {p.position.get('side')} @ {p.position.get('entry_price')} ({p.position.get('entry_time')})")
+
+
+@paper.command("diversified-init")
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
+@click.option("--strategy", required=True)
+@click.option("--cohort", default="prime", show_default=True)
+@click.option("--ticker-limit", default=0, type=int, help="0=コホート全件")
+@click.option("--cost-model", default="japan", type=COST_MODEL_CHOICE)
+@click.option("--initial-cash-jpy", default=None, type=float)
+@click.option("--max-positions", default=5, show_default=True, type=int)
+@click.option("--position-pct", default=0.2, show_default=True, type=float)
+@click.option("--workers", default=8, show_default=True, type=int)
+def paper_diversified_init(
+    style: str,
+    strategy: str,
+    cohort: str,
+    ticker_limit: int,
+    cost_model: str,
+    initial_cash_jpy: float | None,
+    max_positions: int,
+    position_pct: float,
+    workers: int,
+) -> None:
+    """1口座・ユニバース横断のフォワードペーパー（最終足以降のエントリのみ）。"""
+    from signalforge.paper.diversified import DiversifiedPaperBook, init_diversified_paper
+
+    if DiversifiedPaperBook.load(style, strategy):
+        raise click.ClickException(
+            f"既に diversified 口座があります。`paper diversified-reset --style {style} --strategy {strategy}`"
+        )
+    book = init_diversified_paper(
+        style,
+        strategy,
+        cohort=cohort,
+        ticker_limit=ticker_limit,
+        cost_model=cost_model,
+        initial_cash_jpy=initial_cash_jpy,
+        max_positions=max_positions,
+        position_pct=position_pct,
+        workers=workers,
+        refresh=True,
+    )
+    sim = book.last_sim or {}
+    click.echo(f"✅ Diversified paper: {style} / {strategy} · {book.universe_size} 銘柄 ({cohort})")
+    click.echo(f"   エントリ開始: {book.entry_cutoff} より後")
+    click.echo(f"   口座 ¥{book.initial_capital:,.0f} · 同時 {book.max_positions} · {book.position_pct * 100:.0f}%/回")
+    click.echo(f"   評価額: ¥{sim.get('final_equity', book.initial_capital):,.0f}")
+    click.echo(f"   保存: {book.save()}")
+
+
+@paper.command("diversified-run")
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
+@click.option("--strategy", required=True)
+@click.option("--refresh/--no-refresh", default=True)
+@click.option("--workers", default=None, type=int, help="未指定なら口座保存値")
+def paper_diversified_run(style: str, strategy: str, refresh: bool, workers: int | None) -> None:
+    """ユニバースを更新し、分散ルールでフォワード成績を再計算。"""
+    from signalforge.paper.diversified import DiversifiedPaperBook, run_diversified_paper
+
+    book = DiversifiedPaperBook.load(style, strategy)
+    if not book:
+        raise click.ClickException("口座がありません。`paper diversified-init` を実行してください。")
+    out = run_diversified_paper(book, refresh=refresh, workers=workers)
+    sim = out["simulation"]
+    click.echo(f"=== Diversified paper: {style} / {strategy} ===")
+    click.echo(f"フォワード候補トレード: {out['n_trades_forward']}")
+    click.echo(f"採用: {sim.get('accepted_trades', 0)} · スキップ: {sim.get('skipped_overlap', 0)}")
+    click.echo(f"評価額: ¥{sim.get('final_equity', book.initial_capital):,.0f} · リターン {sim.get('total_return_pct', 0):+.2f}%")
+
+
+@paper.command("diversified-run-all")
+@click.option("--refresh/--no-refresh", default=True)
+@click.option("--workers", default=8, show_default=True, type=int)
+def paper_diversified_run_all(refresh: bool, workers: int) -> None:
+    """Advance all diversified paper accounts (TSE フォワード検証用ペア)."""
+    from signalforge.paper.diversified import DiversifiedPaperBook, run_diversified_paper
+
+    pairs = [
+        ("swing", "bb_lower_rsi_oversold"),
+        ("swing", "bnf_multi_indicator_bounce"),
+    ]
+    for style, strategy in pairs:
+        book = DiversifiedPaperBook.load(style, strategy)
+        if not book:
+            click.echo(f"⏭  未 init: {strategy}")
+            continue
+        try:
+            out = run_diversified_paper(book, refresh=refresh, workers=workers)
+            sim = out["simulation"]
+            click.echo(
+                f"✓ {strategy}: フォワード {out['n_trades_forward']} · "
+                f"¥{sim.get('final_equity', 0):,.0f} ({sim.get('total_return_pct', 0):+.2f}%)"
+            )
+        except Exception as exc:
+            click.echo(f"✗ {strategy}: {exc}")
+
+
+@paper.command("diversified-status")
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
+@click.option("--strategy", required=True)
+def paper_diversified_status(style: str, strategy: str) -> None:
+    from signalforge.paper.diversified import DiversifiedPaperBook
+
+    book = DiversifiedPaperBook.load(style, strategy)
+    if not book:
+        raise click.ClickException("口座がありません。")
+    sim = book.last_sim or {}
+    click.echo(f"Diversified: {style} / {strategy}")
+    click.echo(f"コホート: {book.cohort} · 銘柄数: {book.universe_size}")
+    click.echo(f"開始: {book.started_at} · エントリ cutoff: {book.entry_cutoff}")
+    click.echo(f"最終実行: {book.last_run_at}")
+    click.echo(
+        f"¥{book.initial_capital:,.0f} → ¥{sim.get('final_equity', book.initial_capital):,.0f} "
+        f"({sim.get('total_return_pct', 0):+.2f}%)"
+    )
+
+
+@paper.command("diversified-reset")
+@click.option("--style", default="swing", type=click.Choice(STYLE_CHOICES))
+@click.option("--strategy", required=True)
+@click.confirmation_option(prompt="Diversified paper 口座を削除しますか？")
+def paper_diversified_reset(style: str, strategy: str) -> None:
+    from signalforge.paper.diversified import diversified_book_path
+
+    path = diversified_book_path(style, strategy)
+    if path.exists():
+        path.unlink()
+    click.echo("Diversified paper をリセットしました。")
 
 
 @paper.command("reset")

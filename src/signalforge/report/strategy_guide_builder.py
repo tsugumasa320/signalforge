@@ -600,3 +600,17 @@ def resolve_strategy_guide(strategy_id: str) -> dict[str, Any]:
 
 def strategy_display_title(strategy_id: str) -> str:
     return str(resolve_strategy_guide(strategy_id).get("title") or strategy_id)
+
+
+def strategy_style_label(strategy_id: str) -> str:
+    cat = _catalog_entry(strategy_id) or {}
+    impl = _impl_index().get(strategy_id) or {}
+    style_key = cat.get("style") or impl.get("catalog_style") or ""
+    return STYLE_LABEL.get(str(style_key), str(style_key) or "—")
+
+
+def strategy_category_label(strategy_id: str) -> str:
+    from signalforge.report.metrics_ja import format_strategy_tags
+
+    cat = _catalog_entry(strategy_id) or {}
+    return format_strategy_tags(cat.get("tags"))

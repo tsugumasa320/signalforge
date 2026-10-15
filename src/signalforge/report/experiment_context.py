@@ -181,10 +181,10 @@ def live_strategy_universe(
         use_stored_period = periods_match(ps, pe, ref_start, ref_end)
 
     if not use_stored_period:
-        from signalforge.experiments.scan import (
-            _filter_ticker_rows,
-            _load_ticker_rows_in_dir,
-            _strategies_dir,
+        from signalforge.experiments.ticker_cohort import (
+            filter_ticker_rows as _filter_ticker_rows,
+            load_ticker_rows_in_dir as _load_ticker_rows_in_dir,
+            strategies_dir as _strategies_dir,
         )
         from signalforge.experiments.series import (
             aggregate_sliced_rows,

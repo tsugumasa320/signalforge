@@ -5,6 +5,7 @@ from typing import Any
 
 import pandas as pd
 
+from signalforge.backtest.capital import CapitalPolicy
 from signalforge.backtest.costs import load_cost_model
 from signalforge.backtest.engine import BacktestEngine
 from signalforge.backtest.metrics import compute_metrics
@@ -125,16 +126,15 @@ def init_paper_portfolio(
     if df.empty:
         raise RuntimeError("データが取得できませんでした。")
 
-    from signalforge.config import CONFIG_DIR, load_yaml
-
-    alpaca_cfg = load_yaml(CONFIG_DIR / "costs" / "alpaca.yaml")
-    initial_cash = float(alpaca_cfg.get("initial_cash_usd", 100_000))
+    policy = CapitalPolicy.from_config(cfg)
+    initial_cash = policy.initial_cash
 
     last_ts = str(df.index[-1])
     portfolio = PaperPortfolio.create(
         style,
         strategy,
         cost_model=cost_model,
+        currency=policy.currency,
         initial_cash=initial_cash,
         last_bar_ts=last_ts,
     )

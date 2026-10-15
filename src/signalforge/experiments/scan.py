@@ -16,62 +16,18 @@ from signalforge.experiments.storage import (
     rows_for_universe_aggregate,
     ticker_row_has_core_metrics,
 )
+from signalforge.experiments.ticker_cohort import (
+    TSE_SEGMENT_LABELS,
+    filter_ticker_rows as _filter_ticker_rows,
+    load_ticker_rows_in_dir as _load_ticker_rows_in_dir,
+    ranking_row_from_aggregate as _ranking_row_from_aggregate,
+)
 from signalforge.paper.matrix import paper_portfolio_exists
 
 
 def _header_metrics_poisoned(header_universe: dict[str, Any]) -> bool:
     exp = header_universe.get("median_avg_pnl_pct")
     return exp is not None and float(exp) <= -20.0
-
-
-TSE_SEGMENT_LABELS: dict[str, str] = {
-    "prime": "プライム",
-    "standard": "スタンダード",
-    "growth": "グロース",
-}
-
-
-def _filter_ticker_rows(
-    rows: list[dict[str, Any]],
-    *,
-    segment: str | None = None,
-    sector_tse: str | None = None,
-) -> list[dict[str, Any]]:
-    out = rows
-    if segment:
-        out = [r for r in out if r.get("segment") == segment]
-    if sector_tse:
-        out = [r for r in out if r.get("sector_tse") == sector_tse]
-    return out
-
-
-def _load_ticker_rows_in_dir(
-    strategy_id: str,
-    doc: dict[str, Any],
-    strategies_dir: Path | None,
-) -> list[dict[str, Any]]:
-    if strategies_dir is None or strategies_dir == _strategies_dir():
-        return load_ticker_rows(strategy_id, doc)
-    inline = doc.get("tickers")
-    if inline:
-        return list(inline)
-    side = doc.get("tickers_file")
-    if side:
-        path = strategies_dir / side
-        if path.exists():
-            try:
-                raw = json.loads(path.read_text(encoding="utf-8"))
-                return raw if isinstance(raw, list) else []
-            except json.JSONDecodeError:
-                return []
-    path = strategies_dir / f"{strategy_id}.tickers.json"
-    if path.exists():
-        try:
-            raw = json.loads(path.read_text(encoding="utf-8"))
-            return raw if isinstance(raw, list) else []
-        except json.JSONDecodeError:
-            return []
-    return []
 
 
 def _cohort_from_valid_sidecar(
@@ -106,29 +62,15 @@ def _universe_from_valid_sidecar(
     strategy_id: str,
     doc: dict[str, Any],
     header_universe: dict[str, Any],
-) -> tuple[dict[str, Any], int, int]:
-    return _cohort_from_valid_sidecar(strategy_id, doc, header_universe)
-
-
-def _ranking_row_from_aggregate(
-    base: dict[str, Any],
-    u: dict[str, Any],
     *,
-    n_valid: int,
-    n_ok: int,
-) -> dict[str, Any]:
-    return {
-        **base,
-        "expectancy_pct": u.get("median_avg_pnl_pct"),
-        "profit_factor": u.get("median_profit_factor"),
-        "win_rate": u.get("median_win_rate"),
-        "total_trades": u.get("median_trades"),
-        "max_drawdown_pct": u.get("median_max_drawdown_pct"),
-        "n_tickers": u.get("n_tickers"),
-        "metrics_valid_tickers": n_valid,
-        "metrics_total_tickers": n_ok,
-        "metrics_partial": n_valid < n_ok,
-    }
+    fast: bool = False,
+) -> tuple[dict[str, Any], int, int]:
+    if fast:
+        if _header_metrics_poisoned(header_universe):
+            return {}, 0, 0
+        n = int(header_universe.get("n_tickers") or doc.get("n_tickers_done") or 0)
+        return header_universe, n, max(n, 1)
+    return _cohort_from_valid_sidecar(strategy_id, doc, header_universe)
 
 
 def list_campaign_sectors(*, strategies_dir: Path | None = None) -> list[str]:
@@ -154,6 +96,7 @@ def apply_cohort_to_complete(
     segment: str | None = None,
     sector_tse: str | None = None,
     strategies_dir: Path | None = None,
+    header_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Rebuild ranking rows for Prime / Standard / Growth / sector cohorts."""
     if not segment and not sector_tse:
@@ -170,14 +113,19 @@ def apply_cohort_to_complete(
             header = (doc.get("by_segment") or {}).get(segment) or {}
         else:
             header = (doc.get("by_sector") or {}).get(sector_tse or "") or {}
-        u, n_valid, n_ok = _cohort_from_valid_sidecar(
-            sid,
-            doc,
-            header,
-            segment=segment,
-            sector_tse=sector_tse,
-            strategies_dir=d,
-        )
+        if header_only:
+            u, n_valid, n_ok = _universe_from_valid_sidecar(
+                sid, doc, header, fast=True
+            )
+        else:
+            u, n_valid, n_ok = _cohort_from_valid_sidecar(
+                sid,
+                doc,
+                header,
+                segment=segment,
+                sector_tse=sector_tse,
+                strategies_dir=d,
+            )
         if not u and n_ok == 0:
             continue
         keep = {
@@ -185,7 +133,13 @@ def apply_cohort_to_complete(
             for k in ("strategy_id", "style", "capital_ok", "paper_active", "mtime")
             if k in base
         }
-        out.append(_ranking_row_from_aggregate(keep, u, n_valid=n_valid, n_ok=n_ok))
+        from signalforge.alt_data.trust import apply_trust_to_row
+
+        out.append(
+            apply_trust_to_row(
+                _ranking_row_from_aggregate(keep, u, n_valid=n_valid, n_ok=n_ok)
+            )
+        )
     out.sort(
         key=lambda x: float(x.get("expectancy_pct") or x.get("profit_factor") or 0),
         reverse=True,
@@ -222,7 +176,11 @@ def planned_strategy_count() -> int:
     )
 
 
-def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, Any]:
+def scan_campaign_progress(
+    *,
+    strategies_dir: Path | None = None,
+    fast: bool = False,
+) -> dict[str, Any]:
     d = strategies_dir or _strategies_dir()
     complete: list[dict[str, Any]] = []
     in_progress: list[dict[str, Any]] = []
@@ -271,29 +229,35 @@ def scan_campaign_progress(*, strategies_dir: Path | None = None) -> dict[str, A
         done = int(doc.get("n_tickers_done") or 0)
         if doc.get("complete") and target > 0 and done >= target:
             header_u = doc.get("universe") or {}
-            u, n_valid, n_ok = _universe_from_valid_sidecar(sid, doc, header_u)
+            u, n_valid, n_ok = _universe_from_valid_sidecar(
+                sid, doc, header_u, fast=fast
+            )
             stored_cap = doc.get("backtest_capital")
             if manifest_cap and isinstance(stored_cap, dict):
                 cap_ok = capital_records_match(stored_cap, manifest_cap)
             else:
                 cap_ok = stored_cap is not None
+            from signalforge.alt_data.trust import apply_trust_to_row
+
             complete.append(
-                {
-                    "strategy_id": sid,
-                    "style": doc.get("style"),
-                    "expectancy_pct": u.get("median_avg_pnl_pct"),
-                    "profit_factor": u.get("median_profit_factor"),
-                    "win_rate": u.get("median_win_rate"),
-                    "total_trades": u.get("median_trades"),
-                    "max_drawdown_pct": u.get("median_max_drawdown_pct"),
-                    "n_tickers": u.get("n_tickers"),
-                    "metrics_valid_tickers": n_valid,
-                    "metrics_total_tickers": n_ok,
-                    "metrics_partial": n_valid < n_ok,
-                    "capital_ok": cap_ok,
-                    "paper_active": paper_portfolio_exists(sid),
-                    "mtime": _safe_mtime(path),
-                }
+                apply_trust_to_row(
+                    {
+                        "strategy_id": sid,
+                        "style": doc.get("style"),
+                        "expectancy_pct": u.get("median_avg_pnl_pct"),
+                        "profit_factor": u.get("median_profit_factor"),
+                        "win_rate": u.get("median_win_rate"),
+                        "total_trades": u.get("median_trades"),
+                        "max_drawdown_pct": u.get("median_max_drawdown_pct"),
+                        "n_tickers": u.get("n_tickers"),
+                        "metrics_valid_tickers": n_valid,
+                        "metrics_total_tickers": n_ok,
+                        "metrics_partial": n_valid < n_ok,
+                        "capital_ok": cap_ok,
+                        "paper_active": paper_portfolio_exists(sid),
+                        "mtime": _safe_mtime(path),
+                    }
+                )
             )
         elif done > 0 and not doc.get("complete"):
             in_progress.append(
@@ -399,7 +363,13 @@ def apply_cohort_period_slice(
             for k in ("strategy_id", "style", "capital_ok", "paper_active", "mtime")
             if k in base
         }
-        out.append(_ranking_row_from_aggregate(keep, u, n_valid=n_valid, n_ok=len(sliced)))
+        from signalforge.alt_data.trust import apply_trust_to_row
+
+        out.append(
+            apply_trust_to_row(
+                _ranking_row_from_aggregate(keep, u, n_valid=n_valid, n_ok=len(sliced))
+            )
+        )
     out.sort(
         key=lambda x: float(x.get("expectancy_pct") or x.get("profit_factor") or 0),
         reverse=True,

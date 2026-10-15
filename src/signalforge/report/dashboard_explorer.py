@@ -134,8 +134,8 @@ def _render_saved_results() -> None:
             format_func=lambda k: sort_option_label(CATALOG_SORT_OPTIONS, k),
             key="cat_sort",
         )
-        top_n = st.slider("表示件数", 10, min(133, len(df)), 25, key="cat_top")
-        df = df.sort_values(sort_col, ascending=False).head(top_n)
+        df = df.sort_values(sort_col, ascending=False)
+        top_n = len(df)
         cols = [c for c in ["id", "style", "ticker", "n_tickers", "profit_factor", "win_rate", "total_trades", "total_return_pct", "pct_pf_above_1"] if c in df.columns]
         st.dataframe(rename_experiment_columns(df[cols]), width="stretch", hide_index=True)
         meta = doc.get("meta") or {}

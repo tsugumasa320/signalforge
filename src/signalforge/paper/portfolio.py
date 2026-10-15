@@ -20,11 +20,25 @@ def portfolio_path(style: str, strategy: str) -> Path:
     return paper_dir() / f"{safe}.json"
 
 
+def paper_currency(portfolio: "PaperPortfolio") -> str:
+    cur = getattr(portfolio, "currency", "") or ""
+    if cur:
+        return cur
+    return "JPY" if portfolio.cost_model == "japan" else "USD"
+
+
+def format_paper_amount(portfolio: "PaperPortfolio", amount: float) -> str:
+    if paper_currency(portfolio) == "JPY":
+        return f"¥{amount:,.0f}"
+    return f"${amount:,.0f}"
+
+
 @dataclass
 class PaperPortfolio:
     style: str
     strategy: str
     cost_model: str = "alpaca"
+    currency: str = ""
     initial_cash: float = 100_000.0
     cash: float = 100_000.0
     started_at: str = ""
@@ -50,6 +64,7 @@ class PaperPortfolio:
         strategy: str,
         *,
         cost_model: str = "alpaca",
+        currency: str = "",
         initial_cash: float = 100_000.0,
         last_bar_ts: str,
     ) -> PaperPortfolio:
@@ -58,6 +73,7 @@ class PaperPortfolio:
             style=style,
             strategy=strategy,
             cost_model=cost_model,
+            currency=currency,
             initial_cash=initial_cash,
             cash=initial_cash,
             started_at=now,

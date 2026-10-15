@@ -53,13 +53,23 @@ fi
 export PYTHONUNBUFFERED=1
 echo "=== experiments daemon $(date -Iseconds) ===" >> "$LOG"
 
+CLOSED_LID_BATTERY="${CLOSED_LID_BATTERY:-0}"
+if [[ "$CLOSED_LID_BATTERY" == "1" ]]; then
+  # shellcheck source=scripts/closed-lid-power.sh
+  source "$ROOT/scripts/closed-lid-power.sh"
+  closed_lid_power_on
+fi
+
+# caffeinate: -dims -u（バッテリー蓋閉じ向け）, -s は AC 時のみシステムスリープ抑止
+CAFF=( -dims -u -s )
+
 nohup bash -c "
   cd \"$(pwd)\"
   export PYTHONUNBUFFERED=1
   uv run signalforge experiments compact >> \"$LOG\" 2>&1 || true
   uv run signalforge experiments aggregate >> \"$LOG\" 2>&1 || true
   if command -v caffeinate >/dev/null 2>&1; then
-    exec caffeinate -i uv run signalforge experiments run --ignore-schedule --workers 8 ${RUN_EXTRA[*]:-}
+    exec caffeinate ${CAFF[*]} uv run signalforge experiments run --ignore-schedule --workers 8 ${RUN_EXTRA[*]:-}
   else
     exec uv run signalforge experiments run --ignore-schedule --workers 8 ${RUN_EXTRA[*]:-}
   fi

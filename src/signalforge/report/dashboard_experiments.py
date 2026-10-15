@@ -21,11 +21,11 @@ from signalforge.report.experiment_context import (
 from signalforge.experiments.storage import ticker_row_has_core_metrics
 from signalforge.experiments.period import infer_stored_backtest_period, period_label, periods_match
 from signalforge.experiments.scan import (
-    TSE_SEGMENT_LABELS,
     apply_cohort_period_slice,
     apply_cohort_to_complete,
     list_campaign_sectors,
 )
+from signalforge.experiments.ticker_cohort import TSE_SEGMENT_LABELS
 from signalforge.experiments.series import period_sliceable
 from signalforge.report.dashboard_explorer import _default_dates
 from signalforge.report.metrics_ja import (
@@ -35,6 +35,9 @@ from signalforge.report.metrics_ja import (
     HELP_PROFIT_FACTOR,
     MAX_DRAWDOWN,
     PROFIT_FACTOR,
+    STRATEGY_CATEGORY,
+    STRATEGY_RANK,
+    STRATEGY_SUMMARY,
     TSE_TABLE_NOTE,
     TRADES,
     WIN_RATE,
@@ -71,15 +74,32 @@ def experiments_data_updated_label() -> str:
     return datetime.fromtimestamp(m).strftime("%Y-%m-%d %H:%M")
 
 
-@st.cache_data(ttl=15, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner="TSE 実験データを読み込み中…")
 def scan_experiment_campaign(_cache_key: float) -> dict[str, Any]:
     from signalforge.experiments.scan import scan_campaign_progress
 
-    return scan_campaign_progress()
+    # fast=True: ヘッダ JSON のみ（sidecar 全読込は数分かかるためダッシュボード用）
+    return scan_campaign_progress(fast=True)
 
 
 def get_experiment_scan() -> dict[str, Any]:
     return scan_experiment_campaign(_experiments_dir_mtime())
+
+
+@st.cache_data(ttl=30, show_spinner=False)
+def _segment_cohort_rows_cached(
+    _cache_key: float,
+    segment: str,
+    sector_tse: str | None,
+) -> list[dict[str, Any]]:
+    """by_segment / by_sector ヘッダのみ（sidecar 全読込を避ける）."""
+    scan = scan_experiment_campaign(_cache_key)
+    return apply_cohort_to_complete(
+        scan["complete"],
+        segment=segment,
+        sector_tse=sector_tse,
+        header_only=True,
+    )
 
 
 def experiment_ranking_strategy_ids() -> list[str]:
@@ -104,6 +124,25 @@ def _load_strategy_doc(strategy_id: str) -> dict[str, Any] | None:
     if doc and doc.get("complete"):
         return doc
     return None
+
+
+def _attach_strategy_catalog_fields(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty or "strategy_id" not in df.columns:
+        return df
+    from signalforge.report.strategy_guide_builder import (
+        resolve_strategy_guide,
+        strategy_category_label,
+        strategy_style_label,
+    )
+
+    out = df.copy()
+    sids = out["strategy_id"].astype(str)
+    out["strategy_summary"] = sids.map(
+        lambda sid: (resolve_strategy_guide(sid).get("summary") or "—").strip()
+    )
+    out["strategy_category"] = sids.map(strategy_category_label)
+    out["style"] = sids.map(strategy_style_label)
+    return out
 
 
 def _format_ranking_table(df: pd.DataFrame) -> pd.DataFrame:
@@ -136,6 +175,12 @@ def _format_ranking_table(df: pd.DataFrame) -> pd.DataFrame:
         out[TRADES] = out[TRADES].apply(
             lambda v: f"{int(float(v))}" if v is not None and v == v else "—"
         )
+    from signalforge.report.metrics_ja import METRICS_NOTE
+
+    if METRICS_NOTE in out.columns:
+        out[METRICS_NOTE] = out[METRICS_NOTE].apply(
+            lambda v: str(v).strip() if v is not None and v == v and str(v).strip() else "—"
+        )
     return out
 
 
@@ -153,11 +198,164 @@ def _render_experiments_live_header(scan: dict[str, Any]) -> None:
                 st.progress(min(1.0, done / tgt), text=f"{row['strategy_id']} {done}/{tgt}")
 
 
+def _experiment_cohort_rows(
+    scan_complete: list[dict[str, Any]],
+    *,
+    use_stored_period: bool,
+    bt_start: date | None,
+    bt_end: date | None,
+    ref_start: date | None,
+    ref_end: date | None,
+    segment: str | None,
+    sector_tse: str | None,
+    header_only: bool = False,
+) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
+    if use_stored_period:
+        return (
+            apply_cohort_to_complete(
+                scan_complete,
+                segment=segment,
+                sector_tse=sector_tse,
+                header_only=header_only,
+            ),
+            None,
+        )
+    if bt_start is None or ref_start is None:
+        return [], None
+    if not period_sliceable(bt_start, bt_end, ref_start, ref_end):
+        return [], None
+    rows, meta = apply_cohort_period_slice(
+        scan_complete,
+        start=bt_start,
+        end=bt_end,
+        segment=segment,
+        sector_tse=sector_tse,
+    )
+    return rows, meta
+
+
+def _prepare_ranking_dataframe(
+    rows: list[dict[str, Any]],
+    *,
+    min_median_trades: float,
+    profit_factor_gt_1: bool,
+    expectancy_positive: bool,
+) -> pd.DataFrame:
+    from signalforge.alt_data.trust import apply_trust_to_row
+
+    if rows:
+        rows = [apply_trust_to_row(dict(r)) for r in rows]
+    df = pd.DataFrame(rows)
+    if df.empty:
+        return df
+    if "expectancy_pct" in df.columns:
+        df.loc[
+            df["expectancy_pct"].notna() & (df["expectancy_pct"] <= -20.0),
+            "expectancy_pct",
+        ] = None
+    return apply_ranking_filters(
+        df,
+        min_median_trades=min_median_trades,
+        profit_factor_gt_1=profit_factor_gt_1,
+        expectancy_positive=expectancy_positive,
+    )
+
+
+def _render_expectancy_bar_chart(
+    chart_df: pd.DataFrame,
+    *,
+    title: str,
+    chart_key: str,
+) -> None:
+    top = (
+        chart_df.sort_values("expectancy_pct", ascending=False, na_position="last")
+        .dropna(subset=["expectancy_pct"])
+    )
+    if top.empty:
+        return
+    labels = [
+        f"{i + 1}. {sid}"
+        for i, sid in enumerate(top["strategy_id"].astype(str).tolist())
+    ]
+    st.plotly_chart(
+        _bar_fig(
+            labels,
+            top["expectancy_pct"].astype(float).tolist(),
+            title,
+            ytitle=EXPECTANCY,
+        ),
+        width="stretch",
+        key=chart_key,
+    )
+
+
+def _render_segment_expectancy_charts(
+    scan_complete: list[dict[str, Any]],
+    *,
+    use_stored_period: bool,
+    bt_start: date | None,
+    bt_end: date | None,
+    ref_start: date | None,
+    ref_end: date | None,
+    sector_tse: str | None,
+    period_note: str,
+    min_median_trades: float,
+    profit_factor_gt_1: bool,
+    expectancy_positive: bool,
+) -> None:
+    st.markdown("#### 市場区分別（期待値）")
+    caption_bits: list[str] = ["表と同じフィルタを適用"]
+    if sector_tse:
+        caption_bits.append(f"業種: {sector_tse}")
+    if not use_stored_period:
+        caption_bits.append(f"期間: {period_note}")
+    st.caption(" · ".join(caption_bits))
+    cache_key = _experiments_dir_mtime()
+    for seg_key, label in TSE_SEGMENT_LABELS.items():
+        if use_stored_period:
+            rows = _segment_cohort_rows_cached(cache_key, seg_key, sector_tse)
+        else:
+            rows, _ = _experiment_cohort_rows(
+                scan_complete,
+                use_stored_period=use_stored_period,
+                bt_start=bt_start,
+                bt_end=bt_end,
+                ref_start=ref_start,
+                ref_end=ref_end,
+                segment=seg_key,
+                sector_tse=sector_tse,
+                header_only=False,
+            )
+        seg_df = _prepare_ranking_dataframe(
+            rows,
+            min_median_trades=min_median_trades,
+            profit_factor_gt_1=profit_factor_gt_1,
+            expectancy_positive=expectancy_positive,
+        )
+        if seg_df.empty or "expectancy_pct" not in seg_df.columns:
+            st.caption(f"{label}: フィルタに一致する戦略がありません")
+            continue
+        n_show = int(seg_df["expectancy_pct"].notna().sum())
+        if n_show == 0:
+            st.caption(f"{label}: 期待値データなし")
+            continue
+        _render_expectancy_bar_chart(
+            seg_df,
+            title=f"{label} · {EXPECTANCY}（{n_show} 戦略）",
+            chart_key=f"exp_seg_chart_{seg_key}",
+        )
+
+
 def render_experiments_panel() -> None:
     st.subheader("東証 TSE 実験")
     scan = get_experiment_scan()
     n_with_exp = sum(
-        1 for r in (scan.get("complete") or []) if r.get("expectancy_pct") is not None
+        1
+        for r in (scan.get("complete") or [])
+        if r.get("metrics_trusted") and r.get("expectancy_pct") is not None
+    )
+    n_untrusted = sum(
+        1 for r in (scan.get("complete") or []) if r.get("metrics_trusted") is False
     )
     overall = scan.get("overall") or {}
     ticker_pct = overall.get("ticker_overall_pct")
@@ -165,9 +363,14 @@ def render_experiments_panel() -> None:
     st.caption(
         f"{TSE_TABLE_NOTE}  \n"
         f"データ更新 **{experiments_data_updated_label()}** · "
-        f"期待値あり **{n_with_exp}** / {len(scan.get('complete') or [])} 戦略{extra} · "
+        f"信頼できる期待値 **{n_with_exp}** / {len(scan.get('complete') or [])} 戦略{extra} · "
         "30秒ごとに自動更新 · 市場区分・業種・期間（系列データがあれば再BT不要）"
     )
+    if n_untrusted:
+        st.caption(
+            f"**データ列:** 代理BT・未取得データの戦略 **{n_untrusted}** 件は数値を **—** で表示（誤解防止）。"
+            "本データ戦略は `alt-data` 取得後に再BT。"
+        )
 
     manifest = scan.get("manifest") or {}
 
@@ -287,27 +490,24 @@ def render_experiments_panel() -> None:
     st.session_state["exp_cohort_segment"] = segment
     st.session_state["exp_cohort_sector"] = sector_tse
 
-    complete_rows: list[dict[str, Any]]
-    if use_stored_period:
-        complete_rows = apply_cohort_to_complete(
-            scan["complete"],
-            segment=segment,
-            sector_tse=sector_tse,
+    if not use_stored_period and not period_sliceable(bt_start, bt_end, ref_start, ref_end):
+        st.warning(
+            f"保存済みBT（{stored_note}）より **前／後** には伸ばせません。"
+            "より長い期間が必要ならキャンペーンをその開始日で再実行してください。"
         )
-    else:
-        if not period_sliceable(bt_start, bt_end, ref_start, ref_end):
-            st.warning(
-                f"保存済みBT（{stored_note}）より **前／後** には伸ばせません。"
-                "より長い期間が必要ならキャンペーンをその開始日で再実行してください。"
-            )
-            return
-        complete_rows, slice_meta = apply_cohort_period_slice(
-            scan["complete"],
-            start=bt_start,
-            end=bt_end,
-            segment=segment,
-            sector_tse=sector_tse,
-        )
+        return
+    complete_rows, slice_meta = _experiment_cohort_rows(
+        scan["complete"],
+        use_stored_period=use_stored_period,
+        bt_start=bt_start,
+        bt_end=bt_end,
+        ref_start=ref_start,
+        ref_end=ref_end,
+        segment=segment,
+        sector_tse=sector_tse,
+    )
+    if not use_stored_period:
+        slice_meta = slice_meta or {}
         n_series = int(slice_meta.get("series_tickers") or 0)
         n_total = int(slice_meta.get("total_tickers") or 0)
         if n_total and n_series < n_total:
@@ -327,11 +527,7 @@ def render_experiments_panel() -> None:
 
     if (segment or sector_tse) and not complete_rows:
         st.warning(f"「{cohort_note}」に該当する sidecar 行がまだありません。")
-        return
 
-    df = pd.DataFrame(complete_rows)
-    if "expectancy_pct" in df.columns:
-        df.loc[df["expectancy_pct"].notna() & (df["expectancy_pct"] <= -20.0), "expectancy_pct"] = None
     f1, f2, f3 = st.columns(3)
     with f1:
         min_trades = st.number_input("中央値取引数 ≥", min_value=0, value=0, step=5, key="exp_f_trades")
@@ -340,15 +536,74 @@ def render_experiments_panel() -> None:
     with f3:
         exp_pos = st.checkbox("期待値 > 0", key="exp_f_exp")
 
-    df = apply_ranking_filters(
-        df,
+    df = _prepare_ranking_dataframe(
+        complete_rows,
         min_median_trades=float(min_trades),
         profit_factor_gt_1=pf_gt1,
         expectancy_positive=exp_pos,
     )
+
+    show_expectancy_charts = n_with_exp > 0
+    if show_expectancy_charts:
+        if not df.empty and "expectancy_pct" in df.columns and df["expectancy_pct"].notna().any():
+            n_chart = int(df["expectancy_pct"].notna().sum())
+            bits = [cohort_note, f"{n_chart} 戦略"]
+            if not use_stored_period:
+                bits.append(period_note)
+            _render_expectancy_bar_chart(
+                df,
+                title=f"{EXPECTANCY} · {' · '.join(bits)}",
+                chart_key="exp_expectancy_chart",
+            )
+        elif not df.empty:
+            st.caption("フィルタ後の戦略に期待値がありません。")
+        _render_segment_expectancy_charts(
+            scan["complete"],
+            use_stored_period=use_stored_period,
+            bt_start=bt_start,
+            bt_end=bt_end,
+            ref_start=ref_start,
+            ref_end=ref_end,
+            sector_tse=sector_tse,
+            period_note=period_note,
+            min_median_trades=float(min_trades),
+            profit_factor_gt_1=pf_gt1,
+            expectancy_positive=exp_pos,
+        )
+        st.divider()
+
     if df.empty:
         st.warning("フィルタに一致する戦略がありません。")
-        return
+    else:
+        _render_experiment_ranking_table(
+            df,
+            segment=segment,
+            sector_tse=sector_tse,
+            use_stored_period=use_stored_period,
+            cohort_note=cohort_note,
+            period_note=period_note,
+        )
+
+    if not show_expectancy_charts and not df.empty and "profit_factor" in df.columns:
+        st.caption("期待値・最大DD は再BT後に表示されます。いまは `experiments aggregate` で損益比等のみ。")
+
+    if st.button("再読み込み", key="exp_rescan"):
+        scan_experiment_campaign.clear()
+        _segment_cohort_rows_cached.clear()
+        _cached_ticker_rows.clear()
+        st.rerun()
+
+
+def _render_experiment_ranking_table(
+    df: pd.DataFrame,
+    *,
+    segment: str | None,
+    sector_tse: str | None,
+    use_stored_period: bool,
+    cohort_note: str,
+    period_note: str,
+) -> None:
+    from signalforge.report.dashboard_view import render_strategy_detail, sync_strategy_navigation
 
     sort_labels = dict(EXPERIMENT_SORT_OPTIONS)
     sort_col = st.selectbox(
@@ -359,12 +614,13 @@ def render_experiments_panel() -> None:
     )
     if sort_col not in df.columns:
         sort_col = "profit_factor"
-    n_rows = len(df)
-    top_n = n_rows if n_rows <= 10 else st.slider("表示件数", 5, min(50, n_rows), min(15, n_rows), key="exp_top")
-
-    show = df.sort_values(sort_col, ascending=False, na_position="last").head(top_n).reset_index(drop=True)
+    show = (
+        df.sort_values(sort_col, ascending=False, na_position="last")
+        .reset_index(drop=True)
+    )
+    show.insert(0, "rank", range(1, len(show) + 1))
     strategy_ids = show["strategy_id"].astype(str).tolist()
-    display = show.copy()
+    display = _attach_strategy_catalog_fields(show)
     if "paper_active" in display.columns:
         display["strategy_id"] = display.apply(
             lambda r: f"📈 {r['strategy_id']}" if r.get("paper_active") else r["strategy_id"],
@@ -382,13 +638,33 @@ def render_experiments_panel() -> None:
         if not use_stored_period:
             bits.append(period_note)
         st.caption(f"表示中: **{' · '.join(bits)}**（該当銘柄のみの典型値）")
+    st.caption(f"**#** は現在の並び替え（{sort_labels.get(sort_col, sort_col)}）での順位です。")
+    table_out = _format_ranking_table(display[cols])
+    col_cfg = {}
+    if STRATEGY_RANK in table_out.columns:
+        col_cfg[STRATEGY_RANK] = st.column_config.NumberColumn(
+            STRATEGY_RANK,
+            width="small",
+            format="%d",
+        )
+    if STRATEGY_CATEGORY in table_out.columns:
+        col_cfg[STRATEGY_CATEGORY] = st.column_config.TextColumn(
+            STRATEGY_CATEGORY,
+            width="medium",
+            help="web_catalog.yaml の tags（日本語ラベル）",
+        )
+    if STRATEGY_SUMMARY in table_out.columns:
+        col_cfg[STRATEGY_SUMMARY] = st.column_config.TextColumn(
+            STRATEGY_SUMMARY,
+            width="large",
+            help="📚 戦略解説タブと同じ概要文",
+        )
     st.dataframe(
-        _format_ranking_table(display[cols]),
+        table_out,
         width="stretch",
         hide_index=True,
+        **({"column_config": col_cfg} if col_cfg else {}),
     )
-
-    from signalforge.report.dashboard_view import render_strategy_detail, sync_strategy_navigation
 
     cur = st.session_state.get("exp_strategy_row_pick")
     if cur not in strategy_ids:
@@ -396,10 +672,11 @@ def render_experiments_panel() -> None:
 
     def _pill_label(sid: str) -> str:
         row = show.loc[show["strategy_id"] == sid].iloc[0]
+        n = int(row["rank"])
         exp = row.get("expectancy_pct")
         if exp is not None and exp == exp and float(exp) > -20:
-            return f"{sid} ({float(exp):+.2f}%)"
-        return sid
+            return f"#{n} {sid} ({float(exp):+.2f}%)"
+        return f"#{n} {sid}"
 
     st.markdown("**詳細・解説を見る → 戦略名を押す**")
     pick = st.pills(
@@ -430,26 +707,6 @@ def render_experiments_panel() -> None:
         st.divider()
         st.markdown(f"#### `{pick}`")
         render_strategy_detail(str(pick))
-
-    if "expectancy_pct" in df.columns and df["expectancy_pct"].notna().any():
-        top = df.sort_values("expectancy_pct", ascending=False, na_position="last").head(min(10, n_rows))
-        st.plotly_chart(
-            _bar_fig(
-                top["strategy_id"].astype(str).tolist(),
-                top["expectancy_pct"].astype(float).fillna(0).tolist(),
-                f"{EXPECTANCY} Top {len(top)}",
-                ytitle=EXPECTANCY,
-            ),
-            width="stretch",
-            key="exp_expectancy_chart",
-        )
-    elif "profit_factor" in df.columns:
-        st.caption("期待値・最大DD は再BT後に表示されます。いまは `experiments aggregate` で損益比等のみ。")
-
-    if st.button("再読み込み", key="exp_rescan"):
-        scan_experiment_campaign.clear()
-        _cached_ticker_rows.clear()
-        st.rerun()
 
 
 def render_experiment_strategy_detail(strategy_id: str) -> None:

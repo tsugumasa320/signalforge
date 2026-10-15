@@ -88,7 +88,11 @@ scripts/rerun-experiments-series.sh      # 期間スライス用系列データ�
 scripts/rerun-experiments-capital.sh      # 口座/上限変更後（--refresh-capital、INITIAL_CASH_JPY 等）
 ```
 
+**蓋を閉じて BT 継続:** `./scripts/rerun-experiments-series-closed-lid.sh`（**バッテリー可**・要 `sudo` pmset、`caffeinate -dims -u -s`）。終わったら `./scripts/restore-battery-sleep.sh`。電源接続なら `./scripts/rerun-experiments-series.sh` でも可。落ちたら `./scripts/start-experiments-supervisor.sh`。
+
 Details: `docs/experiments.md`. Dashboard: **📊 戦略結果 → TSE 実験** (segment heatmap when aggregates exist).
+
+**近似→本データ:** `docs/alt_data.md` · **J-Quants:** `docs/jquants_setup.md`（`JQUANTS_API_KEY` → `alt-data jquants-test` → `fetch --jquants-credit`）。
 
 ## Paper trading (forward virtual)
 
@@ -102,4 +106,8 @@ uv run signalforge paper status
 
 State: `data/paper/{style}_{strategy}.json` (committed by GitHub Actions; local `data/*.pkl` stays gitignored).
 
+**1口座・分散（実運用近似）:** `paper diversified-init/run-all` · ログ付き一括: `./scripts/run-diversified-paper-prime.sh` → `data/logs/diversified-paper-prime.log`
+
 GitHub Actions (`.github/workflows/daily-paper.yml`): scheduled Mon–Fri 22:00 UTC, runs `scripts/ci-daily-paper.sh`, commits paper JSON.
+
+**フォワードの見方:** 更新は Actions 日次（JST 朝頃）→ **GitHub Pages**（`dashboard export` の hub）。`data/paper/diversified_*.json` を commit すると分散ペーパーも Pages に載る。Streamlit `127.0.0.1:8501` はローカル専用。

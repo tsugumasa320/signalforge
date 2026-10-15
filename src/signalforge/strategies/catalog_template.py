@@ -392,6 +392,92 @@ def _ema_pullback_proxy(df: pd.DataFrame, params: dict, strat: BaseStrategy) -> 
     return _swing_pullback_ema(df, {"ema_col": "ema20"}, strat)
 
 
+def _sector_relative_momentum(df: pd.DataFrame, params: dict, strat: BaseStrategy) -> pd.Series:
+    lookback = int(params.get("lookback", 20))
+    col = f"sector_rs_{lookback}d"
+    min_rs = float(params.get("min_rs_pct", 1.0))
+    ema_col = params.get("ema_col", "ema20")
+    signals = pd.Series(0, index=df.index)
+    if col not in df.columns:
+        return signals
+    for i in range(1, len(df)):
+        row = df.iloc[i]
+        rs = row.get(col)
+        if rs is None or rs != rs or float(rs) < min_rs:
+            continue
+        if float(row["close"]) > float(row.get(ema_col, row["close"])):
+            signals.iloc[i] = 1
+    return signals
+
+
+def _sector_spread_zscore(df: pd.DataFrame, params: dict, strat: BaseStrategy) -> pd.Series:
+    z_col = params.get("z_col", "sector_spread_z20")
+    entry_z = float(params.get("entry_z", -2.0))
+    exit_z = float(params.get("exit_z", 0.0))
+    signals = pd.Series(0, index=df.index)
+    if z_col not in df.columns:
+        return signals
+    for i in range(1, len(df)):
+        z = df.iloc[i][z_col]
+        if z is None or z != z:
+            continue
+        zf = float(z)
+        if zf <= entry_z:
+            signals.iloc[i] = 1
+        elif zf >= exit_z:
+            signals.iloc[i] = -1
+    return signals
+
+
+def _credit_margin_contrarian(df: pd.DataFrame, params: dict, strat: BaseStrategy) -> pd.Series:
+    """High short margin ratio that starts falling → contrarian long (需給改善期待)."""
+    min_ratio = float(params.get("min_shrt_ratio", 0.45))
+    min_drop = float(params.get("ratio_drop", 0.03))
+    rsi_max = float(params.get("rsi_max", 45))
+    chg_col = params.get("chg_col", "margin_shrt_ratio_chg_4w")
+    signals = pd.Series(0, index=df.index)
+    if "margin_shrt_ratio" not in df.columns:
+        return signals
+    for i in range(1, len(df)):
+        row = df.iloc[i]
+        ratio = row.get("margin_shrt_ratio")
+        chg = row.get(chg_col) if chg_col in df.columns else None
+        if ratio is None or ratio != ratio or float(ratio) < min_ratio:
+            continue
+        if chg is None or chg != chg or float(chg) > -min_drop:
+            continue
+        rsi = row.get("rsi_14")
+        rsi_ok = rsi is None or rsi != rsi or float(rsi) <= rsi_max
+        if rsi_ok and float(row["close"]) >= float(row.get("ema20", row["close"])):
+            signals.iloc[i] = 1
+    return signals
+
+
+def _post_earnings_drift(df: pd.DataFrame, params: dict, strat: BaseStrategy) -> pd.Series:
+    min_day = int(params.get("min_days_after", 1))
+    max_day = int(params.get("max_days_after", 5))
+    min_gap = float(params.get("min_gap_pct", 0.005))
+    vol_ratio = float(params.get("volume_ratio_min", 1.2))
+    signals = pd.Series(0, index=df.index)
+    if "days_since_earnings" not in df.columns:
+        return signals
+    vol_ma = df["volume"].rolling(20).mean()
+    for i in range(1, len(df)):
+        row, prev = df.iloc[i], df.iloc[i - 1]
+        dse = row.get("days_since_earnings")
+        if dse is None or dse != dse:
+            continue
+        days = int(float(dse))
+        if days < min_day or days > max_day:
+            continue
+        gap = (row["open"] - prev["close"]) / prev["close"]
+        vma = vol_ma.iloc[i]
+        vol_ok = vma == vma and float(row["volume"]) >= float(vma) * vol_ratio
+        if gap >= min_gap and row["close"] > row["open"] and vol_ok:
+            signals.iloc[i] = 1
+    return signals
+
+
 _TEMPLATE_REGISTRY: dict[str, Callable[..., pd.Series]] = {
     "ma_cross": _ma_cross,
     "perfect_order_pullback": _perfect_order_pullback,
@@ -422,6 +508,10 @@ _TEMPLATE_REGISTRY: dict[str, Callable[..., pd.Series]] = {
     "bb_squeeze_proxy": _bb_squeeze_proxy,
     "vwap_proxy_daily": _vwap_proxy_daily,
     "ema_pullback_proxy": _ema_pullback_proxy,
+    "sector_relative_momentum": _sector_relative_momentum,
+    "sector_spread_zscore": _sector_spread_zscore,
+    "post_earnings_drift": _post_earnings_drift,
+    "credit_margin_contrarian": _credit_margin_contrarian,
 }
 
 

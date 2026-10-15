@@ -19,7 +19,13 @@ from signalforge.report.charts import plot_strategy_comparison
 from signalforge.report.dashboard_components import oos_metrics_from_trades
 from signalforge.config import load_web_catalog
 from signalforge.report.strategy_guide_builder import resolve_strategy_guide, strategy_display_title
-from signalforge.report.static_dashboard import export_paper_page, paper_summary_row
+from signalforge.report.static_dashboard import (
+    diversified_paper_summary_row,
+    export_diversified_paper_page,
+    export_paper_page,
+    paper_summary_row,
+)
+from signalforge.paper.diversified import list_diversified_paper_books
 from signalforge.report.static_html import fig_to_html_block, wrap_page
 from signalforge.report.strategy_visuals import plot_strategy_demo
 
@@ -169,11 +175,15 @@ def _comparison_table(rows: list[dict], *, kind: str) -> str:
                 continue
             ret = float(r.get("total_return_pct", 0))
             ret_cls = "positive" if ret >= 0 else "negative"
+            if r.get("currency") == "JPY":
+                eq_s = f"¥{float(r.get('equity', 0)):,.0f}"
+            else:
+                eq_s = f"${float(r.get('equity', 0)):,.0f}"
             body += (
                 "<tr>"
                 f"<td>{escape(r.get('style_label', r.get('style', '')))}</td>"
                 f"<td>{escape(r.get('strategy_label', r.get('strategy', '')))}</td>"
-                f"<td>${float(r.get('equity', 0)):,.0f}</td>"
+                f"<td>{eq_s}</td>"
                 f'<td class="{ret_cls}">{ret:+.2f}%</td>'
                 f"<td>{float(r.get('win_rate', 0)):.1%}</td>"
                 f"<td>{float(r.get('profit_factor', 0)):.2f}</td>"
@@ -221,6 +231,7 @@ def export_hub(
     output_dir: Path,
     paper_rows: list[dict],
     backtest_rows: list[dict],
+    diversified_rows: list[dict] | None = None,
 ) -> Path:
     # PF comparison chart (backtest, swing only for clarity)
     swing_bt = [r for r in backtest_rows if r.get("style") == "swing" and not r.get("error")]
@@ -244,9 +255,13 @@ def export_hub(
     </div>
 
     <section id="paper">
-      <h2>📈 Paper Trading — 全戦略フォワード成績</h2>
-      <p class="muted">各戦略 $100,000 独立口座 · 毎日自動更新</p>
+      <h2>📈 Paper Trading — フォワード成績</h2>
+      <p class="muted">単銘柄口座（下表）· GitHub Pages は Actions 日次更新（JST 朝頃）後が最新</p>
+      <h3>1銘柄 · 独立口座</h3>
       {_comparison_table(paper_rows, kind="paper")}
+      <h3>1口座 · 分散（実運用近似）</h3>
+      <p class="muted">¥300万 · 同時5 · 20%/回 · 先着 — <code>data/paper/diversified_*.json</code> がある場合のみ</p>
+      {_comparison_table(diversified_rows or [], kind="paper")}
     </section>
 
     <section id="backtest">
@@ -323,11 +338,16 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
         if row:
             paper_rows.append(row)
 
+    diversified_rows: list[dict] = []
+    for book in list_diversified_paper_books():
+        export_diversified_paper_page(output_dir, book, depth=1)
+        diversified_rows.append(diversified_paper_summary_row(book))
+
     for strategy_key in _implemented_catalog_ids():
         export_strategy_guide(output_dir, strategy_key)
     export_guides_index(output_dir)
 
     backtest_rows = collect_backtest_rows()
-    hub = export_hub(output_dir, paper_rows, backtest_rows)
+    hub = export_hub(output_dir, paper_rows, backtest_rows, diversified_rows)
     (output_dir / ".nojekyll").touch()
     return hub

@@ -11,11 +11,11 @@ from typing import Any, Callable
 from signalforge.compare.runner import _aggregate, resolve_strategy_style, run_cohort_backtests
 from signalforge.config import data_dir, load_backtest_defaults, load_web_catalog
 from signalforge.experiments.runner import load_plan, resolve_campaign_backtest_capital
-from signalforge.experiments.scan import (
-    _filter_ticker_rows,
-    _load_ticker_rows_in_dir,
-    _ranking_row_from_aggregate,
-    _strategies_dir,
+from signalforge.experiments.ticker_cohort import (
+    filter_ticker_rows as _filter_ticker_rows,
+    load_ticker_rows_in_dir as _load_ticker_rows_in_dir,
+    ranking_row_from_aggregate as _ranking_row_from_aggregate,
+    strategies_dir as _strategies_dir,
 )
 from signalforge.experiments.storage import load_strategy_header, rows_for_universe_aggregate
 

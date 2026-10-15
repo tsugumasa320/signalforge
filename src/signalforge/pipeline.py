@@ -125,6 +125,10 @@ def run_backtest_pipeline(
     if prepared_bundle is None:
         df = trim_to_backtest_window(df, bt_start, bt_end)
 
+    from signalforge.alt_data.enrich import maybe_enrich
+
+    df = maybe_enrich(df, ticker, strategy_name)
+
     profile = StyleProfile.from_config(cfg)
     strategy = get_strategy(strategy_name, cfg)
     signals = strategy.generate_signals(df)

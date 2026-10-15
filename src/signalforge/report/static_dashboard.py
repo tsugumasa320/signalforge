@@ -205,4 +205,78 @@ def paper_summary_row(style: str, strategy: str, *, refresh: bool = False) -> di
         "max_drawdown_pct": m.get("max_drawdown_pct", 0),
         "last_run": portfolio.last_run_at,
         "href": f"paper/{safe}.html",
+        "currency": "USD",
     }
+
+
+def diversified_paper_summary_row(book) -> dict:
+    from signalforge.paper.diversified import DiversifiedPaperBook
+    from signalforge.report.dashboard_strategies import STRATEGY_LABELS
+
+    if not isinstance(book, DiversifiedPaperBook):
+        raise TypeError("expected DiversifiedPaperBook")
+    sim = book.last_sim or {}
+    safe = f"diversified_{book.style}_{book.strategy}".replace("/", "_")
+    strat_label = STRATEGY_LABELS.get(book.strategy, book.strategy)
+    style_label = STYLE_LABELS.get(book.style, book.style)
+    accepted = int(sim.get("accepted_trades") or 0)
+    skipped = int(sim.get("skipped_overlap") or 0)
+    return {
+        "style": book.style,
+        "strategy": book.strategy,
+        "style_label": style_label,
+        "strategy_label": f"{strat_label}（1口座·{book.cohort}）",
+        "equity": float(sim.get("final_equity") or book.initial_capital),
+        "total_return_pct": float(sim.get("total_return_pct") or 0.0),
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "total_trades": accepted,
+        "max_drawdown_pct": 0.0,
+        "last_run": book.last_run_at,
+        "href": f"paper/{safe}.html",
+        "currency": "JPY",
+        "skipped_trades": skipped,
+        "universe_size": book.universe_size,
+    }
+
+
+def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1) -> Path | None:
+    from signalforge.paper.diversified import DiversifiedPaperBook
+
+    if not isinstance(book, DiversifiedPaperBook):
+        return None
+    sim = book.last_sim or {}
+    strat_label = STRATEGY_LABELS.get(book.strategy, book.strategy)
+    style_label = STYLE_LABELS.get(book.style, book.style)
+    safe = f"diversified_{book.style}_{book.strategy}".replace("/", "_")
+    ret = float(sim.get("total_return_pct") or 0)
+    ret_cls = "positive" if ret >= 0 else "negative"
+    body = f"""
+    <div class="info-box">
+      1口座 ¥{book.initial_capital:,.0f} · 同時最大 {book.max_positions} 銘柄 ·
+      1エントリー {book.position_pct * 100:.0f}% · 先着（枠不足はスキップ）<br>
+      ユニバース: {escape(book.cohort)} · {book.universe_size} 銘柄 ·
+      エントリ開始: {escape(book.entry_cutoff)} 以降
+    </div>
+    <div class="metrics">
+      <div class="metric"><label>評価額</label><value>¥{float(sim.get('final_equity', book.initial_capital)):,.0f}</value></div>
+      <div class="metric"><label>総リターン</label><value class="{ret_cls}">{ret:+.2f}%</value></div>
+      <div class="metric"><label>採用トレード</label><value>{int(sim.get('accepted_trades') or 0)}</value></div>
+      <div class="metric"><label>スキップ</label><value>{int(sim.get('skipped_overlap') or 0)}</value></div>
+    </div>
+    <p class="muted">GitHub Actions 日次更新（<code>paper diversified-run-all</code>）後のスナップショット。</p>
+    """
+    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    html = wrap_page(
+        title=f"Paper 分散 · {strat_label}",
+        subtitle=f"{style_label} / {book.strategy}",
+        body=body,
+        generated=generated,
+        nav_active="paper",
+        depth=depth,
+    )
+    paper_dir = output_dir / "paper"
+    paper_dir.mkdir(parents=True, exist_ok=True)
+    path = paper_dir / f"{safe}.html"
+    path.write_text(html, encoding="utf-8")
+    return path

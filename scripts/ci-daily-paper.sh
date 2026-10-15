@@ -16,5 +16,8 @@ uv run signalforge fetch --ticker 7203.T --timeframe 5m --refresh || echo "5m fe
 echo "--- paper run-all ---"
 uv run signalforge paper run-all --refresh
 
+echo "--- diversified paper (if initialized) ---"
+uv run signalforge paper diversified-run-all --refresh --workers 8 || true
+
 echo "--- export unified dashboard ---"
 uv run signalforge dashboard export --output _site
