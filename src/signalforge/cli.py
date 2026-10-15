@@ -1603,9 +1603,9 @@ def experiments_portfolio_all_cmd(
 ) -> None:
     """完了 TSE 実験戦略の 1口座シム結果を portfolio_returns.json にキャッシュ。"""
     from signalforge.experiments.portfolio_returns import build_portfolio_returns_cache
-    from signalforge.experiments.scan import scan_experiment_campaign
+    from signalforge.experiments.scan import scan_campaign_progress
 
-    scan = scan_experiment_campaign()
+    scan = scan_campaign_progress(fast=True)
     sids = [r["strategy_id"] for r in scan.get("complete") or []]
     if not sids:
         raise click.ClickException("完了戦略がありません。")
