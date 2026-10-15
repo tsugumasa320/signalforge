@@ -20,6 +20,7 @@ from signalforge.report.experiment_context import (
 )
 from signalforge.experiments.storage import ticker_row_has_core_metrics
 from signalforge.experiments.period import infer_stored_backtest_period, period_label, periods_match
+from signalforge.experiments.cohort_matrix import build_cohort_matrix
 from signalforge.experiments.scan import (
     apply_cohort_period_slice,
     apply_cohort_to_complete,
@@ -30,6 +31,7 @@ from signalforge.experiments.series import period_sliceable
 from signalforge.report.dashboard_explorer import _default_dates
 from signalforge.report.metrics_ja import (
     EXPECTANCY,
+    EXPERIMENT_DF_COLUMNS,
     EXPERIMENT_RANKING_COLUMNS,
     EXPERIMENT_SORT_OPTIONS,
     HELP_PROFIT_FACTOR,
@@ -171,6 +173,12 @@ def _format_ranking_table(df: pd.DataFrame) -> pd.DataFrame:
         out[PROFIT_FACTOR] = out[PROFIT_FACTOR].apply(
             lambda v: f"{float(v):.2f}" if v is not None and v == v else "—"
         )
+    from signalforge.report.metrics_ja import PORTFOLIO_RETURN
+
+    if PORTFOLIO_RETURN in out.columns:
+        out[PORTFOLIO_RETURN] = out[PORTFOLIO_RETURN].apply(
+            lambda v: f"{float(v):+.2f}" if v is not None and v == v else "—"
+        )
     if TRADES in out.columns:
         out[TRADES] = out[TRADES].apply(
             lambda v: f"{int(float(v))}" if v is not None and v == v else "—"
@@ -245,6 +253,17 @@ def _prepare_ranking_dataframe(
 
     if rows:
         rows = [apply_trust_to_row(dict(r)) for r in rows]
+        from signalforge.experiments.portfolio_returns import load_portfolio_returns_cache
+
+        cache = load_portfolio_returns_cache()
+        by_sid = (cache.get("strategies") or {}) if isinstance(cache, dict) else {}
+        if by_sid:
+            for r in rows:
+                sid = str(r.get("strategy_id") or "")
+                hit = by_sid.get(sid) or {}
+                tr = hit.get("total_return_pct")
+                if tr is not None and not isinstance(hit.get("error"), str):
+                    r["portfolio_return_pct"] = tr
     df = pd.DataFrame(rows)
     if df.empty:
         return df
@@ -287,6 +306,123 @@ def _render_expectancy_bar_chart(
         width="stretch",
         key=chart_key,
     )
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def _cached_cohort_matrix(
+    _mtime: float,
+    complete_flags: tuple[tuple[str, bool | None, str | None], ...],
+) -> pd.DataFrame:
+    complete = [
+        {"strategy_id": sid, "metrics_trusted": trusted, "metrics_note": note}
+        for sid, trusted, note in complete_flags
+    ]
+    rows = build_cohort_matrix(complete)
+    return pd.DataFrame(rows) if rows else pd.DataFrame()
+
+
+def _render_cohort_breakdown_table(complete: list[dict[str, Any]]) -> None:
+    st.markdown("#### 区分・業種別 成績一覧")
+    st.caption(
+        "戦略 × **全体 / 市場区分 / 33業種** の組み合わせ（`experiments aggregate` の典型値）。"
+        "上の期間フィルタは **メイン表のみ**；ここは保存BTの **全期間** 集計です。"
+    )
+    flags = tuple(
+        (
+            str(r.get("strategy_id")),
+            r.get("metrics_trusted"),
+            r.get("metrics_note"),
+        )
+        for r in complete
+        if r.get("strategy_id")
+    )
+    if not flags:
+        st.info("完了戦略がありません。")
+        return
+    raw = _cached_cohort_matrix(_experiments_dir_mtime(), flags)
+    if raw.empty:
+        st.info("区分・業種集計がありません。`uv run signalforge experiments aggregate` を実行してください。")
+        return
+
+    df = _attach_strategy_catalog_fields(raw)
+    kind_labels = {"universe": "全体", "segment": "市場区分", "sector": "業種（TSE33）"}
+    df["cohort_kind_ja"] = df["cohort_kind"].map(kind_labels).fillna(df["cohort_kind"])
+
+    f1, f2, f3 = st.columns([1, 1, 1])
+    with f1:
+        kinds = st.multiselect(
+            "集計種別",
+            options=sorted(df["cohort_kind_ja"].unique()),
+            default=sorted(df["cohort_kind_ja"].unique()),
+            key="cohort_matrix_kinds",
+        )
+    with f2:
+        strategies = st.multiselect(
+            "戦略（空=全件）",
+            options=sorted(df["strategy_id"].unique()),
+            default=[],
+            key="cohort_matrix_strategies",
+        )
+    with f3:
+        min_n = st.number_input("評価銘柄数 ≥", min_value=0, value=10, step=5, key="cohort_matrix_min_n")
+
+    view = df[df["cohort_kind_ja"].isin(kinds)] if kinds else df
+    if strategies:
+        view = view[view["strategy_id"].isin(strategies)]
+    if min_n > 0 and "n_tickers" in view.columns:
+        view = view[view["n_tickers"].fillna(0) >= min_n]
+
+    tab_long, tab_wide = st.tabs(["一覧（長形式）", "市場区分ヒートマップ（期待値）"])
+    display_cols = [
+        "strategy_id",
+        "strategy_category",
+        "cohort_kind_ja",
+        "cohort_label",
+        "expectancy_pct",
+        "profit_factor",
+        "median_return_pct",
+        "win_rate",
+        "total_trades",
+        "max_drawdown_pct",
+        "n_tickers",
+        "metrics_note",
+    ]
+    with tab_long:
+        sort = st.selectbox(
+            "並び替え",
+            ["expectancy_pct", "profit_factor", "median_return_pct", "strategy_id", "cohort_label"],
+            format_func=lambda k: rename_experiment_columns(pd.DataFrame(columns=[k])).columns[0]
+            if k in EXPERIMENT_DF_COLUMNS
+            else k,
+            key="cohort_matrix_sort",
+        )
+        show = view.sort_values(sort, ascending=False, na_position="last")
+        st.caption(f"{len(show)} 行")
+        st.dataframe(_format_ranking_table(show[[c for c in display_cols if c in show.columns]]), width="stretch")
+        csv = show.to_csv(index=False).encode("utf-8-sig")
+        st.download_button("CSV ダウンロード", csv, "tse_cohort_matrix.csv", "text/csv", key="cohort_matrix_csv")
+
+    with tab_wide:
+        seg = view[view["cohort_kind"] == "segment"].copy()
+        if seg.empty or seg["expectancy_pct"].notna().sum() == 0:
+            st.caption("市場区分の期待値データがありません。")
+        else:
+            top_n = st.slider("戦略数（全体期待値上位）", 5, 40, 20, key="cohort_heat_n")
+            uni = view[view["cohort_kind"] == "universe"].sort_values("expectancy_pct", ascending=False)
+            pick = uni.head(top_n)["strategy_id"].tolist()
+            seg = seg[seg["strategy_id"].isin(pick)]
+            pivot = seg.pivot_table(
+                index="strategy_id",
+                columns="cohort_label",
+                values="expectancy_pct",
+                aggfunc="first",
+            )
+            col_order = [TSE_SEGMENT_LABELS[k] for k in ("prime", "standard", "growth") if TSE_SEGMENT_LABELS[k] in pivot.columns]
+            pivot = pivot[[c for c in col_order if c in pivot.columns]]
+            st.dataframe(
+                pivot.map(lambda v: f"{v:+.3f}" if v == v else "—"),
+                width="stretch",
+            )
 
 
 def _render_segment_expectancy_charts(
@@ -587,9 +723,13 @@ def render_experiments_panel() -> None:
     if not show_expectancy_charts and not df.empty and "profit_factor" in df.columns:
         st.caption("期待値・最大DD は再BT後に表示されます。いまは `experiments aggregate` で損益比等のみ。")
 
+    st.divider()
+    _render_cohort_breakdown_table(scan.get("complete") or [])
+
     if st.button("再読み込み", key="exp_rescan"):
         scan_experiment_campaign.clear()
         _segment_cohort_rows_cached.clear()
+        _cached_cohort_matrix.clear()
         _cached_ticker_rows.clear()
         st.rerun()
 
@@ -639,6 +779,11 @@ def _render_experiment_ranking_table(
             bits.append(period_note)
         st.caption(f"表示中: **{' · '.join(bits)}**（該当銘柄のみの典型値）")
     st.caption(f"**#** は現在の並び替え（{sort_labels.get(sort_col, sort_col)}）での順位です。")
+    if "portfolio_return_pct" not in show.columns or show["portfolio_return_pct"].isna().all():
+        st.caption(
+            "1口座リターン列は `uv run signalforge experiments portfolio-all` で "
+            "`data/reports/experiments/portfolio_returns.json` を生成すると表示されます。"
+        )
     table_out = _format_ranking_table(display[cols])
     col_cfg = {}
     if STRATEGY_RANK in table_out.columns:

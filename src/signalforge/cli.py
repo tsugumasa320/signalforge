@@ -1544,11 +1544,18 @@ def experiments_capital_cmd(
 @click.option("--initial-cash-jpy", default=None, type=float)
 @click.option("--max-positions", default=5, show_default=True, type=int)
 @click.option("--position-pct", default=0.2, show_default=True, type=float)
+@click.option(
+    "--entry-priority",
+    default="sector_liquidity",
+    show_default=True,
+    type=click.Choice(["first_come", "liquidity", "sector_liquidity"]),
+)
 def experiments_portfolio_cmd(
     strategy_id: str,
     initial_cash_jpy: float | None,
     max_positions: int,
     position_pct: float,
+    entry_priority: str,
 ) -> None:
     """1口座・分散制約で TSE 実験トレードを再シミュレーション（先着・同時保有上限）。"""
     from signalforge.portfolio.diversified import simulate_from_experiment_strategy
@@ -1559,6 +1566,7 @@ def experiments_portfolio_cmd(
             initial_cash_jpy=initial_cash_jpy,
             max_positions=max_positions,
             position_pct=position_pct,
+            entry_priority=entry_priority,
         )
     except FileNotFoundError as exc:
         raise click.ClickException(str(exc)) from exc
@@ -1575,6 +1583,42 @@ def experiments_portfolio_cmd(
     )
     click.echo(f"採用トレード: {out['accepted_trades']} · スキップ（枠/重複）: {out['skipped_overlap']}")
     click.echo(f"最終評価額: ¥{out['final_equity']:,.0f} · 総リターン: {out['total_return_pct']:+.2f}%")
+
+
+@experiments.command("portfolio-all")
+@click.option("--initial-cash-jpy", default=None, type=float)
+@click.option("--max-positions", default=5, show_default=True, type=int)
+@click.option("--position-pct", default=0.2, show_default=True, type=float)
+@click.option(
+    "--entry-priority",
+    default="sector_liquidity",
+    show_default=True,
+    type=click.Choice(["first_come", "liquidity", "sector_liquidity"]),
+)
+def experiments_portfolio_all_cmd(
+    initial_cash_jpy: float | None,
+    max_positions: int,
+    position_pct: float,
+    entry_priority: str,
+) -> None:
+    """完了 TSE 実験戦略の 1口座シム結果を portfolio_returns.json にキャッシュ。"""
+    from signalforge.experiments.portfolio_returns import build_portfolio_returns_cache
+    from signalforge.experiments.scan import scan_experiment_campaign
+
+    scan = scan_experiment_campaign()
+    sids = [r["strategy_id"] for r in scan.get("complete") or []]
+    if not sids:
+        raise click.ClickException("完了戦略がありません。")
+    doc = build_portfolio_returns_cache(
+        sids,
+        initial_cash_jpy=initial_cash_jpy,
+        max_positions=max_positions,
+        position_pct=position_pct,
+        entry_priority=entry_priority,
+    )
+    n_ok = sum(1 for v in doc.get("strategies", {}).values() if "total_return_pct" in v)
+    click.echo(f"キャッシュ: {doc['params']}")
+    click.echo(f"書き込み: {n_ok} / {len(sids)} 戦略")
 
 
 @experiments.command("schedule")
@@ -2270,7 +2314,9 @@ def paper_diversified_init_all(
     from signalforge.paper.diversified import DiversifiedPaperBook, init_diversified_paper
     from signalforge.paper.matrix import DIVERSIFIED_PAPER_SIMULATIONS
 
-    for style, strategy in DIVERSIFIED_PAPER_SIMULATIONS:
+    for spec in DIVERSIFIED_PAPER_SIMULATIONS:
+        style, strategy, spec_cohort = spec.style, spec.strategy, spec.cohort
+        use_cohort = cohort if cohort != "prime_liquid" else spec_cohort
         if skip_existing and DiversifiedPaperBook.load(style, strategy):
             click.echo(f"⏭  {strategy}（既存）")
             continue
@@ -2278,11 +2324,11 @@ def paper_diversified_init_all(
             from signalforge.paper.diversified import diversified_book_path
 
             diversified_book_path(style, strategy).unlink(missing_ok=True)
-        click.echo(f"→ init {strategy} …")
+        click.echo(f"→ init {strategy} ({use_cohort}) …")
         init_diversified_paper(
             style,
             strategy,
-            cohort=cohort,
+            cohort=use_cohort,
             ticker_limit=ticker_limit,
             workers=workers,
             refresh=True,
@@ -2298,8 +2344,8 @@ def paper_diversified_run_all(refresh: bool, workers: int) -> None:
     from signalforge.paper.diversified import DiversifiedPaperBook, run_diversified_paper
     from signalforge.paper.matrix import DIVERSIFIED_PAPER_SIMULATIONS
 
-    pairs = DIVERSIFIED_PAPER_SIMULATIONS
-    for style, strategy in pairs:
+    for spec in DIVERSIFIED_PAPER_SIMULATIONS:
+        style, strategy = spec.style, spec.strategy
         book = DiversifiedPaperBook.load(style, strategy)
         if not book:
             click.echo(f"⏭  未 init: {strategy}")

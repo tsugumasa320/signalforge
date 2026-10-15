@@ -52,6 +52,7 @@ class DiversifiedPaperBook:
     initial_capital: float = 3_000_000.0
     max_positions: int = 5
     position_pct: float = 0.2
+    entry_priority: str = "sector_liquidity"
     currency: str = "JPY"
     started_at: str = ""
     entry_cutoff: str = ""
@@ -111,6 +112,7 @@ def init_diversified_paper(
     max_positions: int = 5,
     position_pct: float = 0.2,
     workers: int = 8,
+    entry_priority: str = "sector_liquidity",
     refresh: bool = True,
 ) -> DiversifiedPaperBook:
     load_style_config(style)
@@ -135,6 +137,7 @@ def init_diversified_paper(
         initial_capital=float(params["initial_capital"]),
         max_positions=int(params["max_positions"]),
         position_pct=float(params["position_pct"]),
+        entry_priority=entry_priority,
         currency="JPY",
         started_at=now,
         entry_cutoff=str(cutoff_ts),
@@ -170,6 +173,12 @@ def run_diversified_paper(
     if cutoff.tzinfo is None and not pool.empty and pool["entry_time"].dt.tz is not None:
         cutoff = cutoff.tz_localize("UTC")
     pool = filter_trades_after(pool, cutoff)
+    if not pool.empty and "ticker" in pool.columns:
+        from signalforge.portfolio.liquidity import ticker_sector_map
+
+        sectors = ticker_sector_map()
+        pool = pool.copy()
+        pool["sector_tse"] = pool["ticker"].map(lambda t: sectors.get(str(t), ""))
     chart_end = pd.Timestamp.now(tz="UTC")
     if not pool.empty and "exit_time" in pool.columns:
         ex = pd.to_datetime(pool["exit_time"].max())
@@ -178,6 +187,7 @@ def run_diversified_paper(
         else:
             ex = ex.tz_convert("UTC")
         chart_end = max(chart_end, ex)
+    priority = getattr(book, "entry_priority", None) or "sector_liquidity"
     sim = simulate_diversified_portfolio(
         pool,
         initial_capital=book.initial_capital,
@@ -185,6 +195,7 @@ def run_diversified_paper(
         position_pct=book.position_pct,
         chart_start=cutoff,
         chart_end=chart_end,
+        entry_priority=priority,  # type: ignore[arg-type]
     )
     book.last_sim = sim
     book.last_run_at = datetime.now(timezone.utc).isoformat()

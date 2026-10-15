@@ -4,25 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from signalforge.paper.diversified_specs import DIVERSIFIED_PAPER_SIMULATIONS
 from signalforge.paper.runner import init_paper_portfolio, run_paper_daily
 
 # (style, strategy) pairs simulated daily in CI and shown on the public dashboard.
-# 1口座・分散フォワード（TSE 上位 TA + ルール分散）
-DIVERSIFIED_PAPER_SIMULATIONS: list[tuple[str, str]] = [
-    # TSE 中央値 PF 上位クラスタ
-    ("swing", "bb_lower_rsi_oversold"),
-    ("swing", "bnf_multi_indicator_bounce"),
-    ("swing", "grid_trading_range"),
-    ("swing", "bnf_ma25_kairi_reversion"),
-    ("swing", "mean_reversion_short_term"),
-    ("swing", "low_pbr_value_reversal"),
-    # ルール系統の分散
-    ("swing", "ichimoku_tk_cross"),
-    ("swing", "gap_fill_reversal"),
-    # ベンチマーク（TSE 中央値は弱めだが比較軸としてフォワード追跡）
-    ("swing", "macd_cross"),
-    ("swing", "ema_pullback"),
-]
 
 PAPER_SIMULATIONS: list[tuple[str, str]] = [
     ("swing_champion", "macd_cross"),

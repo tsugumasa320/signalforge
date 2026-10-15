@@ -9,6 +9,7 @@ PROFIT_FACTOR_LONG = "損益比（PF）"
 EXPECTANCY = "期待値（%）"
 WIN_RATE = "勝率"
 MAX_DRAWDOWN = "最大DD（%）"
+PORTFOLIO_RETURN = "1口座リターン（%）"
 TRADES = "取引数"
 STRATEGY_SUMMARY = "解説"
 STRATEGY_CATEGORY = "分類"
@@ -106,12 +107,17 @@ EXPERIMENT_DF_COLUMNS: dict[str, str] = {
     "max_drawdown_pct": MAX_DRAWDOWN,
     "n_tickers": "評価銘柄数",
     "total_return_pct": "総リターン（%）",
+    "portfolio_return_pct": PORTFOLIO_RETURN,
     "avg_pnl_pct": EXPECTANCY,
     "segment": "市場区分",
     "sector_tse": "業種（TSE33）",
     "ticker": "銘柄コード",
     "name": "銘柄名",
     "cohort": "コホート",
+    "cohort_kind": "集計種別",
+    "cohort_label": "区分・業種",
+    "cohort_key": "集計キー",
+    "median_return_pct": "中央値リターン（%）",
     "rule_id": "ラボルール",
     "expectancy_pct_lab": EXPECTANCY,
     "window": "評価期間",
@@ -119,6 +125,7 @@ EXPERIMENT_DF_COLUMNS: dict[str, str] = {
 }
 
 EXPERIMENT_SORT_OPTIONS: list[tuple[str, str]] = [
+    ("portfolio_return_pct", PORTFOLIO_RETURN),
     ("expectancy_pct", EXPECTANCY),
     ("profit_factor", PROFIT_FACTOR),
     ("win_rate", WIN_RATE),
@@ -132,6 +139,7 @@ EXPERIMENT_RANKING_COLUMNS: list[str] = [
     "style",
     "strategy_category",
     "strategy_summary",
+    "portfolio_return_pct",
     "expectancy_pct",
     "profit_factor",
     "win_rate",

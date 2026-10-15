@@ -2,9 +2,33 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 import pandas as pd
+
+from signalforge.portfolio.liquidity import ticker_liquidity_score_map
+
+EntryPriority = Literal["first_come", "liquidity", "sector_liquidity"]
+
+
+def _prepare_trade_queue(trades: pd.DataFrame, entry_priority: EntryPriority) -> pd.DataFrame:
+    t = trades.copy()
+    t["entry_ts"] = pd.to_datetime(t["entry_time"])
+    t["exit_ts"] = pd.to_datetime(t["exit_time"])
+    if entry_priority == "first_come":
+        return t.sort_values("entry_ts")
+    liq = ticker_liquidity_score_map()
+    t["_liq"] = t["ticker"].map(lambda x: liq.get(str(x), 0.0)) if "ticker" in t.columns else 0.0
+    return t.sort_values(["entry_ts", "_liq"], ascending=[True, False])
+
+
+def _open_sector_counts(open_slots: list[dict]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for s in open_slots:
+        sec = str(s.get("sector_tse") or "")
+        if sec:
+            counts[sec] = counts.get(sec, 0) + 1
+    return counts
 
 
 def equity_daily_from_accepted(
@@ -60,10 +84,12 @@ def simulate_diversified_portfolio(
     position_pct: float | None = None,
     chart_start: pd.Timestamp | None = None,
     chart_end: pd.Timestamp | None = None,
+    entry_priority: EntryPriority = "liquidity",
+    max_per_sector: int = 2,
 ) -> dict[str, Any]:
     """
-    Greedy non-overlapping: earliest entry first, skip if slot full until exit frees capital.
-    Each trade uses fixed notional fraction of *current* equity at entry.
+    Greedy non-overlapping queue; skip if slot full until exit frees capital.
+    entry_priority: liquidity = same-day tie-break by liquid names; sector_liquidity also caps sector overlap.
     """
     if trades.empty:
         end = chart_end or pd.Timestamp.now(tz="UTC")
@@ -76,11 +102,10 @@ def simulate_diversified_portfolio(
             "skipped_overlap": 0,
             "skipped": 0,
             "equity_daily": _pack_equity_daily(empty_eq),
+            "entry_priority": entry_priority,
         }
 
-    t = trades.sort_values("entry_time").copy()
-    t["entry_ts"] = pd.to_datetime(t["entry_time"])
-    t["exit_ts"] = pd.to_datetime(t["exit_time"])
+    t = _prepare_trade_queue(trades, entry_priority)
     cash = initial_capital
     open_slots: list[dict] = []
     accepted: list[dict] = []
@@ -92,6 +117,11 @@ def simulate_diversified_portfolio(
         if len(open_slots) >= max_positions:
             skipped += 1
             continue
+        if entry_priority == "sector_liquidity" and "sector_tse" in row.index:
+            sec = str(row.get("sector_tse") or "")
+            if sec and _open_sector_counts(open_slots).get(sec, 0) >= max_per_sector:
+                skipped += 1
+                continue
         notional = cash * pct
         if notional <= 0:
             skipped += 1
@@ -99,7 +129,12 @@ def simulate_diversified_portfolio(
         pnl_frac = float(row["pnl_pct"]) / 100.0
         cash += notional * pnl_frac
         exit_ts = row["exit_ts"]
-        open_slots.append({"exit_ts": exit_ts})
+        open_slots.append(
+            {
+                "exit_ts": exit_ts,
+                "sector_tse": str(row.get("sector_tse") or "") if "sector_tse" in row.index else "",
+            }
+        )
         accepted.append(
             {
                 **row.to_dict(),
@@ -123,6 +158,7 @@ def simulate_diversified_portfolio(
         "max_positions": max_positions,
         "position_pct": pct,
         "equity_daily": _pack_equity_daily(eq),
+        "entry_priority": entry_priority,
     }
 
 

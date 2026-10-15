@@ -70,6 +70,7 @@ def simulate_from_experiment_strategy(
     max_positions: int = 5,
     position_pct: float = 0.2,
     entry_after: pd.Timestamp | None = None,
+    entry_priority: str = "sector_liquidity",
 ) -> dict[str, Any]:
     doc = load_strategy_header(strategy_id)
     if not doc:
@@ -82,7 +83,13 @@ def simulate_from_experiment_strategy(
         position_pct=position_pct,
     )
     pool = filter_trades_after(pool, entry_after)
-    sim = simulate_diversified_portfolio(pool, **params)
+    if not pool.empty and "ticker" in pool.columns:
+        from signalforge.portfolio.liquidity import ticker_sector_map
+
+        sectors = ticker_sector_map()
+        pool = pool.copy()
+        pool["sector_tse"] = pool["ticker"].map(lambda t: sectors.get(str(t), ""))
+    sim = simulate_diversified_portfolio(pool, **params, entry_priority=entry_priority)  # type: ignore[arg-type]
     n_with_series = sum(1 for r in rows if ticker_row_has_series(r))
     return {
         "strategy_id": strategy_id,
