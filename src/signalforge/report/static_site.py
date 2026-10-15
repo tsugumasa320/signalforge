@@ -340,7 +340,7 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
 
     diversified_rows: list[dict] = []
     for book in list_diversified_paper_books():
-        export_diversified_paper_page(output_dir, book, depth=1)
+        export_diversified_paper_page(output_dir, book, depth=1, refresh=refresh)
         diversified_rows.append(diversified_paper_summary_row(book))
 
     for strategy_key in _implemented_catalog_ids():

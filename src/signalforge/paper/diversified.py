@@ -170,11 +170,21 @@ def run_diversified_paper(
     if cutoff.tzinfo is None and not pool.empty and pool["entry_time"].dt.tz is not None:
         cutoff = cutoff.tz_localize("UTC")
     pool = filter_trades_after(pool, cutoff)
+    chart_end = pd.Timestamp.now(tz="UTC")
+    if not pool.empty and "exit_time" in pool.columns:
+        ex = pd.to_datetime(pool["exit_time"].max())
+        if ex.tzinfo is None:
+            ex = ex.tz_localize("UTC")
+        else:
+            ex = ex.tz_convert("UTC")
+        chart_end = max(chart_end, ex)
     sim = simulate_diversified_portfolio(
         pool,
         initial_capital=book.initial_capital,
         max_positions=book.max_positions,
         position_pct=book.position_pct,
+        chart_start=cutoff,
+        chart_end=chart_end,
     )
     book.last_sim = sim
     book.last_run_at = datetime.now(timezone.utc).isoformat()

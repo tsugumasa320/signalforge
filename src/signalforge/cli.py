@@ -2255,17 +2255,50 @@ def paper_diversified_run(style: str, strategy: str, refresh: bool, workers: int
     click.echo(f"評価額: ¥{sim.get('final_equity', book.initial_capital):,.0f} · リターン {sim.get('total_return_pct', 0):+.2f}%")
 
 
+@paper.command("diversified-init-all")
+@click.option("--cohort", default="prime_liquid", show_default=True)
+@click.option("--ticker-limit", default=0, type=int)
+@click.option("--workers", default=8, show_default=True, type=int)
+@click.option("--skip-existing/--force", default=True, help="既存口座はスキップ")
+def paper_diversified_init_all(
+    cohort: str,
+    ticker_limit: int,
+    workers: int,
+    skip_existing: bool,
+) -> None:
+    """DIVERSIFIED_PAPER_SIMULATIONS の口座をまとめて init。"""
+    from signalforge.paper.diversified import DiversifiedPaperBook, init_diversified_paper
+    from signalforge.paper.matrix import DIVERSIFIED_PAPER_SIMULATIONS
+
+    for style, strategy in DIVERSIFIED_PAPER_SIMULATIONS:
+        if skip_existing and DiversifiedPaperBook.load(style, strategy):
+            click.echo(f"⏭  {strategy}（既存）")
+            continue
+        if not skip_existing:
+            from signalforge.paper.diversified import diversified_book_path
+
+            diversified_book_path(style, strategy).unlink(missing_ok=True)
+        click.echo(f"→ init {strategy} …")
+        init_diversified_paper(
+            style,
+            strategy,
+            cohort=cohort,
+            ticker_limit=ticker_limit,
+            workers=workers,
+            refresh=True,
+        )
+        click.echo(f"✓ {strategy}")
+
+
 @paper.command("diversified-run-all")
 @click.option("--refresh/--no-refresh", default=True)
 @click.option("--workers", default=8, show_default=True, type=int)
 def paper_diversified_run_all(refresh: bool, workers: int) -> None:
     """Advance all diversified paper accounts (TSE フォワード検証用ペア)."""
     from signalforge.paper.diversified import DiversifiedPaperBook, run_diversified_paper
+    from signalforge.paper.matrix import DIVERSIFIED_PAPER_SIMULATIONS
 
-    pairs = [
-        ("swing", "bb_lower_rsi_oversold"),
-        ("swing", "bnf_multi_indicator_bounce"),
-    ]
+    pairs = DIVERSIFIED_PAPER_SIMULATIONS
     for style, strategy in pairs:
         book = DiversifiedPaperBook.load(style, strategy)
         if not book:

@@ -118,8 +118,10 @@ Mac がスリープすると BT は止まります。
 uv run signalforge experiments portfolio macd_cross
 uv run signalforge paper diversified-init --strategy macd_cross --cohort prime --workers 8
 uv run signalforge paper diversified-run-all --refresh --workers 8
-./scripts/run-diversified-paper-prime.sh   # bb_lower + bnf_multi · プライム全銘柄（ログ: data/logs/diversified-paper-prime.log）
+./scripts/run-diversified-paper-prime.sh   # 分散フォワード5戦略 · プライム（ログ: data/logs/diversified-paper-prime.log）
 ```
+
+分散フォワード既定10戦略（`DIVERSIFIED_PAPER_SIMULATIONS`）: 上記5 + `low_pbr_value_reversal`, `ichimoku_tk_cross`, `gap_fill_reversal`, `macd_cross`, `ema_pullback`
 
 実験だけ別口座にしたい場合は `config/experiments/backtest_plan.yaml` の `meta.backtest_capital`、または run 時の CLI / 環境変数を使います。
 

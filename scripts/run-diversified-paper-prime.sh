@@ -8,7 +8,18 @@ mkdir -p data/logs
 
 WORKERS="${WORKERS:-8}"
 COHORT="${COHORT:-prime}"
-STRATEGIES=(bb_lower_rsi_oversold bnf_multi_indicator_bounce)
+STRATEGIES=(
+  bb_lower_rsi_oversold
+  bnf_multi_indicator_bounce
+  grid_trading_range
+  bnf_ma25_kairi_reversion
+  mean_reversion_short_term
+  low_pbr_value_reversal
+  ichimoku_tk_cross
+  gap_fill_reversal
+  macd_cross
+  ema_pullback
+)
 
 {
 echo "=== $(date -Iseconds) diversified paper init cohort=$COHORT workers=$WORKERS ==="

@@ -240,8 +240,11 @@ def diversified_paper_summary_row(book) -> dict:
     }
 
 
-def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1) -> Path | None:
+def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1, refresh: bool = False) -> Path | None:
+    from signalforge.lab.portfolio_sim import unpack_equity_daily
     from signalforge.paper.diversified import DiversifiedPaperBook
+    from signalforge.report.benchmark import align_benchmark_to_equity, load_nikkei225_close
+    from signalforge.report.charts import plot_equity_vs_benchmark_index
 
     if not isinstance(book, DiversifiedPaperBook):
         return None
@@ -251,6 +254,13 @@ def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1) -> 
     safe = f"diversified_{book.style}_{book.strategy}".replace("/", "_")
     ret = float(sim.get("total_return_pct") or 0)
     ret_cls = "positive" if ret >= 0 else "negative"
+    chart_html = ""
+    eq_raw = unpack_equity_daily(sim.get("equity_daily") or {})
+    if not eq_raw.empty:
+        nikkei = load_nikkei225_close(refresh=refresh)
+        eq_idx, nik_idx = align_benchmark_to_equity(eq_raw, nikkei)
+        fig = plot_equity_vs_benchmark_index(eq_idx, nik_idx, title="フォワード期間 · 資産 vs 日経225")
+        chart_html = fig_to_html_block(fig, include_plotlyjs="cdn", div_id="equity-nikkei")
     body = f"""
     <div class="info-box">
       1口座 ¥{book.initial_capital:,.0f} · 同時最大 {book.max_positions} 銘柄 ·
@@ -264,7 +274,8 @@ def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1) -> 
       <div class="metric"><label>採用トレード</label><value>{int(sim.get('accepted_trades') or 0)}</value></div>
       <div class="metric"><label>スキップ</label><value>{int(sim.get('skipped_overlap') or 0)}</value></div>
     </div>
-    <p class="muted">GitHub Actions 日次更新（<code>paper diversified-run-all</code>）後のスナップショット。</p>
+    {chart_html}
+    <p class="muted">指数はエントリ開始日=100。日経は 1321.T（日経225連動ETF）の終値。GitHub Actions 日次更新後のスナップショット。</p>
     """
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = wrap_page(

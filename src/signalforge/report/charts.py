@@ -73,6 +73,46 @@ def plot_price_and_trades(
     return fig
 
 
+def plot_equity_vs_benchmark_index(
+    equity: pd.Series,
+    benchmark_index: pd.Series,
+    *,
+    title: str = "資産推移 vs 日経225",
+    equity_label: str = "分散ペーパー（指数100）",
+    benchmark_label: str = "日経225 ETF（1321.T・指数100）",
+) -> go.Figure:
+    fig = go.Figure()
+    if not equity.empty:
+        fig.add_trace(
+            go.Scatter(
+                x=equity.index,
+                y=equity,
+                name=equity_label,
+                line=dict(color="#3b82f6", width=2.5),
+            )
+        )
+    if not benchmark_index.empty:
+        fig.add_trace(
+            go.Scatter(
+                x=benchmark_index.index,
+                y=benchmark_index,
+                name=benchmark_label,
+                line=dict(color="#94a3b8", width=2, dash="dot"),
+            )
+        )
+    fig.add_hline(y=100, line_dash="dash", line_color="#64748b", opacity=0.6)
+    fig.update_layout(
+        title=title,
+        xaxis_title="日付",
+        yaxis_title="開始=100",
+        height=440,
+        template="plotly_dark",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        hovermode="x unified",
+    )
+    return fig
+
+
 def plot_equity_and_drawdown(equity: pd.Series, title: str = "Equity & Drawdown") -> go.Figure:
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.65, 0.35], vertical_spacing=0.06)
 
