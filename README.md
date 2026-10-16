@@ -46,7 +46,7 @@ uv run signalforge dashboard stop
 uv run signalforge backtest --style swing --strategy macd_cross   # 単一 BT + ジャーナル
 uv run signalforge cohort run --strategies catalog:swing --cohorts prime
 uv run signalforge lab matrix --rules all --cohorts prime,standard,growth
-uv run signalforge paper run-all                                  # フォワード仮想口座
+uv run signalforge paper diversified-run-all                      # TSE 分散フォワード（1口座）
 uv run signalforge doctor
 uv run pytest
 ```

@@ -7,20 +7,9 @@ from typing import Any
 from signalforge.paper.diversified_specs import DIVERSIFIED_PAPER_SIMULATIONS
 from signalforge.paper.runner import init_paper_portfolio, run_paper_daily
 
-# (style, strategy) pairs simulated daily in CI and shown on the public dashboard.
+# 旧: 米国株・単銘柄 USD 口座のフォワード（廃止）。日次 CI / Pages は DIVERSIFIED のみ。
 
-PAPER_SIMULATIONS: list[tuple[str, str]] = [
-    ("swing_champion", "macd_cross"),
-    ("swing", "ema_pullback"),
-    ("swing", "macd_cross"),
-    ("swing", "ma_golden_cross"),
-    ("swing", "rsi_reversal"),
-    ("swing", "bb_squeeze"),
-    ("swing_high_winrate", "macd_cross"),
-    ("daytrade", "vwap_ema"),
-    ("daytrade", "vwap_reclaim"),
-    ("daytrade", "orb"),
-]
+PAPER_SIMULATIONS: list[tuple[str, str]] = []
 
 STYLE_LABELS = {
     "swing": "スイング（日足）",
@@ -38,10 +27,10 @@ def ensure_paper_portfolio(style: str, strategy: str, *, refresh: bool) -> None:
 
 
 def paper_portfolio_exists(strategy_id: str) -> bool:
-    from signalforge.paper.portfolio import PaperPortfolio
+    from signalforge.paper.diversified import DiversifiedPaperBook
 
-    for style, strat in PAPER_SIMULATIONS:
-        if strat == strategy_id and PaperPortfolio.load(style, strat) is not None:
+    for spec in DIVERSIFIED_PAPER_SIMULATIONS:
+        if spec.strategy == strategy_id and DiversifiedPaperBook.load(spec.style, spec.strategy):
             return True
     return False
 

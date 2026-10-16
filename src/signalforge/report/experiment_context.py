@@ -94,16 +94,16 @@ def strategies_matching_capital(
 
 
 def paper_forward_summary(strategy_id: str) -> dict[str, Any] | None:
-    from signalforge.paper.matrix import PAPER_SIMULATIONS
-    from signalforge.report.static_dashboard import paper_summary_row
+    from signalforge.paper.diversified import DiversifiedPaperBook
+    from signalforge.paper.matrix import DIVERSIFIED_PAPER_SIMULATIONS
+    from signalforge.report.static_dashboard import diversified_paper_summary_row
 
-    for style, strat in PAPER_SIMULATIONS:
-        if strat != strategy_id:
+    for spec in DIVERSIFIED_PAPER_SIMULATIONS:
+        if spec.strategy != strategy_id:
             continue
-        row = paper_summary_row(style, strategy_id, refresh=False)
-        if row:
-            row["style"] = style
-            return row
+        book = DiversifiedPaperBook.load(spec.style, spec.strategy)
+        if book:
+            return diversified_paper_summary_row(book)
     return None
 
 

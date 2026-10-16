@@ -256,10 +256,8 @@ def export_hub(
 
     <section id="paper">
       <h2>📈 Paper Trading — フォワード成績</h2>
-      <p class="muted">単銘柄口座（下表）· GitHub Pages は Actions 日次更新（JST 朝頃）後が最新</p>
-      <h3>1銘柄 · 独立口座</h3>
-      {_comparison_table(paper_rows, kind="paper")}
-      <h3>1口座 · 分散（実運用近似）</h3>
+      <p class="muted">GitHub Pages は Actions 日次更新（JST 朝頃）後が最新</p>
+      <h3>1口座 · 分散（TSE · 実運用近似）</h3>
       <p class="muted">¥300万 · 同時5 · 20%/回 · 先着 — <code>data/paper/diversified_*.json</code> がある場合のみ</p>
       {_comparison_table(diversified_rows or [], kind="paper")}
     </section>

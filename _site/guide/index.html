@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>戦略解説一覧</title>
+  <style>
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 2rem;
+  background: #0b1220;
+  border-bottom: 1px solid #334155;
+  font-size: 0.875rem;
+}
+nav a { color: var(--accent); text-decoration: none; }
+nav a:hover { text-decoration: underline; }
+nav .active { color: var(--text); font-weight: 600; }
+header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #334155;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+header h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+main { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.metric {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #334155;
+}
+.metric label { display: block; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+.metric value { display: block; font-size: 1.35rem; font-weight: 600; margin-top: 0.25rem; }
+.metric.positive value { color: var(--green); }
+.metric.negative value { color: var(--red); }
+section, .card {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #334155;
+}
+section h2, .card h2 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--muted); }
+section h3 { margin: 1rem 0 0.5rem; font-size: 0.95rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #334155; }
+th { color: var(--muted); font-weight: 500; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.muted { color: var(--muted); }
+.positive { color: var(--green); }
+.negative { color: var(--red); }
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  background: #334155;
+}
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+ul.compact { margin: 0.25rem 0; padding-left: 1.25rem; }
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+a { color: var(--accent); }
+.info-box {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+</style>
+</head>
+<body>
+<nav>
+<a href="../index.html">🏠 ホーム</a>
+<a href="../index.html#paper">📈 Paper 成績</a>
+<a href="../index.html#backtest">⚖️ バックテスト比較</a>
+<a href="../index.html#guides" class="active">📚 戦略解説</a>
+</nav>
+<header>
+  <h1>戦略解説一覧</h1>
+  <p>133 戦略</p>
+</header>
+<main>
+<section><h1>戦略解説一覧</h1><ul class='compact'><li><a href="adx_trend_ride.html">ADX 閾値以上でトレンド乗り</a> <span class="muted">(adx_trend_ride)</span></li><li><a href="am_high_breakout_volume.html">前場高値ブレイク × 出来高2倍</a> <span class="muted">(am_high_breakout_volume)</span></li><li><a href="bb_lower_rsi_oversold.html">BB−2σ + RSI 売られ過ぎ</a> <span class="muted">(bb_lower_rsi_oversold)</span></li><li><a href="bb_squeeze.html">ボリンジャー・スクイーズ</a> <span class="muted">(bb_squeeze)</span></li><li><a href="bb_upper_rsi_exit.html">BB+2σ + RSI70 利確シグナル</a> <span class="muted">(bb_upper_rsi_exit)</span></li><li><a href="bnf_ma25_kairi_reversion.html">BNF型 — 25日乖離率逆張り（地合い連動）</a> <span class="muted">(bnf_ma25_kairi_reversion)</span></li><li><a href="bnf_multi_indicator_bounce.html">BNF型 — 乖離率+出来高+RSI+BB 反発パターン</a> <span class="muted">(bnf_multi_indicator_bounce)</span></li><li><a href="bnf_regime_trend_vs_fade.html">BNF型 — 上げ相場順張り / 下げ相場逆張り切替</a> <span class="muted">(bnf_regime_trend_vs_fade)</span></li><li><a href="bnf_sector_leading_swing.html">BNF型 — 日経連動セクター連れ高・出遅れ</a> <span class="muted">(bnf_sector_leading_swing)</span></li><li><a href="box_range_breakout.html">レンジ（ボックス）上下ブレイク</a> <span class="muted">(box_range_breakout)</span></li><li><a href="cci_zero_cross.html">CCI ゼロライン / ±100 ブレイク</a> <span class="muted">(cci_zero_cross)</span></li><li><a href="ch5_minority_sentiment.html">5ch 少数派法則（掲示板勢い逆張り）</a> <span class="muted">(ch5_minority_sentiment)</span></li><li><a href="close_momentum.html">引け前30分モメンタム（クロージング）</a> <span class="muted">(close_momentum)</span></li><li><a href="credit_balance_contrarian.html">信用残高・貸借倍率 contrarian</a> <span class="muted">(credit_balance_contrarian)</span></li><li><a href="cup_and_handle.html">カップ・アンド・ハンドル</a> <span class="muted">(cup_and_handle)</span></li><li><a href="dca_trend_add.html">ナンピン / ピラミッディング（ルールベース）</a> <span class="muted">(dca_trend_add)</span></li><li><a href="donchian_breakout.html">ドンチャンチャネルブレイク（N日高値）</a> <span class="muted">(donchian_breakout)</span></li><li><a href="double_bottom_break.html">ダブルボトム + ネックラインブレイク</a> <span class="muted">(double_bottom_break)</span></li><li><a href="earnings_drift.html">決算後ドリフト（サプライズ続き）</a> <span class="muted">(earnings_drift)</span></li><li><a href="ema9_21_scalp_5m.html">5分足 EMA9/21 スキャルプ</a> <span class="muted">(ema9_21_scalp_5m)</span></li><li><a href="ema_pullback.html">EMA 押し目買い</a> <span class="muted">(ema_pullback)</span></li><li><a href="fib_pullback_382_618.html">フィボナッチ 38.2/61.8 押し目</a> <span class="muted">(fib_pullback_382_618)</span></li><li><a href="first_hour_momentum.html">寄付後30〜60分 初動モメンタム</a> <span class="muted">(first_hour_momentum)</span></li><li><a href="gap_fill_reversal.html">ギャップ埋め（窓埋め）逆張り</a> <span class="muted">(gap_fill_reversal)</span></li><li><a href="gap_up_continuation.html">ギャップアップ続伸（材料ギャップ）</a> <span class="muted">(gap_up_continuation)</span></li><li><a href="grid_trading_range.html">グリッドトレード（レンジ向け）</a> <span class="muted">(grid_trading_range)</span></li><li><a href="harvest_kw_04ca29e522.html">収集キーワード由来 — ゴールデンクロス（38ヒット）</a> <span class="muted">(harvest_kw_04ca29e522)</span></li><li><a href="harvest_kw_067a94121b.html">収集キーワード由来 — 出来高（448ヒット）</a> <span class="muted">(harvest_kw_067a94121b)</span></li><li><a href="harvest_kw_0bd3e8aee2.html">収集キーワード由来 — 信用残（19ヒット）</a> <span class="muted">(harvest_kw_0bd3e8aee2)</span></li><li><a href="harvest_kw_2a49f1bc02.html">収集キーワード由来 — デイトレ（433ヒット）</a> <span class="muted">(harvest_kw_2a49f1bc02)</span></li><li><a href="harvest_kw_34095c23c5.html">収集キーワード由来 — ストップ高（53ヒット）</a> <span class="muted">(harvest_kw_34095c23c5)</span></li><li><a href="harvest_kw_3b6ce6af3e.html">収集キーワード由来 — スイング（286ヒット）</a> <span class="muted">(harvest_kw_3b6ce6af3e)</span></li><li><a href="harvest_kw_3e890dd37d.html">収集キーワード由来 — 一目均衡（52ヒット）</a> <span class="muted">(harvest_kw_3e890dd37d)</span></li><li><a href="harvest_kw_485fff7244.html">収集キーワード由来 — 逆張り（45ヒット）</a> <span class="muted">(harvest_kw_485fff7244)</span></li><li><a href="harvest_kw_4a8bfbbe61.html">収集キーワード由来 — スキャル（58ヒット）</a> <span class="muted">(harvest_kw_4a8bfbbe61)</span></li><li><a href="harvest_kw_63c04d5463.html">収集キーワード由来 — スクリーニング（305ヒット）</a> <span class="muted">(harvest_kw_63c04d5463)</span></li><li><a href="harvest_kw_69c6f34e5b.html">収集キーワード由来 — デッドクロス（19ヒット）</a> <span class="muted">(harvest_kw_69c6f34e5b)</span></li><li><a href="harvest_kw_781e4b3fe5.html">収集キーワード由来 — 少数派（39ヒット）</a> <span class="muted">(harvest_kw_781e4b3fe5)</span></li><li><a href="harvest_kw_7999ad1776.html">収集キーワード由来 — ボリンジャー（27ヒット）</a> <span class="muted">(harvest_kw_7999ad1776)</span></li><li><a href="harvest_kw_80c429e600.html">収集キーワード由来 — 銘柄探検（17ヒット）</a> <span class="muted">(harvest_kw_80c429e600)</span></li><li><a href="harvest_kw_96f9af238b.html">収集キーワード由来 — 寄付（18ヒット）</a> <span class="muted">(harvest_kw_96f9af238b)</span></li><li><a href="harvest_kw_MACD.html">収集キーワード由来 — MACD（136ヒット）</a> <span class="muted">(harvest_kw_MACD)</span></li><li><a href="harvest_kw_ORB.html">収集キーワード由来 — ORB（55ヒット）</a> <span class="muted">(harvest_kw_ORB)</span></li><li><a href="harvest_kw_RSI.html">収集キーワード由来 — RSI（61ヒット）</a> <span class="muted">(harvest_kw_RSI)</span></li><li><a href="harvest_kw_VWAP.html">収集キーワード由来 — VWAP（189ヒット）</a> <span class="muted">(harvest_kw_VWAP)</span></li><li><a href="harvest_kw__.html">収集キーワード由来 — 出来高（440ヒット）</a> <span class="muted">(harvest_kw__)</span></li><li><a href="harvest_kw_ab5cfb949d.html">収集キーワード由来 — 損切（135ヒット）</a> <span class="muted">(harvest_kw_ab5cfb949d)</span></li><li><a href="harvest_kw_c88320ea98.html">収集キーワード由来 — 押し目（44ヒット）</a> <span class="muted">(harvest_kw_c88320ea98)</span></li><li><a href="harvest_kw_ee4b3de361.html">収集キーワード由来 — 順張り（26ヒット）</a> <span class="muted">(harvest_kw_ee4b3de361)</span></li><li><a href="harvest_kw_ef2d15231b.html">収集キーワード由来 — 乖離率（38ヒット）</a> <span class="muted">(harvest_kw_ef2d15231b)</span></li><li><a href="harvest_kw_f2a0f90d48.html">収集キーワード由来 — 板読（17ヒット）</a> <span class="muted">(harvest_kw_f2a0f90d48)</span></li><li><a href="head_shoulders_short.html">ヘッドショルダー（三尊）崩れ</a> <span class="muted">(head_shoulders_short)</span></li><li><a href="heikin_ashi_trend.html">平均足（Heikin-Ashi）トレンド継続</a> <span class="muted">(heikin_ashi_trend)</span></li><li><a href="ichimoku_kijun_pullback.html">基準線押し目（雲上）</a> <span class="muted">(ichimoku_kijun_pullback)</span></li><li><a href="ichimoku_kumo_break.html">一目均衡表・雲抜け</a> <span class="muted">(ichimoku_kumo_break)</span></li><li><a href="ichimoku_macd_rsi.html">一目 + MACD + RSI 複合</a> <span class="muted">(ichimoku_macd_rsi)</span></li><li><a href="ichimoku_sanyaku_koten.html">三役好転（転換&gt;基準・株&gt;雲・遅行&gt;株価）</a> <span class="muted">(ichimoku_sanyaku_koten)</span></li><li><a href="ichimoku_tk_cross.html">転換線×基準線クロス</a> <span class="muted">(ichimoku_tk_cross)</span></li><li><a href="index_arb_nikkei_etf.html">日経225先物 / 1321.T 裁定系</a> <span class="muted">(index_arb_nikkei_etf)</span></li><li><a href="kabutan_contrarian_short_hold.html">株探流 — 逆張りは短期売買（方向逆らい禁止長期化）</a> <span class="muted">(kabutan_contrarian_short_hold)</span></li><li><a href="kabutan_core_satellite_credit_swing.html">株探特集 — コア長期＋信用スイングサテライト</a> <span class="muted">(kabutan_core_satellite_credit_swing)</span></li><li><a href="kabutan_ma_uptrend_low_kairi25.html">株探流 — MA上昇トレンド＋25日線カイリ率小（押し目）</a> <span class="muted">(kabutan_ma_uptrend_low_kairi25)</span></li><li><a href="kabutan_preset_.html">株探プリセット — 出来高急増</a> <span class="muted">(kabutan_preset_)</span></li><li><a href="kabutan_preset_2.html">株探プリセット — ボリンジャー-2σ付近</a> <span class="muted">(kabutan_preset_2)</span></li><li><a href="kabutan_preset_25_5.html">株探プリセット — 25日線カイリ率-5%以下</a> <span class="muted">(kabutan_preset_25_5)</span></li><li><a href="kabutan_preset_5.html">株探プリセット — 5日線上抜け</a> <span class="muted">(kabutan_preset_5)</span></li><li><a href="kabutan_preset_5_25.html">株探プリセット — ゴールデンクロス5-25</a> <span class="muted">(kabutan_preset_5_25)</span></li><li><a href="kabutan_preset_macd_buy.html">株探「MACD/買いシグナル」プリセット</a> <span class="muted">(kabutan_preset_macd_buy)</span></li><li><a href="kabutan_preset_rsi14_20.html">株探プリセット — RSI14 20%以下</a> <span class="muted">(kabutan_preset_rsi14_20)</span></li><li><a href="kabutan_preset_rsi14_80.html">株探プリセット — RSI14 80%以上</a> <span class="muted">(kabutan_preset_rsi14_80)</span></li><li><a href="kabutan_preset_rsi_overbought.html">株探「RSI14 80%以上」買われすぎ（利確/警戒）</a> <span class="muted">(kabutan_preset_rsi_overbought)</span></li><li><a href="kabutan_preset_rsi_oversold.html">株探「RSI14 20%以下」売られすぎ</a> <span class="muted">(kabutan_preset_rsi_oversold)</span></li><li><a href="kabutan_shinchu_sanbon_inverted.html">株探「新値3本足陰転」売りシグナル</a> <span class="muted">(kabutan_shinchu_sanbon_inverted)</span></li><li><a href="kabutan_supply_ma_20_60_swing.html">需給×MA（5/20/60）押し目 — 株タン系解説</a> <span class="muted">(kabutan_supply_ma_20_60_swing)</span></li><li><a href="kabutan_theme_swing_earnings.html">株探特集 — テーマ＋決算パターンのスイング</a> <span class="muted">(kabutan_theme_swing_earnings)</span></li><li><a href="keltner_squeeze.html">ケルトナー / BB スクイーズ類似</a> <span class="muted">(keltner_squeeze)</span></li><li><a href="low_pbr_value_reversal.html">低PBR / バリュー逆張り（テクニカル確認付き）</a> <span class="muted">(low_pbr_value_reversal)</span></li><li><a href="lunch_break_fade.html">昼休み明け / 前場引け前の逆張り</a> <span class="muted">(lunch_break_fade)</span></li><li><a href="ma_200_trend_filter.html">200日線フィルタ＋短期シグナル</a> <span class="muted">(ma_200_trend_filter)</span></li><li><a href="ma_25_75_golden_cross.html">25日/75日 ゴールデンクロス</a> <span class="muted">(ma_25_75_golden_cross)</span></li><li><a href="ma_50_200_golden_cross.html">50/200日 ゴールデンクロス（中期トレンド転換）</a> <span class="muted">(ma_50_200_golden_cross)</span></li><li><a href="ma_death_cross.html">デッドクロス（ショート / 回避）</a> <span class="muted">(ma_death_cross)</span></li><li><a href="ma_golden_cross.html">EMA 5-25 ゴールデンクロス</a> <span class="muted">(ma_golden_cross)</span></li><li><a href="macd_cross.html">MACD クロス</a> <span class="muted">(macd_cross)</span></li><li><a href="macd_histogram_reversal.html">MACD ヒストグラム反転</a> <span class="muted">(macd_histogram_reversal)</span></li><li><a href="mean_reversion_short_term.html">短期リバーサル（過去5日リターン逆張り）</a> <span class="muted">(mean_reversion_short_term)</span></li><li><a href="minkabu_community_sentiment_rank.html">みんかぶ — 買い予想/売り予想投稿数で優先順位</a> <span class="muted">(minkabu_community_sentiment_rank)</span></li><li><a href="minkabu_custom_technical_screen.html">みんかぶ — 38種テクニカル自由組合せ</a> <span class="muted">(minkabu_custom_technical_screen)</span></li><li><a href="minkabu_gc_25_75_preset.html">みんかぶ — 25/75日ゴールデンクロス条件</a> <span class="muted">(minkabu_gc_25_75_preset)</span></li><li><a href="minkabu_short_oversold_preset.html">みんかぶ — 短期売られすぎ銘柄</a> <span class="muted">(minkabu_short_oversold_preset)</span></li><li><a href="momentum_monthly_rebalance.html">モメンタム因子（12-1）月次リバランス</a> <span class="muted">(momentum_monthly_rebalance)</span></li><li><a href="multi_strategy_ensemble.html">複数戦略アンサンブル（投票 / 重み付け）</a> <span class="muted">(multi_strategy_ensemble)</span></li><li><a href="opening_gap_daytrade.html">寄付ギャップ方向フォロー / フェード</a> <span class="muted">(opening_gap_daytrade)</span></li><li><a href="orb.html">ORB（Opening Range Breakout）</a> <span class="muted">(orb)</span></li><li><a href="pairs_trading_sector.html">ペアトレード（同業2銘柄スプレッド）</a> <span class="muted">(pairs_trading_sector)</span></li><li><a href="parabolic_sar_intraday.html">パラボリック SAR デイトレ</a> <span class="muted">(parabolic_sar_intraday)</span></li><li><a href="perfect_order_pullback.html">パーフェクトオーダー押し目（5&gt;25&gt;75 上向き）</a> <span class="muted">(perfect_order_pullback)</span></li><li><a href="pivot_point_bounce.html">ピボットポイント支持・抵抗</a> <span class="muted">(pivot_point_bounce)</span></li><li><a href="pm_high_breakout.html">後場高値 / 当日高値更新ブレイク</a> <span class="muted">(pm_high_breakout)</span></li><li><a href="prior_day_hl_break.html">前日高安値ブレイク</a> <span class="muted">(prior_day_hl_break)</span></li><li><a href="professional_daytrader_session.html">専業デイトレ時間帯特化（5ch スレ文化）</a> <span class="muted">(professional_daytrader_session)</span></li><li><a href="relative_strength_index_rs.html">対指数 RS 強度（日経 / TOPIX 対比）</a> <span class="muted">(relative_strength_index_rs)</span></li><li><a href="relative_volume_filter.html">相対出来高（RelVol）フィルタ付き ORB</a> <span class="muted">(relative_volume_filter)</span></li><li><a href="rsi_dip_200ma.html">RSI35割れ + 200日線上（翌寄り買い）</a> <span class="muted">(rsi_dip_200ma)</span></li><li><a href="rsi_momentum_60.html">RSI60以上 + 25日線上（強い銘柄押し目）</a> <span class="muted">(rsi_momentum_60)</span></li><li><a href="rsi_reversal.html">RSI 売られ過ぎ反発</a> <span class="muted">(rsi_reversal)</span></li><li><a href="sector_leader_laggard.html">業種 ETF / セクター強弱ローテ</a> <span class="muted">(sector_leader_laggard)</span></li><li><a href="sns_sentiment_plus_ta.html">SNS 感情スコア × テクニカル同方向エントリー</a> <span class="muted">(sns_sentiment_plus_ta)</span></li><li><a href="stoch_rsi_cross.html">ストキャスティクス / StochRSI クロス</a> <span class="muted">(stoch_rsi_cross)</span></li><li><a href="supertrend_follow.html">Supertrend トレンドフォロー</a> <span class="muted">(supertrend_follow)</span></li><li><a href="topix100_momentum.html">TOPIX100 / Core30 モメンタムローテ</a> <span class="muted">(topix100_momentum)</span></li><li><a href="trailing_atr_chandelier.html">ATR / シャンデリアエグジット</a> <span class="muted">(trailing_atr_chandelier)</span></li><li><a href="trend_reentry.html">新高値更新後の押し目再エントリー</a> <span class="muted">(trend_reentry)</span></li><li><a href="triangle_breakout.html">三角保ち合いブレイク</a> <span class="muted">(triangle_breakout)</span></li><li><a href="vcp_minervini.html">VCP（ボラ収縮）→ ブレイク（ミネルヴィニ型）</a> <span class="muted">(vcp_minervini)</span></li><li><a href="volume_breakout.html">出来高急増ブレイクアウト</a> <span class="muted">(volume_breakout)</span></li><li><a href="vwap_breakout_follow.html">VWAP 実体抜け + 出来高増追随</a> <span class="muted">(vwap_breakout_follow)</span></li><li><a href="vwap_ema.html">VWAP + EMA クロス</a> <span class="muted">(vwap_ema)</span></li><li><a href="vwap_mean_reversion_short.html">VWAP 下での戻り売り</a> <span class="muted">(vwap_mean_reversion_short)</span></li><li><a href="vwap_orderflow_itasha.html">VWAP + 板・歩み値（需給読み）</a> <span class="muted">(vwap_orderflow_itasha)</span></li><li><a href="vwap_pullback_long.html">VWAP 上での押し目買い</a> <span class="muted">(vwap_pullback_long)</span></li><li><a href="vwap_reclaim.html">VWAP リクレイム</a> <span class="muted">(vwap_reclaim)</span></li><li><a href="weekly_swing_multiframe.html">週足トレンド + 日足エントリー</a> <span class="muted">(weekly_swing_multiframe)</span></li><li><a href="x_keyword_material_screen.html">X キーワードスクリーニング（決算・S高・材料）</a> <span class="muted">(x_keyword_material_screen)</span></li><li><a href="x_sentiment_event_factor.html">X 感情×イベントラベル因子（クオンツ）</a> <span class="muted">(x_sentiment_event_factor)</span></li><li><a href="x_tweet_burst_filter.html">X 投稿急増 + チャート確認（小型株）</a> <span class="muted">(x_tweet_burst_filter)</span></li><li><a href="youtube_dow_theory_trend.html">ダウ理論 — 3 トレンド分類</a> <span class="muted">(youtube_dow_theory_trend)</span></li><li><a href="youtube_elliott_multiframe.html">エリオット波動 × マルチタイムフレーム</a> <span class="muted">(youtube_elliott_multiframe)</span></li><li><a href="youtube_harvest_6vV8gjz982s.html">YouTube字幕 — 楽天トウシル — 高値更新ハードル</a> <span class="muted">(youtube_harvest_6vV8gjz982s)</span></li><li><a href="youtube_harvest_La-WIYNjgoY.html">YouTube字幕 — 久米 × BNF 関連（スレ言及）</a> <span class="muted">(youtube_harvest_La-WIYNjgoY)</span></li><li><a href="youtube_harvest_WSZVfgH9GdI.html">YouTube字幕 — 楽天トウシル — 今週の日本株テクニカル（土信田）</a> <span class="muted">(youtube_harvest_WSZVfgH9GdI)</span></li><li><a href="youtube_harvest__9GKoinlUVE.html">YouTube字幕 — 楽天トウシル — 日経平均 MACD/移動平均解説</a> <span class="muted">(youtube_harvest__9GKoinlUVE)</span></li><li><a href="youtube_new_high_box_break.html">新高値ブレイク投資法（ボックス脱出）</a> <span class="muted">(youtube_new_high_box_break)</span></li></ul></section>
+</main>
+<footer>
+  Generated 2026-10-16 02:25 UTC ·
+  <a href="https://github.com/tsugumasa320/signalforge">SignalForge</a>
+</footer>
+</body>
+</html>
