@@ -1,6 +1,0 @@
-# Legacy US preset (optional). Default market is config/market/japan.yaml
-ticker: NVDA
-correlation_tickers: [QQQ, SOXX]
-timezone: America/New_York
-earnings_blackout_days: 2
-backtest_start_date: "2023-01-01"

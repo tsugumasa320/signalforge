@@ -1,7 +1,7 @@
 [project]
 name = "signalforge"
 version = "0.1.0"
-description = "NVDA multi-horizon technical analysis with interpretable TA + Meta-Labeling ML"
+description = "Japan TSE multi-strategy backtests, forward paper, and strategy catalog hub"
 readme = "README.md"
 authors = [
     { name = "tsugumasa320", email = "tsugumasa320@gmail.com" }

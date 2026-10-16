@@ -22,14 +22,6 @@ def load_market_config(market: str = "japan") -> dict[str, Any]:
     return load_yaml(CONFIG_DIR / "market" / f"{market}.yaml")
 
 
-def load_nvda_config() -> dict[str, Any]:
-    """Legacy US/NVDA preset (deprecated — use load_market_config)."""
-    path = CONFIG_DIR / "nvda.yaml"
-    if path.exists():
-        return load_yaml(path)
-    return load_market_config("japan")
-
-
 def load_universe(name: str | None = None) -> dict[str, Any]:
     if name is None:
         name = load_market_config("japan").get("universe_default", "japan_liquid")
@@ -73,7 +65,7 @@ def load_backtest_defaults() -> dict[str, Any]:
 
 def market_context(cfg: dict[str, Any]) -> dict[str, Any]:
     """Ticker, timezone, correlations — from style market config."""
-    return cfg.get("_market") or cfg.get("_nvda") or {}
+    return cfg.get("_market") or {}
 
 
 def resolve_ticker(cfg: dict[str, Any], cfg_override: dict[str, Any] | None = None) -> str:
@@ -93,7 +85,6 @@ def load_style_config(style: str) -> dict[str, Any]:
     market_key = cfg.get("market", "japan")
     market = load_market_config(market_key)
     cfg["_market"] = market
-    cfg["_nvda"] = market  # backward compatibility
     cfg["_defaults"] = load_backtest_defaults()
     return cfg
 

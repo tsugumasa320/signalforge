@@ -211,8 +211,8 @@ def test_pickle_cache_roundtrip(tmp_path):
     idx = pd.date_range("2024-01-02", periods=5, freq="D", tz="UTC")
     df = pd.DataFrame({"close": [1.0, 2.0, 3.0, 4.0, 5.0]}, index=idx)
     cache = ParquetCache(base=tmp_path)
-    cache.save("NVDA", "1d", df)
-    loaded = cache.load("NVDA", "1d")
+    cache.save("7203.T", "1d", df)
+    loaded = cache.load("7203.T", "1d")
     assert loaded is not None
     assert len(loaded) == 5
     assert cache.path("NVDA", "1d").suffix == ".pkl"

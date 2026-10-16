@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
@@ -10,76 +9,61 @@ from typing import Any
 
 import pandas as pd
 
-from signalforge.config import load_style_config
-from signalforge.optimize.champion import champion_cfg_override
-from signalforge.optimize.spaces import strategies_for_style
-from signalforge.paper.matrix import PAPER_SIMULATIONS, STYLE_LABELS
-from signalforge.pipeline import run_backtest_pipeline
-from signalforge.report.charts import plot_strategy_comparison
-from signalforge.report.dashboard_components import oos_metrics_from_trades
 from signalforge.config import load_web_catalog
-from signalforge.report.strategy_guide_builder import resolve_strategy_guide, strategy_display_title
+from signalforge.paper.diversified import list_diversified_paper_books
+from signalforge.paper.diversified_specs import DIVERSIFIED_PAPER_SIMULATIONS
+from signalforge.paper.matrix import PAPER_SIMULATIONS, STYLE_LABELS
+from signalforge.report.charts import plot_strategy_comparison
+from signalforge.report.metrics_ja import EXPECTANCY, PROFIT_FACTOR
 from signalforge.report.static_dashboard import (
     diversified_paper_summary_row,
     export_diversified_paper_page,
     export_paper_page,
     paper_summary_row,
 )
-from signalforge.paper.diversified import list_diversified_paper_books
 from signalforge.report.static_html import fig_to_html_block, wrap_page
+from signalforge.report.strategy_guide_builder import resolve_strategy_guide, strategy_display_title
 from signalforge.report.strategy_visuals import plot_strategy_demo
 
 
-BACKTEST_STYLES = ("swing", "swing_champion", "swing_high_winrate", "daytrade")
+def collect_tse_experiment_rows(*, top_n: int = 133) -> list[dict[str, Any]]:
+    """Precomputed TSE campaign (median metrics per strategy), same source as Streamlit ranking."""
+    from signalforge.experiments.scan import scan_campaign_progress
 
-
-def _run_backtest_row(style: str, strategy: str) -> dict[str, Any] | None:
-    ml_filter = style in ("swing_champion", "swing_high_winrate")
-    cfg_override = champion_cfg_override(style, strategy, load_style_config(style))
-    try:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=PendingDeprecationWarning)
-            result = run_backtest_pipeline(
-                style,
-                strategy,
-                ml_filter=ml_filter,
-                cost_model="japan",
-                cfg_override=cfg_override,
-                refresh_data=False,
-            )
-    except Exception as exc:
-        return {"style": style, "strategy": strategy, "error": str(exc)}
-
-    trades = result["trades"]
-    if ml_filter and not trades.empty and "is_oos" in trades.columns:
-        m = oos_metrics_from_trades(trades, result["equity"])
-        scope = "OOS"
-    else:
-        m = result["metrics"]
-        scope = "全期間"
-    return {
-        "style": style,
-        "strategy": strategy,
-        "style_label": STYLE_LABELS.get(style, style),
-        "strategy_label": strategy_display_title(strategy),
-        "scope": scope,
-        "profit_factor": m.get("profit_factor", 0),
-        "win_rate": m.get("win_rate", 0),
-        "sharpe": m.get("sharpe", 0),
-        "total_trades": m.get("total_trades", 0),
-        "max_drawdown_pct": m.get("max_drawdown_pct", 0),
-        "total_return_pct": m.get("total_return_pct", 0),
-    }
-
-
-def collect_backtest_rows() -> list[dict[str, Any]]:
+    scan = scan_campaign_progress(fast=True)
     rows: list[dict[str, Any]] = []
-    for style in BACKTEST_STYLES:
-        for strategy in strategies_for_style(style):
-            row = _run_backtest_row(style, strategy)
-            if row:
-                rows.append(row)
-    return rows
+    for r in scan.get("complete") or []:
+        sid = str(r.get("strategy_id") or "")
+        if not sid:
+            continue
+        style = str(r.get("style") or "swing")
+        rows.append(
+            {
+                "style": style,
+                "strategy": sid,
+                "style_label": STYLE_LABELS.get(style, style),
+                "strategy_label": strategy_display_title(sid),
+                "scope": "TSE3521·中央値",
+                "expectancy_pct": r.get("expectancy_pct"),
+                "profit_factor": r.get("profit_factor"),
+                "win_rate": r.get("win_rate"),
+                "total_trades": r.get("total_trades"),
+                "max_drawdown_pct": r.get("max_drawdown_pct"),
+                "n_tickers": r.get("n_tickers"),
+            }
+        )
+    rows.sort(
+        key=lambda x: (x.get("expectancy_pct") is None, -(float(x["expectancy_pct"]) if x.get("expectancy_pct") is not None else -1e9)),
+    )
+    return rows[:top_n] if top_n > 0 else rows
+
+
+def hub_guide_strategy_ids(tse_rows: list[dict[str, Any]], *, top_n: int = 40) -> list[str]:
+    """Guides on Pages: forward matrix + top TSE strategies (not full harvest catalog)."""
+    ids: set[str] = {spec.strategy for spec in DIVERSIFIED_PAPER_SIMULATIONS}
+    for r in tse_rows[:top_n]:
+        ids.add(str(r["strategy"]))
+    return sorted(ids)
 
 
 def _implemented_catalog_ids() -> list[str]:
@@ -191,6 +175,36 @@ def _comparison_table(rows: list[dict], *, kind: str) -> str:
                 f'<td><a href="{escape(r.get("href", "#"))}">詳細</a></td>'
                 "</tr>"
             )
+    elif kind == "tse":
+        header = (
+            f"<tr><th>スタイル</th><th>戦略</th><th>集計</th><th>{escape(EXPECTANCY)}</th>"
+            f"<th>{escape(PROFIT_FACTOR)}</th><th>Win率</th><th>MaxDD</th><th>取引数</th><th>解説</th></tr>"
+        )
+        body = ""
+        for r in rows:
+            strat = str(r.get("strategy") or "")
+            exp = r.get("expectancy_pct")
+            exp_s = f"{float(exp):+.3f}" if exp is not None and exp == exp else "—"
+            exp_cls = "positive" if exp is not None and float(exp) > 0 else "negative" if exp is not None and float(exp) < 0 else ""
+            pf = r.get("profit_factor")
+            pf_s = f"{float(pf):.2f}" if pf is not None and pf == pf else "—"
+            wr = r.get("win_rate")
+            wr_s = f"{float(wr):.1%}" if wr is not None and wr == wr else "—"
+            dd = r.get("max_drawdown_pct")
+            dd_s = f"{float(dd):.2f}%" if dd is not None and dd == dd else "—"
+            body += (
+                "<tr>"
+                f"<td>{escape(r.get('style_label', ''))}</td>"
+                f"<td>{escape(r.get('strategy_label', strat))}</td>"
+                f"<td><span class='badge'>{escape(r.get('scope', ''))}</span></td>"
+                f'<td class="{exp_cls}">{exp_s}</td>'
+                f"<td>{pf_s}</td>"
+                f"<td>{wr_s}</td>"
+                f"<td>{dd_s}</td>"
+                f"<td>{r.get('total_trades', '—')}</td>"
+                f'<td><a href="guide/{escape(strat)}.html">解説</a></td>'
+                "</tr>"
+            )
     else:
         header = (
             "<tr><th>スタイル</th><th>戦略</th><th>スコープ</th><th>PF</th>"
@@ -233,14 +247,21 @@ def export_hub(
     backtest_rows: list[dict],
     diversified_rows: list[dict] | None = None,
 ) -> Path:
-    # PF comparison chart (backtest, swing only for clarity)
-    swing_bt = [r for r in backtest_rows if r.get("style") == "swing" and not r.get("error")]
     chart_html = ""
-    if swing_bt:
-        fig = plot_strategy_comparison(swing_bt, metric="profit_factor")
+    top_chart = [
+        r
+        for r in backtest_rows[:25]
+        if r.get("profit_factor") is not None and r.get("profit_factor") == r.get("profit_factor")
+    ]
+    if top_chart:
+        chart_payload = [
+            {"strategy": str(r.get("strategy_label", r.get("strategy")))[:48], "profit_factor": float(r["profit_factor"])}
+            for r in top_chart
+        ]
+        fig = plot_strategy_comparison(chart_payload, metric="profit_factor")
         chart_html = fig_to_html_block(fig, include_plotlyjs="cdn", div_id="bt-compare")
 
-    guide_ids = _implemented_catalog_ids()
+    guide_ids = hub_guide_strategy_ids(backtest_rows) if backtest_rows else []
     guide_links = "".join(
         f'<a href="guide/{k}.html">{escape(strategy_display_title(k))}</a> '
         for k in guide_ids[:40]
@@ -251,7 +272,7 @@ def export_hub(
     body = f"""
     <div class="info-box">
       日本株向けテクニカル分析ダッシュボード（ローカル Streamlit 版と同等の比較・解説を静的サイト化）。
-      Paper = フォワード仮想運用、バックテスト = 全期間（または OOS）シミュレーション。
+      Paper = TSE 分散フォワード。バックテスト表 = 保存済み TSE 実験（3521銘柄・典型値）。
     </div>
 
     <section id="paper">
@@ -263,10 +284,10 @@ def export_hub(
     </section>
 
     <section id="backtest">
-      <h2>⚖️ バックテスト — 戦略比較</h2>
-      <p class="muted">Alpaca コストモデル · swing_high_winrate は ML フィルタ OOS</p>
+      <h2>⚖️ TSE 実験 — 戦略比較（事前バックテスト）</h2>
+      <p class="muted">japan コスト · 各列は全銘柄BTの中央値（Streamlit TSE 実験タブと同系）</p>
       {chart_html}
-      {_comparison_table(backtest_rows, kind="backtest")}
+      {_comparison_table(backtest_rows, kind="tse")}
     </section>
 
     <section id="guides">
@@ -289,8 +310,8 @@ def export_hub(
     return path
 
 
-def export_guides_index(output_dir: Path) -> Path:
-    guide_ids = _implemented_catalog_ids()
+def export_guides_index(output_dir: Path, *, guide_ids: list[str] | None = None) -> Path:
+    guide_ids = guide_ids if guide_ids is not None else _implemented_catalog_ids()
     links = "".join(
         f'<li><a href="{gid}.html">{escape(strategy_display_title(gid))}</a> '
         f'<span class="muted">({gid})</span></li>'
@@ -328,6 +349,14 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
         return export_guides_only(output_dir)
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    for sub, keep_prefix in (("guide", None), ("paper", "diversified_")):
+        d = output_dir / sub
+        if not d.is_dir():
+            continue
+        for path in d.glob("*.html"):
+            if keep_prefix and path.name.startswith(keep_prefix):
+                continue
+            path.unlink(missing_ok=True)
 
     paper_rows: list[dict] = []
     for style, strategy in PAPER_SIMULATIONS:
@@ -341,11 +370,12 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
         export_diversified_paper_page(output_dir, book, depth=1, refresh=refresh)
         diversified_rows.append(diversified_paper_summary_row(book))
 
-    for strategy_key in _implemented_catalog_ids():
+    backtest_rows = collect_tse_experiment_rows()
+    guide_ids = hub_guide_strategy_ids(backtest_rows)
+    for strategy_key in guide_ids:
         export_strategy_guide(output_dir, strategy_key)
-    export_guides_index(output_dir)
+    export_guides_index(output_dir, guide_ids=guide_ids)
 
-    backtest_rows = collect_backtest_rows()
     hub = export_hub(output_dir, paper_rows, backtest_rows, diversified_rows)
     (output_dir / ".nojekyll").touch()
     return hub

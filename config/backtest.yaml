@@ -6,7 +6,7 @@ max_trades_per_day_swing: 1
 daily_loss_limit_daytrade: 400
 daily_loss_limit_swing: 800
 
-# デフォルト評価開始日（nvda.yaml と併用、style/backtest で上書き可）
+# デフォルト評価開始日（config/market/*.yaml と style/backtest で上書き可）
 backtest_start_date: "2023-01-01"
 
 # 資金制約（全スタイル共通。style の backtest.capital で上書き可）
