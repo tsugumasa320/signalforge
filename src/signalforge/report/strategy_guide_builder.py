@@ -491,6 +491,77 @@ def _guide_ema_pb_proxy(p: dict, approx: str | None) -> dict[str, Any]:
     return _guide_pullback_ema({"ema_col": "ema20"}, approx)
 
 
+@_register("credit_margin_contrarian")
+def _guide_credit_margin(p: dict, approx: str | None) -> dict[str, Any]:
+    shrt = p.get("min_shrt_ratio", 0.45)
+    drop = p.get("ratio_drop", 0.03)
+    rsi = p.get("rsi_max", 45)
+    return {
+        "concept": "信用売残・貸借倍率の改善（需給緩和）と弱い RSI からの逆張りロングを狙うスイング。",
+        "entry_long": [
+            f"信用売残比率 ≥ {shrt} から {drop} 以上低下",
+            f"RSI ≤ {rsi} 付近からの戻り",
+        ],
+        "signal_buy": "需給改善 + 売られ過ぎからの **買い**",
+        "signal_sell": None,
+        "entry_short": ["なし（ロング）"],
+        "market": "信用残 alt-data が取得できる銘柄・期間。データ欠損時はシグナルなし。",
+    }
+
+
+@_register("sector_relative_momentum")
+def _guide_sector_rs(p: dict, approx: str | None) -> dict[str, Any]:
+    lb = p.get("lookback", 20)
+    rs = p.get("min_rs_pct", 1.0)
+    ema = _col_label(str(p.get("ema_col", "ema20")))
+    return {
+        "concept": f"同業種指数に対する相対強度（{lb}日）が高く、{ema} 上で推移する銘柄を買う。",
+        "entry_long": [
+            f"業種対比リターン ≥ {rs}%",
+            f"終値 > {ema}",
+        ],
+        "signal_buy": "セクター RS 上位 **買い**",
+        "signal_sell": None,
+        "entry_short": ["なし"],
+        "market": "セクター指数データがある業種。リーダー銘柄向き。",
+    }
+
+
+@_register("post_earnings_drift")
+def _guide_pead(p: dict, approx: str | None) -> dict[str, Any]:
+    d0 = p.get("min_days_after", 1)
+    d1 = p.get("max_days_after", 5)
+    gap = float(p.get("min_gap_pct", 0.005)) * 100
+    vol = p.get("volume_ratio_min", 1.2)
+    return {
+        "concept": "決算発表後の方向性（ギャップ）と出来高を確認し、短期ドリフトに乗る。",
+        "entry_long": [
+            f"決算後 {d0}〜{d1} 営業日",
+            f"ギャップ ≥ {gap:.2f}%",
+            f"出来高 ≥ 直近平均 × {vol}",
+        ],
+        "signal_buy": "決算ドリフト **買い**",
+        "signal_sell": None,
+        "entry_short": ["なし（ロング）"],
+        "market": "決算カレンダー alt-data が揃う銘柄。",
+    }
+
+
+@_register("sector_spread_zscore")
+def _guide_sector_spread(p: dict, approx: str | None) -> dict[str, Any]:
+    zc = p.get("z_col", "sector_spread_z20")
+    ez = p.get("entry_z", -2.0)
+    xz = p.get("exit_z", 0.0)
+    return {
+        "concept": "同業種内の相対価格スプレッドが統計的に割安（Z スコア）な銘柄を買い、平均回帰で利確。",
+        "entry_long": [f"{zc} ≤ {ez}", "セクター内ペア/スプレッドの割安"],
+        "signal_buy": f"Z ≤ {ez} **買い**",
+        "signal_sell": f"Z ≥ {xz} で利確",
+        "entry_short": ["なし（ロング）"],
+        "market": "同業種内相関が高い銘柄群。",
+    }
+
+
 @lru_cache(maxsize=1)
 def _catalog_index() -> dict[str, dict[str, Any]]:
     return {
