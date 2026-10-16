@@ -121,7 +121,7 @@ uv run signalforge paper diversified-run-all --refresh --workers 8
 ./scripts/run-diversified-paper-prime.sh   # 分散フォワード5戦略 · プライム（ログ: data/logs/diversified-paper-prime.log）
 ```
 
-分散フォワード既定10戦略（`DIVERSIFIED_PAPER_SIMULATIONS`）: 上記5 + `low_pbr_value_reversal`, `ichimoku_tk_cross`, `gap_fill_reversal`, `macd_cross`, `ema_pullback`
+分散フォワード7戦略（`diversified_specs.py`）: prime `bnf_ma25_kairi_reversion`, `bnf_multi_indicator_bounce`, `low_pbr_value_reversal`, `gap_fill_reversal`, `mean_reversion_short_term` · growth `kabutan_preset_rsi_oversold`, `ichimoku_tk_cross`
 
 実験だけ別口座にしたい場合は `config/experiments/backtest_plan.yaml` の `meta.backtest_capital`、または run 時の CLI / 環境変数を使います。
 
