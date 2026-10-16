@@ -1,0 +1,1301 @@
+{
+ "generated_at": "2026-10-16T06:09:26.526891+00:00",
+ "curation": {
+  "n_input": 133,
+  "n_visible": 68,
+  "hidden_untrusted": [
+   "am_high_breakout_volume",
+   "ch5_minority_sentiment",
+   "close_momentum",
+   "credit_balance_contrarian",
+   "ema9_21_scalp_5m",
+   "first_hour_momentum",
+   "harvest_kw_04ca29e522",
+   "harvest_kw_067a94121b",
+   "harvest_kw_0bd3e8aee2",
+   "harvest_kw_2a49f1bc02",
+   "harvest_kw_34095c23c5",
+   "harvest_kw_3b6ce6af3e",
+   "harvest_kw_3e890dd37d",
+   "harvest_kw_485fff7244",
+   "harvest_kw_4a8bfbbe61",
+   "harvest_kw_63c04d5463",
+   "harvest_kw_69c6f34e5b",
+   "harvest_kw_781e4b3fe5",
+   "harvest_kw_7999ad1776",
+   "harvest_kw_80c429e600",
+   "harvest_kw_96f9af238b",
+   "harvest_kw_MACD",
+   "harvest_kw_ORB",
+   "harvest_kw_RSI",
+   "harvest_kw_VWAP",
+   "harvest_kw__",
+   "harvest_kw_ab5cfb949d",
+   "harvest_kw_c88320ea98",
+   "harvest_kw_ee4b3de361",
+   "harvest_kw_ef2d15231b",
+   "harvest_kw_f2a0f90d48",
+   "index_arb_nikkei_etf",
+   "low_pbr_value_reversal",
+   "lunch_break_fade",
+   "minkabu_community_sentiment_rank",
+   "multi_strategy_ensemble",
+   "parabolic_sar_intraday",
+   "pivot_point_bounce",
+   "pm_high_breakout",
+   "prior_day_hl_break",
+   "professional_daytrader_session",
+   "relative_volume_filter",
+   "sns_sentiment_plus_ta",
+   "vwap_breakout_follow",
+   "vwap_mean_reversion_short",
+   "vwap_orderflow_itasha",
+   "vwap_pullback_long",
+   "x_keyword_material_screen",
+   "x_sentiment_event_factor",
+   "x_tweet_burst_filter",
+   "youtube_harvest_6vV8gjz982s",
+   "youtube_harvest_La-WIYNjgoY",
+   "youtube_harvest_WSZVfgH9GdI",
+   "youtube_harvest__9GKoinlUVE"
+  ],
+  "merged_duplicates": [
+   "kabutan_contrarian_short_hold",
+   "kabutan_preset_2",
+   "kabutan_preset_25_5",
+   "kabutan_preset_5",
+   "kabutan_preset_5_25",
+   "kabutan_preset_rsi14_20",
+   "kabutan_preset_rsi14_80",
+   "kabutan_theme_swing_earnings",
+   "macd_cross",
+   "minkabu_gc_25_75_preset",
+   "youtube_dow_theory_trend"
+  ]
+ },
+ "portfolio_params": {
+  "initial_capital": 3000000.0,
+  "max_positions": 5,
+  "position_pct": 0.2,
+  "entry_priority": "sector_turnover",
+  "min_turnover_jpy": 500000000.0,
+  "min_breadth_rank": 0.8,
+  "regime_filter": "none",
+  "oos_start": "2024-01-01"
+ },
+ "rows": [
+  {
+   "strategy_id": "bb_lower_rsi_oversold",
+   "style": "swing",
+   "expectancy_pct": 0.8724381804175,
+   "profit_factor": 1.3804196991310556,
+   "win_rate": 0.4444444444444444,
+   "total_trades": 21.0,
+   "max_drawdown_pct": -24.890496173527442,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 111.49721548868202,
+    "is_return_pct": 21.240998613867234,
+    "oos_return_pct": 74.44364357494788,
+    "max_drawdown_pct": -28.183085598813197,
+    "accepted_trades": 462
+   }
+  },
+  {
+   "strategy_id": "bnf_multi_indicator_bounce",
+   "style": "swing",
+   "expectancy_pct": 0.7077840859181074,
+   "profit_factor": 1.323237455656813,
+   "win_rate": 0.43478260869565216,
+   "total_trades": 30,
+   "max_drawdown_pct": -27.420620520831264,
+   "n_tickers": 3517,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 45.04201630582037,
+    "is_return_pct": 5.891068078458983,
+    "oos_return_pct": 36.97285232627263,
+    "max_drawdown_pct": -33.00584929564497,
+    "accepted_trades": 505
+   }
+  },
+  {
+   "strategy_id": "grid_trading_range",
+   "style": "swing",
+   "expectancy_pct": 0.5920569380770069,
+   "profit_factor": 1.2789606160390687,
+   "win_rate": 0.42857142857142855,
+   "total_trades": 39.0,
+   "max_drawdown_pct": -29.639221664385342,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 14.817247589160342,
+    "is_return_pct": -9.085301107593114,
+    "oos_return_pct": 26.291181720835823,
+    "max_drawdown_pct": -31.37949416887874,
+    "accepted_trades": 544
+   }
+  },
+  {
+   "strategy_id": "bnf_ma25_kairi_reversion",
+   "style": "swing",
+   "expectancy_pct": 0.5118623524549669,
+   "profit_factor": 1.2134692697044858,
+   "win_rate": 0.4230769230769231,
+   "total_trades": 67,
+   "max_drawdown_pct": -37.21480273276126,
+   "n_tickers": 3513,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 86.03405268553024,
+    "is_return_pct": -13.463072103323448,
+    "oos_return_pct": 114.97649293449767,
+    "max_drawdown_pct": -34.65838218509709,
+    "accepted_trades": 616
+   }
+  },
+  {
+   "strategy_id": "kabutan_preset_rsi_oversold",
+   "style": "swing",
+   "expectancy_pct": 0.5063775385501087,
+   "profit_factor": 1.2242766545547648,
+   "win_rate": 0.42857142857142855,
+   "total_trades": 14,
+   "max_drawdown_pct": -19.61154151247847,
+   "n_tickers": 3517,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 27.013780514203,
+    "is_return_pct": -3.468385857043943,
+    "oos_return_pct": 31.577392175484764,
+    "max_drawdown_pct": -31.335687256369027,
+    "accepted_trades": 496
+   }
+  },
+  {
+   "strategy_id": "minkabu_short_oversold_preset",
+   "style": "swing",
+   "expectancy_pct": 0.3984443097734478,
+   "profit_factor": 1.1918956589725853,
+   "win_rate": 0.4230769230769231,
+   "total_trades": 23.0,
+   "max_drawdown_pct": -23.250983081718672,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 55.239306406551435,
+    "is_return_pct": 32.135032579338144,
+    "oos_return_pct": 17.48535068725301,
+    "max_drawdown_pct": -23.325889141844915,
+    "accepted_trades": 544
+   }
+  },
+  {
+   "strategy_id": "stoch_rsi_cross",
+   "style": "swing",
+   "expectancy_pct": 0.39583305501988075,
+   "profit_factor": 1.1919533583706232,
+   "win_rate": 0.4230769230769231,
+   "total_trades": 23.0,
+   "max_drawdown_pct": -23.234096156237655,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 44.600035668243684,
+    "is_return_pct": 24.961412843671948,
+    "oos_return_pct": 15.715749668371505,
+    "max_drawdown_pct": -22.29691483573262,
+    "accepted_trades": 558
+   }
+  },
+  {
+   "strategy_id": "gap_up_continuation",
+   "style": "swing",
+   "expectancy_pct": 0.18614944075683812,
+   "profit_factor": 1.0724699517026277,
+   "win_rate": 0.391304347826087,
+   "total_trades": 59,
+   "max_drawdown_pct": -39.55738025629684,
+   "n_tickers": 3513,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 47.41303900734233,
+    "is_return_pct": 40.50395544191356,
+    "oos_return_pct": 4.917358763102686,
+    "max_drawdown_pct": -26.90554617313755,
+    "accepted_trades": 721
+   }
+  },
+  {
+   "strategy_id": "mean_reversion_short_term",
+   "style": "swing",
+   "expectancy_pct": 0.13822942137919536,
+   "profit_factor": 1.0698163022659073,
+   "win_rate": 0.40476190476190477,
+   "total_trades": 48.0,
+   "max_drawdown_pct": -30.53747275390216,
+   "n_tickers": 3518,
+   "aliases": [
+    "kabutan_contrarian_short_hold"
+   ],
+   "portfolio": {
+    "total_return_pct": 170.29429679995238,
+    "is_return_pct": 29.378022117393332,
+    "oos_return_pct": 108.9182477644436,
+    "max_drawdown_pct": -15.461662622221894,
+    "accepted_trades": 567
+   }
+  },
+  {
+   "strategy_id": "gap_fill_reversal",
+   "style": "swing",
+   "expectancy_pct": 0.0821727520813745,
+   "profit_factor": 1.0394237819016556,
+   "win_rate": 0.3968253968253968,
+   "total_trades": 123.0,
+   "max_drawdown_pct": -46.57183133698031,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 23.60850586902894,
+    "is_return_pct": -0.847744473321399,
+    "oos_return_pct": 24.665349479387277,
+    "max_drawdown_pct": -33.18227164924112,
+    "accepted_trades": 757
+   }
+  },
+  {
+   "strategy_id": "kabutan_ma_uptrend_low_kairi25",
+   "style": "swing",
+   "expectancy_pct": 0.019871930517918402,
+   "profit_factor": 1.0086518419999735,
+   "win_rate": 0.4,
+   "total_trades": 17,
+   "max_drawdown_pct": -23.094637514731215,
+   "n_tickers": 3505,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -5.741656772108472,
+    "is_return_pct": -29.070270613078343,
+    "oos_return_pct": 32.88975446912015,
+    "max_drawdown_pct": -47.52326780667451,
+    "accepted_trades": 579
+   }
+  },
+  {
+   "strategy_id": "kabutan_preset_",
+   "style": "swing",
+   "expectancy_pct": 0.011984122075153052,
+   "profit_factor": 1.0056447490087346,
+   "win_rate": 0.38095238095238093,
+   "total_trades": 40,
+   "max_drawdown_pct": -33.00137528182711,
+   "n_tickers": 3517,
+   "aliases": [
+    "kabutan_preset_2",
+    "kabutan_preset_25_5",
+    "kabutan_preset_5",
+    "kabutan_preset_5_25",
+    "kabutan_preset_rsi14_20",
+    "kabutan_preset_rsi14_80"
+   ],
+   "portfolio": {
+    "total_return_pct": 130.90106510890988,
+    "is_return_pct": -4.760028076942902,
+    "oos_return_pct": 142.44134101115793,
+    "max_drawdown_pct": -25.84177047138363,
+    "accepted_trades": 650
+   }
+  },
+  {
+   "strategy_id": "ichimoku_tk_cross",
+   "style": "swing",
+   "expectancy_pct": 0.005730250399920407,
+   "profit_factor": 1.0041728166334234,
+   "win_rate": 0.3888888888888889,
+   "total_trades": 39.0,
+   "max_drawdown_pct": -29.968512399822565,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 78.01429674762271,
+    "is_return_pct": 12.30453217591152,
+    "oos_return_pct": 58.51034085497526,
+    "max_drawdown_pct": -17.967440681537383,
+    "accepted_trades": 561
+   }
+  },
+  {
+   "strategy_id": "earnings_drift",
+   "style": "swing",
+   "expectancy_pct": 0.0,
+   "profit_factor": 0.0,
+   "win_rate": 0.0,
+   "total_trades": 0,
+   "max_drawdown_pct": 0.0,
+   "n_tickers": 3521,
+   "aliases": [
+    "kabutan_theme_swing_earnings"
+   ],
+   "portfolio": {
+    "total_return_pct": 0.0,
+    "is_return_pct": null,
+    "oos_return_pct": null,
+    "max_drawdown_pct": null,
+    "accepted_trades": 0
+   }
+  },
+  {
+   "strategy_id": "heikin_ashi_trend",
+   "style": "swing",
+   "expectancy_pct": -0.00157044016808607,
+   "profit_factor": 0.9990150403601683,
+   "win_rate": 0.387190005593884,
+   "total_trades": 136.0,
+   "max_drawdown_pct": -51.59893257703956,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 62.510575133382694,
+    "is_return_pct": 9.168948106146036,
+    "oos_return_pct": 48.86153796716262,
+    "max_drawdown_pct": -26.04340085404263,
+    "accepted_trades": 740
+   }
+  },
+  {
+   "strategy_id": "volume_breakout",
+   "style": "swing",
+   "expectancy_pct": -0.005085870543177292,
+   "profit_factor": 0.9979411667626578,
+   "win_rate": 0.3793103448275862,
+   "total_trades": 20.0,
+   "max_drawdown_pct": -24.496855177619956,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -1.7300065264533426,
+    "is_return_pct": -23.471763700042956,
+    "oos_return_pct": 28.410111384733217,
+    "max_drawdown_pct": -45.948466740610606,
+    "accepted_trades": 621
+   }
+  },
+  {
+   "strategy_id": "keltner_squeeze",
+   "style": "swing",
+   "expectancy_pct": -0.012286144667621164,
+   "profit_factor": 0.9933151434404209,
+   "win_rate": 0.38028169014084506,
+   "total_trades": 88,
+   "max_drawdown_pct": -43.42569773664117,
+   "n_tickers": 3517,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 48.66118732679272,
+    "is_return_pct": 13.097543906799626,
+    "oos_return_pct": 31.44510675607608,
+    "max_drawdown_pct": -26.81617464962075,
+    "accepted_trades": 663
+   }
+  },
+  {
+   "strategy_id": "macd_histogram_reversal",
+   "style": "swing",
+   "expectancy_pct": -0.014131328095397747,
+   "profit_factor": 0.9927169396786059,
+   "win_rate": 0.3898305084745763,
+   "total_trades": 58.0,
+   "max_drawdown_pct": -35.230225584405346,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 10.516228740862598,
+    "is_return_pct": 10.489334553206175,
+    "oos_return_pct": 0.8360194438889801,
+    "max_drawdown_pct": -25.024717418953546,
+    "accepted_trades": 546
+   }
+  },
+  {
+   "strategy_id": "cci_zero_cross",
+   "style": "swing",
+   "expectancy_pct": -0.02072973261997823,
+   "profit_factor": 0.9878681114936336,
+   "win_rate": 0.3880597014925373,
+   "total_trades": 64.0,
+   "max_drawdown_pct": -37.66854039740082,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 139.8018714180909,
+    "is_return_pct": 97.25042984246413,
+    "oos_return_pct": 21.572293459441827,
+    "max_drawdown_pct": -22.40136522163192,
+    "accepted_trades": 612
+   }
+  },
+  {
+   "strategy_id": "dca_trend_add",
+   "style": "swing",
+   "expectancy_pct": -0.025553470968154246,
+   "profit_factor": 0.9860162956583624,
+   "win_rate": 0.38636363636363635,
+   "total_trades": 79.0,
+   "max_drawdown_pct": -41.07826179886514,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 72.46799198898279,
+    "is_return_pct": -2.196993266473646,
+    "oos_return_pct": 76.34221865886836,
+    "max_drawdown_pct": -23.941702152472388,
+    "accepted_trades": 686
+   }
+  },
+  {
+   "strategy_id": "fib_pullback_382_618",
+   "style": "swing",
+   "expectancy_pct": -0.08004463632010794,
+   "profit_factor": 0.9620887479373716,
+   "win_rate": 0.38181818181818183,
+   "total_trades": 55.0,
+   "max_drawdown_pct": -36.73032567460605,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 101.63233782836292,
+    "is_return_pct": -4.80867349300631,
+    "oos_return_pct": 111.81797252667675,
+    "max_drawdown_pct": -25.592843023995794,
+    "accepted_trades": 694
+   }
+  },
+  {
+   "strategy_id": "trailing_atr_chandelier",
+   "style": "swing",
+   "expectancy_pct": -0.08660977913147139,
+   "profit_factor": 0.9587541793901839,
+   "win_rate": 0.37606837606837606,
+   "total_trades": 120.0,
+   "max_drawdown_pct": -52.146150808850905,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 71.92816370040309,
+    "is_return_pct": 41.78925789513408,
+    "oos_return_pct": 21.256127757971257,
+    "max_drawdown_pct": -20.06671081649921,
+    "accepted_trades": 669
+   }
+  },
+  {
+   "strategy_id": "ichimoku_kumo_break",
+   "style": "swing",
+   "expectancy_pct": -0.08661481895231168,
+   "profit_factor": 0.9564816114124547,
+   "win_rate": 0.375,
+   "total_trades": 33.0,
+   "max_drawdown_pct": -29.433292330661743,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 47.01203557476234,
+    "is_return_pct": -15.963400399952166,
+    "oos_return_pct": 74.93810586629041,
+    "max_drawdown_pct": -31.040084020318805,
+    "accepted_trades": 665
+   }
+  },
+  {
+   "strategy_id": "rsi_dip_200ma",
+   "style": "swing",
+   "expectancy_pct": -0.09039387502702236,
+   "profit_factor": 0.9564907231560077,
+   "win_rate": 0.38461538461538464,
+   "total_trades": 20,
+   "max_drawdown_pct": -21.936257133877515,
+   "n_tickers": 3509,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 121.21053579512098,
+    "is_return_pct": 30.647280338413974,
+    "oos_return_pct": 69.31889835144081,
+    "max_drawdown_pct": -18.10943890598168,
+    "accepted_trades": 612
+   }
+  },
+  {
+   "strategy_id": "supertrend_follow",
+   "style": "swing",
+   "expectancy_pct": -0.09391591561918014,
+   "profit_factor": 0.9557437629344637,
+   "win_rate": 0.37606837606837606,
+   "total_trades": 115.0,
+   "max_drawdown_pct": -51.4088781351703,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 65.40419400939501,
+    "is_return_pct": 16.293196500752206,
+    "oos_return_pct": 42.23032729891909,
+    "max_drawdown_pct": -23.908779447310714,
+    "accepted_trades": 664
+   }
+  },
+  {
+   "strategy_id": "topix100_momentum",
+   "style": "swing",
+   "expectancy_pct": -0.09490123618628304,
+   "profit_factor": 0.9529110532651195,
+   "win_rate": 0.375886524822695,
+   "total_trades": 127.0,
+   "max_drawdown_pct": -53.17770217268187,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -19.06143195404988,
+    "is_return_pct": -27.617917826574324,
+    "oos_return_pct": 11.821276226930433,
+    "max_drawdown_pct": -39.361284870986054,
+    "accepted_trades": 718
+   }
+  },
+  {
+   "strategy_id": "bnf_regime_trend_vs_fade",
+   "style": "swing",
+   "expectancy_pct": -0.0964892587261629,
+   "profit_factor": 0.9569135666227367,
+   "win_rate": 0.3759432624113475,
+   "total_trades": 107.0,
+   "max_drawdown_pct": -50.08716215224176,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 86.94720654097081,
+    "is_return_pct": 24.57853633981262,
+    "oos_return_pct": 50.06373652603797,
+    "max_drawdown_pct": -30.634510588892162,
+    "accepted_trades": 618
+   }
+  },
+  {
+   "strategy_id": "ema_pullback",
+   "style": "swing",
+   "expectancy_pct": -0.10377340678973307,
+   "profit_factor": 0.946963990992172,
+   "win_rate": 0.38181818181818183,
+   "total_trades": 37,
+   "max_drawdown_pct": -30.007269927330654,
+   "n_tickers": 3511,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 55.931730216731744,
+    "is_return_pct": 0.6546985840812924,
+    "oos_return_pct": 54.91748761879713,
+    "max_drawdown_pct": -24.269004004374228,
+    "accepted_trades": 657
+   }
+  },
+  {
+   "strategy_id": "ichimoku_macd_rsi",
+   "style": "swing",
+   "expectancy_pct": -0.10408393471084681,
+   "profit_factor": 0.9456818165923595,
+   "win_rate": 0.3793103448275862,
+   "total_trades": 21.0,
+   "max_drawdown_pct": -22.712219089522392,
+   "n_tickers": 3514,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 2.6387871575117794,
+    "is_return_pct": 1.9778118097538044,
+    "oos_return_pct": 1.4449701559925643,
+    "max_drawdown_pct": -33.6192643213732,
+    "accepted_trades": 578
+   }
+  },
+  {
+   "strategy_id": "ma_200_trend_filter",
+   "style": "swing",
+   "expectancy_pct": -0.10661690673038537,
+   "profit_factor": 0.9473343117351246,
+   "win_rate": 0.3783783783783784,
+   "total_trades": 33,
+   "max_drawdown_pct": -28.261543927752285,
+   "n_tickers": 3515,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 20.936234888326876,
+    "is_return_pct": -9.54769251409634,
+    "oos_return_pct": 34.76015108618575,
+    "max_drawdown_pct": -31.165277804623827,
+    "accepted_trades": 568
+   }
+  },
+  {
+   "strategy_id": "perfect_order_pullback",
+   "style": "swing",
+   "expectancy_pct": -0.10793968783917904,
+   "profit_factor": 0.9498019354098639,
+   "win_rate": 0.38461538461538464,
+   "total_trades": 28.0,
+   "max_drawdown_pct": -26.070118772895082,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -11.154564951768563,
+    "is_return_pct": -19.9880877884691,
+    "oos_return_pct": 11.040259622025971,
+    "max_drawdown_pct": -43.23664383126646,
+    "accepted_trades": 662
+   }
+  },
+  {
+   "strategy_id": "minkabu_custom_technical_screen",
+   "style": "swing",
+   "expectancy_pct": -0.1088329166779214,
+   "profit_factor": 0.9430977353488716,
+   "win_rate": 0.3783783783783784,
+   "total_trades": 28.0,
+   "max_drawdown_pct": -25.87686298412881,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 33.62701625199098,
+    "is_return_pct": 18.684409074471485,
+    "oos_return_pct": 12.59020228018608,
+    "max_drawdown_pct": -24.044006119894835,
+    "accepted_trades": 583
+   }
+  },
+  {
+   "strategy_id": "adx_trend_ride",
+   "style": "swing",
+   "expectancy_pct": -0.11837474502746873,
+   "profit_factor": 0.9480323237549924,
+   "win_rate": 0.375,
+   "total_trades": 95.0,
+   "max_drawdown_pct": -48.154301708722556,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 0.4807081826585069,
+    "is_return_pct": -6.369622740653524,
+    "oos_return_pct": 7.31635514437512,
+    "max_drawdown_pct": -42.878919861595065,
+    "accepted_trades": 550
+   }
+  },
+  {
+   "strategy_id": "kabutan_preset_macd_buy",
+   "style": "swing",
+   "expectancy_pct": -0.1184961079039692,
+   "profit_factor": 0.9384212083928699,
+   "win_rate": 0.375,
+   "total_trades": 34.0,
+   "max_drawdown_pct": -28.481098476964434,
+   "n_tickers": 3516,
+   "aliases": [
+    "macd_cross"
+   ],
+   "portfolio": {
+    "total_return_pct": 58.27673655904542,
+    "is_return_pct": 31.749527188338035,
+    "oos_return_pct": 20.134576523213067,
+    "max_drawdown_pct": -29.35791576807505,
+    "accepted_trades": 584
+   }
+  },
+  {
+   "strategy_id": "relative_strength_index_rs",
+   "style": "swing",
+   "expectancy_pct": -0.1189959446798518,
+   "profit_factor": 0.9437008756317748,
+   "win_rate": 0.37373737373737376,
+   "total_trades": 99.0,
+   "max_drawdown_pct": -49.2896900722726,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 41.53737341095138,
+    "is_return_pct": 4.42490819703707,
+    "oos_return_pct": 35.53985907642605,
+    "max_drawdown_pct": -37.340179237071794,
+    "accepted_trades": 570
+   }
+  },
+  {
+   "strategy_id": "rsi_momentum_60",
+   "style": "swing",
+   "expectancy_pct": -0.1200225323006965,
+   "profit_factor": 0.9470165078121795,
+   "win_rate": 0.37349397590361444,
+   "total_trades": 84.0,
+   "max_drawdown_pct": -46.57012529750706,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 10.122305494345806,
+    "is_return_pct": -2.414917662915872,
+    "oos_return_pct": 12.847479201743983,
+    "max_drawdown_pct": -38.56503838850757,
+    "accepted_trades": 574
+   }
+  },
+  {
+   "strategy_id": "sector_leader_laggard",
+   "style": "swing",
+   "expectancy_pct": -0.13171394756659446,
+   "profit_factor": 0.9434885778906409,
+   "win_rate": 0.3705300127713921,
+   "total_trades": 92.0,
+   "max_drawdown_pct": -48.98756266727605,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 21.336134937493554,
+    "is_return_pct": 5.92511898728274,
+    "oos_return_pct": 18.77805646450843,
+    "max_drawdown_pct": -28.63132819169586,
+    "accepted_trades": 699
+   }
+  },
+  {
+   "strategy_id": "ichimoku_kijun_pullback",
+   "style": "swing",
+   "expectancy_pct": -0.13740379097879282,
+   "profit_factor": 0.9363647080251054,
+   "win_rate": 0.3783783783783784,
+   "total_trades": 33.0,
+   "max_drawdown_pct": -29.631262113092326,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 37.81702693840716,
+    "is_return_pct": 1.4883219232012523,
+    "oos_return_pct": 37.04234010833068,
+    "max_drawdown_pct": -21.788345420234357,
+    "accepted_trades": 627
+   }
+  },
+  {
+   "strategy_id": "rsi_reversal",
+   "style": "swing",
+   "expectancy_pct": -0.13912953240809295,
+   "profit_factor": 0.9354836727818487,
+   "win_rate": 0.38461538461538464,
+   "total_trades": 12,
+   "max_drawdown_pct": -17.672872397757576,
+   "n_tickers": 3503,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 49.44565702945047,
+    "is_return_pct": 5.01021496255889,
+    "oos_return_pct": 42.31535197098202,
+    "max_drawdown_pct": -33.30942222979374,
+    "accepted_trades": 599
+   }
+  },
+  {
+   "strategy_id": "momentum_monthly_rebalance",
+   "style": "swing",
+   "expectancy_pct": -0.1451431182063085,
+   "profit_factor": 0.9333137630093933,
+   "win_rate": 0.3728813559322034,
+   "total_trades": 118.0,
+   "max_drawdown_pct": -52.87155591846554,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 7.198867843495238,
+    "is_return_pct": -8.38695679771515,
+    "oos_return_pct": 18.198787926036665,
+    "max_drawdown_pct": -43.81107814581217,
+    "accepted_trades": 761
+   }
+  },
+  {
+   "strategy_id": "bnf_sector_leading_swing",
+   "style": "swing",
+   "expectancy_pct": -0.14914450491591336,
+   "profit_factor": 0.9370149300858505,
+   "win_rate": 0.3684210526315789,
+   "total_trades": 82,
+   "max_drawdown_pct": -47.774472804044905,
+   "n_tickers": 3517,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 5.811453915493647,
+    "is_return_pct": 26.69799748210755,
+    "oos_return_pct": -13.401982510048605,
+    "max_drawdown_pct": -45.280909827031856,
+    "accepted_trades": 706
+   }
+  },
+  {
+   "strategy_id": "kabutan_preset_rsi_overbought",
+   "style": "swing",
+   "expectancy_pct": -0.15572165929670442,
+   "profit_factor": 0.9287320063294264,
+   "win_rate": 0.37037037037037035,
+   "total_trades": 23.0,
+   "max_drawdown_pct": -27.08255313373755,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -47.119736209822584,
+    "is_return_pct": -41.78792663220433,
+    "oos_return_pct": -9.159284782609989,
+    "max_drawdown_pct": -60.93571569266396,
+    "accepted_trades": 547
+   }
+  },
+  {
+   "strategy_id": "bb_upper_rsi_exit",
+   "style": "swing",
+   "expectancy_pct": -0.16461216273529838,
+   "profit_factor": 0.9251599600273989,
+   "win_rate": 0.3673469387755102,
+   "total_trades": 33.0,
+   "max_drawdown_pct": -33.05161841345425,
+   "n_tickers": 3514,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -58.41494706698847,
+    "is_return_pct": -46.3348858492477,
+    "oos_return_pct": -22.510082031701863,
+    "max_drawdown_pct": -65.11032342650222,
+    "accepted_trades": 529
+   }
+  },
+  {
+   "strategy_id": "trend_reentry",
+   "style": "swing",
+   "expectancy_pct": -0.1717603332493774,
+   "profit_factor": 0.914859636552062,
+   "win_rate": 0.36666666666666664,
+   "total_trades": 26.0,
+   "max_drawdown_pct": -26.440685517158233,
+   "n_tickers": 3510,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 27.965787967366683,
+    "is_return_pct": -15.975643734908228,
+    "oos_return_pct": 53.202664774685005,
+    "max_drawdown_pct": -37.30081943790682,
+    "accepted_trades": 475
+   }
+  },
+  {
+   "strategy_id": "weekly_swing_multiframe",
+   "style": "swing",
+   "expectancy_pct": -0.17998336612761906,
+   "profit_factor": 0.9059810703334169,
+   "win_rate": 0.375,
+   "total_trades": 15.0,
+   "max_drawdown_pct": -20.669840168194746,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -4.301229758386982,
+    "is_return_pct": -7.582955300679495,
+    "oos_return_pct": 3.5509959802000113,
+    "max_drawdown_pct": -27.52707044632262,
+    "accepted_trades": 415
+   }
+  },
+  {
+   "strategy_id": "youtube_elliott_multiframe",
+   "style": "swing",
+   "expectancy_pct": -0.17998515166456522,
+   "profit_factor": 0.9059810703334169,
+   "win_rate": 0.375,
+   "total_trades": 15.0,
+   "max_drawdown_pct": -20.677128090790767,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -4.3012335683880405,
+    "is_return_pct": -7.582953304356588,
+    "oos_return_pct": 3.550989620752776,
+    "max_drawdown_pct": -27.527076581722998,
+    "accepted_trades": 415
+   }
+  },
+  {
+   "strategy_id": "cup_and_handle",
+   "style": "swing",
+   "expectancy_pct": -0.1851752309991508,
+   "profit_factor": 0.9075668498650551,
+   "win_rate": 0.3684210526315789,
+   "total_trades": 37.0,
+   "max_drawdown_pct": -30.84574863237636,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 8.565836823079277,
+    "is_return_pct": -32.84979192829728,
+    "oos_return_pct": 61.6760989141732,
+    "max_drawdown_pct": -41.066438415577665,
+    "accepted_trades": 521
+   }
+  },
+  {
+   "strategy_id": "ma_golden_cross",
+   "style": "swing",
+   "expectancy_pct": -0.1887241619723773,
+   "profit_factor": 0.9050101791422037,
+   "win_rate": 0.37037037037037035,
+   "total_trades": 28.0,
+   "max_drawdown_pct": -26.872371153663558,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 2.4078859221546844,
+    "is_return_pct": -5.1297605845398,
+    "oos_return_pct": 7.94521712302767,
+    "max_drawdown_pct": -31.92555106391064,
+    "accepted_trades": 549
+   }
+  },
+  {
+   "strategy_id": "ichimoku_sanyaku_koten",
+   "style": "swing",
+   "expectancy_pct": -0.1923837596979828,
+   "profit_factor": 0.9153144627425586,
+   "win_rate": 0.36585365853658536,
+   "total_trades": 68.0,
+   "max_drawdown_pct": -42.42967062552199,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -0.873203550743129,
+    "is_return_pct": -5.9549669515529535,
+    "oos_return_pct": 5.403542575387221,
+    "max_drawdown_pct": -25.868783964528753,
+    "accepted_trades": 600
+   }
+  },
+  {
+   "strategy_id": "kabutan_core_satellite_credit_swing",
+   "style": "swing",
+   "expectancy_pct": -0.19674721758512673,
+   "profit_factor": 0.8997138034493448,
+   "win_rate": 0.3684210526315789,
+   "total_trades": 14,
+   "max_drawdown_pct": -19.648523683893597,
+   "n_tickers": 3517,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -41.8981499653824,
+    "is_return_pct": -27.29974357828403,
+    "oos_return_pct": -20.080268083810672,
+    "max_drawdown_pct": -52.520887379061044,
+    "accepted_trades": 444
+   }
+  },
+  {
+   "strategy_id": "opening_gap_daytrade",
+   "style": "daytrade",
+   "expectancy_pct": -0.2075653905514021,
+   "profit_factor": 0.29594293355469625,
+   "win_rate": 0.3333333333333333,
+   "total_trades": 4,
+   "max_drawdown_pct": -1.4141468081890398,
+   "n_tickers": 3195,
+   "aliases": []
+  },
+  {
+   "strategy_id": "vcp_minervini",
+   "style": "swing",
+   "expectancy_pct": -0.21272885089178886,
+   "profit_factor": 0.8944371662874671,
+   "win_rate": 0.36666666666666664,
+   "total_trades": 43.0,
+   "max_drawdown_pct": -33.5758193933369,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 12.172679760546146,
+    "is_return_pct": -26.257070736303668,
+    "oos_return_pct": 52.113132581741326,
+    "max_drawdown_pct": -42.59521134821051,
+    "accepted_trades": 508
+   }
+  },
+  {
+   "strategy_id": "orb",
+   "style": "daytrade",
+   "expectancy_pct": -0.21567511786818422,
+   "profit_factor": 0.28164241367137,
+   "win_rate": 0.3023255813953488,
+   "total_trades": 72.0,
+   "max_drawdown_pct": -14.410487555945645,
+   "n_tickers": 3492,
+   "aliases": []
+  },
+  {
+   "strategy_id": "vwap_reclaim",
+   "style": "daytrade",
+   "expectancy_pct": -0.2157781969473619,
+   "profit_factor": 0.3116719190914319,
+   "win_rate": 0.3076923076923077,
+   "total_trades": 28.0,
+   "max_drawdown_pct": -6.643115470937827,
+   "n_tickers": 3500,
+   "aliases": []
+  },
+  {
+   "strategy_id": "box_range_breakout",
+   "style": "swing",
+   "expectancy_pct": -0.2176297316495715,
+   "profit_factor": 0.9035616384637128,
+   "win_rate": 0.3611111111111111,
+   "total_trades": 76.5,
+   "max_drawdown_pct": -46.28962240765689,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 16.706625486911108,
+    "is_return_pct": -17.58980428229092,
+    "oos_return_pct": 41.61673136499067,
+    "max_drawdown_pct": -40.515978620162166,
+    "accepted_trades": 602
+   }
+  },
+  {
+   "strategy_id": "pairs_trading_sector",
+   "style": "swing",
+   "expectancy_pct": -0.21917275850504023,
+   "profit_factor": 0.9027926794863592,
+   "win_rate": 0.3686893391344644,
+   "total_trades": 161.0,
+   "max_drawdown_pct": -66.74378691426683,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -17.593227303795146,
+    "is_return_pct": -26.305038625316747,
+    "oos_return_pct": 11.821447706890797,
+    "max_drawdown_pct": -40.709912819687354,
+    "accepted_trades": 674
+   }
+  },
+  {
+   "strategy_id": "ma_50_200_golden_cross",
+   "style": "swing",
+   "expectancy_pct": -0.22168666695388023,
+   "profit_factor": 0.8919243225563211,
+   "win_rate": 0.4,
+   "total_trades": 5.0,
+   "max_drawdown_pct": -10.607923544343919,
+   "n_tickers": 3508,
+   "aliases": [
+    "youtube_dow_theory_trend"
+   ],
+   "portfolio": {
+    "total_return_pct": -47.95529459419659,
+    "is_return_pct": -30.873659049637723,
+    "oos_return_pct": -24.71074746575217,
+    "max_drawdown_pct": -58.93717157198359,
+    "accepted_trades": 403
+   }
+  },
+  {
+   "strategy_id": "vwap_ema",
+   "style": "daytrade",
+   "expectancy_pct": -0.22777052586070476,
+   "profit_factor": 0.19291278564553505,
+   "win_rate": 0.2631578947368421,
+   "total_trades": 9,
+   "max_drawdown_pct": -2.4719983815550495,
+   "n_tickers": 3261,
+   "aliases": []
+  },
+  {
+   "strategy_id": "ma_25_75_golden_cross",
+   "style": "swing",
+   "expectancy_pct": -0.23897171702635617,
+   "profit_factor": 0.8795795110638092,
+   "win_rate": 0.375,
+   "total_trades": 11.0,
+   "max_drawdown_pct": -17.64871226877783,
+   "n_tickers": 3516,
+   "aliases": [
+    "minkabu_gc_25_75_preset"
+   ],
+   "portfolio": {
+    "total_return_pct": -41.7248487213042,
+    "is_return_pct": -39.61819441544202,
+    "oos_return_pct": -3.488889219968805,
+    "max_drawdown_pct": -51.21511041522737,
+    "accepted_trades": 454
+   }
+  },
+  {
+   "strategy_id": "donchian_breakout",
+   "style": "swing",
+   "expectancy_pct": -0.256579800688323,
+   "profit_factor": 0.8849543640535402,
+   "win_rate": 0.3548387096774194,
+   "total_trades": 55.0,
+   "max_drawdown_pct": -41.33645367361402,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 16.429162836460918,
+    "is_return_pct": -7.840426431926717,
+    "oos_return_pct": 26.334311595377535,
+    "max_drawdown_pct": -35.865813265478366,
+    "accepted_trades": 567
+   }
+  },
+  {
+   "strategy_id": "youtube_new_high_box_break",
+   "style": "swing",
+   "expectancy_pct": -0.2574903483613615,
+   "profit_factor": 0.8839003243513162,
+   "win_rate": 0.35555555555555557,
+   "total_trades": 55.0,
+   "max_drawdown_pct": -41.19820026776392,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 12.696314580615908,
+    "is_return_pct": -6.035174373066643,
+    "oos_return_pct": 19.934575335723757,
+    "max_drawdown_pct": -38.014985914076746,
+    "accepted_trades": 567
+   }
+  },
+  {
+   "strategy_id": "triangle_breakout",
+   "style": "swing",
+   "expectancy_pct": -0.2638431869834566,
+   "profit_factor": 0.8786441071490222,
+   "win_rate": 0.3546345447121274,
+   "total_trades": 63.0,
+   "max_drawdown_pct": -43.64856237761134,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 32.59522187666506,
+    "is_return_pct": 25.120140973610773,
+    "oos_return_pct": 5.974322634939222,
+    "max_drawdown_pct": -39.851292259969185,
+    "accepted_trades": 582
+   }
+  },
+  {
+   "strategy_id": "bb_squeeze",
+   "style": "swing",
+   "expectancy_pct": -0.276611696064849,
+   "profit_factor": 0.8575249212822178,
+   "win_rate": 0.35294117647058826,
+   "total_trades": 37.0,
+   "max_drawdown_pct": -30.578922426067237,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": 6.944445957757894,
+    "is_return_pct": -3.1599500705983052,
+    "oos_return_pct": 10.434108652073725,
+    "max_drawdown_pct": -29.859574785074862,
+    "accepted_trades": 649
+   }
+  },
+  {
+   "strategy_id": "kabutan_supply_ma_20_60_swing",
+   "style": "swing",
+   "expectancy_pct": -0.28542159997151384,
+   "profit_factor": 0.8627190594054276,
+   "win_rate": 0.36363636363636365,
+   "total_trades": 11,
+   "max_drawdown_pct": -17.3811766338743,
+   "n_tickers": 3515,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -19.046705239741758,
+    "is_return_pct": -25.072739899539254,
+    "oos_return_pct": 8.042513034265397,
+    "max_drawdown_pct": -36.44139991497428,
+    "accepted_trades": 455
+   }
+  },
+  {
+   "strategy_id": "double_bottom_break",
+   "style": "swing",
+   "expectancy_pct": -0.29543491991385806,
+   "profit_factor": 0.870369888392202,
+   "win_rate": 0.35294117647058826,
+   "total_trades": 39.0,
+   "max_drawdown_pct": -35.15881355069011,
+   "n_tickers": 3516,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -10.940502037473044,
+    "is_return_pct": -15.99762931289408,
+    "oos_return_pct": 6.020219708153252,
+    "max_drawdown_pct": -44.966759409258,
+    "accepted_trades": 562
+   }
+  },
+  {
+   "strategy_id": "kabutan_shinchu_sanbon_inverted",
+   "style": "swing",
+   "expectancy_pct": -0.49673386930329794,
+   "profit_factor": 0.7764035644437365,
+   "win_rate": 0.34782608695652173,
+   "total_trades": 109.0,
+   "max_drawdown_pct": -62.509723510690534,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -67.36620937264031,
+    "is_return_pct": -41.27278218546853,
+    "oos_return_pct": -44.43157390765271,
+    "max_drawdown_pct": -70.72758683054596,
+    "accepted_trades": 740
+   }
+  },
+  {
+   "strategy_id": "head_shoulders_short",
+   "style": "swing",
+   "expectancy_pct": -0.6998869558545118,
+   "profit_factor": 0.7023002528926207,
+   "win_rate": 0.3333333333333333,
+   "total_trades": 15.0,
+   "max_drawdown_pct": -25.938682951675986,
+   "n_tickers": 3518,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -62.22200506350843,
+    "is_return_pct": -46.99614100522459,
+    "oos_return_pct": -28.725953821182436,
+    "max_drawdown_pct": -65.91802630617559,
+    "accepted_trades": 449
+   }
+  },
+  {
+   "strategy_id": "ma_death_cross",
+   "style": "swing",
+   "expectancy_pct": -0.8870982163482671,
+   "profit_factor": 0.6497313746234835,
+   "win_rate": 0.3333333333333333,
+   "total_trades": 5.0,
+   "max_drawdown_pct": -13.018178025420118,
+   "n_tickers": 3512,
+   "aliases": [],
+   "portfolio": {
+    "total_return_pct": -25.804664911910457,
+    "is_return_pct": -8.438109246654014,
+    "oos_return_pct": -18.967012937772722,
+    "max_drawdown_pct": -35.10936686443215,
+    "accepted_trades": 313
+   }
+  }
+ ]
+}

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import os
+from functools import lru_cache
 from typing import Any
 
 import pandas as pd
 
 from signalforge.backtest.costs import load_cost_model
 from signalforge.backtest.engine import BacktestEngine
-from signalforge.config import load_style_config, market_context, resolve_ticker
+from signalforge.config import load_implementation_map, load_style_config, market_context, resolve_ticker
 from signalforge.data.correlations import load_benchmark_pair
 from signalforge.data.cache import ParquetCache
 from signalforge.data.fetcher import MarketDataFetcher
@@ -34,6 +35,25 @@ def resolve_data_source(style: str, cfg: dict[str, Any]) -> str:
     return "yfinance"
 
 
+@lru_cache(maxsize=1)
+def _strategy_exit_map() -> dict[str, dict[str, Any]]:
+    impl = load_implementation_map().get("strategies") or {}
+    return {sid: dict(spec["exit"]) for sid, spec in impl.items() if isinstance(spec, dict) and spec.get("exit")}
+
+
+def _apply_strategy_exit(cfg: dict[str, Any], strategy_name: str | None) -> None:
+    """Per-strategy exit (implementation_map `exit:`) over style defaults; cfg_override still wins."""
+    exit_rules = _strategy_exit_map().get(str(strategy_name or ""))
+    if not exit_rules:
+        return
+    rules = dict(cfg.get("rules") or {})
+    rules["exit"] = {**(rules.get("exit") or {}), **{k: v for k, v in exit_rules.items() if k != "max_hold_bars"}}
+    cfg["rules"] = rules
+    if "max_hold_bars" in exit_rules:
+        rules["exit"]["max_hold_bars"] = int(exit_rules["max_hold_bars"])
+        cfg["backtest"] = {**(cfg.get("backtest") or {}), "max_hold_bars": int(exit_rules["max_hold_bars"])}
+
+
 def run_backtest_pipeline(
     style: str,
     strategy_name: str | None = None,
@@ -47,6 +67,8 @@ def run_backtest_pipeline(
     prepared_bundle: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     cfg = load_style_config(style)
+    strategy_name = strategy_name or (cfg_override or {}).get("strategy") or cfg.get("strategy", "ema_pullback")
+    _apply_strategy_exit(cfg, strategy_name)
     if cfg_override:
         for key, value in cfg_override.items():
             if key == "rules" and isinstance(value, dict):
@@ -68,7 +90,6 @@ def run_backtest_pipeline(
             else:
                 cfg[key] = value
 
-    strategy_name = strategy_name or cfg.get("strategy", "ema_pullback")
     mc = market_context(cfg)
     ticker = resolve_ticker(cfg, cfg_override)
     corr = list(mc.get("correlation_tickers", []))

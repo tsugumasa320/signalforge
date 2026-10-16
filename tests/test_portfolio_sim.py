@@ -67,3 +67,64 @@ def test_liquidity_prefers_higher_score_on_same_day(monkeypatch):
     )
     assert liq["accepted_trades"] == 1
     assert liq["final_equity"] > fc["final_equity"]
+
+
+def test_turnover_priority_and_floor():
+    trades = pd.DataFrame(
+        [
+            {**_trade("THIN", "2020-01-01", "2020-02-01", 30.0, "a"), "turnover_jpy": 1e7},
+            {**_trade("MID", "2020-01-01", "2020-02-01", 5.0, "b"), "turnover_jpy": 6e8},
+            {**_trade("BIG", "2020-01-01", "2020-02-01", 10.0, "c"), "turnover_jpy": 5e9},
+        ]
+    )
+    out = simulate_diversified_portfolio(
+        trades,
+        initial_capital=1_000_000,
+        max_positions=1,
+        position_pct=1.0,
+        entry_priority="sector_turnover",
+        min_turnover_jpy=5e8,
+    )
+    assert out["skipped_turnover"] == 1
+    assert out["accepted_trades"] == 1
+    assert round(out["total_return_pct"], 6) == 10.0
+
+
+def test_breadth_filter_keeps_only_crowded_days():
+    from signalforge.portfolio.entry_features import attach_breadth
+
+    rows = []
+    days = pd.bdate_range("2020-01-01", periods=80)
+    for i, d in enumerate(days):
+        n = 8 if i == 79 else 1
+        for k in range(n):
+            rows.append(_trade(f"T{k}", str(d.date()), str((d + pd.Timedelta(days=3)).date()), 1.0, f"s{k}"))
+    pool = attach_breadth(pd.DataFrame(rows), window=250, min_history=60)
+    last = pool[pd.to_datetime(pool["entry_time"]) == days[-1]]
+    assert (last["breadth_rank"] == 1.0).all()
+    out = simulate_diversified_portfolio(
+        pool,
+        initial_capital=1_000_000,
+        max_positions=5,
+        position_pct=0.2,
+        entry_priority="sector_random",
+        min_breadth_rank=0.8,
+    )
+    assert out["accepted_trades"] == 5
+    assert out["skipped_breadth"] == len(pool) - 8
+
+
+def test_paper_book_upgrades_legacy_rules(tmp_path, monkeypatch):
+    import json
+
+    from signalforge.lab.portfolio_sim import DEFAULT_ENTRY_RULES
+    from signalforge.paper import diversified as pd_mod
+
+    monkeypatch.setattr(pd_mod, "data_dir", lambda: tmp_path)
+    path = pd_mod.diversified_book_path("swing", "x")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"style": "swing", "strategy": "x", "entry_priority": "sector_liquidity"}))
+    book = pd_mod.DiversifiedPaperBook.load("swing", "x")
+    assert book is not None
+    assert book.entry_rules() == DEFAULT_ENTRY_RULES
+    assert book.rules_version == pd_mod.ENTRY_RULES_VERSION

@@ -63,22 +63,38 @@ def main() -> None:
 @main.command()
 @click.option("--ticker", default=None, help="Single ticker (default: 7203.T)")
 @click.option("--universe", default=None, help="Universe yaml name (e.g. japan_liquid)")
+@click.option("--cohort", default=None, help="Compare preset id (e.g. tse_all, prime) — ETF 除外")
 @click.option("--timeframe", default="1d", type=click.Choice(["1d", "1h", "5m", "15m"]))
 @click.option("--source", default="auto", type=click.Choice(["auto", "yfinance", "alpaca"]))
 @click.option("--refresh", is_flag=True)
 @click.option("--with-correlations", is_flag=True, help="Also fetch 1321.T / 1570.T")
+@click.option("--workers", default=1, show_default=True, type=int, help="並列取得数（--cohort 向け）")
+@click.option("--paper-books", is_flag=True, help="保存済み分散ペーパー口座の銘柄（和集合）")
 def fetch(
     ticker: str | None,
     universe: str | None,
+    cohort: str | None,
     timeframe: str,
     source: str,
     refresh: bool,
     with_correlations: bool,
+    workers: int,
+    paper_books: bool,
 ) -> None:
     """Fetch and cache market data (Japan: yfinance *.T)."""
     import os
 
-    if universe:
+    if paper_books:
+        from signalforge.paper.diversified import list_diversified_paper_books
+
+        tickers = sorted({t for b in list_diversified_paper_books() for t in (b.tickers or [])})
+        if not tickers:
+            raise click.ClickException("分散ペーパー口座がありません。")
+    elif cohort:
+        from signalforge.paper.diversified import resolve_universe_tickers
+
+        tickers = resolve_universe_tickers(cohort, 0)
+    elif universe:
         tickers = list(load_universe(universe).get("tickers", []))
     else:
         default = load_market_config("japan").get("default_ticker", "7203.T")
@@ -91,9 +107,32 @@ def fetch(
                 source = "alpaca"
     fetcher = MarketDataFetcher(data_source=source)
     cache = ParquetCache()
-    for sym in tickers:
-        df = cache.load_or_fetch(sym, timeframe, fetcher, refresh=True if refresh else False)
-        click.echo(f"Cached {sym} {timeframe} ({source}): {len(df)} bars → {cache.path(sym, timeframe)}")
+    if workers > 1 and len(tickers) > 1:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        def _one(sym: str) -> tuple[str, int | None, str]:
+            try:
+                df = cache.load_or_fetch(sym, timeframe, fetcher, refresh=bool(refresh))
+                return sym, len(df), ""
+            except Exception as exc:
+                return sym, None, str(exc)
+
+        ok = failed = 0
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            for i, fut in enumerate(as_completed([pool.submit(_one, s) for s in tickers]), start=1):
+                sym, n, err = fut.result()
+                if n is None:
+                    failed += 1
+                    click.echo(f"✗ {sym}: {err}")
+                else:
+                    ok += 1
+                if i % 250 == 0:
+                    click.echo(f"… {i}/{len(tickers)}")
+        click.echo(f"Cached {ok} / {len(tickers)} ({timeframe}, {source}) · 失敗 {failed}")
+    else:
+        for sym in tickers:
+            df = cache.load_or_fetch(sym, timeframe, fetcher, refresh=True if refresh else False)
+            click.echo(f"Cached {sym} {timeframe} ({source}): {len(df)} bars → {cache.path(sym, timeframe)}")
     if with_correlations:
         for sym in load_market_config("japan").get("correlation_tickers", []):
             cdf = cache.load_or_fetch(sym, timeframe, fetcher, refresh=True if refresh else False)
@@ -1539,37 +1578,94 @@ def experiments_capital_cmd(
     click.echo("再BT: experiments run --refresh-capital （必要なら --initial-cash-jpy 等）")
 
 
+def _entry_rule_options(fn):
+    from signalforge.lab.portfolio_sim import DEFAULT_ENTRY_RULES, ENTRY_PRIORITIES, REGIME_FILTERS
+
+    fn = click.option(
+        "--legacy-rules",
+        is_flag=True,
+        help="旧ルール（流動性タグ順・出来高/ブレッドス条件なし）で比較",
+    )(fn)
+    fn = click.option(
+        "--regime-filter",
+        default=DEFAULT_ENTRY_RULES["regime_filter"],
+        show_default=True,
+        type=click.Choice(list(REGIME_FILTERS)),
+    )(fn)
+    fn = click.option(
+        "--min-breadth-rank",
+        default=DEFAULT_ENTRY_RULES["min_breadth_rank"],
+        show_default=True,
+        type=float,
+        help="当日シグナル数が過去1年の何割以上の日だけ新規（0=無効）",
+    )(fn)
+    fn = click.option(
+        "--min-turnover-jpy",
+        default=DEFAULT_ENTRY_RULES["min_turnover_jpy"],
+        show_default=True,
+        type=float,
+        help="直近20日平均売買代金の下限（円, 0=無効）",
+    )(fn)
+    fn = click.option(
+        "--entry-priority",
+        default=DEFAULT_ENTRY_RULES["entry_priority"],
+        show_default=True,
+        type=click.Choice(list(ENTRY_PRIORITIES)),
+    )(fn)
+    return fn
+
+
+def _entry_rules_from_cli(
+    entry_priority: str,
+    min_turnover_jpy: float,
+    min_breadth_rank: float,
+    regime_filter: str,
+    legacy_rules: bool,
+) -> dict[str, Any]:
+    from signalforge.lab.portfolio_sim import LEGACY_ENTRY_RULES
+
+    if legacy_rules:
+        return dict(LEGACY_ENTRY_RULES)
+    return {
+        "entry_priority": entry_priority,
+        "min_turnover_jpy": min_turnover_jpy,
+        "min_breadth_rank": min_breadth_rank,
+        "regime_filter": regime_filter,
+    }
+
+
 @experiments.command("portfolio")
 @click.argument("strategy_id")
 @click.option("--initial-cash-jpy", default=None, type=float)
 @click.option("--max-positions", default=5, show_default=True, type=int)
 @click.option("--position-pct", default=0.2, show_default=True, type=float)
-@click.option(
-    "--entry-priority",
-    default="sector_liquidity",
-    show_default=True,
-    type=click.Choice(["first_come", "liquidity", "sector_liquidity"]),
-)
+@_entry_rule_options
 def experiments_portfolio_cmd(
     strategy_id: str,
     initial_cash_jpy: float | None,
     max_positions: int,
     position_pct: float,
     entry_priority: str,
+    min_turnover_jpy: float,
+    min_breadth_rank: float,
+    regime_filter: str,
+    legacy_rules: bool,
 ) -> None:
-    """1口座・分散制約で TSE 実験トレードを再シミュレーション（先着・同時保有上限）。"""
+    """1口座・分散制約で TSE 実験トレードを再シミュレーション（同時保有上限・入口ルール）。"""
     from signalforge.portfolio.diversified import simulate_from_experiment_strategy
 
+    rules = _entry_rules_from_cli(entry_priority, min_turnover_jpy, min_breadth_rank, regime_filter, legacy_rules)
     try:
         out = simulate_from_experiment_strategy(
             strategy_id,
             initial_cash_jpy=initial_cash_jpy,
             max_positions=max_positions,
             position_pct=position_pct,
-            entry_priority=entry_priority,
+            entry_rules=rules,
         )
     except FileNotFoundError as exc:
         raise click.ClickException(str(exc)) from exc
+    click.echo(f"入口ルール: {rules}")
 
     click.echo(f"戦略: {strategy_id}")
     click.echo(
@@ -1583,23 +1679,23 @@ def experiments_portfolio_cmd(
     )
     click.echo(f"採用トレード: {out['accepted_trades']} · スキップ（枠/重複）: {out['skipped_overlap']}")
     click.echo(f"最終評価額: ¥{out['final_equity']:,.0f} · 総リターン: {out['total_return_pct']:+.2f}%")
+    click.echo(f"最大DD: {out.get('max_drawdown_pct', 0):.1f}% · 勝率: {out.get('win_rate_pct') or 0:.1f}%")
 
 
 @experiments.command("portfolio-all")
 @click.option("--initial-cash-jpy", default=None, type=float)
 @click.option("--max-positions", default=5, show_default=True, type=int)
 @click.option("--position-pct", default=0.2, show_default=True, type=float)
-@click.option(
-    "--entry-priority",
-    default="sector_liquidity",
-    show_default=True,
-    type=click.Choice(["first_come", "liquidity", "sector_liquidity"]),
-)
+@_entry_rule_options
 def experiments_portfolio_all_cmd(
     initial_cash_jpy: float | None,
     max_positions: int,
     position_pct: float,
     entry_priority: str,
+    min_turnover_jpy: float,
+    min_breadth_rank: float,
+    regime_filter: str,
+    legacy_rules: bool,
 ) -> None:
     """完了 TSE 実験戦略の 1口座シム結果を portfolio_returns.json にキャッシュ。"""
     from signalforge.experiments.portfolio_returns import build_portfolio_returns_cache
@@ -1614,11 +1710,103 @@ def experiments_portfolio_all_cmd(
         initial_cash_jpy=initial_cash_jpy,
         max_positions=max_positions,
         position_pct=position_pct,
-        entry_priority=entry_priority,
+        entry_rules=_entry_rules_from_cli(
+            entry_priority, min_turnover_jpy, min_breadth_rank, regime_filter, legacy_rules
+        ),
     )
     n_ok = sum(1 for v in doc.get("strategies", {}).values() if "total_return_pct" in v)
     click.echo(f"キャッシュ: {doc['params']}")
     click.echo(f"書き込み: {n_ok} / {len(sids)} 戦略")
+
+
+@experiments.command("portfolio-compare")
+@click.argument("strategy_ids", nargs=-1, required=True)
+@click.option(
+    "--priorities",
+    default="sector_random,sector_liquidity,sector_turnover",
+    show_default=True,
+    help="カンマ区切り entry_priority",
+)
+@click.option("--regimes", default="none,ma200", show_default=True, help="カンマ区切り regime_filter")
+@click.option("--turnovers", default="0,5e8", show_default=True, help="カンマ区切り min_turnover_jpy")
+@click.option("--breadths", default="0,0.8", show_default=True, help="カンマ区切り min_breadth_rank")
+@click.option("--seeds", default=10, show_default=True, type=int, help="同点ランダム順の試行回数（中央値・下位10%）")
+@click.option("--oos-start", default="2024-01-01", show_default=True)
+def experiments_portfolio_compare_cmd(
+    strategy_ids: tuple[str, ...],
+    priorities: str,
+    regimes: str,
+    turnovers: str,
+    breadths: str,
+    seeds: int,
+    oos_start: str,
+) -> None:
+    """入口ルールの組み合わせを 1口座シムで比較（前半/後半 2024- 分割、ランダム同点順の分布）。"""
+    from signalforge.experiments.portfolio_compare import compare_portfolio_variants
+
+    def _row(r: dict[str, Any]) -> None:
+        click.echo(
+            f"{r['strategy_id']:28s} {r['entry_priority']:16s} {r['regime_filter']:11s} "
+            f"tv≥{r['min_turnover_jpy']:.0e} br≥{r['min_breadth_rank']:.1f} | "
+            f"中央値 {r['total_return_pct']:+7.1f}% (下位10% {r['p10_return_pct']:+7.1f}%) "
+            f"前半 {r['is_return_pct']:+7.1f}% 後半 {r['oos_return_pct']:+7.1f}% "
+            f"DD {r['max_drawdown_pct']:6.1f}% n={r['accepted_trades']:.0f}"
+        )
+
+    doc = compare_portfolio_variants(
+        list(strategy_ids),
+        entry_priorities=[s.strip() for s in priorities.split(",") if s.strip()],
+        regime_filters=[s.strip() for s in regimes.split(",") if s.strip()],
+        min_turnovers=[float(s) for s in turnovers.split(",") if s.strip()],
+        min_breadths=[float(s) for s in breadths.split(",") if s.strip()],
+        seeds=seeds,
+        oos_start=oos_start,
+        progress_cb=_row,
+    )
+    click.echo(f"書き込み: {len(doc['rows'])} 行 → data/reports/experiments/portfolio_compare.json")
+
+
+@experiments.command("exit-sweep")
+@click.argument("strategy_ids", nargs=-1, required=True)
+@click.option("--variants", default="", help="カンマ区切り（空=全バリアント）")
+@click.option("--min-median-turnover-jpy", default=3e8, show_default=True, type=float)
+@click.option("--workers", default=8, show_default=True, type=int)
+@click.option("--seeds", default=10, show_default=True, type=int)
+def experiments_exit_sweep_cmd(
+    strategy_ids: tuple[str, ...],
+    variants: str,
+    min_median_turnover_jpy: float,
+    workers: int,
+    seeds: int,
+) -> None:
+    """決済ルール（利確/損切り ATR 倍率・最大保有）を流動銘柄で再BTし、1口座ルールで比較。"""
+    from signalforge.experiments.exit_sweep import EXIT_VARIANTS, liquid_tse_tickers, run_exit_sweep
+
+    names = [v.strip() for v in variants.split(",") if v.strip()] or list(EXIT_VARIANTS)
+    unknown = [v for v in names if v not in EXIT_VARIANTS]
+    if unknown:
+        raise click.ClickException(f"未知のバリアント: {unknown}（候補: {list(EXIT_VARIANTS)}）")
+    universe = liquid_tse_tickers(min_median_turnover_jpy)
+    click.echo(f"対象銘柄: {len(universe)}（中央値売買代金 ≥ ¥{min_median_turnover_jpy:,.0f}）")
+
+    def _row(r: dict[str, Any]) -> None:
+        click.echo(
+            f"{r['strategy_id']:28s} {r['variant']:22s} 平均 {r['mean_pnl_pct']:+.2f}% | "
+            f"1口座 {r['total_return_pct']:+7.1f}% 前半 {r['is_return_pct'] or 0:+7.1f}% "
+            f"後半 {r['oos_return_pct'] or 0:+7.1f}% DD {r['max_drawdown_pct']:6.1f}% | "
+            f"ランダム中央値 {r['random_median_return_pct']:+7.1f}% 下位10% {r['random_p10_return_pct']:+7.1f}%",
+            nl=True,
+        )
+
+    run_exit_sweep(
+        list(strategy_ids),
+        variants=names,
+        tickers=universe,
+        workers=workers,
+        seeds=seeds,
+        progress_cb=_row,
+    )
+    click.echo("書き込み: data/reports/experiments/exit_sweep.json")
 
 
 @experiments.command("schedule")

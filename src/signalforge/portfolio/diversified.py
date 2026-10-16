@@ -9,7 +9,7 @@ import pandas as pd
 from signalforge.config import load_backtest_defaults
 from signalforge.experiments.series import TRADES_COMPACT_KEY, ticker_row_has_series, unpack_trades
 from signalforge.experiments.storage import load_strategy_header, load_ticker_rows
-from signalforge.lab.portfolio_sim import simulate_diversified_portfolio
+from signalforge.lab.portfolio_sim import DEFAULT_ENTRY_RULES, simulate_diversified_portfolio
 
 
 def default_diversified_params(
@@ -42,13 +42,41 @@ def trades_pool_from_ticker_rows(rows: list[dict[str, Any]]) -> pd.DataFrame:
             continue
         trades = trades.copy()
         trades["ticker"] = row.get("ticker") or row.get("symbol") or "?"
+        if row.get("sector_tse"):
+            trades["sector_tse"] = str(row["sector_tse"])
         frames.append(trades)
     if not frames:
         return pd.DataFrame()
-    pool = pd.concat(frames, ignore_index=True)
+    pool = drop_broken_trades(pd.concat(frames, ignore_index=True))
     pool["entry_time"] = pd.to_datetime(pool["entry_time"])
     pool["exit_time"] = pd.to_datetime(pool["exit_time"])
     return pool.sort_values("entry_time").reset_index(drop=True)
+
+
+# Swing trades beyond this are split / bad-tick artifacts in the cached OHLCV, not real fills.
+MAX_ABS_TRADE_PNL_PCT = 300.0
+
+
+def drop_broken_trades(pool: pd.DataFrame) -> pd.DataFrame:
+    if pool.empty or "pnl_pct" not in pool.columns:
+        return pool
+    return pool.loc[pool["pnl_pct"].astype(float).abs() <= MAX_ABS_TRADE_PNL_PCT].reset_index(drop=True)
+
+
+def fill_missing_sectors(pool: pd.DataFrame) -> pd.DataFrame:
+    if pool.empty or "ticker" not in pool.columns:
+        return pool
+    from signalforge.portfolio.liquidity import ticker_sector_map
+
+    sectors = ticker_sector_map()
+    out = pool.copy()
+    fallback = out["ticker"].map(lambda t: sectors.get(str(t), ""))
+    if "sector_tse" in out.columns:
+        out["sector_tse"] = out["sector_tse"].where(out["sector_tse"].fillna("").astype(str) != "", fallback)
+    else:
+        out["sector_tse"] = fallback
+    out["sector_tse"] = out["sector_tse"].fillna("").astype(str)
+    return out
 
 
 def filter_trades_after(pool: pd.DataFrame, cutoff: pd.Timestamp | None) -> pd.DataFrame:
@@ -63,6 +91,38 @@ def filter_trades_after(pool: pd.DataFrame, cutoff: pd.Timestamp | None) -> pd.D
     return pool.loc[entries > ts].reset_index(drop=True)
 
 
+def experiment_trade_pool(strategy_id: str) -> pd.DataFrame:
+    """All campaign trades for a strategy with sector_tse attached."""
+    doc = load_strategy_header(strategy_id)
+    if not doc:
+        raise FileNotFoundError(f"実験 JSON がありません: {strategy_id}")
+    return fill_missing_sectors(trades_pool_from_ticker_rows(load_ticker_rows(strategy_id, doc)))
+
+
+def attach_entry_rule_features(pool: pd.DataFrame, rules: dict[str, Any]) -> pd.DataFrame:
+    """Attach history-dependent features on the full pool (before any entry_after cut)."""
+    from signalforge.portfolio import entry_features as ef
+
+    if pool.empty:
+        return pool
+    if float(rules.get("min_breadth_rank") or 0) and "breadth_rank" not in pool.columns:
+        pool = ef.attach_breadth(pool)
+    if (
+        float(rules.get("min_turnover_jpy") or 0) or rules.get("entry_priority") == "sector_turnover"
+    ) and "turnover_jpy" not in pool.columns:
+        pool = ef.attach_turnover(pool)
+    return pool
+
+
+def entry_rule_kwargs(rules: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "entry_priority": rules.get("entry_priority") or "sector_liquidity",
+        "regime_filter": rules.get("regime_filter") or "none",
+        "min_turnover_jpy": float(rules.get("min_turnover_jpy") or 0.0),
+        "min_breadth_rank": float(rules.get("min_breadth_rank") or 0.0),
+    }
+
+
 def simulate_from_experiment_strategy(
     strategy_id: str,
     *,
@@ -70,26 +130,21 @@ def simulate_from_experiment_strategy(
     max_positions: int = 5,
     position_pct: float = 0.2,
     entry_after: pd.Timestamp | None = None,
-    entry_priority: str = "sector_liquidity",
+    entry_rules: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     doc = load_strategy_header(strategy_id)
     if not doc:
         raise FileNotFoundError(f"実験 JSON がありません: {strategy_id}")
+    rules = {**DEFAULT_ENTRY_RULES, **(entry_rules or {})}
     rows = load_ticker_rows(strategy_id, doc)
-    pool = trades_pool_from_ticker_rows(rows)
+    pool = fill_missing_sectors(trades_pool_from_ticker_rows(rows))
     params = default_diversified_params(
         initial_cash_jpy=initial_cash_jpy,
         max_positions=max_positions,
         position_pct=position_pct,
     )
-    pool = filter_trades_after(pool, entry_after)
-    if not pool.empty and "ticker" in pool.columns:
-        from signalforge.portfolio.liquidity import ticker_sector_map
-
-        sectors = ticker_sector_map()
-        pool = pool.copy()
-        pool["sector_tse"] = pool["ticker"].map(lambda t: sectors.get(str(t), ""))
-    sim = simulate_diversified_portfolio(pool, **params, entry_priority=entry_priority)  # type: ignore[arg-type]
+    pool = filter_trades_after(attach_entry_rule_features(pool, rules), entry_after)
+    sim = simulate_diversified_portfolio(pool, **params, **entry_rule_kwargs(rules))
     n_with_series = sum(1 for r in rows if ticker_row_has_series(r))
     return {
         "strategy_id": strategy_id,
@@ -128,5 +183,5 @@ def trades_pool_from_backtest_rows(rows: list[dict[str, Any]]) -> pd.DataFrame:
         frames.append(trades)
     if not frames:
         return pd.DataFrame()
-    pool = pd.concat(frames, ignore_index=True)
+    pool = drop_broken_trades(pd.concat(frames, ignore_index=True))
     return pool.sort_values("entry_time").reset_index(drop=True)

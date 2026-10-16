@@ -9,18 +9,18 @@ from dataclasses import dataclass
 class DiversifiedPaperSpec:
     style: str
     strategy: str
-    cohort: str = "prime"
+    cohort: str = "tse_liquid"
 
 
-# プライム5 + growth2（1口座・中央値のバランス、BB/MACD ベンチは外す）
+# 1口座シム（DEFAULT_ENTRY_RULES）で前半〜2023・後半2024- とも黒字、最大DD 約-30% 以内（2026-10 再評価）
 DIVERSIFIED_PAPER_SIMULATIONS: list[DiversifiedPaperSpec] = [
-    DiversifiedPaperSpec("swing", "bnf_ma25_kairi_reversion", "prime"),
-    DiversifiedPaperSpec("swing", "bnf_multi_indicator_bounce", "prime"),
-    DiversifiedPaperSpec("swing", "low_pbr_value_reversal", "prime"),
-    DiversifiedPaperSpec("swing", "gap_fill_reversal", "prime"),
-    DiversifiedPaperSpec("swing", "mean_reversion_short_term", "prime"),
-    DiversifiedPaperSpec("swing", "kabutan_preset_rsi_oversold", "growth"),
-    DiversifiedPaperSpec("swing", "ichimoku_tk_cross", "growth"),
+    DiversifiedPaperSpec("swing", "mean_reversion_short_term"),
+    DiversifiedPaperSpec("swing", "cci_zero_cross"),
+    DiversifiedPaperSpec("swing", "rsi_dip_200ma"),
+    DiversifiedPaperSpec("swing", "bb_lower_rsi_oversold"),
+    DiversifiedPaperSpec("swing", "ichimoku_tk_cross"),
+    DiversifiedPaperSpec("swing", "trailing_atr_chandelier"),
+    DiversifiedPaperSpec("swing", "bnf_regime_trend_vs_fade"),
 ]
 
 

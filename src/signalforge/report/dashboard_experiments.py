@@ -664,16 +664,33 @@ def render_experiments_panel() -> None:
     if (segment or sector_tse) and not complete_rows:
         st.warning(f"「{cohort_note}」に該当する sidecar 行がまだありません。")
 
-    f1, f2, f3 = st.columns(3)
+    f1, f2, f3, f4 = st.columns(4)
     with f1:
         min_trades = st.number_input("中央値取引数 ≥", min_value=0, value=0, step=5, key="exp_f_trades")
     with f2:
         pf_gt1 = st.checkbox("損益比 > 1", key="exp_f_pf")
     with f3:
         exp_pos = st.checkbox("期待値 > 0", key="exp_f_exp")
+    with f4:
+        show_all = st.checkbox("重複・代理BTも表示", key="exp_f_show_all")
+
+    ranking_rows = complete_rows
+    if not show_all:
+        from signalforge.experiments.curation import curate_strategy_rows
+        from signalforge.paper.diversified_specs import DIVERSIFIED_PAPER_SIMULATIONS
+
+        ranking_rows, cur_info = curate_strategy_rows(
+            complete_rows,
+            preferred_ids={s.strategy for s in DIVERSIFIED_PAPER_SIMULATIONS},
+        )
+        st.caption(
+            f"掲載 {cur_info['n_visible']} / {cur_info['n_input']} 戦略 — "
+            f"同一結果の重複 {len(cur_info['merged_duplicates'])} 件を統合 · "
+            f"代理BT・データ未取得 {len(cur_info['hidden_untrusted'])} 件を非表示"
+        )
 
     df = _prepare_ranking_dataframe(
-        complete_rows,
+        ranking_rows,
         min_median_trades=float(min_trades),
         profit_factor_gt_1=pf_gt1,
         expectancy_positive=exp_pos,

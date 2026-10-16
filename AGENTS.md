@@ -106,7 +106,7 @@ uv run signalforge paper status
 
 State: `data/paper/{style}_{strategy}.json` (committed by GitHub Actions; local `data/*.pkl` stays gitignored).
 
-**1口座・分散（実運用近似）:** `paper diversified-init/run-all` · ログ付き一括: `./scripts/run-diversified-paper-prime.sh` → `data/logs/diversified-paper-prime.log` · TSE 表の **1口座リターン** 列: `uv run signalforge experiments portfolio-all` → `data/reports/experiments/portfolio_returns.json`（`sector_liquidity` 優先・同業種最大2）
+**1口座・分散（実運用近似）:** `paper diversified-init/run-all` · ログ付き一括: `./scripts/run-diversified-paper-prime.sh` → `data/logs/diversified-paper-prime.log` · TSE 表の **1口座リターン** 列: `uv run signalforge experiments portfolio-all` → `data/reports/experiments/portfolio_returns.json`（入口ルール: シグナル集中日のみ・売買代金≥5億・売買代金順・同業種最大2。詳細 `docs/experiments.md`）。Pages 用スナップショット `data/published/tse_strategy_summary.json`（重複統合・代理BT非掲載）は `dashboard export` 時に自動更新 → commit。
 
 GitHub Actions (`.github/workflows/daily-paper.yml`): scheduled Mon–Fri 22:00 UTC, runs `scripts/ci-daily-paper.sh`, commits paper JSON.
 

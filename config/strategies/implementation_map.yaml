@@ -107,6 +107,10 @@ strategies:
     params:
       side: lower
       rsi_max: 30
+    exit:
+      atr_tp_multiple: 2.0
+      atr_sl_multiple: 3.0
+      max_hold_bars: 10
     catalog_style: swing
   bb_upper_rsi_exit:
     template: bb_rsi
@@ -163,6 +167,10 @@ strategies:
     catalog_style: swing
   gap_fill_reversal:
     template: gap_fill_reversal
+    exit:
+      atr_tp_multiple: 2.0
+      atr_sl_multiple: 3.0
+      max_hold_bars: 10
     catalog_style: swing
   fib_pullback_382_618:
     template: swing_pullback_ema
@@ -339,6 +347,10 @@ strategies:
     catalog_style: swing
   mean_reversion_short_term:
     template: mean_reversion_rsi
+    exit:
+      atr_tp_multiple: 2.0
+      atr_sl_multiple: 3.0
+      max_hold_bars: 10
     catalog_style: swing
   pairs_trading_sector:
     template: sector_spread_zscore

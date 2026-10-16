@@ -56,17 +56,24 @@ def _compute_bundle(style: str, sym: str, refresh_data: bool) -> dict[str, Any]:
     }
 
 
+def _prep_is_fresh(path: Path, sym: str, timeframe: str) -> bool:
+    if not path.exists():
+        return False
+    raw = ParquetCache().path(sym, timeframe)
+    return not raw.exists() or raw.stat().st_mtime <= path.stat().st_mtime
+
+
 def load_or_prepare_ticker(style: str, sym: str, *, refresh_data: bool = False) -> dict[str, Any]:
     """Load trimmed indicator frame from disk cache or build once per (style, ticker)."""
     cfg = load_style_config(style)
     timeframe = cfg.get("timeframe", "1d")
     path = _prep_path(style, sym, timeframe)
-    if path.exists() and not refresh_data:
+    if not refresh_data and _prep_is_fresh(path, sym, timeframe):
         bundle = pd.read_pickle(path)
         if isinstance(bundle, dict) and "df" in bundle:
             return bundle
     with _file_lock:
-        if path.exists() and not refresh_data:
+        if not refresh_data and _prep_is_fresh(path, sym, timeframe):
             bundle = pd.read_pickle(path)
             if isinstance(bundle, dict) and "df" in bundle:
                 return bundle

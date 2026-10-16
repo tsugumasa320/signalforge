@@ -112,16 +112,32 @@ Mac がスリープすると BT は止まります。
 | `min_cash_reserve_pct` | 常に残す現金（例 0.10 = 10%） |
 
 **TSE 実験**は銘柄ごとに上記ルールで **独立口座** として BT します。  
-**1口座・分散制約**（実運用に近い近似）: 口座 ¥300万 · 同時最大 5 銘柄 · 1 回 20% · 先着（枠が埋まればスキップ）。
+**1口座・分散制約**（実運用に近い近似）: 口座 ¥300万 · 同時最大 5 銘柄 · 1 回 20% · 同業種最大 2。
+
+**入口ルール（既定 = `DEFAULT_ENTRY_RULES`、`lab/portfolio_sim.py`）**
+
+| ルール | 既定 | 理由（2020–2026 TSE 実験の検証） |
+|------|------|------|
+| シグナル集中日のみ（`min_breadth_rank`） | 0.8 | 当日シグナル数が過去250営業日の上位20%の日だけ新規。逆張り系のエッジは投げ売り日に集中し、平常日の平均損益はマイナス |
+| 売買代金下限（`min_turnover_jpy`） | 5億円 | 直近20日平均（エントリー前日まで）。薄商い銘柄の取引を除外 |
+| 優先順位（`entry_priority`） | `sector_turnover` | 同日に枠を争うときは売買代金の大きい順。ランダム順より一貫して良い |
+| 地合い（`regime_filter`） | `none` | 1321.T 200日線フィルタは後半（2024-）だけ効き前半は悪化 → 不採用 |
+
+評価は **同点ランダム順の分布（中央値・下位10%）** と **前半（〜2023）/後半（2024-）** で行う。旧方式（流動性タグ51銘柄優先・それ以外は銘柄コード順）は並び順の偶然に強く依存していた。
+
+**決済（逆張り系、流動 760 銘柄スイープ）:** スイング既定（利確 3ATR・損切り 1.5ATR・最大 15 本）より、**損切り 3ATR・利確 2ATR・最大 10 本** のほうが 1口座・ランダム順とも安定。`implementation_map.yaml` の `exit:` で `mean_reversion_short_term` / `bb_lower_rsi_oversold` / `gap_fill_reversal` に適用。極端な損益（±300%超）は不良ティックとして 1口座プールから除外。
 
 ```bash
-uv run signalforge experiments portfolio macd_cross
-uv run signalforge paper diversified-init --strategy macd_cross --cohort prime --workers 8
+uv run signalforge experiments portfolio mean_reversion_short_term           # 既定ルール
+uv run signalforge experiments portfolio mean_reversion_short_term --legacy-rules
+uv run signalforge experiments portfolio-compare bb_lower_rsi_oversold --breadths 0,0.7,0.8,0.9
+uv run signalforge experiments exit-sweep mean_reversion_short_term           # 利確/損切り/保有日数の比較
+uv run signalforge paper diversified-init --strategy mean_reversion_short_term --cohort tse_liquid --workers 8
 uv run signalforge paper diversified-run-all --refresh --workers 8
 ./scripts/run-diversified-paper-prime.sh   # 分散フォワード5戦略 · プライム（ログ: data/logs/diversified-paper-prime.log）
 ```
 
-分散フォワード7戦略（`diversified_specs.py`）: prime `bnf_ma25_kairi_reversion`, `bnf_multi_indicator_bounce`, `low_pbr_value_reversal`, `gap_fill_reversal`, `mean_reversion_short_term` · growth `kabutan_preset_rsi_oversold`, `ichimoku_tk_cross`
+分散フォワード7戦略（`diversified_specs.py`、コホート `tse_liquid`）: `mean_reversion_short_term`, `cci_zero_cross`, `rsi_dip_200ma`, `bb_lower_rsi_oversold`, `ichimoku_tk_cross`, `trailing_atr_chandelier`, `bnf_regime_trend_vs_fade`
 
 実験だけ別口座にしたい場合は `config/experiments/backtest_plan.yaml` の `meta.backtest_capital`、または run 時の CLI / 環境変数を使います。
 

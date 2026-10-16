@@ -14,12 +14,17 @@ from signalforge.config import data_dir, load_style_config
 from signalforge.compare.prep_cache import load_or_prepare_ticker
 from signalforge.compare.runner import run_cohort_backtests
 from signalforge.portfolio.diversified import (
+    attach_entry_rule_features,
     default_diversified_params,
+    entry_rule_kwargs,
+    fill_missing_sectors,
     filter_trades_after,
     trades_pool_from_backtest_rows,
 )
-from signalforge.lab.portfolio_sim import simulate_diversified_portfolio
+from signalforge.lab.portfolio_sim import DEFAULT_ENTRY_RULES, simulate_diversified_portfolio
 from signalforge.universe.filters import get_preset, resolve_cohort_tickers
+
+ENTRY_RULES_VERSION = 2
 
 
 def list_diversified_paper_books() -> list[DiversifiedPaperBook]:
@@ -31,9 +36,11 @@ def list_diversified_paper_books() -> list[DiversifiedPaperBook]:
     for path in sorted(root.glob("diversified_*.json")):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
-            books.append(DiversifiedPaperBook(**data))
+            book = DiversifiedPaperBook(**data)
         except (json.JSONDecodeError, TypeError):
             continue
+        book.upgrade_rules()
+        books.append(book)
     return books
 
 
@@ -53,6 +60,10 @@ class DiversifiedPaperBook:
     max_positions: int = 5
     position_pct: float = 0.2
     entry_priority: str = "sector_liquidity"
+    min_turnover_jpy: float = 0.0
+    min_breadth_rank: float = 0.0
+    regime_filter: str = "none"
+    rules_version: int = 1
     currency: str = "JPY"
     started_at: str = ""
     entry_cutoff: str = ""
@@ -68,7 +79,31 @@ class DiversifiedPaperBook:
         if not path.exists():
             return None
         data = json.loads(path.read_text(encoding="utf-8"))
-        return cls(**data)
+        book = cls(**data)
+        book.upgrade_rules()
+        return book
+
+    def upgrade_rules(self) -> bool:
+        """Move books created before ENTRY_RULES_VERSION onto DEFAULT_ENTRY_RULES (start date kept)."""
+        if self.rules_version >= ENTRY_RULES_VERSION:
+            return False
+        self.apply_rules(DEFAULT_ENTRY_RULES)
+        return True
+
+    def apply_rules(self, rules: dict[str, Any]) -> None:
+        self.entry_priority = str(rules["entry_priority"])
+        self.min_turnover_jpy = float(rules["min_turnover_jpy"])
+        self.min_breadth_rank = float(rules["min_breadth_rank"])
+        self.regime_filter = str(rules["regime_filter"])
+        self.rules_version = ENTRY_RULES_VERSION
+
+    def entry_rules(self) -> dict[str, Any]:
+        return {
+            "entry_priority": self.entry_priority,
+            "min_turnover_jpy": self.min_turnover_jpy,
+            "min_breadth_rank": self.min_breadth_rank,
+            "regime_filter": self.regime_filter,
+        }
 
     def save(self) -> Path:
         path = diversified_book_path(self.style, self.strategy)
@@ -93,7 +128,19 @@ def latest_bar_across_universe(style: str, tickers: list[str], *, refresh: bool)
     return latest
 
 
+LIQUID_COHORT = "tse_liquid"
+LIQUID_COHORT_MIN_MEDIAN_TURNOVER_JPY = 3e8
+LIQUID_COHORT_LOOKBACK_BARS = 250
+
+
 def resolve_universe_tickers(cohort: str, ticker_limit: int) -> list[str]:
+    if cohort == LIQUID_COHORT:
+        from signalforge.portfolio.entry_features import liquid_tickers
+
+        tickers = liquid_tickers(
+            LIQUID_COHORT_MIN_MEDIAN_TURNOVER_JPY, lookback_bars=LIQUID_COHORT_LOOKBACK_BARS
+        )
+        return tickers[:ticker_limit] if ticker_limit > 0 else tickers
     preset = get_preset(cohort)
     tickers = resolve_cohort_tickers({**(preset.get("filter") or {}), "exclude_etf": True})
     if ticker_limit > 0:
@@ -112,7 +159,7 @@ def init_diversified_paper(
     max_positions: int = 5,
     position_pct: float = 0.2,
     workers: int = 8,
-    entry_priority: str = "sector_liquidity",
+    entry_rules: dict[str, Any] | None = None,
     refresh: bool = True,
 ) -> DiversifiedPaperBook:
     load_style_config(style)
@@ -137,7 +184,6 @@ def init_diversified_paper(
         initial_capital=float(params["initial_capital"]),
         max_positions=int(params["max_positions"]),
         position_pct=float(params["position_pct"]),
-        entry_priority=entry_priority,
         currency="JPY",
         started_at=now,
         entry_cutoff=str(cutoff_ts),
@@ -145,6 +191,7 @@ def init_diversified_paper(
         tickers=tickers,
         workers=workers,
     )
+    book.apply_rules({**DEFAULT_ENTRY_RULES, **(entry_rules or {})})
     run_diversified_paper(book, refresh=refresh, workers=workers)
     return book
 
@@ -168,17 +215,12 @@ def run_diversified_paper(
         max_workers=max(1, int(w)),
     )
     rows = cohort_result.get("tickers") or []
-    pool = trades_pool_from_backtest_rows(rows)
+    rules = book.entry_rules()
+    pool = attach_entry_rule_features(fill_missing_sectors(trades_pool_from_backtest_rows(rows)), rules)
     cutoff = pd.Timestamp(book.entry_cutoff)
     if cutoff.tzinfo is None and not pool.empty and pool["entry_time"].dt.tz is not None:
         cutoff = cutoff.tz_localize("UTC")
     pool = filter_trades_after(pool, cutoff)
-    if not pool.empty and "ticker" in pool.columns:
-        from signalforge.portfolio.liquidity import ticker_sector_map
-
-        sectors = ticker_sector_map()
-        pool = pool.copy()
-        pool["sector_tse"] = pool["ticker"].map(lambda t: sectors.get(str(t), ""))
     chart_end = pd.Timestamp.now(tz="UTC")
     if not pool.empty and "exit_time" in pool.columns:
         ex = pd.to_datetime(pool["exit_time"].max())
@@ -187,7 +229,6 @@ def run_diversified_paper(
         else:
             ex = ex.tz_convert("UTC")
         chart_end = max(chart_end, ex)
-    priority = getattr(book, "entry_priority", None) or "sector_liquidity"
     sim = simulate_diversified_portfolio(
         pool,
         initial_capital=book.initial_capital,
@@ -195,7 +236,7 @@ def run_diversified_paper(
         position_pct=book.position_pct,
         chart_start=cutoff,
         chart_end=chart_end,
-        entry_priority=priority,  # type: ignore[arg-type]
+        **entry_rule_kwargs(rules),
     )
     book.last_sim = sim
     book.last_run_at = datetime.now(timezone.utc).isoformat()

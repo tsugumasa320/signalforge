@@ -26,6 +26,8 @@ ENV/
 /data/*
 !/data/paper/
 !/data/paper/**
+!/data/published/
+!/data/published/**
 *.parquet
 .pytest_cache/
 .coverage
