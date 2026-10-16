@@ -23,6 +23,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: astral-sh/setup-uv@v5
         with:
@@ -64,5 +66,13 @@ jobs:
             echo "No paper state changes."
           else
             git commit -m "chore(paper): daily update (run ${GITHUB_RUN_ID})"
-            git push
+            # 走行中に main が進んでも、取り込み直してから push する
+            for _ in 1 2 3; do
+              git rebase --abort >/dev/null 2>&1 || true
+              if git pull --rebase origin main && git push origin HEAD:main; then
+                exit 0
+              fi
+              sleep 10
+            done
+            exit 1
           fi
