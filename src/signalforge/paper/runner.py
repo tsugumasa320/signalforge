@@ -245,13 +245,15 @@ def run_paper_daily(
 
     closed_df = pd.DataFrame(portfolio.closed_trades)
     if not closed_df.empty and "entry_time" in closed_df.columns:
-        closed_df["entry_time"] = pd.to_datetime(closed_df["entry_time"])
+        closed_df["entry_time"] = pd.to_datetime(closed_df["entry_time"], utc=True)
         if "exit_time" in closed_df.columns:
-            closed_df["exit_time"] = pd.to_datetime(closed_df["exit_time"])
+            closed_df["exit_time"] = pd.to_datetime(closed_df["exit_time"], utc=True)
 
     eq_series = pd.Series(
         [s["equity"] for s in portfolio.equity_snapshots],
-        index=pd.to_datetime([s["date"] for s in portfolio.equity_snapshots]),
+        index=pd.to_datetime(
+            [s["date"] for s in portfolio.equity_snapshots], utc=True, format="mixed"
+        ),
     )
     metrics = compute_metrics(closed_df, eq_series) if not closed_df.empty else compute_metrics(closed_df, eq_series)
     total_return = (equity / portfolio.initial_cash - 1) * 100 if portfolio.initial_cash else 0.0

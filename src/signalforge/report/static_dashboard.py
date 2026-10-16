@@ -23,11 +23,13 @@ def _paper_summary(portfolio: PaperPortfolio, df: pd.DataFrame) -> dict:
     if not closed.empty:
         for col in ("entry_time", "exit_time"):
             if col in closed.columns:
-                closed[col] = pd.to_datetime(closed[col])
+                closed[col] = pd.to_datetime(closed[col], utc=True)
 
     eq = pd.Series(
         [s["equity"] for s in portfolio.equity_snapshots],
-        index=pd.to_datetime([s["date"] for s in portfolio.equity_snapshots]),
+        index=pd.to_datetime(
+            [s["date"] for s in portfolio.equity_snapshots], utc=True, format="mixed"
+        ),
     )
     metrics = compute_metrics(closed, eq)
     last_close = float(df.iloc[-1]["close"])
