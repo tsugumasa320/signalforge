@@ -38,3 +38,6 @@ notebooks/.ipynb_checkpoints/
 !.streamlit/config.toml
 reports/
 *.log
+
+_site/
+.DS_Store
