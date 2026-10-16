@@ -56,3 +56,20 @@ class ParquetCache:
         df = fetcher.fetch(ticker, timeframe)  # type: ignore[arg-type]
         self.save(ticker, timeframe, df)
         return df
+
+    def update(self, ticker: str, timeframe: str, fetcher) -> pd.DataFrame:
+        """Append bars after the cached tail. A missing file is fetched in full."""
+        cached = self.load(ticker, timeframe)
+        if cached is None or cached.empty:
+            df = fetcher.fetch(ticker, timeframe)  # type: ignore[arg-type]
+            self.save(ticker, timeframe, df)
+            return df
+        last = pd.Timestamp(cached.index.max())
+        if last.tzinfo is not None:
+            last = last.tz_convert("UTC").tz_localize(None)
+        start = (last - pd.Timedelta(days=10)).to_pydatetime()
+        fresh = fetcher.fetch(ticker, timeframe, start=start)  # type: ignore[arg-type]
+        combined = pd.concat([cached, fresh])
+        combined = combined[~combined.index.duplicated(keep="last")].sort_index()
+        self.save(ticker, timeframe, combined)
+        return combined

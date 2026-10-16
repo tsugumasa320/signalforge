@@ -7,11 +7,15 @@ echo "=== SignalForge daily (multi-strategy) ==="
 
 uv sync --extra dev --frozen 2>/dev/null || uv sync --extra dev
 
-echo "--- fetch paper-book universe (1d, once) ---"
-uv run signalforge fetch --paper-books --timeframe 1d --refresh --with-correlations --workers 8
+if [[ "${PUBLISH_ONLY:-}" == "1" ]]; then
+  echo "--- publish only (paper books already computed) ---"
+else
+  echo "--- update paper-book universe (1d, append new bars) ---"
+  uv run signalforge fetch --paper-books --timeframe 1d --update --with-correlations --workers 8
 
-echo "--- diversified paper (TSE forward, cached data) ---"
-uv run signalforge paper diversified-run-all --no-refresh --workers 8 || true
+  echo "--- diversified paper (TSE forward, cached data) ---"
+  uv run signalforge paper diversified-run-all --no-refresh --workers 8 || true
+fi
 
 echo "--- export unified dashboard ---"
 uv run signalforge dashboard export --output _site

@@ -66,7 +66,8 @@ def main() -> None:
 @click.option("--cohort", default=None, help="Compare preset id (e.g. tse_all, prime) — ETF 除外")
 @click.option("--timeframe", default="1d", type=click.Choice(["1d", "1h", "5m", "15m"]))
 @click.option("--source", default="auto", type=click.Choice(["auto", "yfinance", "alpaca"]))
-@click.option("--refresh", is_flag=True)
+@click.option("--refresh", is_flag=True, help="キャッシュを捨てて全期間を取り直す")
+@click.option("--update", "update_cache", is_flag=True, help="キャッシュの末尾以降だけ足す（無ければ全期間）")
 @click.option("--with-correlations", is_flag=True, help="Also fetch 1321.T / 1570.T")
 @click.option("--workers", default=1, show_default=True, type=int, help="並列取得数（--cohort 向け）")
 @click.option("--paper-books", is_flag=True, help="保存済み分散ペーパー口座の銘柄（和集合）")
@@ -77,6 +78,7 @@ def fetch(
     timeframe: str,
     source: str,
     refresh: bool,
+    update_cache: bool,
     with_correlations: bool,
     workers: int,
     paper_books: bool,
@@ -105,14 +107,22 @@ def fetch(
         if tickers and not str(tickers[0]).endswith(".T"):
             if os.getenv("ALPACA_API_KEY") and os.getenv("ALPACA_SECRET_KEY"):
                 source = "alpaca"
+    if refresh and update_cache:
+        raise click.ClickException("--refresh と --update は同時に指定できません。")
     fetcher = MarketDataFetcher(data_source=source)
     cache = ParquetCache()
+
+    def _load(sym: str):
+        if update_cache:
+            return cache.update(sym, timeframe, fetcher)
+        return cache.load_or_fetch(sym, timeframe, fetcher, refresh=bool(refresh))
+
     if workers > 1 and len(tickers) > 1:
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
         def _one(sym: str) -> tuple[str, int | None, str]:
             try:
-                df = cache.load_or_fetch(sym, timeframe, fetcher, refresh=bool(refresh))
+                df = _load(sym)
                 return sym, len(df), ""
             except Exception as exc:
                 return sym, None, str(exc)
@@ -131,11 +141,11 @@ def fetch(
         click.echo(f"Cached {ok} / {len(tickers)} ({timeframe}, {source}) · 失敗 {failed}")
     else:
         for sym in tickers:
-            df = cache.load_or_fetch(sym, timeframe, fetcher, refresh=True if refresh else False)
+            df = _load(sym)
             click.echo(f"Cached {sym} {timeframe} ({source}): {len(df)} bars → {cache.path(sym, timeframe)}")
     if with_correlations:
         for sym in load_market_config("japan").get("correlation_tickers", []):
-            cdf = cache.load_or_fetch(sym, timeframe, fetcher, refresh=True if refresh else False)
+            cdf = _load(sym)
             click.echo(f"Cached {sym} {timeframe}: {len(cdf)} bars → {cache.path(sym, timeframe)}")
 
 

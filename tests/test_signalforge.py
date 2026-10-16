@@ -218,6 +218,31 @@ def test_pickle_cache_roundtrip(tmp_path):
     assert cache.path("7203.T", "1d").suffix == ".pkl"
 
 
+def test_cache_update_appends_new_bars(tmp_path):
+    from signalforge.data.cache import ParquetCache
+
+    idx = pd.date_range("2024-01-01", periods=3, freq="D", tz="UTC")
+    base = pd.DataFrame(
+        {"open": 1.0, "high": 1.0, "low": 1.0, "close": [1.0, 2.0, 3.0], "volume": 1.0},
+        index=idx,
+    )
+    cache = ParquetCache(base=tmp_path)
+    cache.save("7203.T", "1d", base)
+
+    class _Fetcher:
+        def fetch(self, ticker, timeframe, start=None, end=None):
+            new_idx = pd.date_range("2024-01-03", periods=2, freq="D", tz="UTC")
+            return pd.DataFrame(
+                {"open": 1.0, "high": 1.0, "low": 1.0, "close": [3.5, 4.0], "volume": 1.0},
+                index=new_idx,
+            )
+
+    out = cache.update("7203.T", "1d", _Fetcher())
+    assert len(out) == 4
+    assert float(out.iloc[-1]["close"]) == 4.0
+    assert float(out.loc[idx[2], "close"]) == 3.5
+
+
 def test_paper_portfolio_save_load(tmp_path, monkeypatch):
     from signalforge.paper.portfolio import PaperPortfolio, paper_dir
 
