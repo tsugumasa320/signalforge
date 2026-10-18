@@ -242,6 +242,76 @@ def diversified_paper_summary_row(book) -> dict:
     }
 
 
+def _yen(value: object) -> str:
+    if value is None:
+        return "—"
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return "—"
+    if number != number:
+        return "—"
+    return f"¥{number:,.1f}" if abs(number) < 1000 else f"¥{number:,.0f}"
+
+
+def _chart_links(ticker: str) -> str:
+    """Kabutan and TradingView for a TSE ticker such as 7203.T."""
+    code = ticker.strip()
+    if code.endswith(".T"):
+        code = code[:-2]
+    if not code:
+        return "—"
+    safe = escape(code, quote=True)
+    kabutan = f"https://kabutan.jp/stock/?code={safe}"
+    tradingview = f"https://jp.tradingview.com/chart/?symbol=TSE:{safe}"
+    return (
+        f'<a href="{kabutan}" target="_blank" rel="noopener">株探</a>'
+        " · "
+        f'<a href="{tradingview}" target="_blank" rel="noopener">TradingView</a>'
+    )
+
+
+def diversified_fills_table(fills: list[dict] | None) -> str:
+    """Accepted forward trades: ticker, dates, prices, yen PnL."""
+    rows = list(fills or [])
+    if not rows:
+        return "<p class='muted'>この期間の約定はまだありません。</p>"
+    body = ""
+    for row in reversed(rows):
+        pnl = row.get("pnl_pct")
+        try:
+            pnl_f = float(pnl) if pnl is not None else None
+        except (TypeError, ValueError):
+            pnl_f = None
+        pnl_cls = "positive" if pnl_f is not None and pnl_f > 0 else "negative" if pnl_f is not None and pnl_f < 0 else ""
+        pnl_s = f"{pnl_f:+.2f}%" if pnl_f is not None else "—"
+        jpy = row.get("pnl_jpy")
+        try:
+            jpy_f = float(jpy) if jpy is not None else None
+        except (TypeError, ValueError):
+            jpy_f = None
+        jpy_cls = "positive" if jpy_f is not None and jpy_f > 0 else "negative" if jpy_f is not None and jpy_f < 0 else ""
+        jpy_s = f"¥{jpy_f:,.0f}" if jpy_f is not None else "—"
+        ticker = str(row.get("ticker") or "")
+        body += (
+            "<tr>"
+            f"<td>{escape(ticker)}</td>"
+            f"<td>{_chart_links(ticker)}</td>"
+            f"<td>{escape(str(row.get('entry_time') or '—'))}</td>"
+            f"<td>{escape(str(row.get('exit_time') or '—'))}</td>"
+            f"<td>{_yen(row.get('entry_price'))}</td>"
+            f"<td>{_yen(row.get('exit_price'))}</td>"
+            f'<td class="{pnl_cls}">{pnl_s}</td>'
+            f'<td class="{jpy_cls}">{jpy_s}</td>'
+            "</tr>"
+        )
+    header = (
+        "<tr><th>銘柄</th><th>チャート</th><th>エントリー</th><th>決済</th><th>買い価格</th>"
+        "<th>売り価格</th><th>損益率</th><th>損益</th></tr>"
+    )
+    return f"<table><thead>{header}</thead><tbody>{body}</tbody></table>"
+
+
 def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1, refresh: bool = False) -> Path | None:
     from signalforge.lab.portfolio_sim import unpack_equity_daily
     from signalforge.paper.diversified import DiversifiedPaperBook
@@ -277,6 +347,11 @@ def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1, ref
       <div class="metric"><label>スキップ</label><value>{int(sim.get('skipped_overlap') or 0)}</value></div>
     </div>
     {chart_html}
+    <section>
+      <h2>約定</h2>
+      <p class="muted">エントリー日より後に採用された取引。価格はスリッページ込みの約定価格。足の確認は株探または TradingView。</p>
+      {diversified_fills_table(sim.get("fills"))}
+    </section>
     <p class="muted">指数はエントリ開始日=100。日経は 1321.T（日経225連動ETF）の終値。GitHub Actions 日次更新後のスナップショット。</p>
     """
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")

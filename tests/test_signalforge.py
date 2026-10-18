@@ -243,6 +243,33 @@ def test_cache_update_appends_new_bars(tmp_path):
     assert float(out.loc[idx[2], "close"]) == 3.5
 
 
+def test_diversified_fills_table_lists_prices():
+    from signalforge.report.static_dashboard import diversified_fills_table
+
+    html = diversified_fills_table(
+        [
+            {
+                "ticker": "7203.T",
+                "entry_time": "2026-10-17",
+                "exit_time": "2026-10-20",
+                "entry_price": 2500,
+                "exit_price": 2600,
+                "pnl_pct": 4.0,
+                "pnl_jpy": 20000,
+            }
+        ]
+    )
+    assert "7203.T" in html
+    assert "2026-10-17" in html
+    assert "2026-10-20" in html
+    assert "2,500" in html
+    assert "2,600" in html
+    assert 'href="https://kabutan.jp/stock/?code=7203"' in html
+    assert 'href="https://jp.tradingview.com/chart/?symbol=TSE:7203"' in html
+    assert 'target="_blank"' in html
+    assert "この期間の約定はまだありません" in diversified_fills_table([])
+
+
 def test_paper_portfolio_save_load(tmp_path, monkeypatch):
     from signalforge.paper.portfolio import PaperPortfolio, paper_dir
 

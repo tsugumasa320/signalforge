@@ -47,6 +47,10 @@ def pack_trades(trades: pd.DataFrame) -> list[dict[str, Any]]:
             item["h"] = int(t["hold_bars"])
         if t.get("total_cost_usd") is not None:
             item["c"] = float(t["total_cost_usd"])
+        if t.get("entry_price") is not None and pd.notna(t.get("entry_price")):
+            item["ep"] = float(t["entry_price"])
+        if t.get("exit_price") is not None and pd.notna(t.get("exit_price")):
+            item["xp"] = float(t["exit_price"])
         out.append(item)
     return out
 
@@ -105,6 +109,10 @@ def unpack_trades(compact: list[dict[str, Any]]) -> pd.DataFrame:
             row["hold_bars"] = int(t["h"])
         if t.get("c") is not None:
             row["total_cost_usd"] = float(t["c"])
+        if t.get("ep") is not None:
+            row["entry_price"] = float(t["ep"])
+        if t.get("xp") is not None:
+            row["exit_price"] = float(t["xp"])
         rows.append(row)
     return pd.DataFrame(rows)
 

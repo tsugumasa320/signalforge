@@ -69,6 +69,33 @@ def test_liquidity_prefers_higher_score_on_same_day(monkeypatch):
     assert liq["final_equity"] > fc["final_equity"]
 
 
+def test_fills_keep_ticker_dates_and_prices():
+    trades = pd.DataFrame(
+        [
+            {
+                **_trade("7203.T", "2024-01-02", "2024-01-05", 4.0, "輸送用機器"),
+                "entry_price": 2500.0,
+                "exit_price": 2600.0,
+            }
+        ]
+    )
+    out = simulate_diversified_portfolio(
+        trades,
+        initial_capital=1_000_000,
+        max_positions=1,
+        position_pct=0.2,
+        entry_priority="first_come",
+    )
+    fills = out["fills"]
+    assert len(fills) == 1
+    assert fills[0]["ticker"] == "7203.T"
+    assert fills[0]["entry_time"] == "2024-01-02"
+    assert fills[0]["exit_time"] == "2024-01-05"
+    assert fills[0]["entry_price"] == 2500.0
+    assert fills[0]["exit_price"] == 2600.0
+    assert fills[0]["pnl_jpy"] > 0
+
+
 def test_turnover_priority_and_floor():
     trades = pd.DataFrame(
         [

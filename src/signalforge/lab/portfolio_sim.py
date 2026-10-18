@@ -207,6 +207,7 @@ def simulate_diversified_portfolio(
             "skipped_overlap": 0,
             "skipped": 0,
             "equity_daily": _pack_equity_daily(empty_eq),
+            "fills": [],
             "entry_priority": entry_priority,
             "regime_filter": regime_filter,
         }
@@ -287,9 +288,50 @@ def simulate_diversified_portfolio(
         "max_drawdown_pct": max_drawdown_pct(eq),
         "win_rate_pct": (sum(1 for a in accepted if a["pnl_jpy"] > 0) / len(accepted) * 100.0) if accepted else None,
         "equity_daily": _pack_equity_daily(eq),
+        "fills": pack_fills(accepted),
         "entry_priority": entry_priority,
         "regime_filter": regime_filter,
     }
+
+
+def _fill_date(value: Any) -> str | None:
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return None
+    ts = pd.Timestamp(value)
+    if pd.isna(ts):
+        return None
+    return ts.strftime("%Y-%m-%d")
+
+
+def _fill_float(value: Any) -> float | None:
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def pack_fills(accepted: list[dict]) -> list[dict]:
+    """JSON-safe accepted trades: ticker, dates, prices, yen PnL."""
+    rows = []
+    for row in accepted:
+        item = {
+            "ticker": str(row.get("ticker") or ""),
+            "entry_time": _fill_date(row.get("entry_time")),
+            "exit_time": _fill_date(row.get("exit_time")),
+            "entry_price": _fill_float(row.get("entry_price")),
+            "exit_price": _fill_float(row.get("exit_price")),
+            "pnl_pct": _fill_float(row.get("pnl_pct")),
+            "pnl_jpy": _fill_float(row.get("pnl_jpy")),
+            "notional": _fill_float(row.get("notional")),
+        }
+        side = row.get("side")
+        if side:
+            item["side"] = str(side)
+        rows.append(item)
+    rows.sort(key=lambda r: (r.get("exit_time") or "", r.get("entry_time") or "", r.get("ticker") or ""))
+    return rows
 
 
 def _pack_equity_daily(equity: pd.Series) -> dict[str, list]:
