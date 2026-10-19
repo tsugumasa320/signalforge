@@ -2,8 +2,8 @@ name: Daily paper update
 
 on:
   schedule:
-    # 毎日 22:00 UTC ≒ JST 07:00（米国大引け後・日本の朝）
-    - cron: "0 22 * * *"
+    # 毎日 12:00 UTC = JST 21:00。東証は 15:30 引け。yfinance の日足は夜には揃う。
+    - cron: "0 12 * * *"
   workflow_dispatch:
     inputs:
       publish_only:

@@ -330,7 +330,7 @@ def export_hub(
 
     <section id="paper">
       <h2>📈 Paper Trading — フォワード成績</h2>
-      <p class="muted">GitHub Pages は Actions 日次更新（JST 朝頃）後が最新</p>
+      <p class="muted">GitHub Pages は Actions 日次更新（JST 21:00）後が最新</p>
       <h3>1口座 · 分散（TSE · 実運用近似）</h3>
       <p class="muted">¥300万 · 同時5 · 20%/回 · 売買代金 ≥ 5億円 · シグナル集中日のみ · 売買代金順 · 同業種2まで</p>
       {_comparison_table(diversified_rows or [], kind="paper")}
