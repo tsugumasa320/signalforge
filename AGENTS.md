@@ -108,6 +108,6 @@ State: `data/paper/{style}_{strategy}.json` (committed by GitHub Actions; local 
 
 **1口座・分散（実運用近似）:** `paper diversified-init/run-all` · ログ付き一括: `./scripts/run-diversified-paper-prime.sh` → `data/logs/diversified-paper-prime.log` · TSE 表の **1口座リターン** 列: `uv run signalforge experiments portfolio-all` → `data/reports/experiments/portfolio_returns.json`（入口ルール: シグナル集中日のみ・売買代金≥5億・売買代金順・同業種最大2。詳細 `docs/experiments.md`）。Pages 用スナップショット `data/published/tse_strategy_summary.json`（重複統合・代理BT非掲載）は `dashboard export` 時に自動更新 → commit。
 
-GitHub Actions (`.github/workflows/daily-paper.yml`): scheduled daily 09:00 UTC (18:00 JST), runs `scripts/ci-daily-paper.sh`, commits paper JSON.
+GitHub Actions (`.github/workflows/daily-paper.yml`): scheduled daily 09:17 UTC (18:17 JST), runs `scripts/ci-daily-paper.sh`, commits paper JSON.
 
-**フォワードの見方:** 更新は Actions 日次（JST 18:00）→ **GitHub Pages**（`dashboard export` の hub）。`data/paper/diversified_*.json` を commit すると分散ペーパーも Pages に載る。Streamlit `127.0.0.1:8501` はローカル専用。
+**フォワードの見方:** 更新は Actions 日次（JST 18:17）→ **GitHub Pages**（`dashboard export` の hub）。`data/paper/diversified_*.json` を commit すると分散ペーパーも Pages に載る。Streamlit `127.0.0.1:8501` はローカル専用。

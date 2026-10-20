@@ -2,8 +2,9 @@ name: Daily paper update
 
 on:
   schedule:
-    # 毎日 09:00 UTC = JST 18:00。東証は 15:30 引け。同じ日の日足をその日のうちに取る。
-    - cron: "0 9 * * *"
+    # 毎日 09:17 UTC = JST 18:17。東証は 15:30 引け。
+    # 毎時0分は GitHub が予定を捨てることがあるので、17分に置く。
+    - cron: "17 9 * * *"
   workflow_dispatch:
     inputs:
       publish_only:
