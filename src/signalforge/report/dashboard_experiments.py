@@ -482,9 +482,45 @@ def _render_segment_expectancy_charts(
         )
 
 
+def render_intraday_campaigns() -> None:
+    """5-minute and 1-minute day-trade results, including runs still in progress."""
+    from signalforge.experiments.intraday_campaign import intraday_result_rows
+    from signalforge.report.strategy_guide_builder import strategy_display_title
+
+    rows = intraday_result_rows()
+    st.subheader("短期足の実験")
+    st.caption("5分足は約60日、1分足は約7日。数字は全銘柄の中央値です。計算中の行は終わってから数値が入ります。")
+    frame = pd.DataFrame(
+        [
+            {
+                "足": row["timeframe_label"],
+                "戦略": strategy_display_title(row["strategy_id"]),
+                "状態": row["status"],
+                "期間": row["window"] or "—",
+                "中央リターン%": row["median_return_pct"],
+                "中央PF": row["median_profit_factor"],
+                "中央トレード数": row["median_trades"],
+            }
+            for row in rows
+        ]
+    )
+    st.dataframe(frame, hide_index=True, width="stretch")
+
+
+def _daily_scan(scan: dict[str, Any]) -> dict[str, Any]:
+    from signalforge.experiments.intraday_campaign import without_intraday
+
+    return {
+        **scan,
+        "complete": without_intraday(scan.get("complete") or []),
+        "in_progress": without_intraday(scan.get("in_progress") or []),
+    }
+
+
 def render_experiments_panel() -> None:
-    st.subheader("東証 TSE 実験")
-    scan = get_experiment_scan()
+    render_intraday_campaigns()
+    st.subheader("日足の実験")
+    scan = _daily_scan(get_experiment_scan())
     n_with_exp = sum(
         1
         for r in (scan.get("complete") or [])

@@ -64,7 +64,7 @@ def main() -> None:
 @click.option("--ticker", default=None, help="Single ticker (default: 7203.T)")
 @click.option("--universe", default=None, help="Universe yaml name (e.g. japan_liquid)")
 @click.option("--cohort", default=None, help="Compare preset id (e.g. tse_all, prime) — ETF 除外")
-@click.option("--timeframe", default="1d", type=click.Choice(["1d", "1h", "5m", "15m"]))
+@click.option("--timeframe", default="1d", type=click.Choice(["1d", "1h", "1m", "2m", "5m", "15m"]))
 @click.option("--source", default="auto", type=click.Choice(["auto", "yfinance", "alpaca"]))
 @click.option("--refresh", is_flag=True, help="キャッシュを捨てて全期間を取り直す")
 @click.option("--update", "update_cache", is_flag=True, help="キャッシュの末尾以降だけ足す（無ければ全期間）")
@@ -1215,6 +1215,7 @@ def alt_data_status_cmd() -> None:
     is_flag=True,
     help="銘柄ごと決算日（JQUANTS_API_KEY あれば J-Quants、なければ yfinance）",
 )
+@click.option("--yahoo", is_flag=True, help="決算日を yfinance から取る。無料J-Quantsの12週間遅れは使わない")
 @click.option("--all", "fetch_all", is_flag=True, help="--sectors と --earnings")
 @click.option("--refresh", is_flag=True, help="既存ファイルも再取得")
 @click.option("--limit", default=0, type=int, help="earnings / jquants-credit の銘柄数上限（0=全 TSE）")
@@ -1226,6 +1227,7 @@ def alt_data_status_cmd() -> None:
 def alt_data_fetch_cmd(
     sectors: bool,
     earnings: bool,
+    yahoo: bool,
     fetch_all: bool,
     refresh: bool,
     limit: int,
@@ -1259,7 +1261,7 @@ def alt_data_fetch_cmd(
         tickers = list_tse_tickers()
         if limit > 0:
             tickers = tickers[:limit]
-        use_jq = bool((os.getenv("JQUANTS_API_KEY") or "").strip())
+        use_jq = bool((os.getenv("JQUANTS_API_KEY") or "").strip()) and not yahoo
         src = "J-Quants earnings-calendar" if use_jq else "yfinance"
         click.echo(f"決算日を取得中… ({len(tickers)} 銘柄, {src})")
 
@@ -1863,6 +1865,7 @@ def experiments_schedule_cmd() -> None:
     help="常に残す現金比率（例 0.1）",
 )
 @click.option("--aggregate-only", is_flag=True, help="Rebuild matrices from saved strategy JSON")
+@click.option("--only", multiple=True, help="この戦略IDだけ実行する。再計算するときは --no-resume を付ける")
 def experiments_run(
     strategy_limit: int,
     ticker_limit: int,
@@ -1877,6 +1880,7 @@ def experiments_run(
     max_position_pct: float | None,
     min_cash_reserve_pct: float | None,
     aggregate_only: bool,
+    only: tuple[str, ...],
 ) -> None:
     """Run JPX universe experiment: 全銘柄×全戦略、並列+再開。schedule.yaml で時間調整可。"""
     from signalforge.experiments.runner import (
@@ -1891,12 +1895,22 @@ def experiments_run(
     plan = load_plan()
     cost = (plan.get("meta") or {}).get("cost_model", "japan")
     strategy_ids = _parse_strategy_ids(plan.get("strategies", "catalog:all"), None, strategy_limit)
+    if only:
+        wanted = set(only)
+        unknown = wanted.difference(strategy_ids)
+        if unknown:
+            raise click.ClickException(f"未知の戦略ID: {', '.join(sorted(unknown))}")
+        strategy_ids = [sid for sid in strategy_ids if sid in wanted]
     cat_by_id = {s["id"]: s for s in load_web_catalog().get("strategies", [])}
 
     if aggregate_only:
         n = ticker_limit or len(list_tse_tickers())
+        from signalforge.experiments.intraday_campaign import PRICE_INTRADAY_STRATEGIES
         from signalforge.experiments.runner import refresh_completed_strategy_aggregates
 
+        if not only:
+            skip = set(PRICE_INTRADAY_STRATEGIES)
+            strategy_ids = [sid for sid in strategy_ids if sid not in skip]
         refreshed = refresh_completed_strategy_aggregates(strategy_ids)
         build_experiment_summaries(strategy_ids, tickers_count=n)
         click.echo(

@@ -82,6 +82,16 @@ def load_style_config(style: str) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Style config not found: {path}")
     cfg = load_yaml(path)
+    import os
+
+    timeframe = os.getenv("SIGNALFORGE_TIMEFRAME")
+    if timeframe:
+        cfg["timeframe"] = timeframe
+    hold = os.getenv("SIGNALFORGE_MAX_HOLD_BARS")
+    if hold:
+        backtest = dict(cfg.get("backtest") or {})
+        backtest["max_hold_bars"] = int(hold)
+        cfg["backtest"] = backtest
     market_key = cfg.get("market", "japan")
     market = load_market_config(market_key)
     cfg["_market"] = market

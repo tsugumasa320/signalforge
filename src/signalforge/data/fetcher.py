@@ -7,7 +7,24 @@ from typing import Literal
 import pandas as pd
 import yfinance as yf
 
-Timeframe = Literal["1d", "1h", "5m", "15m"]
+Timeframe = Literal["1d", "1h", "1m", "2m", "5m", "15m"]
+
+
+def yfinance_history_start(timeframe: str, end: datetime, start: datetime | None = None) -> datetime:
+    """Yahoo keeps about 7 days of 1-minute bars, 60 days of 2/5/15-minute bars, and 730 days of 1-hour bars."""
+    if timeframe == "1m":
+        earliest = end - timedelta(days=6)
+    elif timeframe in ("2m", "5m", "15m"):
+        earliest = end - timedelta(days=59)
+    elif timeframe == "1h":
+        earliest = end - timedelta(days=720)
+    elif timeframe == "1d":
+        earliest = end - timedelta(days=365 * 20)
+    else:
+        earliest = end - timedelta(days=700)
+    if start is None or start < earliest:
+        return earliest
+    return start
 
 
 class MarketDataFetcher:
@@ -16,6 +33,8 @@ class MarketDataFetcher:
     YF_INTERVAL_MAP = {
         "1d": "1d",
         "1h": "1h",
+        "1m": "1m",
+        "2m": "2m",
         "5m": "5m",
         "15m": "15m",
     }
@@ -46,13 +65,7 @@ class MarketDataFetcher:
     ) -> pd.DataFrame:
         interval = self.YF_INTERVAL_MAP[timeframe]
         end = end or datetime.now()
-        if start is None:
-            if timeframe == "1d":
-                start = end - timedelta(days=365 * 20)
-            elif timeframe in ("5m", "15m"):
-                start = end - timedelta(days=55)
-            else:
-                start = end - timedelta(days=700)
+        start = yfinance_history_start(timeframe, end, start)
 
         df = yf.download(
             ticker,
@@ -102,6 +115,8 @@ class MarketDataFetcher:
         tf_map = {
             "1d": TimeFrame(1, TimeFrameUnit.Day),
             "1h": TimeFrame(1, TimeFrameUnit.Hour),
+            "1m": TimeFrame(1, TimeFrameUnit.Minute),
+            "2m": TimeFrame(2, TimeFrameUnit.Minute),
             "5m": TimeFrame(5, TimeFrameUnit.Minute),
             "15m": TimeFrame(15, TimeFrameUnit.Minute),
         }
@@ -115,6 +130,8 @@ class MarketDataFetcher:
         chunk_days = {
             "1d": 730,
             "1h": 120,
+            "1m": 7,
+            "2m": 30,
             "5m": 30,
             "15m": 45,
         }[timeframe]

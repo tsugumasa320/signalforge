@@ -85,9 +85,12 @@ def build_published_summary() -> dict[str, Any]:
     from signalforge.experiments.scan import scan_campaign_progress
     from signalforge.paper.diversified_specs import DIVERSIFIED_PAPER_SIMULATIONS
 
+    from signalforge.experiments.intraday_campaign import without_intraday
+
     scan = scan_campaign_progress(fast=True)
     forward = {s.strategy for s in DIVERSIFIED_PAPER_SIMULATIONS}
-    rows, info = curate_strategy_rows(scan.get("complete") or [], preferred_ids=forward)
+    daily = without_intraday(scan.get("complete") or [])
+    rows, info = curate_strategy_rows(daily, preferred_ids=forward)
     cache = load_portfolio_returns_cache()
     port = cache.get("strategies") or {}
     keep = (

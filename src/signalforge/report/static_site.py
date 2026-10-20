@@ -185,6 +185,45 @@ def export_strategy_guide(output_dir: Path, strategy_key: str) -> Path:
     return path
 
 
+def _intraday_table() -> str:
+    from signalforge.experiments.intraday_campaign import intraday_result_rows
+    from signalforge.report.strategy_guide_builder import strategy_display_title
+
+    rows = intraday_result_rows()
+    if not rows:
+        return '<p class="muted">短期足の結果はまだありません。</p>'
+    body = ""
+    for row in rows:
+        ret = row.get("median_return_pct")
+        pf = row.get("median_profit_factor")
+        trades = row.get("median_trades")
+        try:
+            ret_s = f"{float(ret):+.2f}%" if ret is not None else "—"
+        except (TypeError, ValueError):
+            ret_s = "—"
+        try:
+            pf_s = f"{float(pf):.2f}" if pf is not None else "—"
+        except (TypeError, ValueError):
+            pf_s = "—"
+        trades_s = "—" if trades is None else f"{float(trades):.0f}"
+        body += (
+            "<tr>"
+            f"<td>{escape(row['timeframe_label'])}</td>"
+            f"<td>{escape(strategy_display_title(row['strategy_id']))}</td>"
+            f"<td>{escape(row['status'])}</td>"
+            f"<td>{escape(str(row.get('window') or '—'))}</td>"
+            f"<td>{ret_s}</td>"
+            f"<td>{pf_s}</td>"
+            f"<td>{trades_s}</td>"
+            "</tr>"
+        )
+    header = (
+        "<tr><th>足</th><th>戦略</th><th>状態</th><th>期間</th>"
+        "<th>中央リターン</th><th>中央PF</th><th>中央トレード数</th></tr>"
+    )
+    return f"<table><thead>{header}</thead><tbody>{body}</tbody></table>"
+
+
 def _comparison_table(rows: list[dict], *, kind: str) -> str:
     if not rows:
         return '<p class="muted">データがありません。</p>'
@@ -336,9 +375,15 @@ def export_hub(
       {_comparison_table(diversified_rows or [], kind="paper")}
     </section>
 
+    <section id="intraday">
+      <h2>⏱ 短期足の実験</h2>
+      <p class="muted">5分足は約60日、1分足は約7日。数字は全銘柄の中央値です。</p>
+      {_intraday_table()}
+    </section>
+
     <section id="backtest">
-      <h2>⚖️ TSE 実験 — 戦略比較（事前バックテスト）</h2>
-      <p class="muted">japan コスト · 1口座列 = 実運用ルールでの全期間シミュレーション（並び順）· 中央値列 = 全銘柄BTの典型値</p>
+      <h2>⚖️ 日足の実験 — 戦略比較（事前バックテスト）</h2>
+      <p class="muted">日足 · japan コスト · 1口座列 = 実運用ルールでの全期間シミュレーション（並び順）· 中央値列 = 全銘柄BTの典型値。5分足と1分足は上の表。</p>
       <p class="muted">{escape(tse_curation_note())}</p>
       {chart_html}
       {_comparison_table(backtest_rows, kind="tse")}

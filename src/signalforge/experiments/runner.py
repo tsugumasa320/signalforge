@@ -29,7 +29,8 @@ from signalforge.universe.tse_listing import listing_by_ticker, list_tse_tickers
 
 
 def experiments_dir() -> Path:
-    p = data_dir() / "reports" / "experiments"
+    override = os.getenv("SIGNALFORGE_EXPERIMENTS_DIR")
+    p = Path(override) if override else data_dir() / "reports" / "experiments"
     p.mkdir(parents=True, exist_ok=True)
     return p
 
@@ -142,6 +143,7 @@ def _finalize_strategy_doc(
     doc: dict[str, Any] = {
         "strategy_id": strategy_id,
         "style": style,
+        "timeframe": os.getenv("SIGNALFORGE_TIMEFRAME") or None,
         "n_tickers_target": len(tickers),
         "n_tickers_done": len(enriched),
         "complete": complete,
@@ -151,6 +153,9 @@ def _finalize_strategy_doc(
     }
     if backtest_capital:
         doc["backtest_capital"] = backtest_capital
+    window = next((r.get("backtest_window") for r in ok if r.get("backtest_window")), None)
+    if window:
+        doc["backtest_window"] = window
     doc["metrics_schema"] = {"pnl_basis": PNL_METRICS_SCHEMA}
     return doc
 
@@ -480,7 +485,11 @@ def run_experiment_campaign(
                 refreshed_series += 1
             budget.sleep_after_strategy()
             if aggregate_every > 0 and done % aggregate_every == 0:
-                build_experiment_summaries(strategy_ids, tickers_count=len(tickers))
+                build_experiment_summaries(
+                    summary_strategy_ids(strategy_ids),
+                    tickers_count=len(tickers),
+                    refresh=False,
+                )
         except Exception as exc:
             _strategy_path(sid).write_text(
                 json.dumps({"strategy_id": sid, "error": str(exc), "complete": False}, ensure_ascii=False, indent=2),
@@ -488,7 +497,11 @@ def run_experiment_campaign(
             )
             failed += 1
 
-    summary = build_experiment_summaries(strategy_ids, tickers_count=len(tickers))
+    summary = build_experiment_summaries(
+        summary_strategy_ids(strategy_ids),
+        tickers_count=len(tickers),
+        refresh=False,
+    )
     finished = datetime.now(timezone.utc).astimezone().isoformat()
     manifest = {
         "plan": "config/experiments/backtest_plan.yaml",
@@ -506,6 +519,7 @@ def run_experiment_campaign(
         "refreshed_series": refreshed_series,
         "refreshed_capital": refreshed_capital,
         "backtest_capital": backtest_capital,
+        "timeframe": os.getenv("SIGNALFORGE_TIMEFRAME") or None,
         "note": "skipped_complete = 全銘柄済み。--refresh-metrics / --refresh-series / --refresh-capital で完了分を再BT。",
     }
     (experiments_dir() / "manifest.json").write_text(
@@ -553,9 +567,36 @@ def refresh_completed_strategy_aggregates(strategy_ids: list[str] | None = None)
     return updated
 
 
-def build_experiment_summaries(strategy_ids: list[str], *, tickers_count: int) -> dict[str, Any]:
+def summary_strategy_ids(requested: list[str] | None = None) -> list[str]:
+    """Daily ranking stays on daily files. A short-bar folder summarizes that folder."""
+    from signalforge.experiments.intraday_campaign import PRICE_INTRADAY_STRATEGIES
+
+    dedicated = bool(os.getenv("SIGNALFORGE_EXPERIMENTS_DIR"))
+    skip = set() if dedicated else set(PRICE_INTRADAY_STRATEGIES)
+    if dedicated and requested:
+        return [sid for sid in requested if sid not in skip]
+    strat_dir = experiments_dir() / "strategies"
+    found = []
+    if strat_dir.is_dir():
+        for path in strat_dir.glob("*.json"):
+            name = path.name
+            if name.endswith(".tickers.json") or name.endswith(".checkpoint.json"):
+                continue
+            if path.stem in skip:
+                continue
+            found.append(path.stem)
+    return sorted(found)
+
+
+def build_experiment_summaries(
+    strategy_ids: list[str],
+    *,
+    tickers_count: int,
+    refresh: bool = True,
+) -> dict[str, Any]:
     """Roll up per-strategy JSON into segment / sector matrices."""
-    refresh_completed_strategy_aggregates(strategy_ids)
+    if refresh:
+        refresh_completed_strategy_aggregates(strategy_ids)
     seg_matrix: list[dict[str, Any]] = []
     sec_matrix: list[dict[str, Any]] = []
     universe_rows: list[dict[str, Any]] = []
@@ -640,6 +681,10 @@ def build_experiment_summaries(strategy_ids: list[str], *, tickers_count: int) -
     }
     (data_dir() / "reports" / "catalog_backtests.json").write_text(
         json.dumps(catalog, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    (experiments_dir() / "summary.json").write_text(
+        json.dumps(out, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
     return out

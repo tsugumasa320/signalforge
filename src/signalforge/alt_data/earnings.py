@@ -1,4 +1,4 @@
-"""Per-ticker earnings / ex-div dates via yfinance (best-effort for *.T)."""
+"""Per-ticker earnings dates via yfinance. Upcoming and past dates, without the 12-week J-Quants free delay."""
 
 from __future__ import annotations
 
@@ -37,9 +37,11 @@ def fetch_earnings_dates(ticker: str, *, sleep_s: float = 0.15) -> list[str]:
     cal = getattr(tk, "calendar", None)
     if isinstance(cal, dict):
         dates.extend(_parse_dates(cal.get("Earnings Date")))
-        dates.extend(_parse_dates(cal.get("Ex-Dividend Date")))
+    elif cal is not None and hasattr(cal, "to_dict"):
+        raw = cal.to_dict()
+        dates.extend(_parse_dates(raw.get("Earnings Date")))
     try:
-        edf = tk.get_earnings_dates(limit=24)
+        edf = tk.get_earnings_dates(limit=48)
         if edf is not None and not getattr(edf, "empty", True):
             for ts in edf.index:
                 dates.append(pd_timestamp_to_iso(ts))
@@ -52,14 +54,23 @@ def fetch_earnings_dates(ticker: str, *, sleep_s: float = 0.15) -> list[str]:
 def pd_timestamp_to_iso(ts: Any) -> str:
     t = pd.Timestamp(ts)
     if t.tz is not None:
-        t = t.tz_convert(None)
+        t = t.tz_convert("Asia/Tokyo")
     return t.strftime("%Y-%m-%d")
 
 
-def save_earnings(ticker: str, dates: list[str]) -> None:
+def save_earnings(ticker: str, dates: list[str], *, source: str = "yfinance") -> None:
     path = earnings_path(ticker)
     path.write_text(
-        json.dumps({"ticker": ticker, "event_dates": dates, "source": "yfinance"}, ensure_ascii=False, indent=2),
+        json.dumps(
+            {
+                "ticker": ticker,
+                "earnings_dates": dates,
+                "event_dates": dates,
+                "source": source,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
 
@@ -72,7 +83,7 @@ def load_earnings(ticker: str) -> list[str]:
         doc = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return []
-    raw = doc.get("event_dates") or doc.get("earnings_dates") or []
+    raw = doc.get("earnings_dates") or doc.get("event_dates") or []
     return [str(d)[:10] for d in raw if d]
 
 
@@ -90,7 +101,10 @@ def fetch_earnings_universe(
         if path.exists() and not refresh:
             ok += 1
             continue
-        dates = fetch_earnings_dates(sym)
+        try:
+            dates = fetch_earnings_dates(sym)
+        except Exception:
+            dates = []
         save_earnings(sym, dates)
         if dates:
             ok += 1

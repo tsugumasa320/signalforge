@@ -7,6 +7,15 @@ import pandas as pd
 
 from signalforge.interpret.audit import RuleCheck
 from signalforge.strategies.base import BaseStrategy
+from signalforge.strategies.intraday_signals import (
+    opening_gap_session,
+    pivot_bounce,
+    prior_day_level_break,
+    psar_flip,
+    session_high_break,
+    session_momentum,
+    session_vwap_fade,
+)
 
 
 def _cross_up(prev_a: float, prev_b: float, a: float, b: float) -> bool:
@@ -507,6 +516,14 @@ _TEMPLATE_REGISTRY: dict[str, Callable[..., pd.Series]] = {
     "swing_pullback_ema": _swing_pullback_ema,
     "bb_squeeze_proxy": _bb_squeeze_proxy,
     "vwap_proxy_daily": _vwap_proxy_daily,
+    "session_vwap": _vwap_proxy_daily,
+    "opening_gap_session": opening_gap_session,
+    "prior_day_level_break": prior_day_level_break,
+    "session_high_break": session_high_break,
+    "session_momentum": session_momentum,
+    "session_vwap_fade": session_vwap_fade,
+    "pivot_bounce": pivot_bounce,
+    "psar_flip": psar_flip,
     "ema_pullback_proxy": _ema_pullback_proxy,
     "sector_relative_momentum": _sector_relative_momentum,
     "sector_spread_zscore": _sector_spread_zscore,

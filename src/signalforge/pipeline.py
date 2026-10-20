@@ -153,6 +153,14 @@ def run_backtest_pipeline(
     profile = StyleProfile.from_config(cfg)
     strategy = get_strategy(strategy_name, cfg)
     signals = strategy.generate_signals(df)
+    from signalforge.data.entry_filters import filter_reversion_signals
+
+    signals = filter_reversion_signals(
+        signals,
+        ticker=ticker,
+        strategy_id=strategy_name,
+        timeframe=timeframe,
+    )
 
     meta: MetaLabelFilter | None = None
     ml_report: dict[str, Any] = {"trained": False}
@@ -207,9 +215,13 @@ def run_backtest_pipeline(
         "ticker": ticker,
         "data_source": data_source,
         "cost_model": cost_model,
-        "backtest_window": window_label(bt_start, bt_end, len(df)),
-        "backtest_start": str(bt_start.date()) if bt_start is not None else None,
-        "backtest_end": str(bt_end.date()) if bt_end is not None else None,
+        "backtest_window": window_label(
+            pd.Timestamp(df.index.min()) if len(df) else bt_start,
+            pd.Timestamp(df.index.max()) if len(df) else bt_end,
+            len(df),
+        ),
+        "backtest_start": str(pd.Timestamp(df.index.min()).date()) if len(df) else None,
+        "backtest_end": str(pd.Timestamp(df.index.max()).date()) if len(df) else None,
     }
     if not slim_return:
         payload.update(

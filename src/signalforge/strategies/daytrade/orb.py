@@ -6,6 +6,20 @@ from signalforge.interpret.audit import RuleCheck
 from signalforge.strategies.base import BaseStrategy
 
 
+def opening_range_bars(index: pd.Index, or_minutes: int) -> int:
+    """How many bars cover the opening range. 5-minute data is 4 bars for 20 minutes; 1-minute data is 20."""
+    if or_minutes <= 0:
+        return 4
+    if len(index) < 2:
+        return max(1, or_minutes // 5)
+    diffs = pd.Series(index).diff().dt.total_seconds().div(60.0)
+    usable = diffs[(diffs > 0) & (diffs <= 30)]
+    minutes = float(usable.median()) if len(usable) else 5.0
+    if minutes != minutes or minutes <= 0:
+        minutes = 5.0
+    return max(1, int(round(or_minutes / minutes)))
+
+
 class OrbStrategy(BaseStrategy):
     name = "orb"
 
@@ -30,7 +44,7 @@ class OrbStrategy(BaseStrategy):
             if len(day_df) < 5:
                 continue
 
-            or_bars = min(self.or_minutes // 5, len(day_df) // 2) if self.or_minutes else 4
+            or_bars = min(opening_range_bars(day_df.index, self.or_minutes), len(day_df) // 2)
             or_slice = day_df.iloc[:or_bars]
             or_high = or_slice["high"].max()
             or_low = or_slice["low"].min()

@@ -190,6 +190,14 @@ def run_paper_daily(
     profile = StyleProfile.from_config(cfg)
     strat = get_strategy(strategy, cfg)
     signals = strat.generate_signals(df)
+    from signalforge.data.entry_filters import filter_reversion_signals
+
+    signals = filter_reversion_signals(
+        signals,
+        ticker=resolve_ticker(cfg, None),
+        strategy_id=strategy,
+        timeframe=cfg.get("timeframe", "1d"),
+    )
 
     engine = BacktestEngine(
         profile,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +16,9 @@ CORE_TICKER_METRIC_KEYS = ("avg_pnl_pct", "max_drawdown_pct")
 
 
 def _strategies_dir() -> Path:
-    d = data_dir() / "reports" / "experiments" / "strategies"
+    override = os.getenv("SIGNALFORGE_EXPERIMENTS_DIR")
+    base = Path(override) if override else data_dir() / "reports" / "experiments"
+    d = base / "strategies"
     d.mkdir(parents=True, exist_ok=True)
     return d
 

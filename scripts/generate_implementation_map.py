@@ -86,20 +86,20 @@ def _spec(catalog_id: str, tags: list[str], style: str) -> dict:
             "template": "ma_cross",
             "params": {"fast": "ema20", "slow": "ema50", "direction": "dead", "long_only": False},
         },
-        "vwap_pullback_long": {"template": "vwap_proxy_daily", "params": {"mode": "pullback"}},
-        "vwap_mean_reversion_short": {"template": "vwap_proxy_daily", "params": {"mode": "mean_rev_short"}},
-        "vwap_breakout_follow": {"template": "vwap_proxy_daily", "params": {"mode": "breakout"}},
-        "am_high_breakout_volume": {"template": "volume_breakout", "params": {"volume_ratio_min": 1.5}},
-        "pm_high_breakout": {"template": "donchian_breakout", "params": {"period": 5}},
+        "vwap_pullback_long": {"template": "session_vwap", "params": {"mode": "pullback"}},
+        "vwap_mean_reversion_short": {"template": "session_vwap", "params": {"mode": "mean_rev_short"}},
+        "vwap_breakout_follow": {"template": "session_vwap", "params": {"mode": "breakout"}},
+        "am_high_breakout_volume": {"template": "session_high_break", "params": {"session": "morning", "volume_ratio_min": 1.5}},
+        "pm_high_breakout": {"template": "session_high_break", "params": {"session": "afternoon", "volume_ratio_min": 1.2}},
         "relative_volume_filter": {"template": "volume_breakout", "params": {"volume_ratio_min": 1.8}},
-        "opening_gap_daytrade": {"template": "gap_up", "params": {"min_gap_pct": 0.005}},
-        "first_hour_momentum": {"template": "momentum_ema", "params": {"ema_col": "ema9"}},
-        "lunch_break_fade": {"template": "mean_reversion_rsi", "approximation": "日足近似"},
-        "close_momentum": {"template": "momentum_ema", "params": {"ema_col": "ema5"}},
-        "prior_day_hl_break": {"template": "donchian_breakout", "params": {"period": 2}},
-        "pivot_point_bounce": {"template": "swing_pullback_ema", "params": {"ema_col": "ema20"}},
+        "opening_gap_daytrade": {"template": "opening_gap_session", "params": {"min_gap_pct": 0.005}},
+        "first_hour_momentum": {"template": "session_momentum", "params": {"start": "09:00", "end": "10:00", "ema_col": "ema9"}},
+        "lunch_break_fade": {"template": "session_vwap_fade", "params": {"start": "11:00", "end": "11:30"}},
+        "close_momentum": {"template": "session_momentum", "params": {"start": "14:30", "end": "15:00", "ema_col": "ema9"}},
+        "prior_day_hl_break": {"template": "prior_day_level_break"},
+        "pivot_point_bounce": {"template": "pivot_bounce"},
         "ema9_21_scalp_5m": {"template": "ma_cross", "params": {"fast": "ema9", "slow": "ema21"}},
-        "parabolic_sar_intraday": {"template": "adx_trend", "params": {"adx_min": 15, "ema_col": "ema9"}},
+        "parabolic_sar_intraday": {"template": "psar_flip"},
         "weekly_swing_multiframe": {"template": "ma_cross", "params": {"fast": "ema20", "slow": "ema50"}},
         "earnings_drift": {
             "template": "post_earnings_drift",
@@ -138,8 +138,16 @@ def _spec(catalog_id: str, tags: list[str], style: str) -> dict:
         "youtube_new_high_box_break": {"template": "donchian_breakout", "params": {"period": 20}},
         "youtube_elliott_multiframe": {"template": "ma_cross", "params": {"fast": "ema20", "slow": "ema50"}},
         "youtube_dow_theory_trend": {"template": "ma_cross", "params": {"fast": "ema50", "slow": "ema200"}},
-        "vwap_orderflow_itasha": {"template": "vwap_proxy_daily", "approximation": "板情報なし→VWAP日足代理"},
-        "professional_daytrader_session": {"template": "momentum_ema", "params": {"ema_col": "ema9"}, "approximation": "時間帯なし"},
+        "vwap_orderflow_itasha": {
+            "template": "session_vwap",
+            "params": {"mode": "breakout"},
+            "approximation": "板情報なし。セッションVWAPの抜けだけ",
+        },
+        "professional_daytrader_session": {
+            "template": "session_momentum",
+            "params": {"windows": [["09:00", "10:00"], ["14:00", "15:00"]], "ema_col": "ema9"},
+            "approximation": "寄りと引けの時間帯だけ。板や習慣データはない",
+        },
         "kabutan_preset_macd_buy": {"template": "builtin_macd", "params": {"ema_trend": 50}},
         "kabutan_preset_rsi_oversold": {"template": "rsi_oversold", "params": {"rsi_max": 20, "rsi_reclaim": 20}},
         "kabutan_preset_rsi_overbought": {
@@ -183,8 +191,6 @@ def _spec(catalog_id: str, tags: list[str], style: str) -> dict:
 
     if cid in explicit:
         spec = explicit[cid]
-        if style == "daytrade" and "template" in spec and spec["template"] not in ("gap_up",):
-            spec = {**spec, "backtest_style": "swing", "approximation": spec.get("approximation") or "日足でデイトレ手法を近似"}
         return spec
 
     if "ichimoku" in t:
@@ -198,7 +204,7 @@ def _spec(catalog_id: str, tags: list[str], style: str) -> dict:
     if "screening" in t or "kabutan" in t or "minkabu" in t:
         return {"template": "volume_breakout", "params": {"volume_ratio_min": 1.5}}
     if style == "daytrade":
-        return {"template": "momentum_ema", "params": {"ema_col": "ema9"}, "backtest_style": "swing", "approximation": "日足近似"}
+        return {"template": "session_momentum", "params": {"start": "09:00", "end": "10:00", "ema_col": "ema9"}}
     if "ma" in t or "trend" in t:
         return {"template": "ma_cross", "params": {"fast": "ema20", "slow": "ema50"}}
     return {"template": "momentum_ema", "params": {"ema_col": "ema20"}, "approximation": "汎用モメンタム近似"}
