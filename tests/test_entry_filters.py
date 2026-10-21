@@ -1,4 +1,4 @@
-"""Daily mean-reversion entries skip earnings and require an hourly oversold print."""
+"""Daily mean-reversion entries skip earnings. Hourly RSI is not an entry gate."""
 
 from __future__ import annotations
 

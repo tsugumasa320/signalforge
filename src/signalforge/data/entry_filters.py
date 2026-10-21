@@ -1,8 +1,10 @@
 """Entry filters for daily mean-reversion, using only current Yahoo data.
 
 Earnings dates are the announcement calendar (no 12-week vendor delay).
-Hourly bars cover about the last two years. Days without an hourly cache
-keep the daily signal.
+Hourly RSI is not used as an entry gate. On the liquid universe, about two
+years of Yahoo 1-hour bars, requiring the session RSI to reach 30 lowered
+the later return of the mean-reversion and Bollinger entries. The other
+reversion books showed almost no relationship.
 """
 
 from __future__ import annotations
@@ -13,7 +15,6 @@ import pandas as pd
 
 from signalforge.alt_data.earnings import load_earnings
 from signalforge.config import load_implementation_map
-from signalforge.data.cache import ParquetCache
 from signalforge.indicators.engine import rsi
 
 EARNINGS_BLACKOUT_DAYS = 1
@@ -31,7 +32,6 @@ _REVERSION_TEMPLATES = frozenset(
 )
 
 _earnings_cache: dict[str, list[str]] = {}
-_hourly_cache: dict[str, dict[date, tuple[float, float]]] = {}
 
 
 def session_date(ts: pd.Timestamp | datetime | str) -> date:
@@ -131,13 +131,6 @@ def _earnings_for(ticker: str) -> list[str]:
     return _earnings_cache[ticker]
 
 
-def _hourly_for(ticker: str) -> dict[date, tuple[float, float]]:
-    if ticker not in _hourly_cache:
-        frame = ParquetCache().load(ticker, "1h")
-        _hourly_cache[ticker] = session_rsi_extremes(frame) if frame is not None else {}
-    return _hourly_cache[ticker]
-
-
 def filter_reversion_signals(
     signals: pd.Series,
     *,
@@ -147,5 +140,4 @@ def filter_reversion_signals(
 ) -> pd.Series:
     if timeframe != "1d" or not uses_reversion_entry(strategy_id):
         return signals
-    out = apply_earnings_blackout(signals, _earnings_for(ticker))
-    return apply_hourly_confirmation(out, _hourly_for(ticker))
+    return apply_earnings_blackout(signals, _earnings_for(ticker))
