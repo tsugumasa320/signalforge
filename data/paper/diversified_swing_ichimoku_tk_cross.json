@@ -15,24 +15,24 @@
   "currency": "JPY",
   "started_at": "2026-10-16T07:32:13.578182+00:00",
   "entry_cutoff": "2026-10-16 00:00:00+00:00",
-  "last_run_at": "2026-10-29T17:14:40.332632+00:00",
+  "last_run_at": "2026-10-30T17:00:49.937388+00:00",
   "universe_size": 1018,
   "last_sim": {
     "initial_capital": 3000000.0,
-    "final_equity": 3000000.0,
-    "total_return_pct": 0.0,
-    "accepted_trades": 0,
-    "skipped_overlap": 0,
-    "skipped": 0,
+    "final_equity": 2899698.407020096,
+    "total_return_pct": -3.3433864326634644,
+    "accepted_trades": 5,
+    "skipped_overlap": 18,
+    "skipped": 18,
     "skipped_regime": 0,
-    "skipped_turnover": 19,
+    "skipped_turnover": 28,
     "min_turnover_jpy": 500000000.0,
-    "skipped_breadth": 75,
+    "skipped_breadth": 76,
     "min_breadth_rank": 0.8,
     "max_positions": 5,
     "position_pct": 0.2,
-    "max_drawdown_pct": 0.0,
-    "win_rate_pct": null,
+    "max_drawdown_pct": -3.3433864326634644,
+    "win_rate_pct": 0.0,
     "equity_daily": {
       "d": [
         "2026-10-16",
@@ -48,7 +48,8 @@
         "2026-10-26",
         "2026-10-27",
         "2026-10-28",
-        "2026-10-29"
+        "2026-10-29",
+        "2026-10-30"
       ],
       "v": [
         3000000.0,
@@ -63,11 +64,63 @@
         3000000.0,
         3000000.0,
         3000000.0,
-        3000000.0,
-        3000000.0
+        2922599.1256682267,
+        2899698.407020096,
+        2899698.407020096
       ]
     },
-    "fills": [],
+    "fills": [
+      {
+        "ticker": "1925.T",
+        "entry_time": "2026-10-26",
+        "exit_time": "2026-10-28",
+        "entry_price": 2309.154,
+        "exit_price": 2250.2254285714284,
+        "pnl_pct": -2.7564884782494654,
+        "pnl_jpy": -16293.604251190853,
+        "notional": 591100.0310633717
+      },
+      {
+        "ticker": "2502.T",
+        "entry_time": "2026-10-26",
+        "exit_time": "2026-10-28",
+        "entry_price": 1690.8449999999998,
+        "exit_price": 1640.7021428571427,
+        "pnl_pct": -3.1692155560530275,
+        "pnl_jpy": -18852.730872203185,
+        "notional": 594870.5772378122
+      },
+      {
+        "ticker": "8830.T",
+        "entry_time": "2026-10-26",
+        "exit_time": "2026-10-28",
+        "entry_price": 3340.6695,
+        "exit_price": 3204.5980714285715,
+        "pnl_pct": -4.2745189684898355,
+        "pnl_jpy": -25647.113810939012,
+        "notional": 600000.0
+      },
+      {
+        "ticker": "9021.T",
+        "entry_time": "2026-10-26",
+        "exit_time": "2026-10-28",
+        "entry_price": 3129.564,
+        "exit_price": 3046.849714285714,
+        "pnl_pct": -2.847339468452343,
+        "pnl_jpy": -16607.425397440435,
+        "notional": 583261.1664835074
+      },
+      {
+        "ticker": "3659.T",
+        "entry_time": "2026-10-26",
+        "exit_time": "2026-10-29",
+        "entry_price": 2794.89675,
+        "exit_price": 2691.664607142857,
+        "pnl_pct": -3.8957314244940684,
+        "pnl_jpy": -22900.7186481307,
+        "notional": 587841.3102131335
+      }
+    ],
     "entry_priority": "sector_turnover",
     "regime_filter": "none"
   },
