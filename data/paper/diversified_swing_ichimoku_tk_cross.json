@@ -15,19 +15,19 @@
   "currency": "JPY",
   "started_at": "2026-10-16T07:32:13.578182+00:00",
   "entry_cutoff": "2026-10-16 00:00:00+00:00",
-  "last_run_at": "2026-10-30T17:00:49.937388+00:00",
+  "last_run_at": "2026-10-31T16:23:45.576408+00:00",
   "universe_size": 1018,
   "last_sim": {
     "initial_capital": 3000000.0,
     "final_equity": 2899698.407020096,
     "total_return_pct": -3.3433864326634644,
     "accepted_trades": 5,
-    "skipped_overlap": 18,
-    "skipped": 18,
+    "skipped_overlap": 19,
+    "skipped": 19,
     "skipped_regime": 0,
-    "skipped_turnover": 28,
+    "skipped_turnover": 30,
     "min_turnover_jpy": 500000000.0,
-    "skipped_breadth": 76,
+    "skipped_breadth": 80,
     "min_breadth_rank": 0.8,
     "max_positions": 5,
     "position_pct": 0.2,
@@ -49,7 +49,8 @@
         "2026-10-27",
         "2026-10-28",
         "2026-10-29",
-        "2026-10-30"
+        "2026-10-30",
+        "2026-10-31"
       ],
       "v": [
         3000000.0,
@@ -65,6 +66,7 @@
         3000000.0,
         3000000.0,
         2922599.1256682267,
+        2899698.407020096,
         2899698.407020096,
         2899698.407020096
       ]
