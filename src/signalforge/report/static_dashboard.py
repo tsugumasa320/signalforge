@@ -317,6 +317,7 @@ def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1, ref
     from signalforge.paper.diversified import DiversifiedPaperBook
     from signalforge.report.benchmark import align_benchmark_to_equity, load_nikkei225_close
     from signalforge.report.charts import plot_equity_vs_benchmark_index
+    from signalforge.report.paper_strategy_explain import diversified_strategy_rules_html
 
     if not isinstance(book, DiversifiedPaperBook):
         return None
@@ -333,10 +334,19 @@ def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1, ref
         eq_idx, nik_idx = align_benchmark_to_equity(eq_raw, nikkei)
         fig = plot_equity_vs_benchmark_index(eq_idx, nik_idx, title="フォワード期間 · 資産 vs 日経225")
         chart_html = fig_to_html_block(fig, include_plotlyjs="cdn", div_id="equity-nikkei")
+    rules_html = diversified_strategy_rules_html(
+        book.strategy,
+        style=book.style,
+        max_positions=book.max_positions,
+        position_pct=book.position_pct,
+        entry_rules=book.entry_rules(),
+    )
+    queue = "売買代金の大きい順" if book.entry_priority == "sector_turnover" else escape(str(book.entry_priority))
     body = f"""
+    {rules_html}
     <div class="info-box">
       1口座 ¥{book.initial_capital:,.0f} · 同時最大 {book.max_positions} 銘柄 ·
-      1エントリー {book.position_pct * 100:.0f}% · 先着（枠不足はスキップ）<br>
+      1エントリー {book.position_pct * 100:.0f}% · {queue}（枠不足はスキップ）<br>
       ユニバース: {escape(book.cohort)} · {book.universe_size} 銘柄 ·
       エントリ開始: {escape(book.entry_cutoff)} 以降
     </div>

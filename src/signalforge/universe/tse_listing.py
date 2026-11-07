@@ -24,6 +24,38 @@ MARKET_TO_SEGMENT = {
     "グロース（内国株式）": "growth",
 }
 
+# 英字入り銘柄コードは3桁+英字1字（I/O は使わない）。JPX が末尾0付きで出す場合（285A0）は Yahoo 形（285A）へ戻す。
+_ALPHA_LISTING_CODE = re.compile(r"^(\d{3}[A-HJ-NP-Z])0?$")
+
+
+def _normalize_listing_code(raw: Any) -> str | None:
+    """JPX「コード」セルを Yahoo ティッカーのベースへ。不正なら None。
+
+    数字コードは従来どおり（4桁へ zfill、5桁の優先株などはそのまま）。
+    英字コードは 3桁+I/O 以外の英字。末尾の予備桁 0 だけ落とす。
+    """
+    if isinstance(raw, bool):
+        return None
+    try:
+        if pd.isna(raw):
+            return None
+    except (TypeError, ValueError):
+        return None
+    if isinstance(raw, (int, float)):
+        if isinstance(raw, float) and not float(raw).is_integer():
+            return None
+        text = str(int(raw))
+    else:
+        text = str(raw).strip().upper()
+        if not text or text == "NAN":
+            return None
+    if text.isdigit():
+        return text.zfill(4)
+    match = _ALPHA_LISTING_CODE.fullmatch(text)
+    if not match:
+        return None
+    return match.group(1)
+
 
 def _cache_path() -> Path:
     p = data_dir() / "universe"
@@ -51,13 +83,9 @@ def _parse_jpx_frame(df: pd.DataFrame) -> list[dict[str, Any]]:
 
     rows: list[dict[str, Any]] = []
     for _, r in df.iterrows():
-        raw = r.get(code_col)
-        if pd.isna(raw):
+        code = _normalize_listing_code(r.get(code_col))
+        if code is None:
             continue
-        code = str(int(raw) if isinstance(raw, (int, float)) else raw).strip()
-        if not code.isdigit():
-            continue
-        code = code.zfill(4)
         sym = f"{code}.T"
         market = str(r.get(market_col, "")) if market_col else ""
         segment = MARKET_TO_SEGMENT.get(market)
