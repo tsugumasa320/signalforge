@@ -78,6 +78,8 @@ def _row_from_pipeline_result(sym: str, result: dict[str, Any], *, compact: bool
     for key in ("trades_compact", "equity_daily", "series_schema"):
         if key in result:
             row[key] = result[key]
+    if result.get("open_position"):
+        row["open_position"] = result["open_position"]
     return row
 
 

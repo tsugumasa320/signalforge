@@ -159,28 +159,58 @@ def simulate_from_experiment_strategy(
     }
 
 
+def _closed_trades_frame(row: dict[str, Any]) -> pd.DataFrame:
+    compact = row.get(TRADES_COMPACT_KEY)
+    if compact:
+        trades = unpack_trades(compact)
+    else:
+        raw = row.get("trades")
+        if not raw:
+            return pd.DataFrame()
+        trades = pd.DataFrame(raw)
+    if trades.empty:
+        return trades
+    trades = trades.copy()
+    trades["ticker"] = row.get("ticker") or "?"
+    trades["still_open"] = False
+    if "entry_time" in trades.columns:
+        trades["entry_time"] = pd.to_datetime(trades["entry_time"])
+    if "exit_time" in trades.columns:
+        trades["exit_time"] = pd.to_datetime(trades["exit_time"])
+    return trades
+
+
+def _open_position_frame(row: dict[str, Any]) -> pd.DataFrame:
+    """A position still held at the last bar. It occupies a portfolio slot and has no realized pnl."""
+    pos = row.get("open_position")
+    if not isinstance(pos, dict) or not pos.get("entry_time"):
+        return pd.DataFrame()
+    return pd.DataFrame(
+        [
+            {
+                "ticker": row.get("ticker") or "?",
+                "entry_time": pd.to_datetime(pos["entry_time"]),
+                "exit_time": pd.NaT,
+                "entry_price": pos.get("entry_price"),
+                "pnl_pct": 0.0,
+                "side": pos.get("side"),
+                "still_open": True,
+            }
+        ]
+    )
+
+
 def trades_pool_from_backtest_rows(rows: list[dict[str, Any]]) -> pd.DataFrame:
     frames: list[pd.DataFrame] = []
     for row in rows:
         if row.get("error"):
             continue
-        compact = row.get(TRADES_COMPACT_KEY)
-        if compact:
-            trades = unpack_trades(compact)
-        else:
-            raw = row.get("trades")
-            if not raw:
-                continue
-            trades = pd.DataFrame(raw)
-        if trades.empty:
-            continue
-        trades = trades.copy()
-        trades["ticker"] = row.get("ticker") or "?"
-        if "entry_time" in trades.columns:
-            trades["entry_time"] = pd.to_datetime(trades["entry_time"])
-        if "exit_time" in trades.columns:
-            trades["exit_time"] = pd.to_datetime(trades["exit_time"])
-        frames.append(trades)
+        closed = _closed_trades_frame(row)
+        if not closed.empty:
+            frames.append(closed)
+        opened = _open_position_frame(row)
+        if not opened.empty:
+            frames.append(opened)
     if not frames:
         return pd.DataFrame()
     pool = drop_broken_trades(pd.concat(frames, ignore_index=True))

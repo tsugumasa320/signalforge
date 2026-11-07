@@ -289,12 +289,23 @@ class BacktestEngine:
         trades_df = pd.DataFrame(trade_rows)
         metrics = compute_metrics(trades_df, equity)
         metrics.update(self._capital.to_metrics_fragment())
+        open_position = None
+        if position != 0 and 0 <= entry_idx < len(df):
+            # Still held at the last bar. Keep it out of closed-trade metrics, but
+            # the portfolio layer needs it so the slot stays taken until the exit exists.
+            open_position = {
+                "entry_time": df.index[entry_idx],
+                "entry_price": float(entry_price),
+                "side": side,
+                "still_open": True,
+            }
         return BacktestResult(
             trades=trades_df,
             equity_curve=equity,
             metrics=metrics,
             journal_run_id=self.journal.run_id,
             final_cash=cash,
+            open_position=open_position,
             final_state={
                 "cash": cash,
                 "position": position,

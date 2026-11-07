@@ -156,7 +156,8 @@ def equity_daily_from_accepted(
 
     cash = float(initial_capital)
     points: list[tuple[pd.Timestamp, float]] = [(start.normalize(), cash)]
-    rows = sorted(accepted, key=lambda r: pd.Timestamp(r["exit_ts"]))
+    closed = [r for r in accepted if not r.get("still_open") and pd.notna(r.get("exit_ts"))]
+    rows = sorted(closed, key=lambda r: pd.Timestamp(r["exit_ts"]))
     for row in rows:
         cash += float(row.get("pnl_jpy") or 0.0)
         ts = pd.Timestamp(row["exit_ts"])
@@ -239,12 +240,17 @@ def simulate_diversified_portfolio(
 
     entry_arr = t["entry_ts"].to_numpy()
     exit_arr = t["exit_ts"].to_numpy()
+    still_arr = (
+        t["still_open"].fillna(False).astype(bool).tolist()
+        if "still_open" in t.columns
+        else [False] * len(t)
+    )
     pnl_arr = t["pnl_pct"].astype(float).to_numpy() / 100.0
     sec_arr = t["sector_tse"].fillna("").astype(str).to_numpy() if cap_sector else None
     index_arr = t.index.to_numpy()
 
     for i in range(len(t)):
-        entry_ts = entry_arr[i]
+        entry_ts = pd.Timestamp(entry_arr[i])
         open_slots = [s for s in open_slots if s[0] > entry_ts]
         if len(open_slots) >= max_positions:
             skipped += 1
@@ -257,8 +263,11 @@ def simulate_diversified_portfolio(
         if notional <= 0:
             skipped += 1
             continue
-        cash += notional * pnl_arr[i]
-        open_slots.append((exit_arr[i], sec))
+        still = bool(still_arr[i])
+        # Bought, so the slot stays taken. Realized pnl waits until the exit exists.
+        cash += 0.0 if still else notional * pnl_arr[i]
+        hold_until = entry_ts + pd.Timedelta(days=36500) if still else pd.Timestamp(exit_arr[i])
+        open_slots.append((hold_until, sec))
         accepted_idx.append(index_arr[i])
         accepted_notional.append(notional)
 

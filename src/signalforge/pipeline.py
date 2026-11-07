@@ -222,6 +222,7 @@ def run_backtest_pipeline(
         ),
         "backtest_start": str(pd.Timestamp(df.index.min()).date()) if len(df) else None,
         "backtest_end": str(pd.Timestamp(df.index.max()).date()) if len(df) else None,
+        "open_position": result.open_position,
     }
     if not slim_return:
         payload.update(

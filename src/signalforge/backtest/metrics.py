@@ -15,6 +15,7 @@ class BacktestResult:
     journal_run_id: str
     final_cash: float = 0.0
     final_state: dict[str, Any] | None = None
+    open_position: dict[str, Any] | None = None
 
 
 def compute_metrics(trades: pd.DataFrame, equity: pd.Series) -> dict[str, Any]:

@@ -141,6 +141,63 @@ def test_breadth_filter_keeps_only_crowded_days():
     assert out["skipped_breadth"] == len(pool) - 8
 
 
+def test_open_position_keeps_the_slot_until_it_exits():
+    """A buy that has not exited yet still uses a slot, so a later signal is not shown as taken."""
+    trades = pd.DataFrame(
+        [
+            {
+                "ticker": "HELD",
+                "entry_time": "2026-10-21",
+                "exit_time": pd.NaT,
+                "pnl_pct": 0.0,
+                "still_open": True,
+            },
+            _trade("LATER", "2026-10-23", "2026-10-28", 10.0),
+        ]
+    )
+    out = simulate_diversified_portfolio(
+        trades,
+        initial_capital=3_000_000,
+        max_positions=1,
+        position_pct=0.2,
+        entry_priority="first_come",
+        chart_start=pd.Timestamp("2026-10-16"),
+        chart_end=pd.Timestamp("2026-11-06"),
+    )
+    assert out["accepted_trades"] == 1
+    assert out["skipped_overlap"] == 1
+    assert out["fills"][0]["ticker"] == "HELD"
+    assert out["fills"][0]["exit_time"] is None
+    assert out["final_equity"] == 3_000_000
+
+
+def test_open_position_joins_the_trade_pool():
+    from signalforge.portfolio.diversified import trades_pool_from_backtest_rows
+
+    pool = trades_pool_from_backtest_rows(
+        [
+            {
+                "ticker": "2379.T",
+                "trades_compact": [],
+                "open_position": {
+                    "entry_time": "2026-10-21",
+                    "entry_price": 1000.0,
+                    "side": "long",
+                    "still_open": True,
+                },
+            },
+            {
+                "ticker": "6269.T",
+                "trades_compact": [{"e": "2026-10-23", "x": "2026-10-26", "p": 6.0}],
+            },
+        ]
+    )
+    assert set(pool["ticker"]) == {"2379.T", "6269.T"}
+    held = pool.loc[pool["ticker"] == "2379.T"].iloc[0]
+    assert bool(held["still_open"]) is True
+    assert pd.isna(held["exit_time"])
+
+
 def test_paper_book_upgrades_legacy_rules(tmp_path, monkeypatch):
     import json
 
