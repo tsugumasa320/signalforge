@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
@@ -20,109 +21,11 @@ def _pct(value: float | None, *, digits: int = 1) -> str:
     return f'<span class="{cls}">{text}</span>' if cls else text
 
 
-def _yen(value: float | None) -> str:
-    if value is None:
-        return "—"
-    return f"{value:,.0f}"
-
-
-def _oku(value: float | None) -> str:
-    if value is None:
-        return "—"
-    return f"{value / 1e8:.1f}"
-
-
-def _rules_html(markdown: str) -> str:
-    lines = []
-    for raw in (markdown or "").splitlines():
-        line = raw.rstrip()
-        if not line:
-            continue
-        if line.startswith("# "):
-            continue
-        if line.startswith("## "):
-            lines.append(f"<h3>{escape(line[3:])}</h3>")
-        elif line.startswith("- "):
-            lines.append(f"<li>{escape(line[2:])}</li>")
-        else:
-            lines.append(f"<p class='muted'>{escape(line)}</p>")
-    # wrap consecutive li
-    out: list[str] = []
-    in_ul = False
-    for item in lines:
-        if item.startswith("<li>"):
-            if not in_ul:
-                out.append("<ul class='compact'>")
-                in_ul = True
-            out.append(item)
-        else:
-            if in_ul:
-                out.append("</ul>")
-                in_ul = False
-            out.append(item)
-    if in_ul:
-        out.append("</ul>")
-    return "\n".join(out)
-
-
-def _ranking_table(rows: list[dict[str, Any]], *, show_target: bool = True) -> str:
-    header = (
-        "<tr><th>#</th><th>コード</th><th>会社名</th><th>業種</th>"
-        "<th>1年</th><th>20日</th><th>52週DD</th><th>終値</th><th>売買代金(億)</th>"
-        f"{'<th></th>' if show_target else ''}</tr>"
-    )
-    body_parts: list[str] = []
-    for row in rows:
-        rank = row.get("rank")
-        badge = ""
-        if show_target and row.get("target"):
-            badge = '<span class="badge">保有</span>'
-        body_parts.append(
-            "<tr>"
-            f"<td>{rank if rank is not None else '—'}</td>"
-            f"<td>{escape(str(row.get('code') or ''))}</td>"
-            f"<td>{escape(str(row.get('name') or ''))}</td>"
-            f"<td class='muted'>{escape(str(row.get('sector') or ''))}</td>"
-            f"<td>{_pct(row.get('ret_1y'))}</td>"
-            f"<td>{_pct(row.get('ret_20d'))}</td>"
-            f"<td>{_pct(row.get('dd_52w'))}</td>"
-            f"<td>{_yen(row.get('price'))}</td>"
-            f"<td>{_oku(row.get('turnover_20d'))}</td>"
-            f"{f'<td>{badge}</td>' if show_target else ''}"
-            "</tr>"
-        )
-    return f"<table><thead>{header}</thead><tbody>{''.join(body_parts)}</tbody></table>"
-
-
-def _rejected_table(rows: list[dict[str, Any]], *, limit: int = 80) -> str:
-    header = (
-        "<tr><th>コード</th><th>会社名</th><th>1年</th><th>20日</th><th>落ちた条件</th></tr>"
-    )
-    body_parts: list[str] = []
-    for row in rows[:limit]:
-        labels = " / ".join(str(x) for x in (row.get("fail_labels") or row.get("fails") or []))
-        body_parts.append(
-            "<tr>"
-            f"<td>{escape(str(row.get('code') or ''))}</td>"
-            f"<td>{escape(str(row.get('name') or ''))}</td>"
-            f"<td>{_pct(row.get('ret_1y'))}</td>"
-            f"<td>{_pct(row.get('ret_20d'))}</td>"
-            f"<td class='muted'>{escape(labels)}</td>"
-            "</tr>"
-        )
-    more = ""
-    if len(rows) > limit:
-        more = f"<p class='muted'>他 {len(rows) - limit} 銘柄（JSON に全件）</p>"
-    return f"<table><thead>{header}</thead><tbody>{''.join(body_parts)}</tbody></table>{more}"
-
-
 def _load_forward() -> dict[str, Any] | None:
     path = published_forward_path()
     if not path.exists():
         return None
     try:
-        import json
-
         return json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return None
@@ -183,6 +86,293 @@ def _forward_section(fwd: dict[str, Any] | None) -> str:
     """
 
 
+def _rules_html(markdown: str) -> str:
+    lines = []
+    for raw in (markdown or "").splitlines():
+        line = raw.rstrip()
+        if not line or line.startswith("# "):
+            continue
+        if line.startswith("## "):
+            lines.append(f"<h3>{escape(line[3:])}</h3>")
+        elif line.startswith("- "):
+            lines.append(f"<li>{escape(line[2:])}</li>")
+        else:
+            lines.append(f"<p class='muted'>{escape(line)}</p>")
+    out: list[str] = []
+    in_ul = False
+    for item in lines:
+        if item.startswith("<li>"):
+            if not in_ul:
+                out.append("<ul class='compact'>")
+                in_ul = True
+            out.append(item)
+        else:
+            if in_ul:
+                out.append("</ul>")
+                in_ul = False
+            out.append(item)
+    if in_ul:
+        out.append("</ul>")
+    return "\n".join(out)
+
+
+def _lab_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """ページ埋め込み用に必要なキーだけ残す（HTMLサイズ抑制）。"""
+    universe = []
+    for row in payload.get("universe") or list(payload.get("ranking") or []) + list(payload.get("rejected") or []):
+        universe.append(
+            {
+                "code": row.get("code"),
+                "name": row.get("name"),
+                "sector": row.get("sector"),
+                "price": row.get("price"),
+                "ret_1y": row.get("ret_1y"),
+                "ret_3y": row.get("ret_3y"),
+                "excess_1y": row.get("excess_1y"),
+                "ret_20d": row.get("ret_20d"),
+                "dd_52w": row.get("dd_52w"),
+                "vs_ma25": row.get("vs_ma25"),
+                "vol_1y": row.get("vol_1y"),
+                "risk_adj_1y": row.get("risk_adj_1y"),
+                "turnover_20d": row.get("turnover_20d"),
+                "gates": row.get("gates") or {},
+            }
+        )
+    return {
+        "signal_date": payload.get("signal_date"),
+        "name": payload.get("name"),
+        "version": payload.get("version"),
+        "lab_defaults": payload.get("lab_defaults") or {},
+        "gate_labels": payload.get("gate_labels") or {},
+        "universe": universe,
+    }
+
+
+def _lab_section(payload: dict[str, Any]) -> str:
+    lab = _lab_payload(payload)
+    defaults = lab.get("lab_defaults") or {}
+    gate_labels = lab.get("gate_labels") or {}
+    gate_order = [
+        "above_ma200",
+        "ma200_up",
+        "ma75_up",
+        "ret_1y_pos",
+        "ret_3y_pos",
+        "excess_1y",
+        "turnover",
+        "ret_20d",
+        "above_ma25",
+        "dd_52w",
+    ]
+    gate_defaults = defaults.get("gates") or {}
+    checks = []
+    for key in gate_order:
+        label = gate_labels.get(key, key)
+        checked = " checked" if gate_defaults.get(key, False) else ""
+        checks.append(
+            f'<label class="gate"><input type="checkbox" data-gate="{escape(key)}"{checked}/> '
+            f"{escape(str(label))}</label>"
+        )
+    min_turn = float(defaults.get("min_turnover") or 0) / 1e8
+    min_ret20 = float(defaults.get("min_ret_20d") or 0) * 100
+    max_dd = float(defaults.get("max_dd_52w") if defaults.get("max_dd_52w") is not None else -1) * 100
+    top_n = int(defaults.get("top_n") or 5)
+    rank_by = str(defaults.get("rank_by") or "ret_1y")
+    data_json = json.dumps(lab, ensure_ascii=False)
+    # </script> がデータに含まれないようエスケープ
+    data_json = data_json.replace("<", "\\u003c")
+
+    return f"""
+    <style>
+      .lab-controls {{ display:grid; gap:0.75rem; }}
+      .gate-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0.35rem 0.75rem; }}
+      .gate {{ display:flex; align-items:center; gap:0.4rem; font-size:0.85rem; color:var(--text); }}
+      .param-row {{ display:flex; flex-wrap:wrap; gap:0.75rem 1.25rem; align-items:end; }}
+      .param {{ display:flex; flex-direction:column; gap:0.25rem; font-size:0.8rem; color:var(--muted); }}
+      .param input, .param select {{ background:#0b1220; color:var(--text); border:1px solid #334155; border-radius:6px; padding:0.35rem 0.5rem; min-width:7rem; }}
+      .lab-actions {{ display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; }}
+      .lab-actions button {{ background:var(--accent); color:#fff; border:0; border-radius:6px; padding:0.45rem 0.9rem; cursor:pointer; font-size:0.85rem; }}
+      .lab-actions button.secondary {{ background:#334155; }}
+      #lab-summary {{ font-size:0.9rem; color:var(--muted); }}
+      #lab-table td, #lab-table th {{ white-space:nowrap; }}
+      #lab-table td.name {{ white-space:normal; max-width:14rem; }}
+    </style>
+    <section id="lab">
+      <h2>条件ラボ（この場で試す）</h2>
+      <p class="muted">採用ルールを初期値に、条件のON/OFFと閾値を変えて通過銘柄を並べ替えます。結果はブラウザ内のみで、採用ルール自体は変わりません。</p>
+      <div class="lab-controls">
+        <div>
+          <h3>必須条件</h3>
+          <div class="gate-grid">{''.join(checks)}</div>
+        </div>
+        <div class="param-row">
+          <label class="param">売買代金下限（億円）
+            <input id="lab-min-turn" type="number" step="0.1" min="0" value="{min_turn:g}"/>
+          </label>
+          <label class="param">20日リターン下限（%）
+            <input id="lab-min-ret20" type="number" step="0.5" value="{min_ret20:g}"/>
+          </label>
+          <label class="param">52週DD下限（%、例 -15）
+            <input id="lab-max-dd" type="number" step="1" value="{max_dd:g}"/>
+          </label>
+          <label class="param">上位N
+            <input id="lab-topn" type="number" step="1" min="1" max="50" value="{top_n}"/>
+          </label>
+          <label class="param">並び替え
+            <select id="lab-rankby">
+              <option value="ret_1y" {"selected" if rank_by == "ret_1y" else ""}>1年リターン</option>
+              <option value="ret_20d" {"selected" if rank_by == "ret_20d" else ""}>20日リターン</option>
+              <option value="risk_adj_1y" {"selected" if rank_by == "risk_adj_1y" else ""}>リスク調整1年</option>
+              <option value="excess_1y" {"selected" if rank_by == "excess_1y" else ""}>TOPIX超過1年</option>
+            </select>
+          </label>
+        </div>
+        <div class="lab-actions">
+          <button type="button" id="lab-apply">この条件でランキング</button>
+          <button type="button" class="secondary" id="lab-reset">採用ルールに戻す</button>
+          <span id="lab-summary"></span>
+        </div>
+      </div>
+      <div class="metrics" id="lab-metrics" style="margin-top:1rem"></div>
+      <h3>保有候補（上位N）</h3>
+      <ul class="compact" id="lab-targets"></ul>
+      <h3>通過ランキング</h3>
+      <div style="overflow-x:auto">
+        <table id="lab-table">
+          <thead>
+            <tr>
+              <th>#</th><th>コード</th><th>会社名</th><th>業種</th>
+              <th>1年</th><th>20日</th><th>超過</th><th>52週DD</th><th>終値</th><th>代金(億)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <script id="trend-lab-data" type="application/json">{data_json}</script>
+    <script>
+    (function() {{
+      const raw = document.getElementById('trend-lab-data');
+      if (!raw) return;
+      const DATA = JSON.parse(raw.textContent);
+      const defaults = DATA.lab_defaults || {{}};
+      const universe = DATA.universe || [];
+
+      function pct(v, digits=1) {{
+        if (v === null || v === undefined || Number.isNaN(v)) return '—';
+        const x = Number(v) * 100;
+        const s = (x >= 0 ? '+' : '') + x.toFixed(digits) + '%';
+        const cls = x > 0 ? 'positive' : (x < 0 ? 'negative' : '');
+        return cls ? '<span class="'+cls+'">'+s+'</span>' : s;
+      }}
+      function yen(v) {{
+        if (v === null || v === undefined || Number.isNaN(v)) return '—';
+        return Math.round(Number(v)).toLocaleString('ja-JP');
+      }}
+      function oku(v) {{
+        if (v === null || v === undefined || Number.isNaN(v)) return '—';
+        return (Number(v) / 1e8).toFixed(1);
+      }}
+      function gateOn(key) {{
+        const el = document.querySelector('input[data-gate="'+key+'"]');
+        return !!(el && el.checked);
+      }}
+      function readParams() {{
+        return {{
+          minTurn: Number(document.getElementById('lab-min-turn').value || 0) * 1e8,
+          minRet20: Number(document.getElementById('lab-min-ret20').value || 0) / 100,
+          maxDd: Number(document.getElementById('lab-max-dd').value || -100) / 100,
+          topN: Math.max(1, Math.min(50, Number(document.getElementById('lab-topn').value || 5))),
+          rankBy: document.getElementById('lab-rankby').value || 'ret_1y',
+        }};
+      }}
+      function passes(row, p) {{
+        const g = row.gates || {{}};
+        const required = [
+          'above_ma200','ma200_up','ma75_up','ret_1y_pos','ret_3y_pos','excess_1y',
+          'turnover','ret_20d','above_ma25','dd_52w'
+        ];
+        for (const key of required) {{
+          if (!gateOn(key)) continue;
+          if (key === 'turnover') {{
+            if (row.turnover_20d == null || row.turnover_20d < p.minTurn) return false;
+            continue;
+          }}
+          if (key === 'ret_20d') {{
+            if (row.ret_20d == null || row.ret_20d <= p.minRet20) return false;
+            continue;
+          }}
+          if (key === 'above_ma25') {{
+            if (row.vs_ma25 == null || row.vs_ma25 <= 0) return false;
+            continue;
+          }}
+          if (key === 'dd_52w') {{
+            if (row.dd_52w == null || row.dd_52w < p.maxDd) return false;
+            continue;
+          }}
+          if (!g[key]) return false;
+        }}
+        return row.ret_1y != null;
+      }}
+      function score(row, rankBy) {{
+        const v = row[rankBy];
+        return (v === null || v === undefined || Number.isNaN(v)) ? -1e99 : Number(v);
+      }}
+      function render() {{
+        const p = readParams();
+        const pass = universe.filter(r => passes(r, p));
+        pass.sort((a,b) => score(b, p.rankBy) - score(a, p.rankBy) || String(a.code).localeCompare(String(b.code)));
+        const targets = pass.slice(0, p.topN);
+        document.getElementById('lab-summary').textContent =
+          '通過 ' + pass.length + ' / ' + universe.length + ' · 上位 ' + targets.length;
+        document.getElementById('lab-metrics').innerHTML = `
+          <div class="metric"><label>通過</label><value>${{pass.length}}</value></div>
+          <div class="metric"><label>上位N</label><value>${{targets.length}}</value></div>
+          <div class="metric"><label>ユニバース</label><value>${{universe.length}}</value></div>
+        `;
+        document.getElementById('lab-targets').innerHTML = targets.length
+          ? targets.map((r,i) => `<li><strong>${{r.code}}</strong> ${{r.name || ''}} · 1年 ${{pct(r.ret_1y)}}</li>`).join('')
+          : '<li class="muted">条件に合う銘柄なし</li>';
+        const tb = document.querySelector('#lab-table tbody');
+        tb.innerHTML = pass.map((r,i) => {{
+          const badge = i < p.topN ? ' <span class="badge">保有</span>' : '';
+          return `<tr>
+            <td>${{i+1}}${{badge}}</td>
+            <td>${{r.code || ''}}</td>
+            <td class="name">${{r.name || ''}}</td>
+            <td class="muted">${{r.sector || ''}}</td>
+            <td>${{pct(r.ret_1y)}}</td>
+            <td>${{pct(r.ret_20d)}}</td>
+            <td>${{pct(r.excess_1y)}}</td>
+            <td>${{pct(r.dd_52w)}}</td>
+            <td>${{yen(r.price)}}</td>
+            <td>${{oku(r.turnover_20d)}}</td>
+          </tr>`;
+        }}).join('');
+      }}
+      function reset() {{
+        const g = defaults.gates || {{}};
+        document.querySelectorAll('input[data-gate]').forEach(el => {{
+          el.checked = !!g[el.getAttribute('data-gate')];
+        }});
+        document.getElementById('lab-min-turn').value = ((defaults.min_turnover || 0) / 1e8);
+        document.getElementById('lab-min-ret20').value = ((defaults.min_ret_20d || 0) * 100);
+        document.getElementById('lab-max-dd').value = ((defaults.max_dd_52w != null ? defaults.max_dd_52w : -1) * 100);
+        document.getElementById('lab-topn').value = defaults.top_n || 5;
+        document.getElementById('lab-rankby').value = defaults.rank_by || 'ret_1y';
+        render();
+      }}
+      document.getElementById('lab-apply').addEventListener('click', render);
+      document.getElementById('lab-reset').addEventListener('click', reset);
+      document.querySelectorAll('.lab-controls input, .lab-controls select').forEach(el => {{
+        el.addEventListener('change', render);
+      }});
+      render();
+    }})();
+    </script>
+    """
+
+
 def render_trend_screen_body(payload: dict[str, Any], *, forward: dict[str, Any] | None = None) -> str:
     warning = ""
     if payload.get("warning"):
@@ -199,31 +389,22 @@ def render_trend_screen_body(payload: dict[str, Any], *, forward: dict[str, Any]
       <div class="metric"><label>シグナル日</label><value>{escape(str(payload.get('signal_date') or ''))}</value></div>
       <div class="metric"><label>ユニバース</label><value>{payload.get('n_universe', 0)}</value></div>
       <div class="metric"><label>シグナル日バー</label><value>{payload.get('n_on_signal', 0)}</value></div>
-      <div class="metric positive"><label>通過</label><value>{payload.get('n_pass', 0)}</value></div>
+      <div class="metric positive"><label>採用通過</label><value>{payload.get('n_pass', 0)}</value></div>
       <div class="metric"><label>保有目標</label><value>{payload.get('n_target', 0)}</value></div>
     </div>
 
-    {_forward_section(forward if forward is not None else _load_forward())}
-
     <section>
-      <h2>今月の保有目標（上位 {escape(str(payload.get('top_n') or 5))}）</h2>
+      <h2>採用ルールの保有目標（上位 {escape(str(payload.get('top_n') or 5))}）</h2>
+      <p class="muted">{escape(str(payload.get('name') or ''))} · 版 {escape(str(payload.get('version') or ''))}</p>
       <ul class="compact">{target_bits or '<li class="muted">なし</li>'}</ul>
     </section>
 
-    <section id="ranking">
-      <h2>通過銘柄ランキング（全 {payload.get('n_pass', 0)} 銘柄）</h2>
-      <p class="muted">採用ルール: {escape(str(payload.get('name') or ''))} · 版 {escape(str(payload.get('version') or ''))} · 並びは過去1年リターン</p>
-      {_ranking_table(list(payload.get('ranking') or []))}
-    </section>
+    {_lab_section(payload)}
 
-    <section id="rejected">
-      <h2>未通過（参考）</h2>
-      <p class="muted">一次条件・売買代金・直近20日などのいずれかで除外。1年リターンが高い順寄り。</p>
-      {_rejected_table(list(payload.get('rejected') or []))}
-    </section>
+    {_forward_section(forward if forward is not None else _load_forward())}
 
     <section id="rules">
-      <h2>規則</h2>
+      <h2>採用規則</h2>
       {_rules_html(str(payload.get('rules_markdown') or ''))}
     </section>
     """

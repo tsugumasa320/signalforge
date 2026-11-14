@@ -10,7 +10,12 @@ from typing import Any
 import pandas as pd
 
 from signalforge.config import data_dir
-from signalforge.research.trend_screen.frequency import primary_mask
+from signalforge.research.trend_screen.config import (
+    MA200_SLOPE_LAG,
+    MA75_SLOPE_LAG,
+    RET_1Y_STEPS,
+    RET_3Y_STEPS,
+)
 from signalforge.research.trend_screen.horse import _clean, _load_bars
 from signalforge.research.trend_screen.improve import _stats_at
 from signalforge.research.trend_screen.ruleset import SystemRules, load_adopted, rules_markdown
@@ -31,6 +36,20 @@ GATE_LABELS = {
     "above_ma25": "終値>25日線",
     "dd_52w": "52週高値からの下落上限",
 }
+
+# サイト上でON/OFFできる条件（採用ルールの部品）
+LAB_GATE_KEYS = (
+    "above_ma200",
+    "ma200_up",
+    "ma75_up",
+    "ret_1y_pos",
+    "ret_3y_pos",
+    "excess_1y",
+    "turnover",
+    "ret_20d",
+    "above_ma25",
+    "dd_52w",
+)
 
 
 def published_ranking_path() -> Path:
@@ -69,6 +88,106 @@ def _passes_extra(rules: SystemRules, stats: dict[str, float | None]) -> tuple[b
     return not fails, fails
 
 
+def _gate_snapshot(
+    close: pd.Series,
+    volume: pd.Series | None,
+    bench: pd.Series,
+    signal: pd.Timestamp,
+) -> dict[str, Any]:
+    """サイトで条件を付け替えられるよう、銘柄×シグナル日の生メトリクスと可否を返す。"""
+    empty_gates = {k: False for k in LAB_GATE_KEYS}
+    px = _clean(close)
+    if signal not in px.index:
+        return {
+            "had_bar": False,
+            "price": None,
+            "ret_1y": None,
+            "ret_3y": None,
+            "excess_1y": None,
+            "ret_20d": None,
+            "vs_ma25": None,
+            "dd_52w": None,
+            "vol_1y": None,
+            "risk_adj_1y": None,
+            "turnover_20d": None,
+            "gates": empty_gates,
+        }
+    loc = px.index.get_loc(signal)
+    if not isinstance(loc, int):
+        return {
+            "had_bar": False,
+            "price": None,
+            "ret_1y": None,
+            "ret_3y": None,
+            "excess_1y": None,
+            "ret_20d": None,
+            "vs_ma25": None,
+            "dd_52w": None,
+            "vol_1y": None,
+            "risk_adj_1y": None,
+            "turnover_20d": None,
+            "gates": empty_gates,
+        }
+    price = float(px.iloc[loc])
+    ma75 = px.rolling(75, min_periods=75).mean()
+    ma200 = px.rolling(200, min_periods=200).mean()
+    m200 = float(ma200.iloc[loc]) if pd.notna(ma200.iloc[loc]) else None
+    m75 = float(ma75.iloc[loc]) if pd.notna(ma75.iloc[loc]) else None
+    m200_prev = None
+    m75_prev = None
+    if loc >= MA200_SLOPE_LAG and pd.notna(ma200.iloc[loc - MA200_SLOPE_LAG]):
+        m200_prev = float(ma200.iloc[loc - MA200_SLOPE_LAG])
+    if loc >= MA75_SLOPE_LAG and pd.notna(ma75.iloc[loc - MA75_SLOPE_LAG]):
+        m75_prev = float(ma75.iloc[loc - MA75_SLOPE_LAG])
+
+    ret_1y = None
+    ret_3y = None
+    if loc >= RET_1Y_STEPS:
+        start = float(px.iloc[loc - RET_1Y_STEPS])
+        if start > 0:
+            ret_1y = price / start - 1.0
+    if loc >= RET_3Y_STEPS:
+        start = float(px.iloc[loc - RET_3Y_STEPS])
+        if start > 0:
+            ret_3y = price / start - 1.0
+
+    bpx = _clean(bench).reindex(px.index)
+    excess_1y = None
+    if loc >= RET_1Y_STEPS and pd.notna(bpx.iloc[loc]) and pd.notna(bpx.iloc[loc - RET_1Y_STEPS]):
+        bs = float(bpx.iloc[loc - RET_1Y_STEPS])
+        be = float(bpx.iloc[loc])
+        if bs > 0 and ret_1y is not None:
+            excess_1y = ret_1y - (be / bs - 1.0)
+
+    stats = _stats_at(close, volume, signal)
+    gates = {
+        "above_ma200": bool(m200 is not None and price > m200),
+        "ma200_up": bool(m200 is not None and m200_prev is not None and m200 > m200_prev),
+        "ma75_up": bool(m75 is not None and m75_prev is not None and m75 > m75_prev),
+        "ret_1y_pos": bool(ret_1y is not None and ret_1y > 0),
+        "ret_3y_pos": bool(ret_3y is not None and ret_3y > 0),
+        "excess_1y": bool(excess_1y is not None and excess_1y > 0),
+        "turnover": bool(stats.get("turnover_20d") is not None),
+        "ret_20d": bool(stats.get("ret_20d") is not None and float(stats["ret_20d"]) > 0),
+        "above_ma25": bool(stats.get("vs_ma25") is not None and float(stats["vs_ma25"]) > 0),
+        "dd_52w": bool(stats.get("dd_52w") is not None),
+    }
+    return {
+        "had_bar": True,
+        "price": price,
+        "ret_1y": ret_1y if ret_1y is not None else stats.get("ret_1y"),
+        "ret_3y": ret_3y,
+        "excess_1y": excess_1y,
+        "ret_20d": stats.get("ret_20d"),
+        "vs_ma25": stats.get("vs_ma25"),
+        "dd_52w": stats.get("dd_52w"),
+        "vol_1y": stats.get("vol_1y"),
+        "risk_adj_1y": stats.get("risk_adj_1y"),
+        "turnover_20d": stats.get("turnover_20d"),
+        "gates": gates,
+    }
+
+
 def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) -> dict[str, Any]:
     rules = load_adopted()
     limit = limit or rules.universe_limit
@@ -83,27 +202,36 @@ def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) ->
 
     rows: list[dict[str, Any]] = []
     for code, series in closes.items():
-        px = _clean(series)
-        had_bar = signal in px.index
-        mask = primary_mask(series, bench)
-        mask_ok = bool(had_bar and signal in mask.index and bool(mask.loc[signal]))
-        stats = _stats_at(series, volumes.get(code), signal) if had_bar else {
-            "ret_1y": None,
-            "vol_1y": None,
-            "risk_adj_1y": None,
-            "turnover_20d": None,
-            "ret_20d": None,
-            "vs_ma25": None,
-            "dd_52w": None,
+        snap = _gate_snapshot(series, volumes.get(code), bench, signal)
+        stats = {
+            "ret_1y": snap["ret_1y"],
+            "vol_1y": snap["vol_1y"],
+            "risk_adj_1y": snap["risk_adj_1y"],
+            "turnover_20d": snap["turnover_20d"],
+            "ret_20d": snap["ret_20d"],
+            "vs_ma25": snap["vs_ma25"],
+            "dd_52w": snap["dd_52w"],
         }
+        gates = dict(snap["gates"])
+        # 売買代金・52週DDは採用ルールの閾値込みで再評価（ラボ用の生値も残す）
+        if rules.min_turnover is not None:
+            turn = stats.get("turnover_20d")
+            gates["turnover"] = bool(turn is not None and turn >= rules.min_turnover)
+        if rules.max_dd_52w is not None:
+            dd52 = stats.get("dd_52w")
+            gates["dd_52w"] = bool(dd52 is not None and dd52 >= rules.max_dd_52w)
+        elif stats.get("dd_52w") is not None:
+            gates["dd_52w"] = True
+
+        primary_keys = ("above_ma200", "ma200_up", "ma75_up", "ret_1y_pos", "ret_3y_pos", "excess_1y")
+        mask_ok = bool(snap["had_bar"] and all(gates[k] for k in primary_keys))
         extra_ok, extra_fails = _passes_extra(rules, stats)
         passed = bool(mask_ok and extra_ok and stats.get("ret_1y") is not None)
-        fails = ([] if mask_ok else ["primary"]) + extra_fails
-        if not had_bar:
+        fails = [k for k in primary_keys if not gates.get(k)] + extra_fails
+        if not snap["had_bar"]:
             fails = ["no_bar"]
         sym = code.replace(".T", "")
         meta = listing.get(code) or listing.get(sym) or {}
-        price = float(px.loc[signal]) if had_bar else None
         rows.append(
             {
                 "ticker": code,
@@ -114,13 +242,17 @@ def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) ->
                 "passed": passed,
                 "fails": fails,
                 "fail_labels": [GATE_LABELS.get(f, f) for f in fails],
-                "price": price,
+                "price": snap["price"],
                 "ret_1y": stats.get("ret_1y"),
+                "ret_3y": snap.get("ret_3y"),
+                "excess_1y": snap.get("excess_1y"),
                 "ret_20d": stats.get("ret_20d"),
                 "dd_52w": stats.get("dd_52w"),
                 "vs_ma25": stats.get("vs_ma25"),
                 "vol_1y": stats.get("vol_1y"),
+                "risk_adj_1y": stats.get("risk_adj_1y"),
                 "turnover_20d": stats.get("turnover_20d"),
+                "gates": gates,
             }
         )
 
@@ -157,6 +289,25 @@ def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) ->
         for r in passers[: rules.top_n]
     ]
 
+    lab_defaults = {
+        "gates": {
+            "above_ma200": True,
+            "ma200_up": True,
+            "ma75_up": True,
+            "ret_1y_pos": True,
+            "ret_3y_pos": True,
+            "excess_1y": True,
+            "turnover": rules.min_turnover is not None,
+            "ret_20d": rules.min_ret_20d is not None,
+            "above_ma25": bool(rules.require_above_ma25),
+            "dd_52w": rules.max_dd_52w is not None,
+        },
+        "min_turnover": float(rules.min_turnover or 0.0),
+        "min_ret_20d": float(rules.min_ret_20d if rules.min_ret_20d is not None else 0.0),
+        "max_dd_52w": float(rules.max_dd_52w) if rules.max_dd_52w is not None else -1.0,
+        "top_n": int(rules.top_n),
+        "rank_by": rules.rank_by or "ret_1y",
+    }
     payload: dict[str, Any] = {
         "system_id": rules.id,
         "version": rules.version,
@@ -176,10 +327,14 @@ def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) ->
         "min_ret_20d": rules.min_ret_20d,
         "require_above_ma25": rules.require_above_ma25,
         "max_dd_52w": rules.max_dd_52w,
+        "lab_defaults": lab_defaults,
+        "gate_labels": {k: GATE_LABELS[k] for k in LAB_GATE_KEYS},
         "rules_markdown": rules_markdown(rules),
         "targets": targets,
         "ranking": passers,
         "rejected": others,
+        # サイトの条件ラボ用（全銘柄・ゲート付き）
+        "universe": rows,
         "generated_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
     }
     return payload

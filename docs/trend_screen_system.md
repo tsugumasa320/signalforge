@@ -15,6 +15,7 @@ uv run signalforge dashboard export --output _site   # Pages に screen/trend.ht
 ```
 
 GitHub Pages: `/screen/trend.html`（ナビ「トレンド・スクリーニング」）。  
+ページ上の **条件ラボ** で一次条件・売買代金・直近20日・25日線・52週DD・上位N・並び替えを切り替え、通過銘柄をその場で再ランキングできる（ブラウザ内のみ。採用ルールは変わらない）。  
 日次更新: `.github/workflows/daily-paper.yml`（JST 18:17）が流動性ユニバースの日足更新 → `ranking` + `forward` → `dashboard export`。
 
 ## 規則（1.2）
