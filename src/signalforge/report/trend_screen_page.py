@@ -130,7 +130,12 @@ def _lab_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 "ret_3y": row.get("ret_3y"),
                 "excess_1y": row.get("excess_1y"),
                 "ret_20d": row.get("ret_20d"),
+                "ret_60d": row.get("ret_60d"),
                 "dd_52w": row.get("dd_52w"),
+                "mdd_1y": row.get("mdd_1y"),
+                "up_month_ratio": row.get("up_month_ratio"),
+                "trend_r2": row.get("trend_r2"),
+                "steady_score": row.get("steady_score"),
                 "vs_ma25": row.get("vs_ma25"),
                 "vol_1y": row.get("vol_1y"),
                 "risk_adj_1y": row.get("risk_adj_1y"),
@@ -178,6 +183,10 @@ def _lab_section(payload: dict[str, Any]) -> str:
     min_turn = float(defaults.get("min_turnover") or 0) / 1e8
     min_ret20 = float(defaults.get("min_ret_20d") or 0) * 100
     max_dd = float(defaults.get("max_dd_52w") if defaults.get("max_dd_52w") is not None else -1) * 100
+    min_steady = float(defaults.get("min_steady_score") or 0)
+    min_up_m = float(defaults.get("min_up_month_ratio") or 0) * 100
+    max_mdd = float(defaults.get("max_mdd_1y") if defaults.get("max_mdd_1y") is not None else -1) * 100
+    min_r2 = float(defaults.get("min_trend_r2") or 0)
     top_n = int(defaults.get("top_n") or 5)
     rank_by = str(defaults.get("rank_by") or "ret_1y")
     data_json = json.dumps(lab, ensure_ascii=False)
@@ -202,6 +211,12 @@ def _lab_section(payload: dict[str, Any]) -> str:
     <section id="lab">
       <h2>条件ラボ（この場で試す）</h2>
       <p class="muted">採用ルールを初期値に、条件のON/OFFと閾値を変えて通過銘柄を並べ替えます。結果はブラウザ内のみで、採用ルール自体は変わりません。</p>
+      <div class="info-box">
+        <strong>安定度スコア（0–100）</strong>は「じわじわ上がってきたか」の参考値です。
+        上昇月の割合・値動きの直線性（trend R²）・1年の経路最大DD・ボラを合成。
+        急騰あとの失速銘柄は低く出やすいです。買ってすぐ含み損が不安なときは、
+        安定度や上昇月割合で絞り、並びを安定度にすると見やすいです。
+      </div>
       <div class="lab-controls">
         <div>
           <h3>必須条件</h3>
@@ -217,14 +232,29 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <label class="param">52週DD下限（%、例 -15）
             <input id="lab-max-dd" type="number" step="1" value="{max_dd:g}"/>
           </label>
+          <label class="param">安定度スコア下限
+            <input id="lab-min-steady" type="number" step="1" min="0" max="100" value="{min_steady:g}"/>
+          </label>
+          <label class="param">上昇月割合下限（%）
+            <input id="lab-min-upm" type="number" step="1" min="0" max="100" value="{min_up_m:g}"/>
+          </label>
+          <label class="param">1年経路DD下限（%、例 -25）
+            <input id="lab-max-mdd" type="number" step="1" value="{max_mdd:g}"/>
+          </label>
+          <label class="param">trend R² 下限（0–1）
+            <input id="lab-min-r2" type="number" step="0.05" min="0" max="1" value="{min_r2:g}"/>
+          </label>
           <label class="param">上位N
             <input id="lab-topn" type="number" step="1" min="1" max="50" value="{top_n}"/>
           </label>
           <label class="param">並び替え
             <select id="lab-rankby">
               <option value="ret_1y" {"selected" if rank_by == "ret_1y" else ""}>1年リターン</option>
+              <option value="steady_score" {"selected" if rank_by == "steady_score" else ""}>安定度スコア</option>
               <option value="ret_20d" {"selected" if rank_by == "ret_20d" else ""}>20日リターン</option>
+              <option value="ret_60d" {"selected" if rank_by == "ret_60d" else ""}>60日リターン</option>
               <option value="risk_adj_1y" {"selected" if rank_by == "risk_adj_1y" else ""}>リスク調整1年</option>
+              <option value="up_month_ratio" {"selected" if rank_by == "up_month_ratio" else ""}>上昇月割合</option>
               <option value="excess_1y" {"selected" if rank_by == "excess_1y" else ""}>TOPIX超過1年</option>
             </select>
           </label>
@@ -232,6 +262,7 @@ def _lab_section(payload: dict[str, Any]) -> str:
         <div class="lab-actions">
           <button type="button" id="lab-apply">この条件でランキング</button>
           <button type="button" class="secondary" id="lab-reset">採用ルールに戻す</button>
+          <button type="button" class="secondary" id="lab-steady">安定寄りプリセット</button>
           <span id="lab-summary"></span>
         </div>
       </div>
@@ -244,7 +275,7 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <thead>
             <tr>
               <th>#</th><th>コード</th><th>会社名</th><th>業種</th>
-              <th>1年</th><th>20日</th><th>超過</th><th>52週DD</th><th>終値</th><th>代金(億)</th>
+              <th>安定度</th><th>上昇月</th><th>経路DD</th><th>1年</th><th>60日</th><th>20日</th><th>終値</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -284,6 +315,10 @@ def _lab_section(payload: dict[str, Any]) -> str:
           minTurn: Number(document.getElementById('lab-min-turn').value || 0) * 1e8,
           minRet20: Number(document.getElementById('lab-min-ret20').value || 0) / 100,
           maxDd: Number(document.getElementById('lab-max-dd').value || -100) / 100,
+          minSteady: Number(document.getElementById('lab-min-steady').value || 0),
+          minUpM: Number(document.getElementById('lab-min-upm').value || 0) / 100,
+          maxMdd: Number(document.getElementById('lab-max-mdd').value || -100) / 100,
+          minR2: Number(document.getElementById('lab-min-r2').value || 0),
           topN: Math.max(1, Math.min(50, Number(document.getElementById('lab-topn').value || 5))),
           rankBy: document.getElementById('lab-rankby').value || 'ret_1y',
         }};
@@ -314,11 +349,19 @@ def _lab_section(payload: dict[str, Any]) -> str:
           }}
           if (!g[key]) return false;
         }}
+        if (p.minSteady > 0 && (row.steady_score == null || row.steady_score < p.minSteady)) return false;
+        if (p.minUpM > 0 && (row.up_month_ratio == null || row.up_month_ratio < p.minUpM)) return false;
+        if (p.maxMdd > -0.999 && (row.mdd_1y == null || row.mdd_1y < p.maxMdd)) return false;
+        if (p.minR2 > 0 && (row.trend_r2 == null || row.trend_r2 < p.minR2)) return false;
         return row.ret_1y != null;
       }}
       function score(row, rankBy) {{
         const v = row[rankBy];
         return (v === null || v === undefined || Number.isNaN(v)) ? -1e99 : Number(v);
+      }}
+      function num(v, digits=1) {{
+        if (v === null || v === undefined || Number.isNaN(v)) return '—';
+        return Number(v).toFixed(digits);
       }}
       function render() {{
         const p = readParams();
@@ -333,7 +376,7 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <div class="metric"><label>ユニバース</label><value>${{universe.length}}</value></div>
         `;
         document.getElementById('lab-targets').innerHTML = targets.length
-          ? targets.map((r,i) => `<li><strong>${{r.code}}</strong> ${{r.name || ''}} · 1年 ${{pct(r.ret_1y)}}</li>`).join('')
+          ? targets.map((r,i) => `<li><strong>${{r.code}}</strong> ${{r.name || ''}} · 安定度 ${{num(r.steady_score,1)}} · 1年 ${{pct(r.ret_1y)}}</li>`).join('')
           : '<li class="muted">条件に合う銘柄なし</li>';
         const tb = document.querySelector('#lab-table tbody');
         tb.innerHTML = pass.map((r,i) => {{
@@ -343,12 +386,13 @@ def _lab_section(payload: dict[str, Any]) -> str:
             <td>${{r.code || ''}}</td>
             <td class="name">${{r.name || ''}}</td>
             <td class="muted">${{r.sector || ''}}</td>
+            <td>${{num(r.steady_score,1)}}</td>
+            <td>${{pct(r.up_month_ratio,0)}}</td>
+            <td>${{pct(r.mdd_1y)}}</td>
             <td>${{pct(r.ret_1y)}}</td>
+            <td>${{pct(r.ret_60d)}}</td>
             <td>${{pct(r.ret_20d)}}</td>
-            <td>${{pct(r.excess_1y)}}</td>
-            <td>${{pct(r.dd_52w)}}</td>
             <td>${{yen(r.price)}}</td>
-            <td>${{oku(r.turnover_20d)}}</td>
           </tr>`;
         }}).join('');
       }}
@@ -360,12 +404,27 @@ def _lab_section(payload: dict[str, Any]) -> str:
         document.getElementById('lab-min-turn').value = ((defaults.min_turnover || 0) / 1e8);
         document.getElementById('lab-min-ret20').value = ((defaults.min_ret_20d || 0) * 100);
         document.getElementById('lab-max-dd').value = ((defaults.max_dd_52w != null ? defaults.max_dd_52w : -1) * 100);
+        document.getElementById('lab-min-steady').value = defaults.min_steady_score || 0;
+        document.getElementById('lab-min-upm').value = ((defaults.min_up_month_ratio || 0) * 100);
+        document.getElementById('lab-max-mdd').value = ((defaults.max_mdd_1y != null ? defaults.max_mdd_1y : -1) * 100);
+        document.getElementById('lab-min-r2').value = defaults.min_trend_r2 || 0;
         document.getElementById('lab-topn').value = defaults.top_n || 5;
         document.getElementById('lab-rankby').value = defaults.rank_by || 'ret_1y';
         render();
       }}
+      function steadyPreset() {{
+        reset();
+        document.getElementById('lab-min-steady').value = 55;
+        document.getElementById('lab-min-upm').value = 55;
+        document.getElementById('lab-max-mdd').value = -25;
+        document.getElementById('lab-min-r2').value = 0.35;
+        document.getElementById('lab-min-ret20').value = 0;
+        document.getElementById('lab-rankby').value = 'steady_score';
+        render();
+      }}
       document.getElementById('lab-apply').addEventListener('click', render);
       document.getElementById('lab-reset').addEventListener('click', reset);
+      document.getElementById('lab-steady').addEventListener('click', steadyPreset);
       document.querySelectorAll('.lab-controls input, .lab-controls select').forEach(el => {{
         el.addEventListener('change', render);
       }});

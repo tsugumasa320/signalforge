@@ -92,6 +92,94 @@ def _passes_extra(rules: SystemRules, stats: dict[str, float | None]) -> tuple[b
     return not fails, fails
 
 
+def _empty_snap(*, had_bar: bool = False) -> dict[str, Any]:
+    return {
+        "had_bar": had_bar,
+        "price": None,
+        "ret_1y": None,
+        "ret_3y": None,
+        "excess_1y": None,
+        "ret_20d": None,
+        "ret_60d": None,
+        "vs_ma25": None,
+        "dd_52w": None,
+        "mdd_1y": None,
+        "up_month_ratio": None,
+        "trend_r2": None,
+        "steady_score": None,
+        "vol_1y": None,
+        "risk_adj_1y": None,
+        "turnover_20d": None,
+        "gates": {k: False for k in LAB_GATE_KEYS},
+    }
+
+
+def _steady_metrics(window: pd.Series) -> dict[str, float | None]:
+    """じわじわ上昇の参考指標。急騰後の失速銘柄を見分けやすくする。"""
+    from signalforge.research.trend_screen.chart import max_drawdown
+
+    out: dict[str, float | None] = {
+        "mdd_1y": None,
+        "up_month_ratio": None,
+        "trend_r2": None,
+        "steady_score": None,
+    }
+    if len(window) < 40:
+        return out
+    out["mdd_1y"] = max_drawdown(window)
+    monthly = window.resample("ME").last().dropna()
+    changes = monthly.pct_change().dropna()
+    if len(changes) >= 6:
+        out["up_month_ratio"] = float((changes > 0).mean())
+    # log価格の時間回帰 R²（1に近いほど直線的な上昇/下落）
+    import math
+
+    y = window.apply(lambda v: math.log(float(v)) if float(v) > 0 else float("nan")).dropna()
+    if len(y) >= 40:
+        x = pd.Series(range(len(y)), index=y.index, dtype=float)
+        x_mean = float(x.mean())
+        y_mean = float(y.mean())
+        var_x = float(((x - x_mean) ** 2).sum())
+        if var_x > 0:
+            cov = float(((x - x_mean) * (y - y_mean)).sum())
+            slope = cov / var_x
+            intercept = y_mean - slope * x_mean
+            fitted = intercept + slope * x
+            ss_res = float(((y - fitted) ** 2).sum())
+            ss_tot = float(((y - y_mean) ** 2).sum())
+            if ss_tot > 0:
+                out["trend_r2"] = max(0.0, min(1.0, 1.0 - ss_res / ss_tot))
+                # 上昇トレンドでない直線は安定上昇とみなさない
+                if slope <= 0:
+                    out["trend_r2"] = float(out["trend_r2"]) * 0.25
+
+    up_m = out["up_month_ratio"]
+    r2 = out["trend_r2"]
+    mdd = out["mdd_1y"]
+    rets = window.pct_change().dropna()
+    vol = float(rets.std(ddof=1) * (245**0.5)) if len(rets) >= 20 else None
+    parts: list[float] = []
+    weights: list[float] = []
+    if up_m is not None:
+        parts.append(up_m)
+        weights.append(0.30)
+    if r2 is not None:
+        parts.append(r2)
+        weights.append(0.25)
+    if mdd is not None:
+        # -40%超の経路DDで0点
+        parts.append(max(0.0, 1.0 - min(1.0, abs(mdd) / 0.40)))
+        weights.append(0.25)
+    if vol is not None:
+        # 年率15%までは減点なし、60%で0
+        parts.append(max(0.0, 1.0 - min(1.0, max(0.0, vol - 0.15) / 0.45)))
+        weights.append(0.20)
+    if parts and sum(weights) > 0:
+        score = sum(p * w for p, w in zip(parts, weights)) / sum(weights)
+        out["steady_score"] = round(100.0 * score, 1)
+    return out
+
+
 def _gate_snapshot(
     close: pd.Series,
     volume: pd.Series | None,
@@ -99,39 +187,12 @@ def _gate_snapshot(
     signal: pd.Timestamp,
 ) -> dict[str, Any]:
     """サイトで条件を付け替えられるよう、銘柄×シグナル日の生メトリクスと可否を返す。"""
-    empty_gates = {k: False for k in LAB_GATE_KEYS}
     px = _clean(close)
     if signal not in px.index:
-        return {
-            "had_bar": False,
-            "price": None,
-            "ret_1y": None,
-            "ret_3y": None,
-            "excess_1y": None,
-            "ret_20d": None,
-            "vs_ma25": None,
-            "dd_52w": None,
-            "vol_1y": None,
-            "risk_adj_1y": None,
-            "turnover_20d": None,
-            "gates": empty_gates,
-        }
+        return _empty_snap(had_bar=False)
     loc = px.index.get_loc(signal)
     if not isinstance(loc, int):
-        return {
-            "had_bar": False,
-            "price": None,
-            "ret_1y": None,
-            "ret_3y": None,
-            "excess_1y": None,
-            "ret_20d": None,
-            "vs_ma25": None,
-            "dd_52w": None,
-            "vol_1y": None,
-            "risk_adj_1y": None,
-            "turnover_20d": None,
-            "gates": empty_gates,
-        }
+        return _empty_snap(had_bar=False)
     price = float(px.iloc[loc])
     ma75 = px.rolling(75, min_periods=75).mean()
     ma200 = px.rolling(200, min_periods=200).mean()
@@ -146,6 +207,7 @@ def _gate_snapshot(
 
     ret_1y = None
     ret_3y = None
+    ret_60d = None
     if loc >= RET_1Y_STEPS:
         start = float(px.iloc[loc - RET_1Y_STEPS])
         if start > 0:
@@ -154,6 +216,10 @@ def _gate_snapshot(
         start = float(px.iloc[loc - RET_3Y_STEPS])
         if start > 0:
             ret_3y = price / start - 1.0
+    if loc >= 60:
+        start = float(px.iloc[loc - 60])
+        if start > 0:
+            ret_60d = price / start - 1.0
 
     bpx = _clean(bench).reindex(px.index)
     excess_1y = None
@@ -164,6 +230,7 @@ def _gate_snapshot(
             excess_1y = ret_1y - (be / bs - 1.0)
 
     stats = _stats_at(close, volume, signal)
+    steady = _steady_metrics(px.iloc[max(0, loc - RET_1Y_STEPS) : loc + 1])
     gates = {
         "above_ma200": bool(m200 is not None and price > m200),
         "ma200_up": bool(m200 is not None and m200_prev is not None and m200 > m200_prev),
@@ -183,8 +250,13 @@ def _gate_snapshot(
         "ret_3y": ret_3y,
         "excess_1y": excess_1y,
         "ret_20d": stats.get("ret_20d"),
+        "ret_60d": ret_60d,
         "vs_ma25": stats.get("vs_ma25"),
         "dd_52w": stats.get("dd_52w"),
+        "mdd_1y": steady["mdd_1y"],
+        "up_month_ratio": steady["up_month_ratio"],
+        "trend_r2": steady["trend_r2"],
+        "steady_score": steady["steady_score"],
         "vol_1y": stats.get("vol_1y"),
         "risk_adj_1y": stats.get("risk_adj_1y"),
         "turnover_20d": stats.get("turnover_20d"),
@@ -266,7 +338,12 @@ def build_ranking(
                 "ret_3y": snap.get("ret_3y"),
                 "excess_1y": snap.get("excess_1y"),
                 "ret_20d": stats.get("ret_20d"),
+                "ret_60d": snap.get("ret_60d"),
                 "dd_52w": stats.get("dd_52w"),
+                "mdd_1y": snap.get("mdd_1y"),
+                "up_month_ratio": snap.get("up_month_ratio"),
+                "trend_r2": snap.get("trend_r2"),
+                "steady_score": snap.get("steady_score"),
                 "vs_ma25": stats.get("vs_ma25"),
                 "vol_1y": stats.get("vol_1y"),
                 "risk_adj_1y": stats.get("risk_adj_1y"),
@@ -324,6 +401,11 @@ def build_ranking(
         "min_turnover": float(rules.min_turnover or 0.0),
         "min_ret_20d": float(rules.min_ret_20d if rules.min_ret_20d is not None else 0.0),
         "max_dd_52w": float(rules.max_dd_52w) if rules.max_dd_52w is not None else -1.0,
+        # 安定上昇の参考フィルタ（初期は緩め＝オフ相当）
+        "min_steady_score": 0.0,
+        "min_up_month_ratio": 0.0,
+        "max_mdd_1y": -1.0,
+        "min_trend_r2": 0.0,
         "top_n": int(rules.top_n),
         "rank_by": rules.rank_by or "ret_1y",
     }
