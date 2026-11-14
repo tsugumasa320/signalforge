@@ -5,7 +5,11 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from signalforge.research.trend_screen.system import _is_month_end_session, latest_signal_day
+from signalforge.research.trend_screen.system import (
+    _is_month_end_session,
+    latest_asof_day,
+    latest_signal_day,
+)
 
 
 def test_mid_month_uses_previous_month_end() -> None:
@@ -28,3 +32,15 @@ def test_true_month_end_session_is_usable() -> None:
 def test_month_end_helper() -> None:
     assert _is_month_end_session(pd.Timestamp("2024-11-29"))
     assert not _is_month_end_session(pd.Timestamp("2024-11-13"))
+
+
+def test_latest_asof_picks_majority_newest_session() -> None:
+    common = pd.bdate_range("2024-01-01", "2024-11-13")
+    stale = pd.bdate_range("2024-01-01", "2024-10-16")
+    closes = {
+        "AAA.T": pd.Series(1.0, index=common),
+        "BBB.T": pd.Series(1.0, index=common),
+        "CCC.T": pd.Series(1.0, index=stale),
+    }
+    as_of = latest_asof_day(closes, min_ratio=0.5)
+    assert as_of == pd.Timestamp("2024-11-13")

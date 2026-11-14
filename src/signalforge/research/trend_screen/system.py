@@ -86,7 +86,10 @@ def _is_month_end_session(day: pd.Timestamp) -> bool:
 
 
 def latest_signal_day(bench: pd.Series) -> pd.Timestamp:
-    """直近の『完了した月』の月末。月中の最終バーを月末扱いしない。"""
+    """直近の『完了した月』の月末。月中の最終バーを月末扱いしない。
+
+    採用シストレのリバランス判定用。スクリーニング表示の最新状況とは別。
+    """
     index = _clean(bench).index
     ends = _month_ends(index)
     if not ends:
@@ -102,8 +105,27 @@ def latest_signal_day(bench: pd.Series) -> pd.Timestamp:
     return closed[-1]
 
 
+def latest_asof_day(closes: dict[str, pd.Series], *, min_ratio: float = 0.9) -> pd.Timestamp:
+    """スクリーニング表示用：ユニバースの大半が揃う最新営業日。"""
+    from collections import Counter
+
+    counts: Counter[pd.Timestamp] = Counter()
+    for series in closes.values():
+        px = _clean(series)
+        if px.empty:
+            continue
+        counts[pd.Timestamp(px.index[-1]).normalize()] += 1
+    if not counts:
+        raise RuntimeError("日足が無く基準日を決められない")
+    n = max(len(closes), 1)
+    for day, count in sorted(counts.items(), reverse=True):
+        if count / n >= min_ratio:
+            return day
+    return max(counts)
+
+
 def _signal_coverage(closes: dict[str, pd.Series], signal: pd.Timestamp) -> tuple[int, bool, str]:
-    """シグナル日に終値がある銘柄数。ユニバースの9割未満なら警告。"""
+    """基準日に終値がある銘柄数。ユニバースの9割未満なら警告。"""
     n_on = sum(1 for series in closes.values() if signal in _clean(series).index)
     n_uni = len(closes)
     if n_uni <= 0:
@@ -113,7 +135,7 @@ def _signal_coverage(closes: dict[str, pd.Series], signal: pd.Timestamp) -> tupl
         return (
             n_on,
             False,
-            f"シグナル日 {signal.date().isoformat()} の日足が {n_on}/{n_uni} しかない。"
+            f"基準日 {signal.date().isoformat()} の日足が {n_on}/{n_uni} しかない。"
             " `uv run signalforge fetch --update` で流動性ユニバースを更新してから再実行。",
         )
     return n_on, True, ""

@@ -2718,11 +2718,14 @@ def trend_screen_ranking_cmd(limit: int, top: int) -> None:
     from signalforge.research.trend_screen.ruleset import load_adopted
 
     payload, path = build_and_publish(limit=limit or load_adopted().universe_limit)
+    as_of = payload.get("as_of") or payload.get("signal_date")
     click.echo(
-        f"{payload['name']} v{payload['version']}  シグナル {payload['signal_date']}  "
+        f"{payload['name']} v{payload['version']}  基準日 {as_of}  "
         f"通過 {payload['n_pass']} / ユニバース {payload['n_universe']} "
         f"（バー {payload['n_on_signal']}）"
     )
+    if payload.get("rebalance_signal_date"):
+        click.echo(f"月末シグナル（リバランス用）: {payload['rebalance_signal_date']}")
     if payload.get("warning"):
         click.echo(f"警告: {payload['warning']}")
     for row in (payload.get("ranking") or [])[: max(0, top)]:

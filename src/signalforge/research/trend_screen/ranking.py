@@ -19,7 +19,11 @@ from signalforge.research.trend_screen.config import (
 from signalforge.research.trend_screen.horse import _clean, _load_bars
 from signalforge.research.trend_screen.improve import _stats_at
 from signalforge.research.trend_screen.ruleset import SystemRules, load_adopted, rules_markdown
-from signalforge.research.trend_screen.system import _signal_coverage, latest_signal_day
+from signalforge.research.trend_screen.system import (
+    _signal_coverage,
+    latest_asof_day,
+    latest_signal_day,
+)
 from signalforge.research.trend_screen.universe_build import read_liquid_list, write_liquid_list
 
 GATE_LABELS = {
@@ -188,7 +192,18 @@ def _gate_snapshot(
     }
 
 
-def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) -> dict[str, Any]:
+def build_ranking(
+    *,
+    limit: int | None = None,
+    refresh_universe: bool = True,
+    as_of_mode: str = "latest",
+) -> dict[str, Any]:
+    """スクリーニング順位を作る。
+
+    as_of_mode:
+      - latest: 日足が揃う最新営業日（サイト表示・毎日更新向け）
+      - month_end: 完了した月末（リバランス判定と同じ）
+    """
     rules = load_adopted()
     limit = limit or rules.universe_limit
     if refresh_universe:
@@ -196,7 +211,11 @@ def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) ->
     names = read_liquid_list(limit)
     closes, volumes, bench = _load_bars(names)
     bench = _clean(bench)
-    signal = latest_signal_day(bench)
+    rebalance_signal = latest_signal_day(bench)
+    if as_of_mode == "month_end":
+        signal = rebalance_signal
+    else:
+        signal = latest_asof_day(closes)
     n_on_signal, coverage_ok, warning = _signal_coverage(closes, signal)
     listing, sectors = _listing_maps()
 
@@ -312,7 +331,11 @@ def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) ->
         "system_id": rules.id,
         "version": rules.version,
         "name": rules.name,
+        "as_of_mode": as_of_mode if as_of_mode in {"latest", "month_end"} else "latest",
+        "as_of": signal.date().isoformat(),
+        # 互換: 旧キー。サイトでは as_of を基準日として使う
         "signal_date": signal.date().isoformat(),
+        "rebalance_signal_date": rebalance_signal.date().isoformat(),
         "benchmark": rules.benchmark,
         "universe_limit": limit,
         "n_universe": len(closes),
@@ -321,6 +344,12 @@ def build_ranking(*, limit: int | None = None, refresh_universe: bool = True) ->
         "n_target": len(targets),
         "coverage_ok": coverage_ok,
         "warning": warning,
+        "note": (
+            "基準日は最新営業日の終値。採用シストレのリバランス判定は月末"
+            f"（次回シグナル候補: {rebalance_signal.date().isoformat()}）。"
+            if as_of_mode != "month_end"
+            else "基準日は完了した月末シグナル。"
+        ),
         "top_n": rules.top_n,
         "rank_by": rules.rank_by,
         "min_turnover": rules.min_turnover,

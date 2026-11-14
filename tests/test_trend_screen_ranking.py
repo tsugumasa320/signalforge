@@ -10,7 +10,10 @@ def test_render_trend_screen_body_contains_lab():
     payload = {
         "name": "テスト",
         "version": "1.2",
-        "signal_date": "2026-10-30",
+        "as_of": "2026-11-13",
+        "signal_date": "2026-11-13",
+        "rebalance_signal_date": "2026-10-30",
+        "note": "基準日は最新営業日の終値。",
         "n_universe": 2,
         "n_on_signal": 2,
         "n_pass": 1,
@@ -48,6 +51,9 @@ def test_render_trend_screen_body_contains_lab():
     html = render_trend_screen_body(payload, forward=None)
     assert "4588" in html
     assert "条件ラボ" in html
+    assert "基準日" in html
+    assert "2026-11-13" in html
+    assert "2026-10-30" in html
     assert "data-gate=" in html
     assert "trend-lab-data" in html
     assert GATE_LABELS["ret_20d"] in html

@@ -139,7 +139,9 @@ def _lab_payload(payload: dict[str, Any]) -> dict[str, Any]:
             }
         )
     return {
+        "as_of": payload.get("as_of") or payload.get("signal_date"),
         "signal_date": payload.get("signal_date"),
+        "rebalance_signal_date": payload.get("rebalance_signal_date"),
         "name": payload.get("name"),
         "version": payload.get("version"),
         "lab_defaults": payload.get("lab_defaults") or {},
@@ -383,19 +385,29 @@ def render_trend_screen_body(payload: dict[str, Any], *, forward: dict[str, Any]
         f"{escape(str(t.get('name') or ''))} · 1年 {_pct(t.get('ret_1y'))}</li>"
         for t in targets
     )
+    as_of = payload.get("as_of") or payload.get("signal_date") or ""
+    rebalance = payload.get("rebalance_signal_date") or ""
+    note = payload.get("note") or ""
     return f"""
     {warning}
+    <div class="info-box">
+      <strong>基準日</strong>は最新の終値が揃った営業日です（毎日更新）。
+      採用シストレの売買タイミングは別で、完了した<strong>月末シグナル</strong>
+      （いま {escape(str(rebalance))}）で判定します。
+      {escape(str(note)) if note else ""}
+    </div>
     <div class="metrics">
-      <div class="metric"><label>シグナル日</label><value>{escape(str(payload.get('signal_date') or ''))}</value></div>
+      <div class="metric"><label>基準日（最新）</label><value>{escape(str(as_of))}</value></div>
+      <div class="metric"><label>月末シグナル</label><value>{escape(str(rebalance))}</value></div>
       <div class="metric"><label>ユニバース</label><value>{payload.get('n_universe', 0)}</value></div>
-      <div class="metric"><label>シグナル日バー</label><value>{payload.get('n_on_signal', 0)}</value></div>
+      <div class="metric"><label>基準日バー</label><value>{payload.get('n_on_signal', 0)}</value></div>
       <div class="metric positive"><label>採用通過</label><value>{payload.get('n_pass', 0)}</value></div>
       <div class="metric"><label>保有目標</label><value>{payload.get('n_target', 0)}</value></div>
     </div>
 
     <section>
       <h2>採用ルールの保有目標（上位 {escape(str(payload.get('top_n') or 5))}）</h2>
-      <p class="muted">{escape(str(payload.get('name') or ''))} · 版 {escape(str(payload.get('version') or ''))}</p>
+      <p class="muted">{escape(str(payload.get('name') or ''))} · 版 {escape(str(payload.get('version') or ''))} · 基準日 {escape(str(as_of))}</p>
       <ul class="compact">{target_bits or '<li class="muted">なし</li>'}</ul>
     </section>
 
@@ -429,7 +441,7 @@ def export_trend_screen_page(
     html = wrap_page(
         title="長期上昇トレンド・スクリーニング",
         subtitle=(
-            f"シグナル {payload.get('signal_date', '')} · "
+            f"基準日 {payload.get('as_of') or payload.get('signal_date', '')} · "
             f"通過 {payload.get('n_pass', 0)} / ユニバース {payload.get('n_universe', 0)}"
         ),
         body=body,
