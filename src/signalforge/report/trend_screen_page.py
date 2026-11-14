@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from signalforge.report.static_html import wrap_page
+from signalforge.research.trend_screen.forward_paper import published_forward_path
 from signalforge.research.trend_screen.ranking import build_and_publish, load_ranking
 
 
@@ -115,7 +116,74 @@ def _rejected_table(rows: list[dict[str, Any]], *, limit: int = 80) -> str:
     return f"<table><thead>{header}</thead><tbody>{''.join(body_parts)}</tbody></table>{more}"
 
 
-def render_trend_screen_body(payload: dict[str, Any]) -> str:
+def _load_forward() -> dict[str, Any] | None:
+    path = published_forward_path()
+    if not path.exists():
+        return None
+    try:
+        import json
+
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _forward_section(fwd: dict[str, Any] | None) -> str:
+    if not fwd:
+        return """
+    <section id="forward">
+      <h2>フォワード（確認期間）</h2>
+      <p class="muted">未生成。 <code>uv run signalforge trend-screen forward</code></p>
+    </section>
+    """
+    s = fwd.get("summary") or {}
+    live = fwd.get("live") or {}
+    open_book = fwd.get("open") or {}
+    holds = "".join(
+        f"<li><strong>{escape(str(h.get('code')))}</strong> {escape(str(h.get('name') or ''))} "
+        f"· {_pct(h.get('return'))}</li>"
+        for h in (open_book.get("holdings") or [])
+    )
+    recent = list(fwd.get("months") or [])[-12:]
+    rows = "".join(
+        "<tr>"
+        f"<td>{escape(str(m.get('signal') or ''))}</td>"
+        f"<td>{m.get('n') or 0}</td>"
+        f"<td>{_pct(m.get('net'))}</td>"
+        f"<td>{_pct(m.get('bench'))}</td>"
+        f"<td>{_pct(m.get('excess'))}</td>"
+        f"<td class='muted'>{escape(str(m.get('codes') or ''))}</td>"
+        f"<td>{'オープン' if m.get('open') else ''}</td>"
+        "</tr>"
+        for m in recent
+    )
+    return f"""
+    <section id="forward">
+      <h2>フォワード（{escape(str(fwd.get('start') or ''))} → {escape(str(fwd.get('as_of') or ''))}）</h2>
+      <p class="muted">{escape(str(fwd.get('note') or ''))}</p>
+      <div class="metrics">
+        <div class="metric"><label>確定CAGR</label><value>{_pct(s.get('cagr'))}</value></div>
+        <div class="metric"><label>ベンチCAGR</label><value>{_pct(s.get('bench_cagr'))}</value></div>
+        <div class="metric"><label>累積リターン</label><value>{_pct(s.get('total_return'))}</value></div>
+        <div class="metric"><label>最大DD</label><value>{_pct(s.get('max_dd'))}</value></div>
+        <div class="metric"><label>時価込み</label><value>{_pct(live.get('total_return'))}</value></div>
+      </div>
+      <h3>直近ポジション</h3>
+      <p class="muted">シグナル {escape(str(open_book.get('signal_date') or ''))} ·
+      評価 {escape(str(open_book.get('as_of') or ''))} ·
+      月次 {_pct(open_book.get('month_net'))}
+      {"（オープン）" if open_book.get("open") else ""}</p>
+      <ul class="compact">{holds or '<li class="muted">なし</li>'}</ul>
+      <h3>直近12か月</h3>
+      <table>
+        <thead><tr><th>シグナル</th><th>銘柄数</th><th>ネット</th><th>ベンチ</th><th>超過</th><th>銘柄</th><th></th></tr></thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </section>
+    """
+
+
+def render_trend_screen_body(payload: dict[str, Any], *, forward: dict[str, Any] | None = None) -> str:
     warning = ""
     if payload.get("warning"):
         warning = f"<div class='info-box'><strong>警告</strong> {escape(str(payload['warning']))}</div>"
@@ -134,6 +202,8 @@ def render_trend_screen_body(payload: dict[str, Any]) -> str:
       <div class="metric positive"><label>通過</label><value>{payload.get('n_pass', 0)}</value></div>
       <div class="metric"><label>保有目標</label><value>{payload.get('n_target', 0)}</value></div>
     </div>
+
+    {_forward_section(forward if forward is not None else _load_forward())}
 
     <section>
       <h2>今月の保有目標（上位 {escape(str(payload.get('top_n') or 5))}）</h2>
@@ -190,11 +260,10 @@ def export_trend_screen_page(
     out.mkdir(parents=True, exist_ok=True)
     path = out / "trend.html"
     path.write_text(html, encoding="utf-8")
-    # also copy JSON next to page for download/debug
-    raw = output_dir / "screen" / "trend_screen_ranking.json"
+    screen_dir = output_dir / "screen"
     from signalforge.research.trend_screen.ranking import published_ranking_path
 
-    src = published_ranking_path()
-    if src.exists():
-        raw.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+    for src in (published_ranking_path(), published_forward_path()):
+        if src.exists():
+            (screen_dir / src.name).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     return path

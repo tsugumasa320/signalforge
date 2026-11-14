@@ -8,13 +8,14 @@
 uv run signalforge trend-screen rules
 uv run signalforge trend-screen targets
 uv run signalforge trend-screen ranking   # 全通過銘柄ランキング → data/published/trend_screen_ranking.json
+uv run signalforge trend-screen forward   # 2023〜フォワード仮想口座 → data/paper/trend_screen.json
 uv run signalforge trend-screen backtest
 uv run signalforge trend-screen improve
 uv run signalforge dashboard export --output _site   # Pages に screen/trend.html
 ```
 
 GitHub Pages: `/screen/trend.html`（ナビ「トレンド・スクリーニング」）。  
-日次更新: `.github/workflows/daily-paper.yml`（JST 18:17）が流動性ユニバースの日足更新 → `trend-screen ranking` → `dashboard export`。
+日次更新: `.github/workflows/daily-paper.yml`（JST 18:17）が流動性ユニバースの日足更新 → `ranking` + `forward` → `dashboard export`。
 
 ## 規則（1.2）
 

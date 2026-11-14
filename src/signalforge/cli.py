@@ -2736,6 +2736,17 @@ def trend_screen_ranking_cmd(limit: int, top: int) -> None:
     click.echo(f"公開JSON: {path}")
 
 
+@trend_screen_group.command("forward")
+@click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
+def trend_screen_forward_cmd(limit: int) -> None:
+    """確認期間（2023〜）以降を仮想口座でフォワード再生し、paper/published に保存する。"""
+    from signalforge.research.trend_screen.forward_paper import print_forward, run_and_save_forward
+    from signalforge.research.trend_screen.ruleset import load_adopted
+
+    payload = run_and_save_forward(limit=limit or load_adopted().universe_limit)
+    print_forward(payload)
+
+
 @trend_screen_group.command("backtest")
 @click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
 def trend_screen_backtest_cmd(limit: int) -> None:

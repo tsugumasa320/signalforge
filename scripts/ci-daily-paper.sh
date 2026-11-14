@@ -44,6 +44,9 @@ PY
 
   echo "--- trend-screen full ranking (published JSON) ---"
   uv run signalforge trend-screen ranking --top 10
+
+  echo "--- trend-screen forward paper ---"
+  uv run signalforge trend-screen forward
 fi
 
 echo "--- export unified dashboard ---"
