@@ -27,8 +27,8 @@ class SystemRules:
     id: str = DEFAULT_SYSTEM_ID
     version: str = DEFAULT_SYSTEM_VERSION
     name: str = DEFAULT_SYSTEM_NAME
-    universe: str = "liquid_turnover_top"
-    universe_limit: int = 300
+    universe: str = "tse_common"
+    universe_limit: int = 0  # 0 = 流動性カットなし（履歴の足る東証普通株すべて）
     require_above_ma200: bool = True
     ma200_slope_lag: int = MA200_SLOPE_LAG
     ma75_slope_lag: int = MA75_SLOPE_LAG
@@ -73,11 +73,18 @@ def load_adopted() -> SystemRules:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return base
+    uni_limit = payload.get("universe_limit", base.universe_limit)
+    try:
+        uni_limit_i = int(uni_limit) if uni_limit is not None else base.universe_limit
+    except (TypeError, ValueError):
+        uni_limit_i = base.universe_limit
     return replace(
         base,
         id=str(payload.get("system_id") or base.id),
         version=str(payload.get("version") or base.version),
         name=str(payload.get("name") or base.name),
+        universe=str(payload.get("universe") or base.universe),
+        universe_limit=uni_limit_i,
         top_n=int(payload.get("top_n") or base.top_n),
         rank_by=str(payload.get("rank_by") or base.rank_by),
         weight=str(payload.get("weight") or base.weight),
@@ -114,7 +121,11 @@ def rules_markdown(rules: SystemRules | None = None) -> str:
         "## ユニバース",
         "",
         f"- 東証プライム・スタンダード・グロースの普通株",
-        f"- 直近20営業日の終値×出来高平均が上位 {rules.universe_limit}",
+        (
+            "- 流動性（売買代金）による母集団の絞り込みなし"
+            if rules.universe_limit <= 0
+            else f"- 直近20営業日の終値×出来高平均が上位 {rules.universe_limit}"
+        ),
         "",
         "## 銘柄の一次条件（日足・すべて必須）",
         "",

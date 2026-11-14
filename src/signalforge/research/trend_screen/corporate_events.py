@@ -202,13 +202,19 @@ def fetch_dividend_snapshot(ticker: str, *, sleep_s: float = 0.08) -> dict[str, 
     return doc
 
 
-def dividend_fields(ticker: str, *, refresh: bool = False) -> dict[str, Any]:
-    doc = None if refresh else _load_div_cache(ticker)
-    if doc is None:
+def dividend_fields(
+    ticker: str,
+    *,
+    refresh: bool = False,
+    fetch_if_missing: bool = False,
+) -> dict[str, Any]:
+    doc = None if refresh else _load_div_cache(ticker, max_age_days=30 if not refresh else 7)
+    if doc is None and (refresh or fetch_if_missing):
         try:
             doc = fetch_dividend_snapshot(ticker)
         except Exception:
             doc = {}
+    doc = doc or {}
     yld = doc.get("dividend_yield")
     try:
         if yld is not None and float(yld) <= 0:
@@ -282,7 +288,13 @@ def event_fields_for(
     """1銘柄分の表示用フィールド。"""
     out = empty_event_fields(ticker)
     out.update(earnings_around(ticker, as_of))
-    out.update(dividend_fields(ticker, refresh=refresh_dividends))
+    out.update(
+        dividend_fields(
+            ticker,
+            refresh=refresh_dividends,
+            fetch_if_missing=refresh_dividends,
+        )
+    )
     code = ticker.replace(".T", "")
     ymap = yutai_map if yutai_map is not None else {}
     if code in ymap:

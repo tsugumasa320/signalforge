@@ -1,4 +1,4 @@
-"""採用ルールで流動性ユニバース全銘柄をランキングし、公開用 JSON を書く。"""
+"""採用ルールでスクリーニング母集団をランキングし、公開用 JSON を書く。"""
 
 from __future__ import annotations
 
@@ -294,17 +294,12 @@ def build_ranking(
     from signalforge.research.trend_screen.corporate_events import (
         event_fields_for,
         load_yutai_map,
-        warm_dividend_cache,
     )
 
     try:
         yutai_map = load_yutai_map()
     except Exception:
         yutai_map = {}
-    try:
-        warm_dividend_cache(list(closes.keys()))
-    except Exception:
-        pass
     as_of_s = signal.date().isoformat()
 
     rows: list[dict[str, Any]] = []
@@ -324,6 +319,9 @@ def build_ranking(
         if rules.min_turnover is not None:
             turn = stats.get("turnover_20d")
             gates["turnover"] = bool(turn is not None and turn >= rules.min_turnover)
+        else:
+            # 流動性ゲートなしでも、ラボでONにできるよう値が取れれば True
+            gates["turnover"] = stats.get("turnover_20d") is not None
         if rules.max_dd_52w is not None:
             dd52 = stats.get("dd_52w")
             gates["dd_52w"] = bool(dd52 is not None and dd52 >= rules.max_dd_52w)
@@ -339,7 +337,6 @@ def build_ranking(
             fails = ["no_bar"]
         sym = code.replace(".T", "")
         meta = listing.get(code) or listing.get(sym) or {}
-        events = event_fields_for(code, as_of=as_of_s, yutai_map=yutai_map)
         rows.append(
             {
                 "ticker": code,
@@ -366,9 +363,12 @@ def build_ranking(
                 "risk_adj_1y": stats.get("risk_adj_1y"),
                 "turnover_20d": stats.get("turnover_20d"),
                 "gates": gates,
-                **events,
             }
         )
+
+    # 配当は既存キャッシュのみ使う（ランキング中の yfinance 一括取得は重い／弾かれやすい）
+    for row in rows:
+        row.update(event_fields_for(row["ticker"], as_of=as_of_s, yutai_map=yutai_map))
 
     passers = [r for r in rows if r["passed"]]
     passers.sort(key=lambda r: (-(r["ret_1y"] or -1e9), r["code"]))

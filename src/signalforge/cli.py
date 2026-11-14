@@ -2700,7 +2700,7 @@ def trend_screen_rules_cmd() -> None:
 
 
 @trend_screen_group.command("targets")
-@click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
+@click.option("--limit", default=0, type=int, help="0なら採用ルール（0=東証普通株すべて）")
 def trend_screen_targets_cmd(limit: int) -> None:
     """直近月末シグナルの目標ポートフォリオを出す。"""
     from signalforge.research.trend_screen.ruleset import load_adopted
@@ -2710,7 +2710,7 @@ def trend_screen_targets_cmd(limit: int) -> None:
 
 
 @trend_screen_group.command("ranking")
-@click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
+@click.option("--limit", default=0, type=int, help="0なら採用ルール（0=東証普通株すべて）")
 @click.option("--top", default=30, show_default=True, type=int, help="端末に出す通過上位件数")
 def trend_screen_ranking_cmd(limit: int, top: int) -> None:
     """採用ルールで流動性ユニバース全銘柄をランキングし、公開 JSON を更新する。"""
@@ -2740,7 +2740,7 @@ def trend_screen_ranking_cmd(limit: int, top: int) -> None:
 
 
 @trend_screen_group.command("forward")
-@click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
+@click.option("--limit", default=0, type=int, help="0なら採用ルール（0=東証普通株すべて）")
 def trend_screen_forward_cmd(limit: int) -> None:
     """確認期間（2023〜）以降を仮想口座でフォワード再生し、paper/published に保存する。"""
     from signalforge.research.trend_screen.forward_paper import print_forward, run_and_save_forward
@@ -2751,7 +2751,7 @@ def trend_screen_forward_cmd(limit: int) -> None:
 
 
 @trend_screen_group.command("backtest")
-@click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
+@click.option("--limit", default=0, type=int, help="0なら採用ルール（0=東証普通株すべて）")
 def trend_screen_backtest_cmd(limit: int) -> None:
     """採用シストレの学習／確認成績を再計算する。"""
     from signalforge.research.trend_screen.ruleset import load_adopted

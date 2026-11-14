@@ -16,15 +16,19 @@ else
   echo "--- diversified paper (TSE forward, cached data) ---"
   uv run signalforge paper diversified-run-all --no-refresh --workers 8 || true
 
-  echo "--- trend-screen liquid universe OHLCV update ---"
+  echo "--- trend-screen universe OHLCV update (東証普通株・流動性カットなし) ---"
   uv run python - <<'PY'
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from signalforge.data.cache import ParquetCache
 from signalforge.data.fetcher import MarketDataFetcher
+from signalforge.paper.diversified import resolve_universe_tickers
+from signalforge.research.trend_screen.ruleset import load_adopted
 from signalforge.research.trend_screen.universe_build import read_liquid_list, write_liquid_list
 
-write_liquid_list(300)
-tickers = read_liquid_list(300)
+rules = load_adopted()
+limit = int(rules.universe_limit or 0)
+# 日次は東証普通株を更新してから母集団リストを書き直す
+tickers = resolve_universe_tickers("tse_all", 0)
 if "1306.T" not in tickers:
     tickers = [*tickers, "1306.T"]
 cache = ParquetCache()
@@ -39,7 +43,8 @@ with ThreadPoolExecutor(max_workers=8) as pool:
         except Exception as exc:
             fail += 1
             print(f"✗ {futs[fut]}: {exc}", flush=True)
-print(f"trend-screen bars updated ok={ok} fail={fail}", flush=True)
+write_liquid_list(limit)
+print(f"trend-screen bars updated ok={ok} fail={fail} universe={len(read_liquid_list(limit))}", flush=True)
 PY
 
   echo "--- trend-screen full ranking (published JSON) ---"
