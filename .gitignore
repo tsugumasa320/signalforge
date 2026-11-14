@@ -28,6 +28,10 @@ ENV/
 !/data/paper/**
 !/data/published/
 !/data/published/**
+!/data/trend_screen/
+/data/trend_screen/**
+!/data/trend_screen/system/
+!/data/trend_screen/system/**
 *.parquet
 .pytest_cache/
 .coverage

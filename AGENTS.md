@@ -111,3 +111,5 @@ State: `data/paper/{style}_{strategy}.json` (committed by GitHub Actions; local 
 GitHub Actions (`.github/workflows/daily-paper.yml`): scheduled daily 09:17 UTC (18:17 JST), runs `scripts/ci-daily-paper.sh`, commits paper JSON.
 
 **フォワードの見方:** 更新は Actions 日次（JST 18:17）→ **GitHub Pages**（`dashboard export` の hub）。`data/paper/diversified_*.json` を commit すると分散ペーパーも Pages に載る。Streamlit `127.0.0.1:8501` はローカル専用。
+
+**トレンド・スクリーニング（Pages）:** `uv run signalforge trend-screen ranking` → `data/published/trend_screen_ranking.json`。日次 Actions が流動性ユニバース日足を更新してからランキング再生成し、`screen/trend.html` を公開する。

@@ -1,0 +1,18 @@
+{
+  "system_id": "trend_primary_top5_1y",
+  "version": "1.0",
+  "signal_date": "2026-10-30",
+  "entry_date": "2026-11-02",
+  "benchmark": "1306.T",
+  "n_universe": 308,
+  "n_primary": 1,
+  "targets": [
+    {
+      "ticker": "642A.T",
+      "weight": 1.0,
+      "price_on_signal": 1972.0,
+      "ret_1y": 0.32931115804746103
+    }
+  ],
+  "generated_at": "2026-11-14T09:28:46+09:00"
+}

@@ -2622,5 +2622,145 @@ def paper_reset(style: str, strategy: str | None) -> None:
     click.echo("Paper 口座をリセットしました。`paper init` または `paper run` で再開できます。")
 
 
+@main.group("trend-screen")
+def trend_screen_group() -> None:
+    """長期上昇トレンドの成長株スクリーニング。配点は未検証の仮説。"""
+
+
+@trend_screen_group.command("universe")
+def trend_screen_universe_cmd() -> None:
+    """上場一覧の件数。日足は取らない。"""
+    from signalforge.research.trend_screen.screen import universe_text
+
+    click.echo(universe_text())
+
+
+@trend_screen_group.command("run")
+@click.option("--tickers", default="", help="カンマ区切り。例: 2702.T,3563.T")
+@click.option("--cases", "use_cases", is_flag=True, help="テストケース2銘柄と再評価10銘柄だけ")
+@click.option("--refresh", is_flag=True, help="日足と財務のキャッシュを取り直す")
+@click.option("--no-forward", is_flag=True, help="チャート条件だけの前方リターン集計を省く")
+def trend_screen_run_cmd(tickers: str, use_cases: bool, refresh: bool, no_forward: bool) -> None:
+    """指定銘柄を採点する。全市場の一括スクリーニングはしない。"""
+    from signalforge.research.trend_screen.screen import ScreenUsageError, run_cli
+
+    try:
+        run_cli(tickers=tickers, use_cases=use_cases, refresh=refresh, with_forward=not no_forward)
+    except ScreenUsageError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+@trend_screen_group.command("race")
+@click.option("--limit", default=300, show_default=True, type=int, help="流動性上位の銘柄数")
+@click.option("--no-funds", is_flag=True, help="業績キャッシュを読まない")
+def trend_screen_race_cmd(limit: int, no_funds: bool) -> None:
+    """流動性上位の日足で選別案を比べ、学習期間の口座CAGRだけで最良を決める。"""
+    from signalforge.research.trend_screen.horse import run_cached_race
+
+    run_cached_race(limit=limit, fetch_funds=not no_funds)
+
+
+@trend_screen_group.command("fetch-funds")
+@click.option("--limit", default=300, show_default=True, type=int)
+def trend_screen_fetch_funds_cmd(limit: int) -> None:
+    """流動性上位の通期財務をキャッシュする。"""
+    from signalforge.research.trend_screen.horse import _load_funds
+    from signalforge.research.trend_screen.universe_build import read_liquid_list, write_liquid_list
+
+    write_liquid_list(limit)
+    names = read_liquid_list(limit)
+    found = _load_funds(names, fetch_missing=True)
+    click.echo(f"財務キャッシュ {len(found)}/{len(names)}")
+
+
+@trend_screen_group.command("frequency")
+@click.option("--limit", default=300, show_default=True, type=int)
+def trend_screen_frequency_cmd(limit: int) -> None:
+    """一次条件の月末判定と毎日判定を比べる。"""
+    from signalforge.research.trend_screen.frequency import run_cached_frequency
+
+    run_cached_frequency(limit=limit)
+
+
+@trend_screen_group.command("concentration")
+@click.option("--limit", default=300, show_default=True, type=int)
+def trend_screen_concentration_cmd(limit: int) -> None:
+    """一次条件の全銘柄と上昇率上位への集中を比べる。"""
+    from signalforge.research.trend_screen.concentration import run_cached_concentration
+
+    run_cached_concentration(limit=limit)
+
+
+@trend_screen_group.command("rules")
+def trend_screen_rules_cmd() -> None:
+    """採用シストレの規則を表示する。"""
+    from signalforge.research.trend_screen.system import print_rules
+
+    print_rules()
+
+
+@trend_screen_group.command("targets")
+@click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
+def trend_screen_targets_cmd(limit: int) -> None:
+    """直近月末シグナルの目標ポートフォリオを出す。"""
+    from signalforge.research.trend_screen.ruleset import load_adopted
+    from signalforge.research.trend_screen.system import compute_targets, print_targets
+
+    print_targets(compute_targets(limit=limit or load_adopted().universe_limit))
+
+
+@trend_screen_group.command("ranking")
+@click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
+@click.option("--top", default=30, show_default=True, type=int, help="端末に出す通過上位件数")
+def trend_screen_ranking_cmd(limit: int, top: int) -> None:
+    """採用ルールで流動性ユニバース全銘柄をランキングし、公開 JSON を更新する。"""
+    from signalforge.research.trend_screen.ranking import build_and_publish
+    from signalforge.research.trend_screen.ruleset import load_adopted
+
+    payload, path = build_and_publish(limit=limit or load_adopted().universe_limit)
+    click.echo(
+        f"{payload['name']} v{payload['version']}  シグナル {payload['signal_date']}  "
+        f"通過 {payload['n_pass']} / ユニバース {payload['n_universe']} "
+        f"（バー {payload['n_on_signal']}）"
+    )
+    if payload.get("warning"):
+        click.echo(f"警告: {payload['warning']}")
+    for row in (payload.get("ranking") or [])[: max(0, top)]:
+        ret = row.get("ret_1y")
+        ret_s = "—" if ret is None else f"{ret:+.1%}"
+        mark = " *" if row.get("target") else ""
+        click.echo(
+            f"{row.get('rank'):>3}. {row.get('code')} {str(row.get('name') or '')[:22]}  "
+            f"1年 {ret_s}{mark}"
+        )
+    click.echo(f"公開JSON: {path}")
+
+
+@trend_screen_group.command("backtest")
+@click.option("--limit", default=0, type=int, help="0なら採用ルールの300")
+def trend_screen_backtest_cmd(limit: int) -> None:
+    """採用シストレの学習／確認成績を再計算する。"""
+    from signalforge.research.trend_screen.ruleset import load_adopted
+    from signalforge.research.trend_screen.system import run_system_backtest
+
+    info = run_system_backtest(limit=limit or load_adopted().universe_limit)
+    train, test = info["train"], info["test"]
+    click.echo(
+        f"学習 CAGR {train.cagr:+.2%} excess {train.mean_excess:+.2%} DD {train.max_dd:+.2%} | "
+        f"確認 CAGR {test.cagr:+.2%} excess {test.mean_excess:+.2%} DD {test.max_dd:+.2%}"
+    )
+    click.echo(f"出力: {info['out'] / 'backtest.md'}")
+
+
+@trend_screen_group.command("improve")
+@click.option("--limit", default=300, show_default=True, type=int)
+@click.option("--no-promote", is_flag=True, help="採用ファイルを更新しない")
+def trend_screen_improve_cmd(limit: int, no_promote: bool) -> None:
+    """改善案を比べ、確認を通れば採用を更新する。"""
+    from signalforge.research.trend_screen.improve import run_cached_improve
+
+    run_cached_improve(limit=limit, promote=not no_promote)
+
+
 if __name__ == "__main__":
     main()

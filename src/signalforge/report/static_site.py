@@ -375,6 +375,12 @@ def export_hub(
       {_comparison_table(diversified_rows or [], kind="paper")}
     </section>
 
+    <section id="screen">
+      <h2>🔍 長期上昇トレンド・スクリーニング</h2>
+      <p class="muted">流動性上位ユニバースを採用ルールで全件ランキング。保有は上位5・等金額。</p>
+      <p><a href="screen/trend.html">全銘柄ランキングを見る →</a></p>
+    </section>
+
     <section id="intraday">
       <h2>⏱ 短期足の実験</h2>
       <p class="muted">5分足は約60日、1分足は約7日。数字は全銘柄の中央値です。</p>
@@ -474,6 +480,11 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
     for strategy_key in guide_ids:
         export_strategy_guide(output_dir, strategy_key)
     export_guides_index(output_dir, guide_ids=guide_ids)
+
+    from signalforge.report.trend_screen_page import export_trend_screen_page
+
+    # 公開 JSON が無ければ作る。日次 CI では先に ranking を更新してから export する。
+    export_trend_screen_page(output_dir, rebuild=False)
 
     hub = export_hub(output_dir, paper_rows, backtest_rows, diversified_rows)
     (output_dir / ".nojekyll").touch()

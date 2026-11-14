@@ -1,0 +1,50 @@
+{
+  "system_id": "trend_top5_liquid",
+  "version": "1.1",
+  "signal_date": "2026-10-30",
+  "entry_date": "2026-11-02",
+  "benchmark": "1306.T",
+  "n_universe": 308,
+  "n_primary": 76,
+  "n_on_signal": 298,
+  "coverage_ok": true,
+  "warning": "",
+  "targets": [
+    {
+      "ticker": "4588.T",
+      "weight": 0.2,
+      "price_on_signal": 7560.0,
+      "ret_1y": 9.5,
+      "vol_1y": 1.0971211377094798
+    },
+    {
+      "ticker": "6834.T",
+      "weight": 0.2,
+      "price_on_signal": 6130.0,
+      "ret_1y": 2.2565156791397296,
+      "vol_1y": 0.9976078344486258
+    },
+    {
+      "ticker": "7826.T",
+      "weight": 0.2,
+      "price_on_signal": 9400.0,
+      "ret_1y": 2.228350833956813,
+      "vol_1y": 0.7709226539020633
+    },
+    {
+      "ticker": "2737.T",
+      "weight": 0.2,
+      "price_on_signal": 24050.0,
+      "ret_1y": 2.099255471175944,
+      "vol_1y": 0.8685326824552895
+    },
+    {
+      "ticker": "8050.T",
+      "weight": 0.2,
+      "price_on_signal": 10485.0,
+      "ret_1y": 1.9704536194124285,
+      "vol_1y": 0.5970943809831848
+    }
+  ],
+  "generated_at": "2026-11-14T12:37:32+09:00"
+}

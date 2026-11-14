@@ -111,6 +111,7 @@ def render_nav(active: str, depth: int = 0) -> str:
     links = [
         ("hub", "🏠 ホーム", f"{p}index.html"),
         ("paper", "📈 Paper 成績", f"{p}index.html#paper"),
+        ("screen", "🔍 トレンド・スクリーニング", f"{p}screen/trend.html"),
         ("backtest", "⚖️ バックテスト比較", f"{p}index.html#backtest"),
         ("guides", "📚 戦略解説", f"{p}index.html#guides"),
     ]

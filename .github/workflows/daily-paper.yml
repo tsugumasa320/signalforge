@@ -66,15 +66,15 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Commit paper state
+      - name: Commit paper + screening state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/paper/
+          git add data/paper/ data/published/trend_screen_ranking.json data/trend_screen/liquid300.txt || true
           if git diff --staged --quiet; then
-            echo "No paper state changes."
+            echo "No paper/screening state changes."
           else
-            git commit -m "chore(paper): daily update (run ${GITHUB_RUN_ID})"
+            git commit -m "chore(paper): daily update + trend-screen ranking (run ${GITHUB_RUN_ID})"
             # 走行中に main が進んでも、取り込み直してから push する
             for _ in 1 2 3; do
               git rebase --abort >/dev/null 2>&1 || true

@@ -1,0 +1,33 @@
+# 長期上昇トレンド・シストレ（採用版）
+
+現行採用は改善レース後の版 1.2（`data/trend_screen/system/adopted.json`）。
+
+## コマンド
+
+```bash
+uv run signalforge trend-screen rules
+uv run signalforge trend-screen targets
+uv run signalforge trend-screen ranking   # 全通過銘柄ランキング → data/published/trend_screen_ranking.json
+uv run signalforge trend-screen backtest
+uv run signalforge trend-screen improve
+uv run signalforge dashboard export --output _site   # Pages に screen/trend.html
+```
+
+GitHub Pages: `/screen/trend.html`（ナビ「トレンド・スクリーニング」）。  
+日次更新: `.github/workflows/daily-paper.yml`（JST 18:17）が流動性ユニバースの日足更新 → `trend-screen ranking` → `dashboard export`。
+
+## 規則（1.2）
+
+1. 流動性上位300の普通株
+2. 日足の一次条件6つ
+3. 20日売買代金が5,000万円以上
+4. 過去20営業日の株価リターンがプラス（直近下落なし）
+5. 過去1年リターン上位5を等金額
+6. 毎月末判定 → 翌営業日終値でリバランス
+
+## 改善レースの結果
+
+- 2026-11-13: 「上位5・売買代金下限」が学習最良（版1.1）
+- 2026-11-14: 直近下落フィルタを追加比較。「上位5・直近20日下落なし」が学習CAGR最大かつ確認で1306超過プラス（版1.2）。確認CAGRはベースより抑えめだが、急落後の高騰銘柄を除外する。
+
+詳細: `data/reports/trend_screen/improve/2026-11-13/improve.md`

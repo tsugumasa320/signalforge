@@ -1,0 +1,55 @@
+{
+  "system_id": "trend_top5_liquid_ret20",
+  "version": "1.2",
+  "signal_date": "2026-10-30",
+  "entry_date": "2026-11-02",
+  "benchmark": "1306.T",
+  "n_universe": 308,
+  "n_primary": 76,
+  "n_on_signal": 298,
+  "coverage_ok": true,
+  "warning": "",
+  "targets": [
+    {
+      "ticker": "4588.T",
+      "name": "オンコリスバイオファーマ",
+      "weight": 0.2,
+      "price_on_signal": 7560.0,
+      "ret_1y": 9.5,
+      "vol_1y": 1.0971211377094798
+    },
+    {
+      "ticker": "6098.T",
+      "name": "リクルートホールディングス",
+      "weight": 0.2,
+      "price_on_signal": 19200.0,
+      "ret_1y": 1.4354338983739496,
+      "vol_1y": 0.5218194708373148
+    },
+    {
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "weight": 0.2,
+      "price_on_signal": 579.4000244140625,
+      "ret_1y": 0.8980325054579315,
+      "vol_1y": 0.4475003923194728
+    },
+    {
+      "ticker": "9147.T",
+      "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
+      "weight": 0.2,
+      "price_on_signal": 5939.0,
+      "ret_1y": 0.8145445860190936,
+      "vol_1y": 0.2699889853137971
+    },
+    {
+      "ticker": "9104.T",
+      "name": "商船三井",
+      "weight": 0.2,
+      "price_on_signal": 7672.0,
+      "ret_1y": 0.7371163939678642,
+      "vol_1y": 0.3153982788677796
+    }
+  ],
+  "generated_at": "2026-11-14T12:59:25+09:00"
+}
