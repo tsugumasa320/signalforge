@@ -141,6 +141,21 @@ def _lab_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 "risk_adj_1y": row.get("risk_adj_1y"),
                 "turnover_20d": row.get("turnover_20d"),
                 "gates": row.get("gates") or {},
+                "yahoo_jp_url": row.get("yahoo_jp_url"),
+                "earnings_last": row.get("earnings_last"),
+                "earnings_next": row.get("earnings_next"),
+                "earnings_next_days": row.get("earnings_next_days"),
+                "dividend_yield": row.get("dividend_yield"),
+                "ex_dividend_date": row.get("ex_dividend_date"),
+                "last_dividend": row.get("last_dividend"),
+                "last_dividend_date": row.get("last_dividend_date"),
+                "yutai": row.get("yutai"),
+                "yutai_months": row.get("yutai_months"),
+                "yutai_record": row.get("yutai_record"),
+                "yutai_min_shares": row.get("yutai_min_shares"),
+                "yutai_type": row.get("yutai_type"),
+                "yutai_annual_est": row.get("yutai_annual_est"),
+                "yutai_url": row.get("yutai_url"),
             }
         )
     return {
@@ -217,6 +232,13 @@ def _lab_section(payload: dict[str, Any]) -> str:
         急騰あとの失速銘柄は低く出やすいです。買ってすぐ含み損が不安なときは、
         安定度や上昇月割合で絞り、並びを安定度にすると見やすいです。
       </div>
+      <div class="info-box">
+        <strong>決算・配当・優待</strong>は参考表示です（通過条件には使いません）。
+        決算日は取得済みカレンダー、配当は Yahoo Finance、優待は
+        <a href="https://yutai-shirabe.com/download/index.html" target="_blank" rel="noopener">優待しらべ</a>
+        （EDINET 有報由来）です。内容・権利日は変更されうるので、売買前に各社IRで確認してください。
+        銘柄コード横の Yahoo は日本版ファイナンスへのリンクです。
+      </div>
       <div class="lab-controls">
         <div>
           <h3>必須条件</h3>
@@ -276,6 +298,7 @@ def _lab_section(payload: dict[str, Any]) -> str:
             <tr>
               <th>#</th><th>コード</th><th>会社名</th><th>業種</th>
               <th>安定度</th><th>上昇月</th><th>経路DD</th><th>1年</th><th>60日</th><th>20日</th><th>終値</th>
+              <th>直近決算</th><th>次回決算</th><th>配当利回</th><th>権利落</th><th>優待</th><th>権利月</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -363,6 +386,29 @@ def _lab_section(payload: dict[str, Any]) -> str:
         if (v === null || v === undefined || Number.isNaN(v)) return '—';
         return Number(v).toFixed(digits);
       }}
+      function txt(v) {{
+        if (v === null || v === undefined || v === '') return '—';
+        return String(v);
+      }}
+      function yahooLink(r) {{
+        const u = r.yahoo_jp_url;
+        if (!u) return txt(r.code);
+        return `<a href="${{u}}" target="_blank" rel="noopener">${{r.code || ''}}</a>`;
+      }}
+      function yutaiCell(r) {{
+        if (!r.yutai) return '—';
+        const label = r.yutai_type || 'あり';
+        if (r.yutai_url) {{
+          return `<a href="${{r.yutai_url}}" target="_blank" rel="noopener">${{label}}</a>`;
+        }}
+        return label;
+      }}
+      function nextEarn(r) {{
+        if (!r.earnings_next) return '—';
+        const d = r.earnings_next_days;
+        const tip = (d === null || d === undefined) ? '' : `（あと${{d}}日）`;
+        return txt(r.earnings_next) + tip;
+      }}
       function render() {{
         const p = readParams();
         const pass = universe.filter(r => passes(r, p));
@@ -376,14 +422,14 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <div class="metric"><label>ユニバース</label><value>${{universe.length}}</value></div>
         `;
         document.getElementById('lab-targets').innerHTML = targets.length
-          ? targets.map((r,i) => `<li><strong>${{r.code}}</strong> ${{r.name || ''}} · 安定度 ${{num(r.steady_score,1)}} · 1年 ${{pct(r.ret_1y)}}</li>`).join('')
+          ? targets.map((r,i) => `<li>${{yahooLink(r)}} ${{r.name || ''}} · 安定度 ${{num(r.steady_score,1)}} · 1年 ${{pct(r.ret_1y)}} · 次回決算 ${{txt(r.earnings_next)}} · 優待 ${{r.yutai ? (r.yutai_months || 'あり') : '—'}}</li>`).join('')
           : '<li class="muted">条件に合う銘柄なし</li>';
         const tb = document.querySelector('#lab-table tbody');
         tb.innerHTML = pass.map((r,i) => {{
           const badge = i < p.topN ? ' <span class="badge">保有</span>' : '';
           return `<tr>
             <td>${{i+1}}${{badge}}</td>
-            <td>${{r.code || ''}}</td>
+            <td>${{yahooLink(r)}}</td>
             <td class="name">${{r.name || ''}}</td>
             <td class="muted">${{r.sector || ''}}</td>
             <td>${{num(r.steady_score,1)}}</td>
@@ -393,6 +439,12 @@ def _lab_section(payload: dict[str, Any]) -> str:
             <td>${{pct(r.ret_60d)}}</td>
             <td>${{pct(r.ret_20d)}}</td>
             <td>${{yen(r.price)}}</td>
+            <td>${{txt(r.earnings_last)}}</td>
+            <td>${{nextEarn(r)}}</td>
+            <td>${{pct(r.dividend_yield,2)}}</td>
+            <td>${{txt(r.ex_dividend_date)}}</td>
+            <td>${{yutaiCell(r)}}</td>
+            <td>${{txt(r.yutai_months)}}</td>
           </tr>`;
         }}).join('');
       }}
@@ -439,11 +491,30 @@ def render_trend_screen_body(payload: dict[str, Any], *, forward: dict[str, Any]
     if payload.get("warning"):
         warning = f"<div class='info-box'><strong>警告</strong> {escape(str(payload['warning']))}</div>"
     targets = payload.get("targets") or []
-    target_bits = "".join(
-        f"<li><strong>{escape(str(t.get('code')))}</strong> "
-        f"{escape(str(t.get('name') or ''))} · 1年 {_pct(t.get('ret_1y'))}</li>"
-        for t in targets
-    )
+    target_bits_parts: list[str] = []
+    for t in targets:
+        code = str(t.get("code") or "")
+        yurl = t.get("yahoo_jp_url") or (
+            f"https://finance.yahoo.co.jp/quote/{code}.T" if code else ""
+        )
+        code_html = (
+            f'<a href="{escape(str(yurl))}" target="_blank" rel="noopener">'
+            f"<strong>{escape(code)}</strong></a>"
+            if yurl
+            else f"<strong>{escape(code)}</strong>"
+        )
+        extra = []
+        if t.get("earnings_next"):
+            extra.append(f"次回決算 {escape(str(t['earnings_next']))}")
+        if t.get("dividend_yield") is not None:
+            extra.append(f"配当 {_pct(t.get('dividend_yield'), digits=2)}")
+        if t.get("yutai"):
+            extra.append(f"優待 {escape(str(t.get('yutai_months') or 'あり'))}")
+        extra_s = (" · " + " · ".join(extra)) if extra else ""
+        target_bits_parts.append(
+            f"<li>{code_html} {escape(str(t.get('name') or ''))} · 1年 {_pct(t.get('ret_1y'))}{extra_s}</li>"
+        )
+    target_bits = "".join(target_bits_parts)
     as_of = payload.get("as_of") or payload.get("signal_date") or ""
     rebalance = payload.get("rebalance_signal_date") or ""
     note = payload.get("note") or ""

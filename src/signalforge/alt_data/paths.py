@@ -38,3 +38,24 @@ def earnings_dir() -> Path:
 def earnings_path(ticker: str) -> Path:
     safe = ticker.replace("/", "_")
     return earnings_dir() / f"{safe}.json"
+
+
+def dividends_dir() -> Path:
+    p = alt_data_root() / "dividends"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def dividends_path(ticker: str) -> Path:
+    safe = ticker.replace("/", "_")
+    return dividends_dir() / f"{safe}.json"
+
+
+def yutai_dir() -> Path:
+    p = alt_data_root() / "yutai"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def yutai_list_path() -> Path:
+    return yutai_dir() / "yutai-list.csv"

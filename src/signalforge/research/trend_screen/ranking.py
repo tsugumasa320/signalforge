@@ -291,6 +291,22 @@ def build_ranking(
     n_on_signal, coverage_ok, warning = _signal_coverage(closes, signal)
     listing, sectors = _listing_maps()
 
+    from signalforge.research.trend_screen.corporate_events import (
+        event_fields_for,
+        load_yutai_map,
+        warm_dividend_cache,
+    )
+
+    try:
+        yutai_map = load_yutai_map()
+    except Exception:
+        yutai_map = {}
+    try:
+        warm_dividend_cache(list(closes.keys()))
+    except Exception:
+        pass
+    as_of_s = signal.date().isoformat()
+
     rows: list[dict[str, Any]] = []
     for code, series in closes.items():
         snap = _gate_snapshot(series, volumes.get(code), bench, signal)
@@ -323,6 +339,7 @@ def build_ranking(
             fails = ["no_bar"]
         sym = code.replace(".T", "")
         meta = listing.get(code) or listing.get(sym) or {}
+        events = event_fields_for(code, as_of=as_of_s, yutai_map=yutai_map)
         rows.append(
             {
                 "ticker": code,
@@ -349,6 +366,7 @@ def build_ranking(
                 "risk_adj_1y": stats.get("risk_adj_1y"),
                 "turnover_20d": stats.get("turnover_20d"),
                 "gates": gates,
+                **events,
             }
         )
 
@@ -381,6 +399,15 @@ def build_ranking(
             "ret_1y": r["ret_1y"],
             "ret_20d": r["ret_20d"],
             "price": r["price"],
+            "yahoo_jp_url": r.get("yahoo_jp_url"),
+            "earnings_last": r.get("earnings_last"),
+            "earnings_next": r.get("earnings_next"),
+            "dividend_yield": r.get("dividend_yield"),
+            "ex_dividend_date": r.get("ex_dividend_date"),
+            "yutai": r.get("yutai"),
+            "yutai_months": r.get("yutai_months"),
+            "yutai_type": r.get("yutai_type"),
+            "yutai_url": r.get("yutai_url"),
         }
         for r in passers[: rules.top_n]
     ]
