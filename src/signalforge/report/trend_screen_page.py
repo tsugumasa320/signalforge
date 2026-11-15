@@ -21,6 +21,70 @@ def _pct(value: float | None, *, digits: int = 1) -> str:
     return f'<span class="{cls}">{text}</span>' if cls else text
 
 
+# 画面用語の短い解説（? ホバー用）
+TERM_TIPS: dict[str, str] = {
+    "as_of": "日足データがそろっている、いちばん新しい営業日。サイトの表示はこの日基準です。",
+    "month_signal": "採用ルールが売買を決める日。完了した月末の終値で判定し、翌営業日終値で入れ替えます。",
+    "universe": "スクリーニングの母集団。いまは売買代金が多い東証銘柄の上位およそ300です。",
+    "bars_on_asof": "基準日に終値データがある銘柄数。欠けが多いと判定が不安定になります。",
+    "passed": "いまの採用条件をすべて満たした銘柄数。",
+    "targets": "通過銘柄を並べたうえで、実際に持つ想定の上位N銘柄。",
+    "lab": "採用ルールを変えずに、条件のON/OFFや閾値をこの場で試す画面です。結果は保存されません。",
+    "above_ma200": "終値が200日移動平均より上。中長期の上昇トレンド側にいる目安です。",
+    "ma200_up": "200日線自体が上向き（60営業日前より高い）。トレンドが続いているかの目安です。",
+    "ma75_up": "75日線が上向き（20営業日前より高い）。中期の勢いの目安です。",
+    "ret_1y_pos": "約1年前の終値より今の方が高い（1年リターンがプラス）。",
+    "ret_3y_pos": "約3年前の終値より今の方が高い（3年リターンがプラス）。",
+    "excess_1y": "直近1年の値上がりが、TOPIX連動ETF（1306）より大きい。",
+    "turnover": "直近20営業日の「終値×出来高」平均が一定以上。薄すぎる銘柄を避ける条件です。",
+    "ret_20d": "直近20営業日で株価がプラス。急落直後の買いを抑える条件です。",
+    "above_ma25": "終値が25日移動平均より上。短期でも下げ止まり寄りかの目安です。",
+    "dd_52w": "直近52週の高値から、いま何％下がっているか。浅いほど高値圏に近いです。",
+    "min_turnover": "直近20日の平均売買代金の下限。単位は億円です。",
+    "min_ret20": "直近20営業日のリターン下限（％）。0なら「下がっていない」だけを要求します。",
+    "max_dd52": "52週高値からの下落率の下限。例: -15 なら、高値から15％以内だけ残します。",
+    "steady": "じわ上げ度の参考点（0–100）。上昇月の多さ・直線性・途中の沈み・ボラを合成します。",
+    "up_month": "直近およそ1年で、月次リターンがプラスだった月の割合。",
+    "path_dd": "直近1年の途中で、ピークから最大どれだけ沈んだか（経路の最大ドローダウン）。",
+    "trend_r2": "値動きが直線的な上昇に近いか（0–1）。急騰あとの失速は低くなりやすいです。",
+    "top_n": "通過銘柄のうち、保有候補として残す件数。",
+    "rank_by": "通過銘柄を並べ替える基準。採用ルールは基本的に1年リターンです。",
+    "col_steady": "安定度スコア。高いほど「急騰より、じわじわ上がってきた」寄りです。",
+    "col_upm": "上昇した月の割合。高いほど毎月プラスが多かったことを示します。",
+    "col_mdd": "1年の経路最大DD。0に近いほど途中の下落が浅いです。",
+    "col_1y": "約1年前からいままでの株価リターン。",
+    "col_60d": "直近約60営業日（およそ3か月）のリターン。",
+    "col_20d": "直近20営業日のリターン。",
+    "col_earn_last": "取得済みカレンダー上の、いちばん新しい決算発表日。",
+    "col_earn_next": "取得済みカレンダー上の、これから来る決算発表日。",
+    "col_div_y": "直近の配当利回り（年率の目安）。データが無い銘柄は — です。",
+    "col_exdiv": "権利落ち日の目安。配当を受け取るには、通常その前に保有が必要です。",
+    "col_yutai": "株主優待の種類。リンクがある場合は優待しらべの会社ページです。",
+    "col_yutai_m": "優待の権利が確定する月。複数ある場合は「・」でつなぎます。",
+    "cagr": "年率換算のリターン。複利で伸ばしたときのペース感です。",
+    "bench_cagr": "比較対象（TOPIX連動ETF 1306）の年率リターン。",
+    "total_ret": "期間全体の累積リターン（手数料控除後）。",
+    "max_dd": "ピークから谷までの最大下落率。痛みの深さの目安です。",
+    "live_ret": "いまの含み損益まで含めた口座全体のリターン。",
+    "fwd_net": "その月の戦略リターン（入れ替えコスト控除後）。",
+    "fwd_bench": "同じ期間のベンチマーク（1306）リターン。",
+    "fwd_excess": "戦略リターン − ベンチマーク。プラスなら市場平均より良い月です。",
+    "forward": "採用ルールを2023年以降に仮想運用した結果。未来のデータは使っていません。",
+}
+
+
+def _tip(label: str, tip_key: str, *, plain: bool = False) -> str:
+    """ラベル＋?。ホバー／フォーカスで解説を出す。"""
+    text = TERM_TIPS.get(tip_key, "")
+    if not text:
+        return escape(label) if plain else label
+    return (
+        f'<span class="tip">{escape(label) if plain else label}'
+        f'<button type="button" class="tip-mark" aria-label="{escape(label)}の説明">?</button>'
+        f'<span class="tip-bubble" role="tooltip">{escape(text)}</span></span>'
+    )
+
+
 def _load_forward() -> dict[str, Any] | None:
     path = published_forward_path()
     if not path.exists():
@@ -62,14 +126,14 @@ def _forward_section(fwd: dict[str, Any] | None) -> str:
     )
     return f"""
     <section id="forward">
-      <h2>フォワード（{escape(str(fwd.get('start') or ''))} → {escape(str(fwd.get('as_of') or ''))}）</h2>
+      <h2>{_tip("フォワード", "forward")}（{escape(str(fwd.get('start') or ''))} → {escape(str(fwd.get('as_of') or ''))}）</h2>
       <p class="muted">{escape(str(fwd.get('note') or ''))}</p>
       <div class="metrics">
-        <div class="metric"><label>確定CAGR</label><value>{_pct(s.get('cagr'))}</value></div>
-        <div class="metric"><label>ベンチCAGR</label><value>{_pct(s.get('bench_cagr'))}</value></div>
-        <div class="metric"><label>累積リターン</label><value>{_pct(s.get('total_return'))}</value></div>
-        <div class="metric"><label>最大DD</label><value>{_pct(s.get('max_dd'))}</value></div>
-        <div class="metric"><label>時価込み</label><value>{_pct(live.get('total_return'))}</value></div>
+        <div class="metric"><label>{_tip("確定CAGR", "cagr")}</label><value>{_pct(s.get('cagr'))}</value></div>
+        <div class="metric"><label>{_tip("ベンチCAGR", "bench_cagr")}</label><value>{_pct(s.get('bench_cagr'))}</value></div>
+        <div class="metric"><label>{_tip("累積リターン", "total_ret")}</label><value>{_pct(s.get('total_return'))}</value></div>
+        <div class="metric"><label>{_tip("最大DD", "max_dd")}</label><value>{_pct(s.get('max_dd'))}</value></div>
+        <div class="metric"><label>{_tip("時価込み", "live_ret")}</label><value>{_pct(live.get('total_return'))}</value></div>
       </div>
       <h3>直近ポジション</h3>
       <p class="muted">シグナル {escape(str(open_book.get('signal_date') or ''))} ·
@@ -79,7 +143,13 @@ def _forward_section(fwd: dict[str, Any] | None) -> str:
       <ul class="compact">{holds or '<li class="muted">なし</li>'}</ul>
       <h3>直近12か月</h3>
       <table>
-        <thead><tr><th>シグナル</th><th>銘柄数</th><th>ネット</th><th>ベンチ</th><th>超過</th><th>銘柄</th><th></th></tr></thead>
+        <thead><tr>
+          <th>{_tip("シグナル", "month_signal")}</th><th>銘柄数</th>
+          <th>{_tip("ネット", "fwd_net")}</th>
+          <th>{_tip("ベンチ", "fwd_bench")}</th>
+          <th>{_tip("超過", "fwd_excess")}</th>
+          <th>銘柄</th><th></th>
+        </tr></thead>
         <tbody>{rows}</tbody>
       </table>
     </section>
@@ -187,13 +257,26 @@ def _lab_section(payload: dict[str, Any]) -> str:
         "dd_52w",
     ]
     gate_defaults = defaults.get("gates") or {}
+    gate_tip_keys = {
+        "above_ma200": "above_ma200",
+        "ma200_up": "ma200_up",
+        "ma75_up": "ma75_up",
+        "ret_1y_pos": "ret_1y_pos",
+        "ret_3y_pos": "ret_3y_pos",
+        "excess_1y": "excess_1y",
+        "turnover": "turnover",
+        "ret_20d": "ret_20d",
+        "above_ma25": "above_ma25",
+        "dd_52w": "dd_52w",
+    }
     checks = []
     for key in gate_order:
         label = gate_labels.get(key, key)
         checked = " checked" if gate_defaults.get(key, False) else ""
+        tip_html = _tip(str(label), gate_tip_keys.get(key, key), plain=True)
         checks.append(
             f'<label class="gate"><input type="checkbox" data-gate="{escape(key)}"{checked}/> '
-            f"{escape(str(label))}</label>"
+            f"{tip_html}</label>"
         )
     min_turn = float(defaults.get("min_turnover") or 0) / 1e8
     min_ret20 = float(defaults.get("min_ret_20d") or 0) * 100
@@ -224,8 +307,8 @@ def _lab_section(payload: dict[str, Any]) -> str:
       #lab-table td.name {{ white-space:normal; max-width:14rem; }}
     </style>
     <section id="lab">
-      <h2>条件ラボ（この場で試す）</h2>
-      <p class="muted">採用ルールを初期値に、条件のON/OFFと閾値を変えて通過銘柄を並べ替えます。結果はブラウザ内のみで、採用ルール自体は変わりません。母集団は流動性上位約300（採用ルール）。</p>
+      <h2>{_tip("条件ラボ", "lab")}（この場で試す）</h2>
+      <p class="muted">採用ルールを初期値に、条件のON/OFFと閾値を変えて通過銘柄を並べ替えます。結果はブラウザ内のみで、採用ルール自体は変わりません。母集団は流動性上位約300（採用ルール）。? にマウスを置くと用語の説明が出ます。</p>
       <div class="info-box">
         <strong>安定度スコア（0–100）</strong>は「じわじわ上がってきたか」の参考値です。
         上昇月の割合・値動きの直線性（trend R²）・1年の経路最大DD・ボラを合成。
@@ -245,31 +328,31 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <div class="gate-grid">{''.join(checks)}</div>
         </div>
         <div class="param-row">
-          <label class="param">売買代金下限（億円）
+          <label class="param">{_tip("売買代金下限（億円）", "min_turnover")}
             <input id="lab-min-turn" type="number" step="0.1" min="0" value="{min_turn:g}"/>
           </label>
-          <label class="param">20日リターン下限（%）
+          <label class="param">{_tip("20日リターン下限（%）", "min_ret20")}
             <input id="lab-min-ret20" type="number" step="0.5" value="{min_ret20:g}"/>
           </label>
-          <label class="param">52週DD下限（%、例 -15）
+          <label class="param">{_tip("52週DD下限（%、例 -15）", "max_dd52")}
             <input id="lab-max-dd" type="number" step="1" value="{max_dd:g}"/>
           </label>
-          <label class="param">安定度スコア下限
+          <label class="param">{_tip("安定度スコア下限", "steady")}
             <input id="lab-min-steady" type="number" step="1" min="0" max="100" value="{min_steady:g}"/>
           </label>
-          <label class="param">上昇月割合下限（%）
+          <label class="param">{_tip("上昇月割合下限（%）", "up_month")}
             <input id="lab-min-upm" type="number" step="1" min="0" max="100" value="{min_up_m:g}"/>
           </label>
-          <label class="param">1年経路DD下限（%、例 -25）
+          <label class="param">{_tip("1年経路DD下限（%、例 -25）", "path_dd")}
             <input id="lab-max-mdd" type="number" step="1" value="{max_mdd:g}"/>
           </label>
-          <label class="param">trend R² 下限（0–1）
+          <label class="param">{_tip("trend R² 下限（0–1）", "trend_r2")}
             <input id="lab-min-r2" type="number" step="0.05" min="0" max="1" value="{min_r2:g}"/>
           </label>
-          <label class="param">上位N
+          <label class="param">{_tip("上位N", "top_n")}
             <input id="lab-topn" type="number" step="1" min="1" max="50" value="{top_n}"/>
           </label>
-          <label class="param">並び替え
+          <label class="param">{_tip("並び替え", "rank_by")}
             <select id="lab-rankby">
               <option value="ret_1y" {"selected" if rank_by == "ret_1y" else ""}>1年リターン</option>
               <option value="steady_score" {"selected" if rank_by == "steady_score" else ""}>安定度スコア</option>
@@ -297,8 +380,19 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <thead>
             <tr>
               <th>#</th><th>コード</th><th>会社名</th><th>業種</th>
-              <th>安定度</th><th>上昇月</th><th>経路DD</th><th>1年</th><th>60日</th><th>20日</th><th>終値</th>
-              <th>直近決算</th><th>次回決算</th><th>配当利回</th><th>権利落</th><th>優待</th><th>権利月</th>
+              <th>{_tip("安定度", "col_steady")}</th>
+              <th>{_tip("上昇月", "col_upm")}</th>
+              <th>{_tip("経路DD", "col_mdd")}</th>
+              <th>{_tip("1年", "col_1y")}</th>
+              <th>{_tip("60日", "col_60d")}</th>
+              <th>{_tip("20日", "col_20d")}</th>
+              <th>終値</th>
+              <th>{_tip("直近決算", "col_earn_last")}</th>
+              <th>{_tip("次回決算", "col_earn_next")}</th>
+              <th>{_tip("配当利回", "col_div_y")}</th>
+              <th>{_tip("権利落", "col_exdiv")}</th>
+              <th>{_tip("優待", "col_yutai")}</th>
+              <th>{_tip("権利月", "col_yutai_m")}</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -480,6 +574,10 @@ def _lab_section(payload: dict[str, Any]) -> str:
       document.querySelectorAll('.lab-controls input, .lab-controls select').forEach(el => {{
         el.addEventListener('change', render);
       }});
+      // ? クリックでチェックボックスが切り替わらないようにする
+      document.querySelectorAll('.tip-mark').forEach(el => {{
+        el.addEventListener('click', (e) => {{ e.preventDefault(); e.stopPropagation(); }});
+      }});
       render();
     }})();
     </script>
@@ -527,12 +625,12 @@ def render_trend_screen_body(payload: dict[str, Any], *, forward: dict[str, Any]
       {escape(str(note)) if note else ""}
     </div>
     <div class="metrics">
-      <div class="metric"><label>基準日（最新）</label><value>{escape(str(as_of))}</value></div>
-      <div class="metric"><label>月末シグナル</label><value>{escape(str(rebalance))}</value></div>
-      <div class="metric"><label>ユニバース</label><value>{payload.get('n_universe', 0)}</value></div>
-      <div class="metric"><label>基準日バー</label><value>{payload.get('n_on_signal', 0)}</value></div>
-      <div class="metric positive"><label>採用通過</label><value>{payload.get('n_pass', 0)}</value></div>
-      <div class="metric"><label>保有目標</label><value>{payload.get('n_target', 0)}</value></div>
+      <div class="metric"><label>{_tip("基準日（最新）", "as_of")}</label><value>{escape(str(as_of))}</value></div>
+      <div class="metric"><label>{_tip("月末シグナル", "month_signal")}</label><value>{escape(str(rebalance))}</value></div>
+      <div class="metric"><label>{_tip("ユニバース", "universe")}</label><value>{payload.get('n_universe', 0)}</value></div>
+      <div class="metric"><label>{_tip("基準日バー", "bars_on_asof")}</label><value>{payload.get('n_on_signal', 0)}</value></div>
+      <div class="metric positive"><label>{_tip("採用通過", "passed")}</label><value>{payload.get('n_pass', 0)}</value></div>
+      <div class="metric"><label>{_tip("保有目標", "targets")}</label><value>{payload.get('n_target', 0)}</value></div>
     </div>
 
     <section>

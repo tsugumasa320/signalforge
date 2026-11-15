@@ -59,6 +59,9 @@ def test_render_trend_screen_body_contains_lab():
     assert GATE_LABELS["ret_20d"] in html
     assert "finance.yahoo.co.jp" in html or "yahoo_jp_url" in html
     assert "決算・配当・優待" in html
+    assert "tip-mark" in html
+    assert "tip-bubble" in html
+    assert "基準日（最新）" in html
 
 
 def test_lab_gate_keys_cover_adopted_filters():

@@ -99,6 +99,56 @@ a { color: var(--accent); }
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
 }
+.tip {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  max-width: 100%;
+}
+.tip-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 999px;
+  border: 1px solid #64748b;
+  color: #cbd5e1;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+  flex: 0 0 auto;
+  background: rgba(15, 23, 42, 0.55);
+}
+.tip-mark:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tip-bubble {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 40;
+  width: min(18rem, 70vw);
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: #020617;
+  border: 1px solid #475569;
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.45;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+.tip:hover .tip-bubble,
+.tip:focus-within .tip-bubble { display: block; }
+th .tip-bubble, .metric .tip-bubble { left: 0; }
+@media (max-width: 640px) {
+  .tip-bubble { width: min(16rem, 85vw); }
+}
 """
 
 
