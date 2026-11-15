@@ -82,6 +82,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   font-size: 0.75rem;
   background: #334155;
 }
+.badge.positive { color: var(--green); border: 1px solid rgba(34, 197, 94, 0.35); }
+.badge.negative { color: var(--red); border: 1px solid rgba(239, 68, 68, 0.35); }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
 ul.compact { margin: 0.25rem 0; padding-left: 1.25rem; }
@@ -162,6 +164,7 @@ def render_nav(active: str, depth: int = 0) -> str:
         ("hub", "🏠 ホーム", f"{p}index.html"),
         ("paper", "📈 Paper 成績", f"{p}index.html#paper"),
         ("screen", "🔍 トレンド・スクリーニング", f"{p}screen/trend.html"),
+        ("ai", "AIトライアル", f"{p}ai/index.html"),
         ("backtest", "⚖️ バックテスト比較", f"{p}index.html#backtest"),
         ("guides", "📚 戦略解説", f"{p}index.html#guides"),
     ]

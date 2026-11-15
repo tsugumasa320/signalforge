@@ -47,9 +47,12 @@ uv run signalforge backtest --style swing --strategy macd_cross   # 単一 BT + 
 uv run signalforge cohort run --strategies catalog:swing --cohorts prime
 uv run signalforge lab matrix --rules all --cohorts prime,standard,growth
 uv run signalforge paper diversified-run-all                      # TSE 分散フォワード（1口座）
+uv run signalforge ai brief                                       # スクリーニング/ペーパーをAI用パケット化
 uv run signalforge doctor
 uv run pytest
 ```
+
+AIトライアル（要約→採点→議論）: [docs/ai_trade.md](docs/ai_trade.md) · Pages: `/ai/`
 
 カタログ収集（メンテナンス用）: `strategies stats`, `strategies harvest`, `strategies collect-max`
 

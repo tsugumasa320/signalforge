@@ -381,6 +381,12 @@ def export_hub(
       <p><a href="screen/trend.html">全銘柄ランキングを見る →</a></p>
     </section>
 
+    <section id="ai">
+      <h2>AIトライアル</h2>
+      <p class="muted">Brief / Score / Debate の参考意見（非自動売買）。`data/published/ai_*.json` を commit すると Pages に載る。</p>
+      <p><a href="ai/index.html">AIトライアル結果を見る →</a></p>
+    </section>
+
     <section id="intraday">
       <h2>⏱ 短期足の実験</h2>
       <p class="muted">5分足は約60日、1分足は約7日。数字は全銘柄の中央値です。</p>
@@ -481,10 +487,12 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
         export_strategy_guide(output_dir, strategy_key)
     export_guides_index(output_dir, guide_ids=guide_ids)
 
+    from signalforge.report.ai_page import export_ai_page
     from signalforge.report.trend_screen_page import export_trend_screen_page
 
     # 公開 JSON が無ければ作る。日次 CI では先に ranking を更新してから export する。
     export_trend_screen_page(output_dir, rebuild=False)
+    export_ai_page(output_dir)
 
     hub = export_hub(output_dir, paper_rows, backtest_rows, diversified_rows)
     (output_dir / ".nojekyll").touch()

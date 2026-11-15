@@ -1,0 +1,39 @@
+{
+  "as_of": "2026-11-13",
+  "debates": [
+    {
+      "ticker": "8309.T",
+      "name": "三井住友トラストグループ",
+      "bull": "採点ADOPT・流動性/リスクのバランスが良い銀行株候補。",
+      "bear": "金融セクター感応。トレンド通過でも短期カタリストはパケット上不明。",
+      "risk_officer": "サイズは小さく。保険・金融で8766等と業種が寄らないか確認。",
+      "decision": "BUY",
+      "confidence": 66,
+      "invalidation": "vs_ma25が負転、またはret_20dが急落。",
+      "why_this_could_fail": "金利見通し変化でセクター全体が売られる。"
+    },
+    {
+      "ticker": "9147.T",
+      "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
+      "bull": "目標入り・過熱が軽い・紙上保有もプラス。ブリーフィングでもWATCH上位。",
+      "bear": "物流感応。世界景気減速なら遅行しやすい。",
+      "risk_officer": "既存trend_paper保有と重複。追加より監視が主。",
+      "decision": "BUY",
+      "confidence": 68,
+      "invalidation": "月次リバランスで目標落ち、または20日リターンが負転。",
+      "why_this_could_fail": "保有重複で集中リスクが上がる。"
+    },
+    {
+      "ticker": "9962.T",
+      "name": "ミスミグループ本社",
+      "bull": "目標5位・20日穏やか。過熱銘柄の対比で見やすい。",
+      "bear": "1年ボラ中位。カタリストはパケット上薄い。",
+      "risk_officer": "新規は小さく、まずはWATCH継続。",
+      "decision": "HOLD",
+      "confidence": 63,
+      "invalidation": "MA25割れ、または出来高急減を伴う反落。",
+      "why_this_could_fail": "スクリーニング遅行で上値が重い。"
+    }
+  ],
+  "committee_summary": "score ADOPTの8309/9147は条件付きBUY、9962はHOLD。いずれも参考意見で発注しない。"
+}

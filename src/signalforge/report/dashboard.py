@@ -47,6 +47,7 @@ from signalforge.report.dashboard_glossary import (
 from signalforge.report.dashboard_strategies import render_strategies_tab
 from signalforge.config import load_market_config
 from signalforge.report.dashboard_explorer import _cfg_override, _default_dates, render_explorer_tab
+from signalforge.report.dashboard_ai import render_ai_panel
 from signalforge.report.dashboard_view import (
     apply_pending_sidebar_strategy,
     render_results_home,
@@ -329,12 +330,15 @@ def run_dashboard() -> None:
     st.title("SignalForge")
     st.caption("東証全銘柄 × 戦略の事前バックテスト結果")
 
-    tab_results, tab_guide, tab_glossary, tab_advanced = st.tabs(
-        ["📊 戦略結果", "📚 戦略解説", "📖 用語集", "⚙️ 上級者（再実行）"]
+    tab_results, tab_ai, tab_guide, tab_glossary, tab_advanced = st.tabs(
+        ["📊 戦略結果", "AIトライアル", "📚 戦略解説", "📖 用語集", "⚙️ 上級者（再実行）"]
     )
 
     with tab_results:
         render_results_home()
+
+    with tab_ai:
+        render_ai_panel()
 
     with tab_guide:
         render_strategies_tab()

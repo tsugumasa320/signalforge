@@ -2776,5 +2776,93 @@ def trend_screen_improve_cmd(limit: int, no_promote: bool) -> None:
     run_cached_improve(limit=limit, promote=not no_promote)
 
 
+@main.group("ai")
+def ai_group() -> None:
+    """AI trial helpers — pack ranking/paper for brief, score, and debate prompts."""
+
+
+@ai_group.command("brief")
+@click.option("--top", default=15, show_default=True, type=int, help="ランキング上位の件数")
+@click.option("--diversified-limit", default=8, show_default=True, type=int)
+@click.option("--strategy-limit", default=10, show_default=True, type=int)
+def ai_brief_cmd(top: int, diversified_limit: int, strategy_limit: int) -> None:
+    """スクリーニング／ペーパーを1パケットにまとめ、AI用プロンプトを書く。"""
+    from signalforge.ai.brief import write_brief
+
+    packet, path, prompt_path = write_brief(
+        top=top,
+        diversified_limit=diversified_limit,
+        strategy_limit=strategy_limit,
+    )
+    ts = packet.get("trend_screen") or {}
+    click.echo(f"schema: {packet['schema']}")
+    click.echo(
+        f"trend-screen: as_of={ts.get('as_of')} pass={ts.get('n_pass')} "
+        f"targets={len(ts.get('targets') or [])} top={len(ts.get('ranking_top') or [])}"
+    )
+    click.echo(f"diversified papers: {len(packet.get('diversified_papers') or [])}")
+    click.echo(f"packet: {path}")
+    click.echo(f"prompt: {prompt_path}")
+    click.echo("次: プロンプトとパケットをAIに渡し、返答JSONを data/ai/brief_response_latest.json へ保存")
+
+
+@ai_group.command("score")
+@click.option("--top", default=20, show_default=True, type=int, help="採点する通過上位件数")
+def ai_score_cmd(top: int) -> None:
+    """上位銘柄の採点パケットとルーブリック付きプロンプトを書く。"""
+    from signalforge.ai.score import write_score
+
+    try:
+        packet, path, prompt_path = write_score(top=top)
+    except FileNotFoundError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"schema: {packet['schema']}")
+    click.echo(f"as_of={packet.get('as_of')} candidates={len(packet.get('candidates') or [])}")
+    click.echo(f"packet: {path}")
+    click.echo(f"prompt: {prompt_path}")
+    click.echo("次: 返答JSONを data/ai/scores_YYYYMMDD.json と scores_response_latest.json へ保存")
+
+
+@ai_group.command("debate")
+@click.option("--tickers", default="", help="カンマ区切り。空なら targets または --from-scores")
+@click.option("--from-scores", is_flag=True, help="ai score の ADOPT / 高得点から選ぶ")
+@click.option("--top", default=3, show_default=True, type=int, help="議論する銘柄数")
+def ai_debate_cmd(tickers: str, from_scores: bool, top: int) -> None:
+    """少数銘柄のブル／ベア議論パケットを書く（発注には接続しない）。"""
+    from signalforge.ai.debate import write_debate
+
+    parts = tuple(t.strip() for t in tickers.split(",") if t.strip())
+    try:
+        packet, path, prompt_path = write_debate(tickers=parts, from_scores=from_scores, top=top)
+    except FileNotFoundError as exc:
+        raise click.ClickException(str(exc)) from exc
+    names = [n.get("ticker") for n in (packet.get("names") or [])]
+    click.echo(f"schema: {packet['schema']}")
+    click.echo(f"as_of={packet.get('as_of')} names={', '.join(str(x) for x in names)}")
+    if packet.get("missing_from_ranking"):
+        click.echo(f"ranking外: {', '.join(packet['missing_from_ranking'])}")
+    click.echo(f"packet: {path}")
+    click.echo(f"prompt: {prompt_path}")
+    click.echo("次: 返答JSONを data/ai/debate_response_latest.json へ保存")
+
+
+@ai_group.command("save-response")
+@click.argument("kind", type=click.Choice(["brief", "score", "debate"]))
+@click.argument("path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--as-of", default=None, help="score 保存時の日付ファイル名用 (YYYY-MM-DD)")
+def ai_save_response_cmd(kind: str, path: Path, as_of: str | None) -> None:
+    """AIの返答を data/ai/ と data/published/（Pages用）へ保存する。"""
+    from signalforge.ai.packet import read_json
+    from signalforge.ai.publish import save_response
+
+    payload = read_json(path)
+    if not isinstance(payload, dict):
+        raise click.ClickException("JSONオブジェクトが必要です。")
+    outs = save_response(kind, payload, as_of=as_of)
+    click.echo(f"saved: {outs['local']}")
+    click.echo(f"published (Pages): {outs['published']}")
+    click.echo("Pages反映: この published JSON を commit → dashboard export / 日次 Actions")
+
+
 if __name__ == "__main__":
     main()

@@ -1,0 +1,316 @@
+{
+  "as_of": "2026-11-13",
+  "scores": [
+    {
+      "ticker": "8309.T",
+      "name": "三井住友トラストグループ",
+      "total": 88,
+      "decision": "ADOPT",
+      "factors": {
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=7.4%、流動性=15862385992。",
+      "risk": "vol_1y=0.2886012638647275, mdd_1y=-0.16083190419363824, earnings_next_days=None"
+    },
+    {
+      "ticker": "9147.T",
+      "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
+      "total": 84,
+      "decision": "ADOPT",
+      "factors": {
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 14,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=3.4%、流動性=6403160185。",
+      "risk": "vol_1y=0.28296769768986507, mdd_1y=-0.09802250255710876, earnings_next_days=None"
+    },
+    {
+      "ticker": "9962.T",
+      "name": "ミスミグループ本社",
+      "total": 84,
+      "decision": "ADOPT",
+      "factors": {
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 14,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=2.8%、流動性=8290290965。",
+      "risk": "vol_1y=0.4500454632179116, mdd_1y=-0.17673751759889478, earnings_next_days=None"
+    },
+    {
+      "ticker": "8795.T",
+      "name": "Ｔ＆Ｄホールディングス",
+      "total": 84,
+      "decision": "ADOPT",
+      "factors": {
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 14,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=3.7%、流動性=7944859815。",
+      "risk": "vol_1y=0.3325593876419327, mdd_1y=-0.13953487954100496, earnings_next_days=None"
+    },
+    {
+      "ticker": "8750.T",
+      "name": "第一ライフグループ",
+      "total": 82,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 20,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=0.3%、流動性=16379816230。",
+      "risk": "vol_1y=0.3084261661718497, mdd_1y=-0.15735563777299344, earnings_next_days=None"
+    },
+    {
+      "ticker": "6178.T",
+      "name": "日本郵政",
+      "total": 82,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 20,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=1.0%、流動性=10837026800。",
+      "risk": "vol_1y=0.2954109217828547, mdd_1y=-0.1589768198446867, earnings_next_days=None"
+    },
+    {
+      "ticker": "4502.T",
+      "name": "武田薬品工業",
+      "total": 79,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=12.0%、流動性=32388530190。",
+      "risk": "vol_1y=0.234802860211254, mdd_1y=-0.19388788056717232, earnings_next_days=None"
+    },
+    {
+      "ticker": "4503.T",
+      "name": "アステラス製薬",
+      "total": 79,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=14.5%、流動性=15630454750。",
+      "risk": "vol_1y=0.3124320209199146, mdd_1y=-0.20714950324088732, earnings_next_days=None"
+    },
+    {
+      "ticker": "7832.T",
+      "name": "バンダイナムコホールディングス",
+      "total": 79,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=12.8%、流動性=20312461610。",
+      "risk": "vol_1y=0.33213077708537636, mdd_1y=-0.2133812086369482, earnings_next_days=None"
+    },
+    {
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "total": 78,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 6
+      },
+      "why": "1年リターンとMA25上方を確認。20日=10.0%、流動性=47926816483。",
+      "risk": "vol_1y=0.4530019640497683, mdd_1y=-0.13825641652644627, earnings_next_days=6"
+    },
+    {
+      "ticker": "8725.T",
+      "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
+      "total": 78,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 6
+      },
+      "why": "1年リターンとMA25上方を確認。20日=6.0%、流動性=24567452175。",
+      "risk": "vol_1y=0.27132265289429447, mdd_1y=-0.11106030203395145, earnings_next_days=6"
+    },
+    {
+      "ticker": "8630.T",
+      "name": "ＳＯＭＰＯホールディングス",
+      "total": 78,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 6
+      },
+      "why": "1年リターンとMA25上方を確認。20日=7.9%、流動性=20599487595。",
+      "risk": "vol_1y=0.3218541279704484, mdd_1y=-0.13473193333205524, earnings_next_days=6"
+    },
+    {
+      "ticker": "7747.T",
+      "name": "朝日インテック",
+      "total": 77,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 10,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=11.4%、流動性=4948070555。",
+      "risk": "vol_1y=0.37134346348458025, mdd_1y=-0.22647914645974787, earnings_next_days=None"
+    },
+    {
+      "ticker": "2702.T",
+      "name": "日本マクドナルドホールディングス",
+      "total": 76,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 9,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=23.0%、流動性=12804270205。",
+      "risk": "vol_1y=0.2647589337744403, mdd_1y=-0.17345750873108268, earnings_next_days=None"
+    },
+    {
+      "ticker": "7867.T",
+      "name": "タカラトミー",
+      "total": 71,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 20,
+        "momentum": 9,
+        "risk": 16,
+        "liquidity": 10,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=21.0%、流動性=4537744155。",
+      "risk": "vol_1y=0.3521662323159246, mdd_1y=-0.21758890709164225, earnings_next_days=None"
+    },
+    {
+      "ticker": "7581.T",
+      "name": "サイゼリヤ",
+      "total": 70,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 9,
+        "risk": 13,
+        "liquidity": 14,
+        "event": 17
+      },
+      "why": "1年リターンとMA25上方を確認。20日=26.0%、流動性=5681109550。",
+      "risk": "vol_1y=0.4316781823569493, mdd_1y=-0.2951048965445542, earnings_next_days=61"
+    },
+    {
+      "ticker": "4588.T",
+      "name": "オンコリスバイオファーマ",
+      "total": 63,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 20,
+        "momentum": 4,
+        "risk": 5,
+        "liquidity": 18,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=67.9%、流動性=12329641650。",
+      "risk": "vol_1y=1.0956190258454714, mdd_1y=-0.38057663125948404, earnings_next_days=None"
+    },
+    {
+      "ticker": "6532.T",
+      "name": "ベイカレント",
+      "total": 62,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 17,
+        "momentum": 4,
+        "risk": 6,
+        "liquidity": 18,
+        "event": 17
+      },
+      "why": "1年リターンとMA25上方を確認。20日=41.7%、流動性=25035789600。",
+      "risk": "vol_1y=0.5755213302931447, mdd_1y=-0.4639733612711523, earnings_next_days=62"
+    },
+    {
+      "ticker": "3994.T",
+      "name": "マネーフォワード",
+      "total": 62,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 12,
+        "risk": 6,
+        "liquidity": 10,
+        "event": 17
+      },
+      "why": "1年リターンとMA25上方を確認。20日=16.5%、流動性=4473368800。",
+      "risk": "vol_1y=0.6827711495101935, mdd_1y=-0.46712302352487467, earnings_next_days=62"
+    },
+    {
+      "ticker": "4475.T",
+      "name": "ＨＥＮＮＧＥ",
+      "total": 61,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 9,
+        "risk": 9,
+        "liquidity": 10,
+        "event": 16
+      },
+      "why": "1年リターンとMA25上方を確認。20日=22.6%、流動性=4928879305。",
+      "risk": "vol_1y=0.6135268738742407, mdd_1y=-0.35602264077373713, earnings_next_days=None"
+    }
+  ],
+  "adopted": [
+    "8309.T",
+    "9147.T",
+    "9962.T",
+    "8795.T"
+  ],
+  "skipped_reasons": [
+    "20日リターンが概ね35%超は過熱として SKIP",
+    "決算7日以内は SKIP",
+    "ADOPT は最大4銘柄に制限"
+  ]
+}
