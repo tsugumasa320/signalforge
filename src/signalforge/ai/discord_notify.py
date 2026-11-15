@@ -22,6 +22,7 @@ def build_daily_message(
     adopted: list[str] | None,
     brief_resp: dict[str, Any] | None,
     eval_summary: dict[str, Any] | None = None,
+    eval_summary_approved: dict[str, Any] | None = None,
     pending_count: int | None = None,
 ) -> str:
     adopted = [str(t) for t in (adopted or []) if t]
@@ -54,7 +55,15 @@ def build_daily_message(
     n5 = summary.get("n_eval_5d")
     if n5:
         mean_s = f"{float(mean5):+.1%}" if mean5 is not None else "—"
-        lines.append(f"Adoption 5日: n={n5} mean={mean_s}")
+        lines.append(f"提案 5日: n={n5} mean={mean_s}")
+
+    approved = eval_summary_approved or {}
+    n_paper = approved.get("n_paper_intents") or approved.get("n_adopted_rows")
+    n5a = approved.get("n_eval_5d")
+    if n_paper:
+        mean_a = approved.get("mean_ret_5d")
+        mean_as = f"{float(mean_a):+.1%}" if mean_a is not None and n5a else "pending"
+        lines.append(f"Paper(approved) 5日: intents={n_paper} n={n5a or 0} mean={mean_as}")
 
     lines.append(f"詳細: {PAGES_AI_URL}")
     text = "\n".join(lines)
@@ -89,6 +98,7 @@ def notify_daily(
     adopted: list[str] | None,
     brief_resp: dict[str, Any] | None,
     eval_summary: dict[str, Any] | None = None,
+    eval_summary_approved: dict[str, Any] | None = None,
     pending_count: int | None = None,
     webhook_url: str | None = None,
 ) -> dict[str, Any]:
@@ -101,6 +111,7 @@ def notify_daily(
         adopted=adopted,
         brief_resp=brief_resp,
         eval_summary=eval_summary,
+        eval_summary_approved=eval_summary_approved,
         pending_count=pending_count,
     )
     result = post_webhook(url, content)

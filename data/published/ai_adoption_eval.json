@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-adoption-eval/v1",
-  "generated_at": "2026-11-15T13:42:52+00:00",
+  "generated_at": "2026-11-15T13:48:51+00:00",
   "horizons_days": [
     5,
     20
@@ -12,6 +12,8 @@
       "name": "三井住友トラストグループ",
       "score_total": 88,
       "entry_price": 1786.5,
+      "gate": "approved",
+      "paper_intent": true,
       "status_5d": "pending",
       "ret_5d": null,
       "price_5d": null,
@@ -25,6 +27,8 @@
       "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
       "score_total": 84,
       "entry_price": 6102.0,
+      "gate": "approved",
+      "paper_intent": true,
       "status_5d": "pending",
       "ret_5d": null,
       "price_5d": null,
@@ -38,6 +42,8 @@
       "name": "ミスミグループ本社",
       "score_total": 84,
       "entry_price": 3966.0,
+      "gate": "approved",
+      "paper_intent": true,
       "status_5d": "pending",
       "ret_5d": null,
       "price_5d": null,
@@ -51,6 +57,8 @@
       "name": "Ｔ＆Ｄホールディングス",
       "score_total": 84,
       "entry_price": 4934.0,
+      "gate": "approved",
+      "paper_intent": true,
       "status_5d": "pending",
       "ret_5d": null,
       "price_5d": null,
@@ -67,5 +75,19 @@
     "n_eval_20d": 0,
     "mean_ret_20d": null,
     "hit_rate_20d": null
+  },
+  "summary_approved": {
+    "n_adopted_rows": 4,
+    "n_eval_5d": 0,
+    "mean_ret_5d": null,
+    "hit_rate_5d": null,
+    "n_eval_20d": 0,
+    "mean_ret_20d": null,
+    "hit_rate_20d": null,
+    "n_paper_intents": 4
+  },
+  "notes": {
+    "summary": "all ADOPT proposals (system performance)",
+    "summary_approved": "approved gate only (human paper intent; no brokerage)"
   }
 }

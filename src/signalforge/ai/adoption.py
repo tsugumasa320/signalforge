@@ -172,11 +172,26 @@ def _forward_return(
     return {"status": "ok", "ret": ret, "price": px, "entry_price": entry}
 
 
+def _summarize_rows(rows: list[dict[str, Any]], horizons: tuple[int, ...]) -> dict[str, Any]:
+    summary: dict[str, Any] = {"n_adopted_rows": len(rows)}
+    for h in horizons:
+        key = f"ret_{h}d"
+        vals = [float(r[key]) for r in rows if r.get(f"status_{h}d") == "ok" and r.get(key) is not None]
+        summary[f"n_eval_{h}d"] = len(vals)
+        summary[f"mean_ret_{h}d"] = (sum(vals) / len(vals)) if vals else None
+        summary[f"hit_rate_{h}d"] = (sum(1 for v in vals if v > 0) / len(vals)) if vals else None
+    return summary
+
+
 def evaluate_adoptions(
     *,
     horizons: tuple[int, ...] = DEFAULT_HORIZONS,
 ) -> dict[str, Any]:
+    """Forward-return eval for ADOPT proposals + approved-only paper-intent slice."""
+    from signalforge.ai.approval import approval_status_map, item_id
+
     log = load_adoption_log()
+    gate_map = approval_status_map()
     rows: list[dict[str, Any]] = []
     for entry in log.get("entries") or []:
         as_of = str(entry.get("as_of") or "")
@@ -184,12 +199,15 @@ def evaluate_adoptions(
             ticker = str(a.get("ticker") or "")
             if not ticker or not as_of:
                 continue
+            gate = gate_map.get(item_id(as_of, ticker)) or "ungated"
             base = {
                 "as_of": as_of,
                 "ticker": ticker,
                 "name": a.get("name"),
                 "score_total": a.get("total"),
                 "entry_price": a.get("price"),
+                "gate": gate,
+                "paper_intent": gate == "approved",
             }
             for h in horizons:
                 fr = _forward_return(ticker, as_of, h, a.get("price"))
@@ -200,13 +218,10 @@ def evaluate_adoptions(
                     base["entry_price"] = fr["entry_price"]
             rows.append(base)
 
-    summary: dict[str, Any] = {"n_adopted_rows": len(rows)}
-    for h in horizons:
-        key = f"ret_{h}d"
-        vals = [float(r[key]) for r in rows if r.get(f"status_{h}d") == "ok" and r.get(key) is not None]
-        summary[f"n_eval_{h}d"] = len(vals)
-        summary[f"mean_ret_{h}d"] = (sum(vals) / len(vals)) if vals else None
-        summary[f"hit_rate_{h}d"] = (sum(1 for v in vals if v > 0) / len(vals)) if vals else None
+    approved_rows = [r for r in rows if r.get("paper_intent")]
+    summary = _summarize_rows(rows, horizons)
+    summary_approved = _summarize_rows(approved_rows, horizons)
+    summary_approved["n_paper_intents"] = len(approved_rows)
 
     payload = {
         "schema": EVAL_SCHEMA,
@@ -214,6 +229,11 @@ def evaluate_adoptions(
         "horizons_days": list(horizons),
         "rows": rows,
         "summary": summary,
+        "summary_approved": summary_approved,
+        "notes": {
+            "summary": "all ADOPT proposals (system performance)",
+            "summary_approved": "approved gate only (human paper intent; no brokerage)",
+        },
     }
     write_json(adoption_eval_path(), payload)
     return payload

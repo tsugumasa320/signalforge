@@ -1,7 +1,8 @@
 """Human approval gate for AI ADOPT proposals (no brokerage).
 
 ai-hedge-fund style: system proposes → human approves/rejects before treating
-as an intentional paper intent. Forward eval still tracks all proposals.
+as an intentional paper intent. Forward eval tracks all proposals; approved
+rows get a separate paper-intent summary.
 """
 
 from __future__ import annotations
@@ -161,3 +162,23 @@ def approval_summary() -> dict[str, int]:
         if st in counts:
             counts[st] += 1
     return counts
+
+
+def approval_status_map() -> dict[str, str]:
+    """Map `as_of:ticker` → pending|approved|rejected."""
+    out: dict[str, str] = {}
+    for i in load_approvals().get("items") or []:
+        as_of = str(i.get("as_of") or "")
+        ticker = str(i.get("ticker") or "")
+        st = str(i.get("status") or "")
+        if as_of and ticker and st:
+            out[item_id(as_of, ticker)] = st
+    return out
+
+
+def list_approved(*, as_of: str | None = None) -> list[dict[str, Any]]:
+    items = load_approvals().get("items") or []
+    out = [i for i in items if i.get("status") == "approved"]
+    if as_of:
+        out = [i for i in out if str(i.get("as_of")) == as_of]
+    return out

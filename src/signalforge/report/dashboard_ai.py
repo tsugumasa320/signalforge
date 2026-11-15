@@ -253,7 +253,19 @@ def render_ai_panel() -> None:
                     f"ADOPT: {tickers_md or '—'} · skip {e.get('skipped_count')}"
                 )
         if isinstance(ev, dict):
+            approved = ev.get("summary_approved") or {}
+            st.subheader("Paper intent（approved）")
+            a1, a2, a3, a4 = st.columns(4)
+            a1.metric("intents", approved.get("n_paper_intents") or approved.get("n_adopted_rows") or 0)
+            mean5a = approved.get("mean_ret_5d")
+            a2.metric("5日平均", "—" if mean5a is None else f"{float(mean5a):+.1%}")
+            mean20a = approved.get("mean_ret_20d")
+            a3.metric("20日平均", "—" if mean20a is None else f"{float(mean20a):+.1%}")
+            hit5a = approved.get("hit_rate_5d")
+            a4.metric("5日的中", "—" if hit5a is None else f"{float(hit5a):.0%}")
+
             summary = ev.get("summary") or {}
+            st.subheader("提案全体")
             c1, c2, c3, c4 = st.columns(4)
             c1.metric("5日 n", summary.get("n_eval_5d") or 0)
             mean5 = summary.get("mean_ret_5d")

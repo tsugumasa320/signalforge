@@ -62,9 +62,18 @@ uv run signalforge ai reject 6758.T --note "過熱"
 uv run signalforge ai ledger              # hash 連鎖の監査台帳
 ```
 
-`ai daily` は ADOPT を **提案**として `data/published/ai_approvals.json` に pending 登録し、決定を `ai_ledger.json`（hash 連鎖）へ追記する。フォワード成績は提案ベース（システム性能）で集計し、承認は「人が意図として残すか」のゲート。
+`ai daily` は ADOPT を **提案**として `data/published/ai_approvals.json` に pending 登録し、決定を `ai_ledger.json`（hash 連鎖）へ追記する。
 
-承認直後は 5営業日・20営業日のフォワードリターンがまだ埋まらない。`ai evaluate-adoptions`（および日次 CI の `ai daily`）は不足分を毎回再計算するが、`as_of` から十分な営業日が経つまで `ai_adoption_eval.json` の各行は `status_5d` / `status_20d` = `pending` のままになる。ゲート処理後は数営業日待ち、Pages の Adoption 成績または `uv run signalforge ai evaluate-adoptions` で埋まり具合を確認する。
+フォワード成績（`ai_adoption_eval.json`）は2層:
+
+| キー | 意味 |
+|------|------|
+| `summary` | 提案全体（システム性能） |
+| `summary_approved` | **approved のみ**（人がゲートした paper intent。発注なし） |
+
+各行に `gate`（pending/approved/rejected/ungated）と `paper_intent`（approved なら true）が付く。
+
+承認直後は 5営業日・20営業日のフォワードリターンがまだ埋まらない。`ai evaluate-adoptions`（および日次 CI の `ai daily`）は不足分を毎回再計算するが、`as_of` から十分な営業日が経つまで各行は `status_5d` / `status_20d` = `pending` のままになる。ゲート処理後は数営業日待ち、Pages の Adoption 成績または `uv run signalforge ai evaluate-adoptions` で埋まり具合を確認する。
 
 **内容（日付だけではない）**
 

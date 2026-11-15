@@ -131,7 +131,18 @@ def render_adoption_section() -> str:
         )
     entries = (log or {}).get("entries") or [] if isinstance(log, dict) else []
     summary = (ev or {}).get("summary") or {} if isinstance(ev, dict) else {}
+    approved = (ev or {}).get("summary_approved") or {} if isinstance(ev, dict) else {}
     metrics = f"""
+      <h3>Paper intent（approved のみ）</h3>
+      <div class="metrics">
+        <div class="metric"><label>承認行数</label><value>{escape(str(approved.get('n_paper_intents') or approved.get('n_adopted_rows') or 0))}</value></div>
+        <div class="metric"><label>5日 評価数</label><value>{escape(str(approved.get('n_eval_5d') or 0))}</value></div>
+        <div class="metric"><label>5日 平均</label><value>{_pct_cell(approved.get('mean_ret_5d'))}</value></div>
+        <div class="metric"><label>5日 的中</label><value>{_pct_cell(approved.get('hit_rate_5d'))}</value></div>
+        <div class="metric"><label>20日 平均</label><value>{_pct_cell(approved.get('mean_ret_20d'))}</value></div>
+        <div class="metric"><label>20日 的中</label><value>{_pct_cell(approved.get('hit_rate_20d'))}</value></div>
+      </div>
+      <h3>提案全体（システム性能）</h3>
       <div class="metrics">
         <div class="metric"><label>採択行数</label><value>{escape(str(summary.get('n_adopted_rows') or len(entries)))}</value></div>
         <div class="metric"><label>5日 評価数</label><value>{escape(str(summary.get('n_eval_5d') or 0))}</value></div>
@@ -161,6 +172,8 @@ def render_adoption_section() -> str:
                 escape(str(r.get("as_of") or "")),
                 _ticker_link(r.get("ticker")),
                 escape(str(r.get("name") or "")),
+                _badge(str(r.get("gate") or "")),
+                "Y" if r.get("paper_intent") else "",
                 _pct_cell(r.get("ret_5d")),
                 escape(str(r.get("status_5d") or "")),
                 _pct_cell(r.get("ret_20d")),
@@ -170,12 +183,13 @@ def render_adoption_section() -> str:
     return f"""
     <section id="adoption">
       <h2>Adoption — 採択ログとフォワード成績</h2>
-      <p class="muted">ADOPT 銘柄を記録し、キャッシュ日足で 5営業日 / 20営業日リターンを集計。不足データは pending。</p>
+      <p class="muted">提案全体と、<strong>approved のみの paper intent</strong> を分けて集計。
+        キャッシュ日足で 5/20 営業日リターン。不足は pending。発注なし。</p>
       {metrics}
       <h3>最近の採択</h3>
       {_table(["as_of", "source", "adopted", "skipped"], recent)}
       <h3>銘柄別フォワード</h3>
-      {_table(["as_of", "ticker", "name", "ret_5d", "5d", "ret_20d", "20d"], eval_rows)}
+      {_table(["as_of", "ticker", "name", "gate", "paper", "ret_5d", "5d", "ret_20d", "20d"], eval_rows)}
     </section>
     """
 

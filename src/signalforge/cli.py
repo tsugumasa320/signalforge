@@ -2822,7 +2822,8 @@ def ai_daily_cmd(
         n = summary.get(f"n_eval_{h}d")
         mean_s = "—" if mean is None else f"{float(mean):+.2%}"
         hit_s = "—" if hit is None else f"{float(hit):.0%}"
-        click.echo(f"eval {h}d: n={n} mean={mean_s} hit={hit_s}")
+        click.echo(f"eval proposed {h}d: n={n} mean={mean_s} hit={hit_s}")
+    # approved slice is recomputed inside evaluate; surface via evaluate-adoptions for detail
     discord = out.get("discord") or {}
     if discord.get("skipped"):
         click.echo("discord: skipped (DISCORD_WEBHOOK_URL unset)")
@@ -2846,11 +2847,13 @@ def ai_notify_discord_cmd(dry_run: bool) -> None:
     score = load_response_for_pages("score") or {}
     ev = read_json(adoption_eval_path()) if adoption_eval_path().exists() else None
     summary = (ev or {}).get("summary") if isinstance(ev, dict) else {}
+    approved = (ev or {}).get("summary_approved") if isinstance(ev, dict) else {}
     content = build_daily_message(
         as_of=str(brief.get("as_of") or score.get("as_of") or ""),
         adopted=list(score.get("adopted") or []),
         brief_resp=brief,
         eval_summary=summary if isinstance(summary, dict) else {},
+        eval_summary_approved=approved if isinstance(approved, dict) else {},
     )
     if dry_run:
         click.echo(content)
@@ -2863,6 +2866,7 @@ def ai_notify_discord_cmd(dry_run: bool) -> None:
             adopted=list(score.get("adopted") or []),
             brief_resp=brief,
             eval_summary=summary if isinstance(summary, dict) else {},
+            eval_summary_approved=approved if isinstance(approved, dict) else {},
         )
     except RuntimeError as exc:
         raise click.ClickException(str(exc)) from exc
@@ -2911,14 +2915,23 @@ def ai_evaluate_adoptions_cmd() -> None:
 
     payload = evaluate_adoptions()
     summary = payload.get("summary") or {}
-    click.echo(f"rows={summary.get('n_adopted_rows')}")
+    approved = payload.get("summary_approved") or {}
+    click.echo(f"proposed rows={summary.get('n_adopted_rows')}")
     for h in payload.get("horizons_days") or [5, 20]:
         mean = summary.get(f"mean_ret_{h}d")
         hit = summary.get(f"hit_rate_{h}d")
         n = summary.get(f"n_eval_{h}d")
         mean_s = "—" if mean is None else f"{float(mean):+.2%}"
         hit_s = "—" if hit is None else f"{float(hit):.0%}"
-        click.echo(f"{h}d: n={n} mean={mean_s} hit={hit_s}")
+        click.echo(f"proposed {h}d: n={n} mean={mean_s} hit={hit_s}")
+    click.echo(f"paper intents (approved)={approved.get('n_paper_intents') or approved.get('n_adopted_rows')}")
+    for h in payload.get("horizons_days") or [5, 20]:
+        mean = approved.get(f"mean_ret_{h}d")
+        hit = approved.get(f"hit_rate_{h}d")
+        n = approved.get(f"n_eval_{h}d")
+        mean_s = "—" if mean is None else f"{float(mean):+.2%}"
+        hit_s = "—" if hit is None else f"{float(hit):.0%}"
+        click.echo(f"approved {h}d: n={n} mean={mean_s} hit={hit_s}")
 
 
 @ai_group.command("pending")

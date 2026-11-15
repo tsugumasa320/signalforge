@@ -79,6 +79,7 @@ def run_daily(
                 adopted=adopted,
                 brief_resp=brief_resp,
                 eval_summary=eval_payload.get("summary") or {},
+                eval_summary_approved=eval_payload.get("summary_approved") or {},
                 pending_count=int(approvals.get("pending_count") or 0),
             )
         except Exception as exc:  # noqa: BLE001 — CI should not fail the whole daily job
@@ -100,5 +101,6 @@ def run_daily(
         "ledger_ok": bool(ledger_check.get("ok")),
         "ledger_events": ledger_check.get("n_events"),
         "eval_summary": eval_payload.get("summary"),
+        "eval_summary_approved": eval_payload.get("summary_approved"),
         "discord": discord,
     }

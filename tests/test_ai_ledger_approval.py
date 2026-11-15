@@ -34,8 +34,8 @@ def test_approval_propose_and_resolve(data_dir: Path) -> None:
         "as_of": "2026-11-13",
         "adopted": ["7203.T", "6758.T"],
         "scores": [
-            {"ticker": "7203.T", "name": "トヨタ", "total": 88, "decision": "ADOPT"},
-            {"ticker": "6758.T", "name": "ソニー", "total": 84, "decision": "ADOPT"},
+            {"ticker": "7203.T", "name": "トヨタ", "total": 88, "decision": "ADOPT", "price": 3000},
+            {"ticker": "6758.T", "name": "ソニー", "total": 84, "decision": "ADOPT", "price": 4000},
         ],
     }
     out = propose_from_score(score, source="rules/v1")
@@ -59,3 +59,45 @@ def test_approval_propose_and_resolve(data_dir: Path) -> None:
     assert "adopt_proposed" in kinds
     assert "adopt_approved" in kinds
     assert "adopt_rejected" in kinds
+
+
+def test_evaluate_splits_approved_paper_intent(data_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import pandas as pd
+
+    from signalforge.ai.adoption import append_adoptions_from_score, evaluate_adoptions
+
+    score = {
+        "as_of": "2026-11-13",
+        "adopted": ["7203.T", "6758.T"],
+        "scores": [
+            {"ticker": "7203.T", "name": "トヨタ", "total": 88, "decision": "ADOPT", "price": 3000.0},
+            {"ticker": "6758.T", "name": "ソニー", "total": 84, "decision": "ADOPT", "price": 4000.0},
+        ],
+    }
+    propose_from_score(score)
+    resolve("7203.T", status="approved")
+    resolve("6758.T", status="rejected")
+    append_adoptions_from_score(score)
+
+    idx = pd.date_range("2026-11-13", periods=30, freq="B", tz="UTC")
+    for ticker, start in (("7203.T", 3000), ("6758.T", 4000)):
+        px = pd.DataFrame(
+            {
+                "open": start,
+                "high": start + 10,
+                "low": start - 10,
+                "close": [start + i * 10 for i in range(30)],
+                "volume": 1e6,
+            },
+            index=idx,
+        )
+        px.to_pickle(data_dir / f"{ticker}_1d.pkl")
+
+    ev = evaluate_adoptions()
+    assert ev["summary"]["n_adopted_rows"] == 2
+    assert ev["summary_approved"]["n_paper_intents"] == 1
+    assert ev["summary_approved"]["n_eval_5d"] == 1
+    gates = {r["ticker"]: r["gate"] for r in ev["rows"]}
+    assert gates["7203.T"] == "approved"
+    assert gates["6758.T"] == "rejected"
+    assert {r["ticker"] for r in ev["rows"] if r["paper_intent"]} == {"7203.T"}
