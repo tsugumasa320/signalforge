@@ -65,6 +65,7 @@ jobs:
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           PUBLISH_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_only && '1' || '0' }}
         run: bash scripts/ci-daily-paper.sh
 

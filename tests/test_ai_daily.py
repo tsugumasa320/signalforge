@@ -145,7 +145,7 @@ def test_generate_score_limits_adopt() -> None:
 
 
 def test_run_daily_and_eval(sample_data: Path) -> None:
-    out = run_daily(score_top=2, debate_top=1, max_adopt=2)
+    out = run_daily(score_top=2, debate_top=1, max_adopt=2, notify_discord=False)
     assert out["as_of"] == "2026-11-13"
     assert (sample_data / "published" / "ai_brief_response.json").exists()
     assert (sample_data / "published" / "ai_scores_response.json").exists()

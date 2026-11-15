@@ -49,6 +49,21 @@ uv run signalforge ai evaluate-adoptions  # 成績だけ再計算
 
 GitHub Actions（`scripts/ci-daily-paper.sh`）が ranking / forward の後に `ai daily` を回し、`data/published/ai_*.json` を commit する。
 
+## Discord 通知
+
+`ai daily` のあと、ADOPT と「人がやること」を Discord に送る（Webhook URL があるときだけ）。
+
+1. Discord チャンネル → 設定 → 連携サービス → ウェブフック → URL をコピー
+2. ローカル: `.env` に `DISCORD_WEBHOOK_URL=...`
+3. GitHub: repo Secrets に `DISCORD_WEBHOOK_URL` を追加（日次 Actions が読む）
+
+```bash
+uv run signalforge ai notify-discord --dry-run   # 文面だけ確認
+uv run signalforge ai notify-discord             # 送信
+uv run signalforge ai daily                      # 生成と同時に送信（既定）
+uv run signalforge ai daily --no-discord         # 送信なし
+```
+
 ## GitHub Pages（本番のダッシュボード）
 
 公開ハブ: https://tsugumasa320.github.io/signalforge/ai/

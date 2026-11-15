@@ -23,6 +23,7 @@ def run_daily(
     debate_top: int = 3,
     max_adopt: int = 4,
     out_dir: Path | None = None,
+    notify_discord: bool = True,
 ) -> dict[str, Any]:
     brief_packet, brief_path, brief_prompt = write_brief(out_dir=out_dir)
     score_packet, score_path, score_prompt = write_score(top=score_top, out_dir=out_dir)
@@ -50,9 +51,24 @@ def run_daily(
     log = append_adoptions_from_score(score_resp, source="rules/v1")
     eval_payload = evaluate_adoptions()
 
+    discord: dict[str, Any] | None = None
+    if notify_discord:
+        from signalforge.ai.discord_notify import notify_daily
+
+        try:
+            discord = notify_daily(
+                as_of=str(score_resp.get("as_of") or ""),
+                adopted=list(score_resp.get("adopted") or []),
+                brief_resp=brief_resp,
+                eval_summary=eval_payload.get("summary") or {},
+            )
+        except Exception as exc:  # noqa: BLE001 — CI should not fail the whole daily job
+            discord = {"ok": False, "skipped": False, "error": str(exc)}
+
     return {
         "as_of": score_resp.get("as_of"),
         "adopted": score_resp.get("adopted"),
+        "brief_resp": brief_resp,
         "brief_path": str(brief_path),
         "score_path": str(score_path),
         "debate_path": str(debate_path),
@@ -61,4 +77,5 @@ def run_daily(
         "debate_prompt": str(debate_prompt),
         "adoption_entries": len(log.get("entries") or []),
         "eval_summary": eval_payload.get("summary"),
+        "discord": discord,
     }

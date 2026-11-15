@@ -2785,12 +2785,18 @@ def ai_group() -> None:
 @click.option("--score-top", default=20, show_default=True, type=int)
 @click.option("--debate-top", default=3, show_default=True, type=int)
 @click.option("--max-adopt", default=4, show_default=True, type=int)
-def ai_daily_cmd(score_top: int, debate_top: int, max_adopt: int) -> None:
+@click.option("--no-discord", is_flag=True, help="Discord 通知を送らない")
+def ai_daily_cmd(score_top: int, debate_top: int, max_adopt: int, no_discord: bool) -> None:
     """ルールベースで Brief/Score/Debate を生成し、採択ログと成績評価も更新する。"""
     from signalforge.ai.daily import run_daily
 
     try:
-        out = run_daily(score_top=score_top, debate_top=debate_top, max_adopt=max_adopt)
+        out = run_daily(
+            score_top=score_top,
+            debate_top=debate_top,
+            max_adopt=max_adopt,
+            notify_discord=not no_discord,
+        )
     except FileNotFoundError as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"as_of={out.get('as_of')} adopted={', '.join(out.get('adopted') or []) or '—'}")
@@ -2803,7 +2809,50 @@ def ai_daily_cmd(score_top: int, debate_top: int, max_adopt: int) -> None:
         mean_s = "—" if mean is None else f"{float(mean):+.2%}"
         hit_s = "—" if hit is None else f"{float(hit):.0%}"
         click.echo(f"eval {h}d: n={n} mean={mean_s} hit={hit_s}")
+    discord = out.get("discord") or {}
+    if discord.get("skipped"):
+        click.echo("discord: skipped (DISCORD_WEBHOOK_URL unset)")
+    elif discord.get("ok"):
+        click.echo("discord: sent")
+    elif discord.get("error"):
+        click.echo(f"discord: error {discord['error']}")
     click.echo("published: data/published/ai_*.json (+ adoption log/eval)")
+
+
+@ai_group.command("notify-discord")
+@click.option("--dry-run", is_flag=True, help="送信せずメッセージだけ表示")
+def ai_notify_discord_cmd(dry_run: bool) -> None:
+    """最新の Brief / Score から Discord に要約を送る。"""
+    from signalforge.ai.discord_notify import build_daily_message, notify_daily, webhook_url_from_env
+    from signalforge.ai.publish import load_response_for_pages
+    from signalforge.ai.adoption import adoption_eval_path
+    from signalforge.ai.packet import read_json
+
+    brief = load_response_for_pages("brief") or {}
+    score = load_response_for_pages("score") or {}
+    ev = read_json(adoption_eval_path()) if adoption_eval_path().exists() else None
+    summary = (ev or {}).get("summary") if isinstance(ev, dict) else {}
+    content = build_daily_message(
+        as_of=str(brief.get("as_of") or score.get("as_of") or ""),
+        adopted=list(score.get("adopted") or []),
+        brief_resp=brief,
+        eval_summary=summary if isinstance(summary, dict) else {},
+    )
+    if dry_run:
+        click.echo(content)
+        return
+    if not webhook_url_from_env():
+        raise click.ClickException("DISCORD_WEBHOOK_URL が未設定です。")
+    try:
+        result = notify_daily(
+            as_of=str(brief.get("as_of") or score.get("as_of") or ""),
+            adopted=list(score.get("adopted") or []),
+            brief_resp=brief,
+            eval_summary=summary if isinstance(summary, dict) else {},
+        )
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo("sent" if result.get("ok") else result)
 
 
 @ai_group.command("evaluate-adoptions")
