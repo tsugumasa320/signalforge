@@ -27,8 +27,8 @@ class SystemRules:
     id: str = DEFAULT_SYSTEM_ID
     version: str = DEFAULT_SYSTEM_VERSION
     name: str = DEFAULT_SYSTEM_NAME
-    universe: str = "tse_common"
-    universe_limit: int = 0  # 0 = 流動性カットなし（履歴の足る東証普通株すべて）
+    universe: str = "liquid_turnover_top"
+    universe_limit: int = 300
     require_above_ma200: bool = True
     ma200_slope_lag: int = MA200_SLOPE_LAG
     ma75_slope_lag: int = MA75_SLOPE_LAG

@@ -1,20 +1,20 @@
 {
-  "system_id": "trend_top5_ret20",
-  "version": "1.3",
+  "system_id": "trend_top5_liquid_ret20",
+  "version": "1.4",
   "name": "長期上昇トレンド・上位5・直近20日下落なし",
-  "based_on": "trend_top5_liquid_ret20",
+  "based_on": "trend_primary_top5_1y",
   "improve_id": "top5_liquid_ret20",
-  "universe": "tse_common",
-  "universe_limit": 0,
+  "universe": "liquid_turnover_top",
+  "universe_limit": 300,
   "top_n": 5,
   "rank_by": "ret_1y",
   "weight": "equal",
   "sector_max": null,
-  "min_turnover": null,
+  "min_turnover": 50000000.0,
   "min_ret_20d": 0.0,
   "require_above_ma25": false,
   "max_dd_52w": null,
   "signal_on": "month_end",
   "promoted_from": "improve_race",
-  "note": "1.3: 流動性上位300・売買代金下限を外し、東証普通株全体を母集団にする"
+  "note": "1.4: 1.3の東証全体は確認BTで大きく劣化したため、流動性上位300＋売買代金下限に戻す"
 }
