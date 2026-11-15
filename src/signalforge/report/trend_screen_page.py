@@ -106,9 +106,11 @@ def _forward_section(fwd: dict[str, Any] | None) -> str:
     s = fwd.get("summary") or {}
     live = fwd.get("live") or {}
     open_book = fwd.get("open") or {}
+    from signalforge.report.yahoo_jp import yahoo_jp_anchor
+
     holds = "".join(
-        f"<li><strong>{escape(str(h.get('code')))}</strong> {escape(str(h.get('name') or ''))} "
-        f"· {_pct(h.get('return'))}</li>"
+        f"<li><strong>{yahoo_jp_anchor(str(h.get('code') or h.get('ticker') or ''))}</strong> "
+        f"{escape(str(h.get('name') or ''))} · {_pct(h.get('return'))}</li>"
         for h in (open_book.get("holdings") or [])
     )
     recent = list(fwd.get("months") or [])[-12:]

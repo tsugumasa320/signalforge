@@ -137,12 +137,16 @@ def score_candidate(c: dict[str, Any]) -> dict[str, Any]:
         "risk": (
             f"mdd_1y={c.get('mdd_1y')} · earnings_next={earn_next} · "
             f"earnings_next_days={days} · event_data={event_data} · "
-            f"content_data={c.get('content_data')}"
+            f"content_data={c.get('content_data')} · pit={c.get('pit_status')}"
         ),
         "surprise": surprise,
         "news": c.get("news"),
         "news_sentiment": news_sent,
         "content_data": c.get("content_data"),
+        "pit_ok": c.get("pit_ok"),
+        "pit_status": c.get("pit_status"),
+        "pit_available_at": c.get("pit_available_at"),
+        "pit_issues": c.get("pit_issues") or [],
     }
 
 

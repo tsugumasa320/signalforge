@@ -1048,6 +1048,8 @@ def render_experiment_strategy_detail(strategy_id: str) -> None:
             if tdf.empty:
                 st.caption("再BT済みで有効な銘柄行がまだありません（旧 -65% データは非表示）。")
             if not tdf.empty:
+                from signalforge.report.yahoo_jp import yahoo_jp_url
+
                 show_cols = [
                     c
                     for c in [
@@ -1065,10 +1067,17 @@ def render_experiment_strategy_detail(strategy_id: str) -> None:
                     tdf = tdf.sort_values("avg_pnl_pct", ascending=False)
                 elif "profit_factor" in tdf.columns:
                     tdf = tdf.sort_values("profit_factor", ascending=False)
+                view = tdf[show_cols].head(30).copy()
+                if "ticker" in view.columns:
+                    view["yahoo"] = view["ticker"].map(yahoo_jp_url)
+                    show_cols = ["ticker", "yahoo"] + [c for c in show_cols if c != "ticker"]
                 st.dataframe(
-                    _format_ranking_table(tdf[show_cols].head(30)),
+                    _format_ranking_table(view[show_cols]),
                     width="stretch",
                     hide_index=True,
+                    column_config={
+                        "yahoo": st.column_config.LinkColumn("Yahoo JP", display_text="開く"),
+                    },
                 )
 
     from signalforge.report.dashboard_strategies import (

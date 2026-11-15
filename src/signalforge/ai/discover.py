@@ -57,11 +57,14 @@ def build_discover_packet(
     filtered.sort(key=lambda r: float(r.get("turnover_20d") or 0), reverse=True)
     filtered = filtered[: max(0, limit)]
 
+    from signalforge.ai.pit import annotate_pit_rows, pit_coverage
+
     candidates = enrich_event_rows(
         [slim_rank_row(r) for r in filtered],
         as_of=as_of_s,
     )
     candidates = enrich_content_rows(candidates, as_of=as_of_s, fetch_news=fetch_news)
+    candidates = annotate_pit_rows(candidates, as_of=as_of_s)
     for c in candidates:
         t = str(c.get("ticker") or "")
         c["screen_passed"] = t in passed
@@ -84,10 +87,12 @@ def build_discover_packet(
         },
         "event_coverage": event_coverage(candidates),
         "content_coverage": content_coverage(candidates),
+        "pit_coverage": pit_coverage(candidates),
         "notes": (
             "トレンド・スクリーニング通過は不要。"
             "流動性ユニバースから売買代金フィルタのみで母集団を作り、同じ5因子ルールで採点。"
             "screen_passed=false の ADOPT が『独自発掘』候補。"
+            "PIT: as_of より後の内容は除外。"
         ),
         "candidates": candidates,
     }

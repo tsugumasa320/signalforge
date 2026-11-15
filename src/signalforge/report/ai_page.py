@@ -15,31 +15,15 @@ from signalforge.ai.packet import read_json
 from signalforge.ai.publish import PUBLISHED_NAMES, load_response_for_pages, published_response_path
 from signalforge.ai.paths import published_path
 from signalforge.report.static_html import wrap_page
+from signalforge.report.yahoo_jp import yahoo_jp_anchor, yahoo_jp_url
 
+# Back-compat for dashboard_ai / tests importing private helpers.
 YAHOO_JP_QUOTE = "https://finance.yahoo.co.jp/quote/{ticker}"
-
-
-def _yahoo_jp_url(ticker: str | None) -> str | None:
-    t = str(ticker or "").strip()
-    if not t or t == "—":
-        return None
-    if not t.upper().endswith(".T"):
-        base = t.replace(".t", "").replace(".T", "")
-        if base.isdigit():
-            t = f"{base}.T"
-    return YAHOO_JP_QUOTE.format(ticker=t)
+_yahoo_jp_url = yahoo_jp_url
 
 
 def _ticker_link(ticker: str | None) -> str:
-    t = str(ticker or "").strip()
-    if not t:
-        return "—"
-    url = _yahoo_jp_url(t)
-    if not url:
-        return escape(t)
-    return (
-        f'<a href="{escape(url)}" target="_blank" rel="noopener">{escape(t)}</a>'
-    )
+    return yahoo_jp_anchor(ticker)
 
 
 def _ticker_list_links(tickers: list[Any] | None) -> str:

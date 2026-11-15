@@ -255,20 +255,22 @@ def _yen(value: object) -> str:
 
 
 def _chart_links(ticker: str) -> str:
-    """Kabutan and TradingView for a TSE ticker such as 7203.T."""
-    code = ticker.strip()
-    if code.endswith(".T"):
-        code = code[:-2]
+    """Yahoo JP, Kabutan, and TradingView for a TSE ticker such as 7203.T."""
+    from signalforge.report.yahoo_jp import normalize_tse_code, yahoo_jp_url
+
+    code = normalize_tse_code(ticker)
     if not code:
         return "—"
     safe = escape(code, quote=True)
     kabutan = f"https://kabutan.jp/stock/?code={safe}"
     tradingview = f"https://jp.tradingview.com/chart/?symbol=TSE:{safe}"
-    return (
-        f'<a href="{kabutan}" target="_blank" rel="noopener">株探</a>'
-        " · "
-        f'<a href="{tradingview}" target="_blank" rel="noopener">TradingView</a>'
-    )
+    parts = []
+    yurl = yahoo_jp_url(ticker)
+    if yurl:
+        parts.append(f'<a href="{escape(yurl)}" target="_blank" rel="noopener">Yahoo</a>')
+    parts.append(f'<a href="{kabutan}" target="_blank" rel="noopener">株探</a>')
+    parts.append(f'<a href="{tradingview}" target="_blank" rel="noopener">TradingView</a>')
+    return " · ".join(parts)
 
 
 def diversified_fills_table(fills: list[dict] | None) -> str:
@@ -292,10 +294,12 @@ def diversified_fills_table(fills: list[dict] | None) -> str:
             jpy_f = None
         jpy_cls = "positive" if jpy_f is not None and jpy_f > 0 else "negative" if jpy_f is not None and jpy_f < 0 else ""
         jpy_s = f"¥{jpy_f:,.0f}" if jpy_f is not None else "—"
+        from signalforge.report.yahoo_jp import yahoo_jp_anchor
+
         ticker = str(row.get("ticker") or "")
         body += (
             "<tr>"
-            f"<td>{escape(ticker)}</td>"
+            f"<td>{yahoo_jp_anchor(ticker)}</td>"
             f"<td>{_chart_links(ticker)}</td>"
             f"<td>{escape(str(row.get('entry_time') or '—'))}</td>"
             f"<td>{escape(str(row.get('exit_time') or '—'))}</td>"
@@ -359,7 +363,7 @@ def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1, ref
     {chart_html}
     <section>
       <h2>約定</h2>
-      <p class="muted">エントリー日より後に採用された取引。価格はスリッページ込みの約定価格。足の確認は株探または TradingView。</p>
+      <p class="muted">エントリー日より後に採用された取引。価格はスリッページ込みの約定価格。足の確認は Yahoo JP・株探・TradingView。</p>
       {diversified_fills_table(sim.get("fills"))}
     </section>
     <p class="muted">指数はエントリ開始日=100。日経は 1321.T（日経225連動ETF）の終値。GitHub Actions 日次更新後のスナップショット。</p>

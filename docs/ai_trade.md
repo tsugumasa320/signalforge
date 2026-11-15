@@ -14,6 +14,8 @@ uv run signalforge alt-data fetch --earnings   # data/alt/earnings/*.json
 
 Score / Brief / Debate の `earnings_next*` は ranking 行を優先し、欠けていれば `data/alt/earnings` から補完する（ライブ API は呼ばない）。キャッシュも無い銘柄は `event_data=missing` で event 因子を中立点にする。
 
+**PIT（薄い可視性ゲート）:** `as_of` より後のサプライズ開示日・ニュース `published_at` は採点前に除外する（KabuForge 風の available_at チェック）。完全な歴史 PIT 認証ではない。パケットに `pit_coverage` / 候補の `pit_ok`・`pit_issues` が付く。
+
 ## コマンド
 
 ```bash
@@ -117,4 +119,5 @@ uv run signalforge ai save-response brief /path/to/reply.json
 - 自動発注
 
 TradingAgents 等の外部委員会ツールは米国前提が多いため、日本株は本リポの `ai debate` を使う。
-取り入れたのは **役割ラベル（bull/bear/risk/human）・承認ゲート・hash 台帳** のみ（丸ごと導入しない）。
+取り入れたのは **役割ラベル（bull/bear/risk/human）・承認ゲート・hash 台帳・薄い PIT ゲート** のみ（丸ごと導入しない）。
+銘柄コード表示は Yahoo!ファイナンス日本版へのリンク（Pages / ペーパー約定表 / TSE 銘柄別など）。

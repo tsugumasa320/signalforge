@@ -12,6 +12,7 @@ from signalforge.ai.packet import (
     write_json,
 )
 from signalforge.ai.paths import ai_dir, load_prompt
+from signalforge.ai.pit import annotate_pit_rows, pit_coverage
 
 SCHEMA = "signalforge-ai-score/v1"
 
@@ -48,6 +49,7 @@ RUBRIC = [
             "カレンダー: earnings_next_days（近いほど減点、missing は中立）。"
             "内容: surprise（会社予想上方/C0・営業利益YoY）と news 見出しキーワードで微調整。"
             "コンセンサス比ではない（J-Quants 短信ベース）。"
+            "as_of より後の開示・見出しは PIT ゲートで除外。"
         ),
     },
 ]
@@ -67,6 +69,7 @@ def build_score_packet(*, top: int = 20, fetch_news: bool = False) -> dict[str, 
         as_of=as_of_s,
     )
     candidates = enrich_content_rows(candidates, as_of=as_of_s, fetch_news=fetch_news)
+    candidates = annotate_pit_rows(candidates, as_of=as_of_s)
     return {
         "schema": SCHEMA,
         "generated_at": utc_now_iso(),
@@ -78,11 +81,13 @@ def build_score_packet(*, top: int = 20, fetch_news: bool = False) -> dict[str, 
         "rubric": RUBRIC,
         "event_coverage": event_coverage(candidates),
         "content_coverage": content_coverage(candidates),
+        "pit_coverage": pit_coverage(candidates),
         "event_notes": (
             "event 因子 = カレンダー + 内容。"
             "カレンダー: ranking / data/alt/earnings。"
             "サプライズ: data/earnings_surprise/fins（会社予想・YoY。コンセンサスなし）。"
             "ニュース: data/alt/news（Yahoo見出しキャッシュ。`ai score --fetch-news` で取得）。"
+            "PIT: as_of より後の disc_date / published_at は除外（完全な歴史PIT認証ではない）。"
         ),
         "candidates": candidates,
         "response_schema": {

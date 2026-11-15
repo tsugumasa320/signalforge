@@ -266,6 +266,7 @@ def test_diversified_fills_table_lists_prices():
     assert "2,600" in html
     assert 'href="https://kabutan.jp/stock/?code=7203"' in html
     assert 'href="https://jp.tradingview.com/chart/?symbol=TSE:7203"' in html
+    assert 'href="https://finance.yahoo.co.jp/quote/7203.T"' in html
     assert 'target="_blank"' in html
     assert "この期間の約定はまだありません" in diversified_fills_table([])
 
