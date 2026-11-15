@@ -189,16 +189,21 @@ def render_ai_panel() -> None:
         if not regime:
             st.info("`uv run signalforge ai market` で地合いを更新してください。")
         else:
-            c1, c2, c3 = st.columns(3)
-            c1.metric("overall", regime.get("overall") or "—")
-            c2.metric("JP", regime.get("jp") or "—")
-            c3.metric("US", regime.get("us") or "—")
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("overall", regime.get("overall_ja") or regime.get("overall") or "—")
+            c2.metric("JP", regime.get("jp_ja") or regime.get("jp") or "—")
+            c3.metric("US", regime.get("us_ja") or regime.get("us") or "—")
+            c4.metric("先物", regime.get("futures_ja") or regime.get("futures") or "—")
             st.write(regime.get("takeaway") or "—")
+            with st.expander("ラベルの意味", expanded=False):
+                for k, v in (regime.get("legend") or {}).items():
+                    st.markdown(f"- `{k}`: {v}")
             rows = []
             for i in regime.get("indices") or []:
                 rows.append(
                     {
                         "name": i.get("name"),
+                        "asset": i.get("asset"),
                         "ticker": i.get("ticker"),
                         "yahoo": _yahoo_jp_url(i.get("ticker"))
                         if str(i.get("ticker") or "").endswith(".T")
@@ -206,7 +211,7 @@ def render_ai_panel() -> None:
                         "ret_5d": i.get("ret_5d"),
                         "ret_20d": i.get("ret_20d"),
                         "vs_ma200": i.get("vs_ma200"),
-                        "stance": i.get("stance"),
+                        "stance": i.get("stance_ja") or i.get("stance"),
                     }
                 )
             st.dataframe(

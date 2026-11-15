@@ -48,6 +48,10 @@ def test_build_market_regime_from_cache(data_dir: Path, monkeypatch: pytest.Monk
         "^DJI": _synth(35000, step=-30),
         "^GSPC": _synth(4500, step=-2),
         "^IXIC": _synth(14000, step=-5),
+        "NIY=F": _synth(40000, step=15),
+        "YM=F": _synth(35000, step=-25),
+        "ES=F": _synth(4500, step=-3),
+        "NQ=F": _synth(16000, step=-8),
     }
 
     def fake_load(ticker: str, *, refresh: bool = False) -> pd.Series:
@@ -56,10 +60,10 @@ def test_build_market_regime_from_cache(data_dir: Path, monkeypatch: pytest.Monk
     monkeypatch.setattr("signalforge.ai.market_regime._load_close", fake_load)
     payload = build_market_regime(refresh=False)
     assert payload["schema"].startswith("signalforge-market-regime")
-    assert payload["jp"] in {"risk_on", "mixed_on"}
-    assert payload["us"] in {"risk_off", "mixed_off"}
-    assert "mixed" in str(payload["overall"]) or payload["overall"] in {"risk_on", "risk_off"}
-
-    assert len(payload["indices"]) == 5
+    assert payload["jp"] in {"risk_on", "mixed_on", "mixed"}
+    assert payload["futures"] in {"risk_on", "mixed_on", "mixed", "mixed_off", "risk_off"}
+    assert payload["overall_ja"]
+    assert len(payload["indices"]) == 9
+    assert any(i.get("asset") == "future" for i in payload["indices"])
     assert load_market_regime() is not None
     assert (data_dir / "published" / "market_regime.json").exists()

@@ -2928,15 +2928,16 @@ def ai_market_cmd(refresh: bool) -> None:
         raise click.ClickException(str(exc)) from exc
     click.echo(
         f"as_of={payload.get('as_of')} overall={payload.get('overall')} "
-        f"jp={payload.get('jp')} us={payload.get('us')}"
+        f"({payload.get('overall_ja')}) jp={payload.get('jp')} us={payload.get('us')} "
+        f"futures={payload.get('futures')}"
     )
     click.echo(payload.get("takeaway") or "")
     for row in payload.get("indices") or []:
         r20 = row.get("ret_20d")
         r20s = "—" if r20 is None else f"{float(r20):+.2%}"
         click.echo(
-            f"  {row.get('id')}: {row.get('name')} 20d={r20s} "
-            f"vs200={row.get('vs_ma200')} stance={row.get('stance')} ok={row.get('ok')}"
+            f"  {row.get('asset')}/{row.get('id')}: {row.get('name')} 20d={r20s} "
+            f"stance={row.get('stance')} ({row.get('stance_ja')}) ok={row.get('ok')}"
         )
     click.echo(f"published: {market_regime_path()}")
 

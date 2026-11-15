@@ -69,22 +69,35 @@ def render_market_section() -> str:
         rows.append(
             [
                 _index_link(i.get("ticker"), i.get("name")),
+                escape(str(i.get("asset") or "")),
                 escape(str(i.get("region") or "")),
                 _pct_cell(i.get("ret_1d")),
                 _pct_cell(i.get("ret_5d")),
                 _pct_cell(i.get("ret_20d")),
-                _pct_cell(i.get("vs_ma200")),
+                _pct_cell(i.get("vs_ma200") if i.get("vs_ma200") is not None else i.get("vs_ma25")),
                 _badge(str(i.get("stance") or "")),
+                escape(str(i.get("stance_ja") or "")),
             ]
         )
+    legend = regime.get("legend") or {}
+    legend_bits = "".join(
+        f"<li><code>{escape(k)}</code> — {escape(str(v))}</li>"
+        for k, v in legend.items()
+        if k in {"risk_on", "mixed", "risk_off", "mixed_on", "mixed_off"}
+    )
     return f"""
     <section id="market">
-      <h2>地合い — 日経 / TOPIX / ダウ / S&amp;P / NASDAQ</h2>
+      <h2>地合い — 現金指数 + 先物</h2>
       <p class="muted">基準日 {escape(str(regime.get('as_of') or '—'))} ·
-        overall <strong>{escape(str(regime.get('overall') or '—'))}</strong> ·
-        JP {escape(str(regime.get('jp') or '—'))} · US {escape(str(regime.get('us') or '—'))}</p>
+        overall <strong>{escape(str(regime.get('overall_ja') or regime.get('overall') or '—'))}</strong>
+        （{escape(str(regime.get('overall') or ''))}） ·
+        JP {escape(str(regime.get('jp_ja') or regime.get('jp') or '—'))} ·
+        US {escape(str(regime.get('us_ja') or regime.get('us') or '—'))} ·
+        先物 {escape(str(regime.get('futures_ja') or regime.get('futures') or '—'))}</p>
       <p>{escape(str(regime.get('takeaway') or ''))}</p>
-      {_table(["index", "region", "1d", "5d", "20d", "vs200", "stance"], rows)}
+      <p class="muted">ラベルの意味（簡易ルール: 20日±2% と 200日線上下。売買シグナルではない）</p>
+      <ul class="compact">{legend_bits}</ul>
+      {_table(["index", "asset", "region", "1d", "5d", "20d", "vsMA", "stance", "日本語"], rows)}
     </section>
     """
 

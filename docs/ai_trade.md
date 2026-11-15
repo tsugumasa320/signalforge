@@ -110,7 +110,17 @@ uv run signalforge ai daily --no-discord         # 送信なし
 
 ### 地合い（Market regime）
 
-`ai market` / `ai daily` が日経（1321）、TOPIX（1306）、NYダウ、S&P500、NASDAQ の 1/5/20日リターンと200日線位置から `risk_on` / `mixed` / `risk_off` を付ける。Brief の `market_take` にも要約を載せる。マクロ予測ではなく簡易スナップショット。
+`ai market` / `ai daily` が現金指数と先物の 1/5/20日リターン・移動平均位置からラベルを付ける。Brief の `market_take` にも要約を載せる。マクロ予測ではなく簡易スナップショット。
+
+| ラベル | 意味（目安） |
+|--------|----------------|
+| `risk_on` | 強気。20日おおむね上昇かつ200日線の上 → リスク資産に資金が向きやすい |
+| `mixed_on` | やや強気（指数間でバラつき） |
+| `mixed` | まちまち。方向感が薄い |
+| `mixed_off` | やや弱気 |
+| `risk_off` | 弱気。20日おおむね下落かつ200日線の下 → 守り寄りになりやすい |
+
+現金: 日経1321 / TOPIX1306 / ダウ / S&P / NASDAQ。先物: `NIY=F`（日経）/ `YM=F` / `ES=F` / `NQ=F`。
 
 手動で LLM 返答を使う場合:
 

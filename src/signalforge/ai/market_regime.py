@@ -1,4 +1,4 @@
-"""Global market regime (地合い) from major index / ETF proxies.
+"""Global market regime (地合い) from major index / ETF / futures proxies.
 
 Uses local OHLCV cache (yfinance). Not investment advice; no brokerage.
 """
@@ -14,18 +14,39 @@ from signalforge.ai.paths import published_path
 from signalforge.data.cache import ParquetCache
 from signalforge.data.fetcher import MarketDataFetcher
 
-SCHEMA = "signalforge-market-regime/v1"
+SCHEMA = "signalforge-market-regime/v2"
 PUBLISHED_NAME = "market_regime.json"
 
-# Prefer JP-listed ETFs for Nikkei/TOPIX (same cache as rest of SignalForge).
-# US cash indices via Yahoo.
+# Spot: JP ETFs + US cash indices. Futures: CME / SGX-style Yahoo continuous.
 INDEX_SPECS: list[dict[str, str]] = [
-    {"id": "nikkei", "ticker": "1321.T", "name": "日経平均（1321 ETF）", "region": "jp"},
-    {"id": "topix", "ticker": "1306.T", "name": "TOPIX（1306 ETF）", "region": "jp"},
-    {"id": "dow", "ticker": "^DJI", "name": "NYダウ", "region": "us"},
-    {"id": "spx", "ticker": "^GSPC", "name": "S&P 500", "region": "us"},
-    {"id": "nasdaq", "ticker": "^IXIC", "name": "NASDAQ総合", "region": "us"},
+    {"id": "nikkei", "ticker": "1321.T", "name": "日経平均（1321 ETF）", "region": "jp", "asset": "spot"},
+    {"id": "topix", "ticker": "1306.T", "name": "TOPIX（1306 ETF）", "region": "jp", "asset": "spot"},
+    {"id": "dow", "ticker": "^DJI", "name": "NYダウ", "region": "us", "asset": "spot"},
+    {"id": "spx", "ticker": "^GSPC", "name": "S&P 500", "region": "us", "asset": "spot"},
+    {"id": "nasdaq", "ticker": "^IXIC", "name": "NASDAQ総合", "region": "us", "asset": "spot"},
+    {"id": "niy_fut", "ticker": "NIY=F", "name": "日経225先物", "region": "jp", "asset": "future"},
+    {"id": "ym_fut", "ticker": "YM=F", "name": "ダウ先物", "region": "us", "asset": "future"},
+    {"id": "es_fut", "ticker": "ES=F", "name": "S&P500先物", "region": "us", "asset": "future"},
+    {"id": "nq_fut", "ticker": "NQ=F", "name": "NASDAQ100先物", "region": "us", "asset": "future"},
 ]
+
+STANCE_JA = {
+    "risk_on": "強気（リスクオン）",
+    "mixed_on": "やや強気",
+    "mixed": "まちまち",
+    "mixed_off": "やや弱気",
+    "risk_off": "弱気（リスクオフ）",
+    "unknown": "不明",
+}
+
+STANCE_HELP = {
+    "risk_on": "直近20日がおおむね上昇し、価格が200日線の上 → 資金がリスク資産に向かいやすい局面の目安",
+    "mixed_on": "強気寄りだが指数間でバラつきあり",
+    "mixed": "上げ下げ・線上下が混在。方向感が薄い",
+    "mixed_off": "弱気寄りだが指数間でバラつきあり",
+    "risk_off": "直近20日がおおむね下落し、価格が200日線の下 → 守り・現金寄りになりやすい局面の目安",
+    "unknown": "データ不足で判定できない",
+}
 
 
 def market_regime_path():
@@ -35,6 +56,10 @@ def market_regime_path():
 def load_market_regime() -> dict[str, Any] | None:
     raw = read_json(market_regime_path())
     return raw if isinstance(raw, dict) else None
+
+
+def stance_label_ja(stance: str | None) -> str:
+    return STANCE_JA.get(str(stance or ""), str(stance or "—"))
 
 
 def _close_series(df: pd.DataFrame) -> pd.Series:
@@ -72,7 +97,7 @@ def _vs_ma(s: pd.Series, window: int) -> float | None:
 
 
 def _stance(ret_20d: float | None, vs_ma200: float | None) -> str:
-    """Local risk stance for one index."""
+    """Local risk stance for one series."""
     if ret_20d is None and vs_ma200 is None:
         return "unknown"
     score = 0
@@ -112,6 +137,7 @@ def analyze_series(close: pd.Series) -> dict[str, Any]:
         "vs_ma25": vs25,
         "vs_ma200": vs200,
         "stance": stance,
+        "stance_ja": stance_label_ja(stance),
         "n_bars": int(len(close)),
     }
 
@@ -124,7 +150,7 @@ def _load_close(ticker: str, *, refresh: bool) -> pd.Series:
             df = cache.update(ticker, "1d", fetcher)
         else:
             df = cache.load_or_fetch(ticker, "1d", fetcher, refresh=False)
-    except Exception as exc:  # noqa: BLE001 — keep other indices usable
+    except Exception as exc:  # noqa: BLE001 — keep other series usable
         return pd.Series(dtype=float, name=str(exc))
     return _close_series(df)
 
@@ -146,38 +172,35 @@ def _region_label(stances: list[str]) -> str:
     return "mixed"
 
 
-def _overall(jp: str, us: str) -> str:
-    if jp == "unknown" and us == "unknown":
+def _blend(*labels: str) -> str:
+    known = [x for x in labels if x and x != "unknown"]
+    if not known:
         return "unknown"
-    if jp == "risk_on" and us == "risk_on":
+    if all(x == "risk_on" for x in known):
         return "risk_on"
-    if jp == "risk_off" and us == "risk_off":
+    if all(x == "risk_off" for x in known):
         return "risk_off"
-    if "off" in jp or "off" in us:
-        if "on" in jp or "on" in us:
-            return "mixed"
-        return "risk_off" if jp == "risk_off" or us == "risk_off" else "mixed_off"
-    if jp == "risk_on" or us == "risk_on":
-        return "mixed_on" if jp != us else "risk_on"
+    ons = sum(1 for x in known if "on" in x and "off" not in x)
+    offs = sum(1 for x in known if "off" in x)
+    if ons and offs:
+        return "mixed"
+    if offs:
+        return "mixed_off" if offs < len(known) else "risk_off"
+    if ons:
+        return "mixed_on" if ons < len(known) else "risk_on"
     return "mixed"
 
 
 def _takeaway(overall: str, indices: list[dict[str, Any]]) -> str:
-    labels = {
-        "risk_on": "地合い強め（リスクオン寄り）",
-        "mixed_on": "地合いやや強め",
-        "mixed": "地合いまちまち",
-        "mixed_off": "地合いやや弱め",
-        "risk_off": "地合い弱め（リスクオフ寄り）",
-        "unknown": "地合い判定不能（データ不足）",
-    }
-    bits = [labels.get(overall, overall)]
-    for row in indices:
+    bits = [stance_label_ja(overall)]
+    # Prefer futures first in the short summary (more leading), then spot
+    ordered = sorted(indices, key=lambda r: 0 if r.get("asset") == "future" else 1)
+    for row in ordered:
         r20 = row.get("ret_20d")
         if r20 is None:
             continue
-        bits.append(f"{row.get('name')}:20日{r20:+.1%}/{row.get('stance')}")
-    return " · ".join(bits[:6])
+        bits.append(f"{row.get('name')}:20日{r20:+.1%}/{row.get('stance_ja') or row.get('stance')}")
+    return " · ".join(bits[:8])
 
 
 def build_market_regime(*, refresh: bool = False) -> dict[str, Any]:
@@ -185,6 +208,11 @@ def build_market_regime(*, refresh: bool = False) -> dict[str, Any]:
     for spec in INDEX_SPECS:
         close = _load_close(spec["ticker"], refresh=refresh)
         metrics = analyze_series(close)
+        # Futures continuous contracts: shorter MA is fine for stance when <200 bars
+        if spec.get("asset") == "future" and metrics.get("vs_ma200") is None and metrics.get("n_bars", 0) >= 25:
+            # re-stance with available vs_ma25 if 200d missing
+            metrics["stance"] = _stance(metrics.get("ret_20d"), metrics.get("vs_ma25"))
+            metrics["stance_ja"] = stance_label_ja(metrics["stance"])
         indices.append(
             {
                 **spec,
@@ -193,9 +221,14 @@ def build_market_regime(*, refresh: bool = False) -> dict[str, Any]:
             }
         )
 
+    spot = [i for i in indices if i.get("asset") == "spot"]
+    futs = [i for i in indices if i.get("asset") == "future"]
     jp = _region_label([i["stance"] for i in indices if i.get("region") == "jp"])
     us = _region_label([i["stance"] for i in indices if i.get("region") == "us"])
-    overall = _overall(jp, us)
+    futures = _region_label([i["stance"] for i in futs])
+    spot_lbl = _region_label([i["stance"] for i in spot])
+    overall = _blend(spot_lbl, futures)
+
     as_ofs = [i.get("as_of") for i in indices if i.get("as_of")]
     as_of = max(as_ofs) if as_ofs else None
 
@@ -204,13 +237,22 @@ def build_market_regime(*, refresh: bool = False) -> dict[str, Any]:
         "generated_at": utc_now_iso(),
         "as_of": as_of,
         "overall": overall,
+        "overall_ja": stance_label_ja(overall),
         "jp": jp,
+        "jp_ja": stance_label_ja(jp),
         "us": us,
+        "us_ja": stance_label_ja(us),
+        "spot": spot_lbl,
+        "futures": futures,
+        "futures_ja": stance_label_ja(futures),
         "takeaway": _takeaway(overall, indices),
+        "legend": STANCE_HELP,
+        "legend_ja": STANCE_JA,
         "indices": indices,
         "notes": [
-            "JPは東証ETF（1321/1306）、米はYahoo現金指数。",
-            "完全なマクロモデルではなく、短期リターンと200日線の簡易地合い。",
+            "現金指数: JP=東証ETF（1321/1306）、米=Yahoo現金指数。",
+            "先物: NIY=F（日経）、YM/ES/NQ=F（米株価指数先物・連続）。",
+            "判定は直近20日リターン（±2%）と200日線上下の簡易ルール。売買シグナルではない。",
             "発注には接続しない。",
         ],
     }
