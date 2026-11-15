@@ -189,17 +189,35 @@ def render_ai_panel() -> None:
         if not regime:
             st.info("`uv run signalforge ai market` で地合いを更新してください。")
         else:
+            legend = regime.get("legend") or {}
             c1, c2, c3, c4 = st.columns(4)
-            c1.metric("overall", regime.get("overall_ja") or regime.get("overall") or "—")
-            c2.metric("JP", regime.get("jp_ja") or regime.get("jp") or "—")
-            c3.metric("US", regime.get("us_ja") or regime.get("us") or "—")
-            c4.metric("先物", regime.get("futures_ja") or regime.get("futures") or "—")
+            c1.metric(
+                "overall",
+                regime.get("overall_ja") or regime.get("overall") or "—",
+                help=legend.get(str(regime.get("overall") or ""), "地合い総合"),
+            )
+            c2.metric(
+                "JP",
+                regime.get("jp_ja") or regime.get("jp") or "—",
+                help=legend.get(str(regime.get("jp") or ""), "日本株地合い"),
+            )
+            c3.metric(
+                "US",
+                regime.get("us_ja") or regime.get("us") or "—",
+                help=legend.get(str(regime.get("us") or ""), "米国株地合い"),
+            )
+            c4.metric(
+                "先物",
+                regime.get("futures_ja") or regime.get("futures") or "—",
+                help=legend.get(str(regime.get("futures") or ""), "指数先物地合い"),
+            )
             st.write(regime.get("takeaway") or "—")
-            with st.expander("ラベルの意味", expanded=False):
-                for k, v in (regime.get("legend") or {}).items():
+            with st.expander("ラベルの意味（ホバー相当）", expanded=False):
+                for k, v in legend.items():
                     st.markdown(f"- `{k}`: {v}")
             rows = []
             for i in regime.get("indices") or []:
+                st_key = str(i.get("stance") or "")
                 rows.append(
                     {
                         "name": i.get("name"),
@@ -212,6 +230,7 @@ def render_ai_panel() -> None:
                         "ret_20d": i.get("ret_20d"),
                         "vs_ma200": i.get("vs_ma200"),
                         "stance": i.get("stance_ja") or i.get("stance"),
+                        "解説": legend.get(st_key, ""),
                     }
                 )
             st.dataframe(
@@ -223,10 +242,12 @@ def render_ai_panel() -> None:
                     "ret_5d": st.column_config.NumberColumn(format="%.1%%"),
                     "ret_20d": st.column_config.NumberColumn(format="%.1%%"),
                     "vs_ma200": st.column_config.NumberColumn(format="%.1%%"),
+                    "解説": st.column_config.TextColumn("解説（ホバー相当）", width="large"),
                 },
             )
     with tab_b:
-        _render_brief(brief_resp, _file_mtime(base / "brief_latest.json"))    with tab_s:
+        _render_brief(brief_resp, _file_mtime(base / "brief_latest.json"))
+    with tab_s:
         _render_score(score_resp, _file_mtime(base / "scores_latest.json"))
     with tab_d:
         _render_debate(debate_resp, _file_mtime(base / "debate_latest.json"))

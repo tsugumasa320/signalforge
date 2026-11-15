@@ -13,7 +13,12 @@ from signalforge.ai.adoption import adoption_eval_path, adoption_log_path
 from signalforge.ai.approval import PUBLISHED_NAME as APPROVALS_PUBLISHED, load_approvals
 from signalforge.ai.discover import PUBLISHED_NAME as DISCOVER_PUBLISHED, load_discover_response
 from signalforge.ai.ledger import PUBLISHED_NAME as LEDGER_PUBLISHED, load_ledger, verify_ledger
-from signalforge.ai.market_regime import PUBLISHED_NAME as MARKET_PUBLISHED, load_market_regime
+from signalforge.ai.market_regime import (
+    PUBLISHED_NAME as MARKET_PUBLISHED,
+    STANCE_HELP,
+    STANCE_JA,
+    load_market_regime,
+)
 from signalforge.ai.packet import read_json
 from signalforge.ai.publish import PUBLISHED_NAMES, load_response_for_pages, published_response_path
 from signalforge.ai.paths import published_path
@@ -75,29 +80,36 @@ def render_market_section() -> str:
                 _pct_cell(i.get("ret_5d")),
                 _pct_cell(i.get("ret_20d")),
                 _pct_cell(i.get("vs_ma200") if i.get("vs_ma200") is not None else i.get("vs_ma25")),
-                _badge(str(i.get("stance") or "")),
-                escape(str(i.get("stance_ja") or "")),
+                _stance_tip(str(i.get("stance") or ""), show_ja=True),
             ]
         )
-    legend = regime.get("legend") or {}
+    legend = regime.get("legend") or STANCE_HELP
     legend_bits = "".join(
-        f"<li><code>{escape(k)}</code> — {escape(str(v))}</li>"
+        f'<li><span class="tip"><code>{escape(k)}</code>'
+        f'<button type="button" class="tip-mark" aria-label="{escape(k)}の説明">?</button>'
+        f'<span class="tip-bubble" role="tooltip">{escape(str(v))}</span></span>'
+        f" — {escape(STANCE_JA.get(k, k))}</li>"
         for k, v in legend.items()
-        if k in {"risk_on", "mixed", "risk_off", "mixed_on", "mixed_off"}
+        if k in {"risk_on", "mixed_on", "mixed", "mixed_off", "risk_off"}
+    )
+    summary = " · ".join(
+        [
+            _stance_summary_tip("overall", regime.get("overall")),
+            _stance_summary_tip("JP", regime.get("jp")),
+            _stance_summary_tip("US", regime.get("us")),
+            _stance_summary_tip("先物", regime.get("futures")),
+        ]
     )
     return f"""
     <section id="market">
       <h2>地合い — 現金指数 + 先物</h2>
       <p class="muted">基準日 {escape(str(regime.get('as_of') or '—'))} ·
-        overall <strong>{escape(str(regime.get('overall_ja') or regime.get('overall') or '—'))}</strong>
-        （{escape(str(regime.get('overall') or ''))}） ·
-        JP {escape(str(regime.get('jp_ja') or regime.get('jp') or '—'))} ·
-        US {escape(str(regime.get('us_ja') or regime.get('us') or '—'))} ·
-        先物 {escape(str(regime.get('futures_ja') or regime.get('futures') or '—'))}</p>
+        ラベルにマウスを乗せると解説が出ます（? でも可）。</p>
+      <p>{summary}</p>
       <p>{escape(str(regime.get('takeaway') or ''))}</p>
-      <p class="muted">ラベルの意味（簡易ルール: 20日±2% と 200日線上下。売買シグナルではない）</p>
+      <p class="muted">凡例（ホバーで詳細）</p>
       <ul class="compact">{legend_bits}</ul>
-      {_table(["index", "asset", "region", "1d", "5d", "20d", "vsMA", "stance", "日本語"], rows)}
+      {_table(["index", "asset", "region", "1d", "5d", "20d", "vsMA", "stance"], rows)}
     </section>
     """
 
@@ -262,6 +274,33 @@ def _badge(text: str | None) -> str:
     elif s in {"AVOID", "SKIP", "REDUCE", "REJECTED", "RISK_OFF", "MIXED_OFF"}:
         cls += " negative"
     return f'<span class="{cls}">{escape(str(text or "—"))}</span>'
+
+
+def _stance_tip(stance: str | None, *, show_ja: bool = True) -> str:
+    """Badge + hover tip for market regime labels (risk_on / mixed / …)."""
+    key = str(stance or "").strip().lower()
+    help_text = STANCE_HELP.get(key) or "地合いラベル（簡易ルール）。売買シグナルではない。"
+    ja = STANCE_JA.get(key, "")
+    badge = _badge(key or "—")
+    label = f"{badge} {escape(ja)}" if show_ja and ja else badge
+    return (
+        f'<span class="tip">{label}'
+        f'<button type="button" class="tip-mark" aria-label="{escape(key or "stance")}の説明">?</button>'
+        f'<span class="tip-bubble" role="tooltip">{escape(help_text)}</span></span>'
+    )
+
+
+def _stance_summary_tip(label: str, stance: str | None) -> str:
+    """Summary chip (overall / JP / US / futures) with hover explanation."""
+    key = str(stance or "").strip().lower()
+    help_text = STANCE_HELP.get(key) or "地合いラベル（簡易ルール）。売買シグナルではない。"
+    ja = STANCE_JA.get(key, key or "—")
+    return (
+        f'<span class="tip"><strong>{escape(label)}</strong> {escape(ja)}'
+        f' <code>{escape(key or "—")}</code>'
+        f'<button type="button" class="tip-mark" aria-label="{escape(label)}の説明">?</button>'
+        f'<span class="tip-bubble" role="tooltip">{escape(help_text)}</span></span>'
+    )
 
 
 def _ul(items: list[Any] | None) -> str:
