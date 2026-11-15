@@ -37,23 +37,29 @@ uv run signalforge ai save-response debate /path/to/reply.json
 
 返答例（フォーマット確定用）: [`examples/ai_brief_response.json`](../examples/ai_brief_response.json) / [`ai_score_response.json`](../examples/ai_score_response.json) / [`ai_debate_response.json`](../examples/ai_debate_response.json)
 
-## GitHub Pages（本番のダッシュボード）
+## 日次自動（推奨）
 
-公開ハブ: https://tsugumasa320.github.io/signalforge/ → **AIトライアル**（`ai/index.html`）
-
-`data/ai/` は gitignore のため、Pages に載るのは **`data/published/ai_*.json`** だけ。
+ルールベース（LLM API 不要）で Brief / Score / Debate を生成し、ADOPT を採択ログに残して 5日・20日リターンを集計する。
 
 ```bash
-uv run signalforge ai save-response brief examples/ai_brief_response.json
-# → data/published/ai_brief_response.json も更新される
-# 同様に score / debate
-git add data/published/ai_*.json && git commit   # ユーザーが明示したとき
-uv run signalforge dashboard export --output _site
+uv run signalforge trend-screen ranking   # 材料
+uv run signalforge ai daily               # 生成 + published 更新 + adoption eval
+uv run signalforge ai evaluate-adoptions  # 成績だけ再計算
 ```
 
-日次 Actions（`dashboard export`）でも `ai/index.html` が生成される。published JSON が commit されていれば Pages に出る。
+GitHub Actions（`scripts/ci-daily-paper.sh`）が ranking / forward の後に `ai daily` を回し、`data/published/ai_*.json` を commit する。
 
-ローカル Streamlit にも **AIトライアル** タブがある（確認用）。
+## GitHub Pages（本番のダッシュボード）
+
+公開ハブ: https://tsugumasa320.github.io/signalforge/ai/
+
+載るもの: Brief / Score / Debate / **Adoption 成績**（`ai_adoption_log.json` · `ai_adoption_eval.json`）
+
+手動で LLM 返答を使う場合:
+
+```bash
+uv run signalforge ai save-response brief /path/to/reply.json
+```
 
 ## Cursor での回し方
 

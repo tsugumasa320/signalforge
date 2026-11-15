@@ -81,11 +81,19 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/paper/ data/published/trend_screen_ranking.json data/published/trend_screen_forward.json data/trend_screen/liquid300.txt || true
+          git add data/paper/ \
+            data/published/trend_screen_ranking.json \
+            data/published/trend_screen_forward.json \
+            data/published/ai_brief_response.json \
+            data/published/ai_scores_response.json \
+            data/published/ai_debate_response.json \
+            data/published/ai_adoption_log.json \
+            data/published/ai_adoption_eval.json \
+            data/trend_screen/liquid300.txt || true
           if git diff --staged --quiet; then
-            echo "No paper/screening state changes."
+            echo "No paper/screening/AI state changes."
           else
-            git commit -m "chore(paper): daily update + trend-screen (run ${GITHUB_RUN_ID})"
+            git commit -m "chore(paper): daily update + trend-screen + ai trial (run ${GITHUB_RUN_ID})"
             # 走行中に main が進んでも、取り込み直してから push する
             for _ in 1 2 3; do
               git rebase --abort >/dev/null 2>&1 || true

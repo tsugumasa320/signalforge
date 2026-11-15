@@ -1,5 +1,6 @@
 {
   "as_of": "2026-11-13",
+  "generator": "rules/v1",
   "scores": [
     {
       "ticker": "8309.T",
@@ -13,8 +14,9 @@
         "liquidity": 18,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=7.4%、流動性=15862385992。",
-      "risk": "vol_1y=0.2886012638647275, mdd_1y=-0.16083190419363824, earnings_next_days=None"
+      "why": "1年+71.5% · 20日+7.4% · vol=0.29 · turnover=15862385992",
+      "risk": "mdd_1y=-0.16083190419363824 · earnings_next_days=None",
+      "price": 1786.5
     },
     {
       "ticker": "9147.T",
@@ -28,8 +30,9 @@
         "liquidity": 14,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=3.4%、流動性=6403160185。",
-      "risk": "vol_1y=0.28296769768986507, mdd_1y=-0.09802250255710876, earnings_next_days=None"
+      "why": "1年+88.6% · 20日+3.4% · vol=0.28 · turnover=6403160185",
+      "risk": "mdd_1y=-0.09802250255710876 · earnings_next_days=None",
+      "price": 6102.0
     },
     {
       "ticker": "9962.T",
@@ -43,8 +46,9 @@
         "liquidity": 14,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=2.8%、流動性=8290290965。",
-      "risk": "vol_1y=0.4500454632179116, mdd_1y=-0.17673751759889478, earnings_next_days=None"
+      "why": "1年+75.2% · 20日+2.8% · vol=0.45 · turnover=8290290965",
+      "risk": "mdd_1y=-0.17673751759889478 · earnings_next_days=None",
+      "price": 3966.0
     },
     {
       "ticker": "8795.T",
@@ -58,8 +62,9 @@
         "liquidity": 14,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=3.7%、流動性=7944859815。",
-      "risk": "vol_1y=0.3325593876419327, mdd_1y=-0.13953487954100496, earnings_next_days=None"
+      "why": "1年+57.0% · 20日+3.7% · vol=0.33 · turnover=7944859815",
+      "risk": "mdd_1y=-0.13953487954100496 · earnings_next_days=None",
+      "price": 4934.0
     },
     {
       "ticker": "8750.T",
@@ -73,8 +78,9 @@
         "liquidity": 18,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=0.3%、流動性=16379816230。",
-      "risk": "vol_1y=0.3084261661718497, mdd_1y=-0.15735563777299344, earnings_next_days=None"
+      "why": "1年+72.8% · 20日+0.3% · vol=0.31 · turnover=16379816230",
+      "risk": "mdd_1y=-0.15735563777299344 · earnings_next_days=None",
+      "price": 1811.0
     },
     {
       "ticker": "6178.T",
@@ -88,8 +94,9 @@
         "liquidity": 18,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=1.0%、流動性=10837026800。",
-      "risk": "vol_1y=0.2954109217828547, mdd_1y=-0.1589768198446867, earnings_next_days=None"
+      "why": "1年+70.1% · 20日+1.0% · vol=0.30 · turnover=10837026800",
+      "risk": "mdd_1y=-0.1589768198446867 · earnings_next_days=None",
+      "price": 2389.0
     },
     {
       "ticker": "4502.T",
@@ -103,8 +110,9 @@
         "liquidity": 18,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=12.0%、流動性=32388530190。",
-      "risk": "vol_1y=0.234802860211254, mdd_1y=-0.19388788056717232, earnings_next_days=None"
+      "why": "1年+71.4% · 20日+12.0% · vol=0.23 · turnover=32388530190",
+      "risk": "mdd_1y=-0.19388788056717232 · earnings_next_days=None",
+      "price": 6926.0
     },
     {
       "ticker": "4503.T",
@@ -118,8 +126,9 @@
         "liquidity": 18,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=14.5%、流動性=15630454750。",
-      "risk": "vol_1y=0.3124320209199146, mdd_1y=-0.20714950324088732, earnings_next_days=None"
+      "why": "1年+57.9% · 20日+14.5% · vol=0.31 · turnover=15630454750",
+      "risk": "mdd_1y=-0.20714950324088732 · earnings_next_days=None",
+      "price": 2699.0
     },
     {
       "ticker": "7832.T",
@@ -133,8 +142,9 @@
         "liquidity": 18,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=12.8%、流動性=20312461610。",
-      "risk": "vol_1y=0.33213077708537636, mdd_1y=-0.2133812086369482, earnings_next_days=None"
+      "why": "1年+55.3% · 20日+12.8% · vol=0.33 · turnover=20312461610",
+      "risk": "mdd_1y=-0.2133812086369482 · earnings_next_days=None",
+      "price": 6900.0
     },
     {
       "ticker": "8766.T",
@@ -148,8 +158,9 @@
         "liquidity": 18,
         "event": 6
       },
-      "why": "1年リターンとMA25上方を確認。20日=10.0%、流動性=47926816483。",
-      "risk": "vol_1y=0.4530019640497683, mdd_1y=-0.13825641652644627, earnings_next_days=6"
+      "why": "1年+100.6% · 20日+10.0% · vol=0.45 · turnover=47926816483",
+      "risk": "mdd_1y=-0.13825641652644627 · earnings_next_days=6",
+      "price": 597.0999755859375
     },
     {
       "ticker": "8725.T",
@@ -163,8 +174,9 @@
         "liquidity": 18,
         "event": 6
       },
-      "why": "1年リターンとMA25上方を確認。20日=6.0%、流動性=24567452175。",
-      "risk": "vol_1y=0.27132265289429447, mdd_1y=-0.11106030203395145, earnings_next_days=6"
+      "why": "1年+70.3% · 20日+6.0% · vol=0.27 · turnover=24567452175",
+      "risk": "mdd_1y=-0.11106030203395145 · earnings_next_days=6",
+      "price": 5316.0
     },
     {
       "ticker": "8630.T",
@@ -178,8 +190,9 @@
         "liquidity": 18,
         "event": 6
       },
-      "why": "1年リターンとMA25上方を確認。20日=7.9%、流動性=20599487595。",
-      "risk": "vol_1y=0.3218541279704484, mdd_1y=-0.13473193333205524, earnings_next_days=6"
+      "why": "1年+61.9% · 20日+7.9% · vol=0.32 · turnover=20599487595",
+      "risk": "mdd_1y=-0.13473193333205524 · earnings_next_days=6",
+      "price": 7290.0
     },
     {
       "ticker": "7747.T",
@@ -193,8 +206,9 @@
         "liquidity": 10,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=11.4%、流動性=4948070555。",
-      "risk": "vol_1y=0.37134346348458025, mdd_1y=-0.22647914645974787, earnings_next_days=None"
+      "why": "1年+58.2% · 20日+11.4% · vol=0.37 · turnover=4948070555",
+      "risk": "mdd_1y=-0.22647914645974787 · earnings_next_days=None",
+      "price": 3811.0
     },
     {
       "ticker": "2702.T",
@@ -208,8 +222,9 @@
         "liquidity": 18,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=23.0%、流動性=12804270205。",
-      "risk": "vol_1y=0.2647589337744403, mdd_1y=-0.17345750873108268, earnings_next_days=None"
+      "why": "1年+55.8% · 20日+23.0% · vol=0.26 · turnover=12804270205",
+      "risk": "mdd_1y=-0.17345750873108268 · earnings_next_days=None",
+      "price": 9594.0
     },
     {
       "ticker": "7867.T",
@@ -223,8 +238,9 @@
         "liquidity": 10,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=21.0%、流動性=4537744155。",
-      "risk": "vol_1y=0.3521662323159246, mdd_1y=-0.21758890709164225, earnings_next_days=None"
+      "why": "1年+66.8% · 20日+21.0% · vol=0.35 · turnover=4537744155",
+      "risk": "mdd_1y=-0.21758890709164225 · earnings_next_days=None",
+      "price": 5353.0
     },
     {
       "ticker": "7581.T",
@@ -238,8 +254,9 @@
         "liquidity": 14,
         "event": 17
       },
-      "why": "1年リターンとMA25上方を確認。20日=26.0%、流動性=5681109550。",
-      "risk": "vol_1y=0.4316781823569493, mdd_1y=-0.2951048965445542, earnings_next_days=61"
+      "why": "1年+65.2% · 20日+26.0% · vol=0.43 · turnover=5681109550",
+      "risk": "mdd_1y=-0.2951048965445542 · earnings_next_days=61",
+      "price": 8880.0
     },
     {
       "ticker": "4588.T",
@@ -253,8 +270,9 @@
         "liquidity": 18,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=67.9%、流動性=12329641650。",
-      "risk": "vol_1y=1.0956190258454714, mdd_1y=-0.38057663125948404, earnings_next_days=None"
+      "why": "1年+753.8% · 20日+67.9% · vol=1.10 · turnover=12329641650",
+      "risk": "mdd_1y=-0.38057663125948404 · earnings_next_days=None",
+      "price": 8410.0
     },
     {
       "ticker": "6532.T",
@@ -268,8 +286,9 @@
         "liquidity": 18,
         "event": 17
       },
-      "why": "1年リターンとMA25上方を確認。20日=41.7%、流動性=25035789600。",
-      "risk": "vol_1y=0.5755213302931447, mdd_1y=-0.4639733612711523, earnings_next_days=62"
+      "why": "1年+90.8% · 20日+41.7% · vol=0.58 · turnover=25035789600",
+      "risk": "mdd_1y=-0.4639733612711523 · earnings_next_days=62",
+      "price": 12325.0
     },
     {
       "ticker": "3994.T",
@@ -283,8 +302,9 @@
         "liquidity": 10,
         "event": 17
       },
-      "why": "1年リターンとMA25上方を確認。20日=16.5%、流動性=4473368800。",
-      "risk": "vol_1y=0.6827711495101935, mdd_1y=-0.46712302352487467, earnings_next_days=62"
+      "why": "1年+73.2% · 20日+16.5% · vol=0.68 · turnover=4473368800",
+      "risk": "mdd_1y=-0.46712302352487467 · earnings_next_days=62",
+      "price": 7460.0
     },
     {
       "ticker": "4475.T",
@@ -298,8 +318,9 @@
         "liquidity": 10,
         "event": 16
       },
-      "why": "1年リターンとMA25上方を確認。20日=22.6%、流動性=4928879305。",
-      "risk": "vol_1y=0.6135268738742407, mdd_1y=-0.35602264077373713, earnings_next_days=None"
+      "why": "1年+72.9% · 20日+22.6% · vol=0.61 · turnover=4928879305",
+      "risk": "mdd_1y=-0.35602264077373713 · earnings_next_days=None",
+      "price": 2378.0
     }
   ],
   "adopted": [
@@ -309,8 +330,8 @@
     "8795.T"
   ],
   "skipped_reasons": [
-    "20日リターンが概ね35%超は過熱として SKIP",
+    "20日リターンが概ね35%超、または vol_1y>0.9 は SKIP",
     "決算7日以内は SKIP",
-    "ADOPT は最大4銘柄に制限"
+    "ADOPT は最大 4 銘柄"
   ]
 }

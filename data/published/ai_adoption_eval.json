@@ -1,0 +1,71 @@
+{
+  "schema": "signalforge-ai-adoption-eval/v1",
+  "generated_at": "2026-11-15T12:51:33+00:00",
+  "horizons_days": [
+    5,
+    20
+  ],
+  "rows": [
+    {
+      "as_of": "2026-11-13",
+      "ticker": "8309.T",
+      "name": "三井住友トラストグループ",
+      "score_total": 88,
+      "entry_price": 1786.5,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-13",
+      "ticker": "9147.T",
+      "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
+      "score_total": 84,
+      "entry_price": 6102.0,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-13",
+      "ticker": "9962.T",
+      "name": "ミスミグループ本社",
+      "score_total": 84,
+      "entry_price": 3966.0,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-13",
+      "ticker": "8795.T",
+      "name": "Ｔ＆Ｄホールディングス",
+      "score_total": 84,
+      "entry_price": 4934.0,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    }
+  ],
+  "summary": {
+    "n_adopted_rows": 4,
+    "n_eval_5d": 0,
+    "mean_ret_5d": null,
+    "hit_rate_5d": null,
+    "n_eval_20d": 0,
+    "mean_ret_20d": null,
+    "hit_rate_20d": null
+  }
+}

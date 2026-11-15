@@ -54,5 +54,8 @@ PY
   uv run signalforge trend-screen forward
 fi
 
+echo "--- AI trial daily (rules brief/score/debate + adoption eval) ---"
+uv run signalforge ai daily || true
+
 echo "--- export unified dashboard ---"
 uv run signalforge dashboard export --output _site

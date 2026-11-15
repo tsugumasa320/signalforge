@@ -2781,6 +2781,48 @@ def ai_group() -> None:
     """AI trial helpers — pack ranking/paper for brief, score, and debate prompts."""
 
 
+@ai_group.command("daily")
+@click.option("--score-top", default=20, show_default=True, type=int)
+@click.option("--debate-top", default=3, show_default=True, type=int)
+@click.option("--max-adopt", default=4, show_default=True, type=int)
+def ai_daily_cmd(score_top: int, debate_top: int, max_adopt: int) -> None:
+    """ルールベースで Brief/Score/Debate を生成し、採択ログと成績評価も更新する。"""
+    from signalforge.ai.daily import run_daily
+
+    try:
+        out = run_daily(score_top=score_top, debate_top=debate_top, max_adopt=max_adopt)
+    except FileNotFoundError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"as_of={out.get('as_of')} adopted={', '.join(out.get('adopted') or []) or '—'}")
+    click.echo(f"adoption entries={out.get('adoption_entries')}")
+    summary = out.get("eval_summary") or {}
+    for h in (5, 20):
+        mean = summary.get(f"mean_ret_{h}d")
+        hit = summary.get(f"hit_rate_{h}d")
+        n = summary.get(f"n_eval_{h}d")
+        mean_s = "—" if mean is None else f"{float(mean):+.2%}"
+        hit_s = "—" if hit is None else f"{float(hit):.0%}"
+        click.echo(f"eval {h}d: n={n} mean={mean_s} hit={hit_s}")
+    click.echo("published: data/published/ai_*.json (+ adoption log/eval)")
+
+
+@ai_group.command("evaluate-adoptions")
+def ai_evaluate_adoptions_cmd() -> None:
+    """採択ログのフォワードリターンを再計算して published に書く。"""
+    from signalforge.ai.adoption import evaluate_adoptions
+
+    payload = evaluate_adoptions()
+    summary = payload.get("summary") or {}
+    click.echo(f"rows={summary.get('n_adopted_rows')}")
+    for h in payload.get("horizons_days") or [5, 20]:
+        mean = summary.get(f"mean_ret_{h}d")
+        hit = summary.get(f"hit_rate_{h}d")
+        n = summary.get(f"n_eval_{h}d")
+        mean_s = "—" if mean is None else f"{float(mean):+.2%}"
+        hit_s = "—" if hit is None else f"{float(hit):.0%}"
+        click.echo(f"{h}d: n={n} mean={mean_s} hit={hit_s}")
+
+
 @ai_group.command("brief")
 @click.option("--top", default=15, show_default=True, type=int, help="ランキング上位の件数")
 @click.option("--diversified-limit", default=8, show_default=True, type=int)

@@ -1,0 +1,110 @@
+{
+  "schema": "signalforge-ai-adoption-log/v1",
+  "updated_at": "2026-11-15T12:51:33+00:00",
+  "entries": [
+    {
+      "as_of": "2026-11-13",
+      "logged_at": "2026-11-15T12:51:33+00:00",
+      "source": "rules/v1",
+      "adopted": [
+        {
+          "ticker": "8309.T",
+          "name": "三井住友トラストグループ",
+          "total": 88,
+          "price": 1786.5,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "9147.T",
+          "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
+          "total": 84,
+          "price": 6102.0,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "9962.T",
+          "name": "ミスミグループ本社",
+          "total": 84,
+          "price": 3966.0,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "8795.T",
+          "name": "Ｔ＆Ｄホールディングス",
+          "total": 84,
+          "price": 4934.0,
+          "decision": "ADOPT"
+        }
+      ],
+      "watched": [
+        {
+          "ticker": "8750.T",
+          "name": "第一ライフグループ",
+          "total": 82,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "6178.T",
+          "name": "日本郵政",
+          "total": 82,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4502.T",
+          "name": "武田薬品工業",
+          "total": 79,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4503.T",
+          "name": "アステラス製薬",
+          "total": 79,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7832.T",
+          "name": "バンダイナムコホールディングス",
+          "total": 79,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7747.T",
+          "name": "朝日インテック",
+          "total": 77,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "2702.T",
+          "name": "日本マクドナルドホールディングス",
+          "total": 76,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7867.T",
+          "name": "タカラトミー",
+          "total": 71,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7581.T",
+          "name": "サイゼリヤ",
+          "total": 70,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "3994.T",
+          "name": "マネーフォワード",
+          "total": 62,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4475.T",
+          "name": "ＨＥＮＮＧＥ",
+          "total": 61,
+          "decision": "WATCH"
+        }
+      ],
+      "skipped_count": 5
+    }
+  ]
+}

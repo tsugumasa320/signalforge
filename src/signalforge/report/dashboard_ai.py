@@ -152,10 +152,48 @@ def render_ai_panel() -> None:
         " 手順: `docs/ai_trade.md` · 公開URL: …/signalforge/ai/"
     )
 
-    tab_b, tab_s, tab_d = st.tabs(["Brief", "Score", "Debate"])
+    tab_b, tab_s, tab_d, tab_a = st.tabs(["Brief", "Score", "Debate", "Adoption"])
     with tab_b:
         _render_brief(brief_resp, _file_mtime(base / "brief_latest.json"))
     with tab_s:
         _render_score(score_resp, _file_mtime(base / "scores_latest.json"))
     with tab_d:
         _render_debate(debate_resp, _file_mtime(base / "debate_latest.json"))
+    with tab_a:
+        from signalforge.ai.adoption import adoption_eval_path, adoption_log_path, load_adoption_log
+        from signalforge.ai.packet import read_json
+
+        log = load_adoption_log()
+        ev = read_json(adoption_eval_path()) if adoption_eval_path().exists() else None
+        st.caption(f"log: {_file_mtime(adoption_log_path())} · eval: {_file_mtime(adoption_eval_path())}")
+        entries = log.get("entries") or []
+        if not entries:
+            st.info("採択ログがありません。`uv run signalforge ai daily` を実行してください。")
+        else:
+            st.write(f"エントリ数: {len(entries)}")
+            recent = []
+            for e in entries[-10:]:
+                recent.append(
+                    {
+                        "as_of": e.get("as_of"),
+                        "source": e.get("source"),
+                        "adopted": ", ".join(
+                            str(a.get("ticker")) for a in (e.get("adopted") or []) if a.get("ticker")
+                        ),
+                        "skipped": e.get("skipped_count"),
+                    }
+                )
+            st.dataframe(pd.DataFrame(recent), width="stretch", hide_index=True)
+        if isinstance(ev, dict):
+            summary = ev.get("summary") or {}
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("5日 n", summary.get("n_eval_5d") or 0)
+            mean5 = summary.get("mean_ret_5d")
+            c2.metric("5日平均", "—" if mean5 is None else f"{float(mean5):+.1%}")
+            mean20 = summary.get("mean_ret_20d")
+            c3.metric("20日平均", "—" if mean20 is None else f"{float(mean20):+.1%}")
+            hit5 = summary.get("hit_rate_5d")
+            c4.metric("5日的中", "—" if hit5 is None else f"{float(hit5):.0%}")
+            rows = ev.get("rows") or []
+            if rows:
+                st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)

@@ -1,39 +1,40 @@
 {
   "as_of": "2026-11-13",
+  "generator": "rules/v1",
   "debates": [
     {
       "ticker": "8309.T",
       "name": "三井住友トラストグループ",
-      "bull": "採点ADOPT・流動性/リスクのバランスが良い銀行株候補。",
-      "bear": "金融セクター感応。トレンド通過でも短期カタリストはパケット上不明。",
-      "risk_officer": "サイズは小さく。保険・金融で8766等と業種が寄らないか確認。",
+      "bull": "スクリーニング通過・1年+71.5%・20日+7.4%。",
+      "bear": "vol_1y=0.29 · mdd_1y=-0.16083190419363824 · earnings_next_days=None。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。",
       "decision": "BUY",
-      "confidence": 66,
-      "invalidation": "vs_ma25が負転、またはret_20dが急落。",
-      "why_this_could_fail": "金利見通し変化でセクター全体が売られる。"
+      "confidence": 64,
+      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ。"
     },
     {
       "ticker": "9147.T",
       "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
-      "bull": "目標入り・過熱が軽い・紙上保有もプラス。ブリーフィングでもWATCH上位。",
-      "bear": "物流感応。世界景気減速なら遅行しやすい。",
-      "risk_officer": "既存trend_paper保有と重複。追加より監視が主。",
+      "bull": "スクリーニング通過・1年+88.6%・20日+3.4%。",
+      "bear": "vol_1y=0.28 · mdd_1y=-0.09802250255710876 · earnings_next_days=None。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。",
       "decision": "BUY",
-      "confidence": 68,
-      "invalidation": "月次リバランスで目標落ち、または20日リターンが負転。",
-      "why_this_could_fail": "保有重複で集中リスクが上がる。"
+      "confidence": 64,
+      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ。"
     },
     {
       "ticker": "9962.T",
       "name": "ミスミグループ本社",
-      "bull": "目標5位・20日穏やか。過熱銘柄の対比で見やすい。",
-      "bear": "1年ボラ中位。カタリストはパケット上薄い。",
-      "risk_officer": "新規は小さく、まずはWATCH継続。",
-      "decision": "HOLD",
-      "confidence": 63,
-      "invalidation": "MA25割れ、または出来高急減を伴う反落。",
-      "why_this_could_fail": "スクリーニング遅行で上値が重い。"
+      "bull": "スクリーニング通過・1年+75.2%・20日+2.8%。",
+      "bear": "vol_1y=0.45 · mdd_1y=-0.17673751759889478 · earnings_next_days=None。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。",
+      "decision": "BUY",
+      "confidence": 64,
+      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ。"
     }
   ],
-  "committee_summary": "score ADOPTの8309/9147は条件付きBUY、9962はHOLD。いずれも参考意見で発注しない。"
+  "committee_summary": "ルールベース議論。BUY は過熱・直近決算を避けた候補のみ。人が最終判断し、発注には接続しない。"
 }
