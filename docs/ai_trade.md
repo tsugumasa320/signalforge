@@ -62,6 +62,8 @@ uv run signalforge ai ledger              # hash 連鎖の監査台帳
 
 `ai daily` は ADOPT を **提案**として `data/published/ai_approvals.json` に pending 登録し、決定を `ai_ledger.json`（hash 連鎖）へ追記する。フォワード成績は提案ベース（システム性能）で集計し、承認は「人が意図として残すか」のゲート。
 
+承認直後は 5営業日・20営業日のフォワードリターンがまだ埋まらない。`ai evaluate-adoptions`（および日次 CI の `ai daily`）は不足分を毎回再計算するが、`as_of` から十分な営業日が経つまで `ai_adoption_eval.json` の各行は `status_5d` / `status_20d` = `pending` のままになる。ゲート処理後は数営業日待ち、Pages の Adoption 成績または `uv run signalforge ai evaluate-adoptions` で埋まり具合を確認する。
+
 **内容（日付だけではない）**
 
 | ソース | パス | 使い方 |

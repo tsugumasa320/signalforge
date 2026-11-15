@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-ledger/v1",
-  "updated_at": "2026-11-15T13:35:35+00:00",
+  "updated_at": "2026-11-15T13:42:33+00:00",
   "events": [
     {
       "ts": "2026-11-15T13:35:35+00:00",
@@ -84,6 +84,66 @@
       "prev_hash": "219db2ce7752f4a9b55a7ad7a17ea0a9b2865d2c378b261eb6980f2eb9d09d25",
       "hash": "7cba8f9146f398b97972ffecce26a689e51bdc32ba3dfa1b5926190b5bcff39f",
       "seq": 5
+    },
+    {
+      "ts": "2026-11-15T13:42:26+00:00",
+      "kind": "adopt_approved",
+      "as_of": "2026-11-13",
+      "payload": {
+        "ticker": "8309.T",
+        "name": "三井住友トラストグループ",
+        "total": 88,
+        "note": "batch gate",
+        "id": "2026-11-13:8309.T"
+      },
+      "prev_hash": "7cba8f9146f398b97972ffecce26a689e51bdc32ba3dfa1b5926190b5bcff39f",
+      "hash": "83cda5ee434135e672e3c9f884557e6afba6a47f9f5e346d527ad87db0540b71",
+      "seq": 6
+    },
+    {
+      "ts": "2026-11-15T13:42:28+00:00",
+      "kind": "adopt_approved",
+      "as_of": "2026-11-13",
+      "payload": {
+        "ticker": "9147.T",
+        "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
+        "total": 84,
+        "note": "batch gate",
+        "id": "2026-11-13:9147.T"
+      },
+      "prev_hash": "83cda5ee434135e672e3c9f884557e6afba6a47f9f5e346d527ad87db0540b71",
+      "hash": "14415c103e106db72c20aae48c7f4c507c44615b2654c424d4508bcaf4e1b00b",
+      "seq": 7
+    },
+    {
+      "ts": "2026-11-15T13:42:30+00:00",
+      "kind": "adopt_approved",
+      "as_of": "2026-11-13",
+      "payload": {
+        "ticker": "9962.T",
+        "name": "ミスミグループ本社",
+        "total": 84,
+        "note": "batch gate",
+        "id": "2026-11-13:9962.T"
+      },
+      "prev_hash": "14415c103e106db72c20aae48c7f4c507c44615b2654c424d4508bcaf4e1b00b",
+      "hash": "a63d24bcd96c5a694f5f328446ff2bf57d9cd3f671d4a87ea65bdd3f15de5444",
+      "seq": 8
+    },
+    {
+      "ts": "2026-11-15T13:42:33+00:00",
+      "kind": "adopt_approved",
+      "as_of": "2026-11-13",
+      "payload": {
+        "ticker": "8795.T",
+        "name": "Ｔ＆Ｄホールディングス",
+        "total": 84,
+        "note": "batch gate",
+        "id": "2026-11-13:8795.T"
+      },
+      "prev_hash": "a63d24bcd96c5a694f5f328446ff2bf57d9cd3f671d4a87ea65bdd3f15de5444",
+      "hash": "049ae3dd3f69342c588252c2a3c43392c8f021cc63a5cd614943da3a4f8baefe",
+      "seq": 9
     }
   ]
 }

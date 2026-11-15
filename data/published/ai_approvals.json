@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-approvals/v1",
-  "updated_at": "2026-11-15T13:35:35+00:00",
+  "updated_at": "2026-11-15T13:42:33+00:00",
   "items": [
     {
       "id": "2026-11-13:8309.T",
@@ -10,10 +10,10 @@
       "total": 88,
       "price": 1786.5,
       "source": "rules/v1",
-      "status": "pending",
+      "status": "approved",
       "proposed_at": "2026-11-15T13:35:35+00:00",
-      "resolved_at": null,
-      "note": ""
+      "resolved_at": "2026-11-15T13:42:26+00:00",
+      "note": "batch gate"
     },
     {
       "id": "2026-11-13:9147.T",
@@ -23,10 +23,10 @@
       "total": 84,
       "price": 6102.0,
       "source": "rules/v1",
-      "status": "pending",
+      "status": "approved",
       "proposed_at": "2026-11-15T13:35:35+00:00",
-      "resolved_at": null,
-      "note": ""
+      "resolved_at": "2026-11-15T13:42:28+00:00",
+      "note": "batch gate"
     },
     {
       "id": "2026-11-13:9962.T",
@@ -36,10 +36,10 @@
       "total": 84,
       "price": 3966.0,
       "source": "rules/v1",
-      "status": "pending",
+      "status": "approved",
       "proposed_at": "2026-11-15T13:35:35+00:00",
-      "resolved_at": null,
-      "note": ""
+      "resolved_at": "2026-11-15T13:42:30+00:00",
+      "note": "batch gate"
     },
     {
       "id": "2026-11-13:8795.T",
@@ -49,10 +49,10 @@
       "total": 84,
       "price": 4934.0,
       "source": "rules/v1",
-      "status": "pending",
+      "status": "approved",
       "proposed_at": "2026-11-15T13:35:35+00:00",
-      "resolved_at": null,
-      "note": ""
+      "resolved_at": "2026-11-15T13:42:33+00:00",
+      "note": "batch gate"
     }
   ]
 }
