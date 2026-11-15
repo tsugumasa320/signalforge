@@ -2809,6 +2809,12 @@ def ai_daily_cmd(
         raise click.ClickException(str(exc)) from exc
     click.echo(f"as_of={out.get('as_of')} adopted={', '.join(out.get('adopted') or []) or '—'}")
     click.echo(f"adoption entries={out.get('adoption_entries')}")
+    ap = out.get("approvals_summary") or {}
+    click.echo(
+        f"approvals: pending={ap.get('pending')} approved={ap.get('approved')} "
+        f"rejected={ap.get('rejected')} (new={', '.join(out.get('approvals_created') or []) or '—'})"
+    )
+    click.echo(f"ledger: ok={out.get('ledger_ok')} events={out.get('ledger_events')}")
     summary = out.get("eval_summary") or {}
     for h in (5, 20):
         mean = summary.get(f"mean_ret_{h}d")
@@ -2824,7 +2830,7 @@ def ai_daily_cmd(
         click.echo("discord: sent")
     elif discord.get("error"):
         click.echo(f"discord: error {discord['error']}")
-    click.echo("published: data/published/ai_*.json (+ adoption log/eval)")
+    click.echo("published: data/published/ai_*.json (+ adoption / approvals / ledger)")
 
 
 @ai_group.command("notify-discord")
@@ -2913,6 +2919,88 @@ def ai_evaluate_adoptions_cmd() -> None:
         mean_s = "—" if mean is None else f"{float(mean):+.2%}"
         hit_s = "—" if hit is None else f"{float(hit):.0%}"
         click.echo(f"{h}d: n={n} mean={mean_s} hit={hit_s}")
+
+
+@ai_group.command("pending")
+@click.option("--as-of", default="", help="基準日で絞る（YYYY-MM-DD）")
+def ai_pending_cmd(as_of: str) -> None:
+    """承認待ちの ADOPT 提案を一覧する。"""
+    from signalforge.ai.approval import approval_summary, list_pending
+
+    rows = list_pending(as_of=as_of or None)
+    summary = approval_summary()
+    click.echo(
+        f"pending={summary.get('pending')} approved={summary.get('approved')} "
+        f"rejected={summary.get('rejected')} total={summary.get('total')}"
+    )
+    if not rows:
+        click.echo("(なし)")
+        return
+    for r in rows:
+        click.echo(
+            f"  {r.get('as_of')}  {r.get('ticker')}  {r.get('name') or ''}  "
+            f"total={r.get('total')}  id={r.get('id')}"
+        )
+
+
+@ai_group.command("approve")
+@click.argument("ticker")
+@click.option("--as-of", default="", help="基準日（省略時は最新の pending）")
+@click.option("--note", default="", help="メモ")
+def ai_approve_cmd(ticker: str, as_of: str, note: str) -> None:
+    """ADOPT 提案を承認する（発注はしない・台帳に記録）。"""
+    from signalforge.ai.approval import resolve
+
+    try:
+        row = resolve(ticker, status="approved", as_of=as_of or None, note=note)
+    except LookupError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"approved {row.get('id')} {row.get('ticker')} as_of={row.get('as_of')}")
+
+
+@ai_group.command("reject")
+@click.argument("ticker")
+@click.option("--as-of", default="", help="基準日（省略時は最新の pending）")
+@click.option("--note", default="", help="メモ")
+def ai_reject_cmd(ticker: str, as_of: str, note: str) -> None:
+    """ADOPT 提案を却下する（台帳に記録）。"""
+    from signalforge.ai.approval import resolve
+
+    try:
+        row = resolve(ticker, status="rejected", as_of=as_of or None, note=note)
+    except LookupError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"rejected {row.get('id')} {row.get('ticker')} as_of={row.get('as_of')}")
+
+
+@ai_group.command("ledger")
+@click.option("--tail", default=12, show_default=True, type=int, help="末尾何件を表示するか")
+@click.option("--verify/--no-verify", default=True, show_default=True, help="hash 連鎖を検証")
+def ai_ledger_cmd(tail: int, verify: bool) -> None:
+    """AI 決定の hash 連鎖台帳を表示する。"""
+    from signalforge.ai.ledger import load_ledger, verify_ledger
+
+    ledger = load_ledger()
+    events = list(ledger.get("events") or [])
+    if verify:
+        check = verify_ledger(ledger)
+        click.echo(f"verify ok={check.get('ok')} n={check.get('n_events')} tip={str(check.get('tip') or '')[:12]}…")
+        if not check.get("ok"):
+            click.echo(f"broken_at={check.get('broken_at')} seq={check.get('seq')}")
+    if not events:
+        click.echo("(empty)")
+        return
+    for ev in events[-max(1, tail) :]:
+        payload = ev.get("payload") or {}
+        adopted = payload.get("adopted")
+        extra = ""
+        if isinstance(adopted, list) and adopted:
+            extra = f" adopted={','.join(str(x) for x in adopted)}"
+        elif payload.get("ticker"):
+            extra = f" ticker={payload.get('ticker')}"
+        click.echo(
+            f"#{ev.get('seq')} {ev.get('ts')} {ev.get('kind')} as_of={ev.get('as_of') or '—'}{extra}"
+        )
 
 
 @ai_group.command("brief")

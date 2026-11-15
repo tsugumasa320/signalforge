@@ -6,7 +6,20 @@ import json
 from pathlib import Path
 
 from signalforge.ai.publish import save_response
-from signalforge.report.ai_page import export_ai_page, render_ai_body
+from signalforge.report.ai_page import (
+    _ticker_link,
+    _yahoo_jp_url,
+    export_ai_page,
+    render_ai_body,
+)
+
+
+def test_yahoo_jp_ticker_link() -> None:
+    assert _yahoo_jp_url("7203.T") == "https://finance.yahoo.co.jp/quote/7203.T"
+    assert _yahoo_jp_url("7203") == "https://finance.yahoo.co.jp/quote/7203.T"
+    html = _ticker_link("7203.T")
+    assert "finance.yahoo.co.jp/quote/7203.T" in html
+    assert "7203.T" in html
 
 
 def test_save_response_writes_published(tmp_path: Path, monkeypatch) -> None:
@@ -59,7 +72,10 @@ def test_export_ai_page(tmp_path: Path, monkeypatch) -> None:
     html = path.read_text(encoding="utf-8")
     assert "AIトライアル" in html
     assert "7203.T" in html
+    assert "finance.yahoo.co.jp/quote/7203.T" in html
     assert "テスト" in html
+    assert "Approval" in html
+    assert "Ledger" in html
     assert (out / "ai" / "ai_brief_response.json").exists()
 
 

@@ -1,0 +1,58 @@
+{
+  "schema": "signalforge-ai-approvals/v1",
+  "updated_at": "2026-11-15T13:35:35+00:00",
+  "items": [
+    {
+      "id": "2026-11-13:8309.T",
+      "as_of": "2026-11-13",
+      "ticker": "8309.T",
+      "name": "三井住友トラストグループ",
+      "total": 88,
+      "price": 1786.5,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-15T13:35:35+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-13:9147.T",
+      "as_of": "2026-11-13",
+      "ticker": "9147.T",
+      "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
+      "total": 84,
+      "price": 6102.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-15T13:35:35+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-13:9962.T",
+      "as_of": "2026-11-13",
+      "ticker": "9962.T",
+      "name": "ミスミグループ本社",
+      "total": 84,
+      "price": 3966.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-15T13:35:35+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-13:8795.T",
+      "as_of": "2026-11-13",
+      "ticker": "8795.T",
+      "name": "Ｔ＆Ｄホールディングス",
+      "total": 84,
+      "price": 4934.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-15T13:35:35+00:00",
+      "resolved_at": null,
+      "note": ""
+    }
+  ]
+}

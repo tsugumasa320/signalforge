@@ -1,0 +1,89 @@
+{
+  "schema": "signalforge-ai-ledger/v1",
+  "updated_at": "2026-11-15T13:35:35+00:00",
+  "events": [
+    {
+      "ts": "2026-11-15T13:35:35+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-13",
+      "payload": {
+        "ticker": "8309.T",
+        "name": "三井住友トラストグループ",
+        "total": 88,
+        "source": "rules/v1"
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "e8532a149b32c6f4c8327643145f43ca78e2707cb211fc2b6999523bcb2c8085",
+      "seq": 1
+    },
+    {
+      "ts": "2026-11-15T13:35:35+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-13",
+      "payload": {
+        "ticker": "9147.T",
+        "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "e8532a149b32c6f4c8327643145f43ca78e2707cb211fc2b6999523bcb2c8085",
+      "hash": "b7394a50608163cfa6ad30a16184b424def28c0422b641690174bfebaef70cea",
+      "seq": 2
+    },
+    {
+      "ts": "2026-11-15T13:35:35+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-13",
+      "payload": {
+        "ticker": "9962.T",
+        "name": "ミスミグループ本社",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "b7394a50608163cfa6ad30a16184b424def28c0422b641690174bfebaef70cea",
+      "hash": "5dd544fabccbd9ad8196356982cb2a6bbec411b64bb0bf815ce7422bbb1f0dbf",
+      "seq": 3
+    },
+    {
+      "ts": "2026-11-15T13:35:35+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-13",
+      "payload": {
+        "ticker": "8795.T",
+        "name": "Ｔ＆Ｄホールディングス",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "5dd544fabccbd9ad8196356982cb2a6bbec411b64bb0bf815ce7422bbb1f0dbf",
+      "hash": "219db2ce7752f4a9b55a7ad7a17ea0a9b2865d2c378b261eb6980f2eb9d09d25",
+      "seq": 4
+    },
+    {
+      "ts": "2026-11-15T13:35:35+00:00",
+      "kind": "daily_run",
+      "as_of": "2026-11-13",
+      "payload": {
+        "source": "rules/v1",
+        "adopted": [
+          "8309.T",
+          "9147.T",
+          "9962.T",
+          "8795.T"
+        ],
+        "score_n": 20,
+        "debate_n": 3,
+        "roles": [
+          "analyst_score",
+          "brief_summarizer",
+          "bull_researcher",
+          "bear_researcher",
+          "risk_officer",
+          "human_approver"
+        ]
+      },
+      "prev_hash": "219db2ce7752f4a9b55a7ad7a17ea0a9b2865d2c378b261eb6980f2eb9d09d25",
+      "hash": "7cba8f9146f398b97972ffecce26a689e51bdc32ba3dfa1b5926190b5bcff39f",
+      "seq": 5
+    }
+  ]
+}

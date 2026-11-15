@@ -157,6 +157,9 @@ def test_run_daily_and_eval(sample_data: Path) -> None:
     assert (sample_data / "published" / "ai_scores_response.json").exists()
     assert (sample_data / "published" / "ai_debate_response.json").exists()
     assert (sample_data / "published" / "ai_adoption_log.json").exists()
+    assert (sample_data / "published" / "ai_approvals.json").exists()
+    assert (sample_data / "published" / "ai_ledger.json").exists()
+    assert out.get("ledger_ok") is True
     log = load_adoption_log()
     assert len(log["entries"]) == 1
     # second run same as_of should not duplicate

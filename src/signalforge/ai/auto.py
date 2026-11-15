@@ -279,10 +279,19 @@ def generate_brief_response(packet: dict[str, Any], score_resp: dict[str, Any] |
         ],
         "skip_today": skip,
         "actions_for_human": [
-            "ADOPT / REDUCE 銘柄のチャート確認",
+            "ADOPT 提案を `ai pending` で確認し、`ai approve` / `ai reject` でゲートする",
+            "ADOPT / REDUCE 銘柄のチャート確認（Yahoo JP リンク）",
             "紙上ドロー銘柄の出口ルール確認",
             "サプライズ悪材料・ネガティブ見出しの銘柄は一次情報を確認",
-            "採用したら ai adoption ログで追跡（日次で自動）",
+            "追跡は adoption ログ＋hash 台帳（`ai ledger`）で自動",
+        ],
+        "committee_roles": [
+            "analyst_score",
+            "brief_summarizer",
+            "bull_researcher",
+            "bear_researcher",
+            "risk_officer",
+            "human_approver",
         ],
     }
 
@@ -319,7 +328,16 @@ def generate_debate_response(packet: dict[str, Any]) -> dict[str, Any]:
                 "name": name,
                 "bull": bull,
                 "bear": bear,
-                "risk_officer": "参考意見のみ。発注・サイズ指定はしない。",
+                "risk_officer": (
+                    "参考意見のみ。発注・サイズ指定はしない。"
+                    "人間が ai approve するまで paper intent にしない。"
+                ),
+                "roles": {
+                    "bull_researcher": "bull",
+                    "bear_researcher": "bear",
+                    "risk_officer": "risk_officer",
+                    "human_approver": "pending_gate",
+                },
                 "decision": decision,
                 "confidence": conf,
                 "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
@@ -332,8 +350,15 @@ def generate_debate_response(packet: dict[str, Any]) -> dict[str, Any]:
         "as_of": packet.get("as_of"),
         "generator": "rules/v1",
         "debates": debates,
+        "committee_roles": [
+            "bull_researcher",
+            "bear_researcher",
+            "risk_officer",
+            "human_approver",
+        ],
         "committee_summary": (
-            "ルールベース議論。BUY は過熱・直近決算を避けた候補のみ。"
-            "人が最終判断し、発注には接続しない。"
+            "ルールベース議論（TradingAgents 型の役割分け）。"
+            "BUY は過熱・直近決算を避けた候補のみ。"
+            "人が ai approve / reject で最終ゲートし、発注には接続しない。"
         ),
     }

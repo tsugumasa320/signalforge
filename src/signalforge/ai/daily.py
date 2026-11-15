@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from signalforge.ai.adoption import append_adoptions_from_score, evaluate_adoptions
+from signalforge.ai.approval import approval_summary, propose_from_score
 from signalforge.ai.auto import (
     generate_brief_response,
     generate_debate_response,
@@ -13,6 +14,7 @@ from signalforge.ai.auto import (
 )
 from signalforge.ai.brief import write_brief
 from signalforge.ai.debate import write_debate
+from signalforge.ai.ledger import record_daily_run, verify_ledger
 from signalforge.ai.publish import save_response
 from signalforge.ai.score import write_score
 
@@ -53,7 +55,18 @@ def run_daily(
     debate_resp = generate_debate_response(debate_packet)
     save_response("debate", debate_resp)
 
+    as_of = str(score_resp.get("as_of") or "")
+    adopted = list(score_resp.get("adopted") or [])
     log = append_adoptions_from_score(score_resp, source="rules/v1")
+    approvals = propose_from_score(score_resp, source="rules/v1")
+    record_daily_run(
+        as_of=as_of,
+        adopted=[str(t) for t in adopted],
+        score_n=len(score_resp.get("scores") or []),
+        debate_n=len(debate_resp.get("debates") or []),
+        source="rules/v1",
+    )
+    ledger_check = verify_ledger()
     eval_payload = evaluate_adoptions()
 
     discord: dict[str, Any] | None = None
@@ -62,10 +75,11 @@ def run_daily(
 
         try:
             discord = notify_daily(
-                as_of=str(score_resp.get("as_of") or ""),
-                adopted=list(score_resp.get("adopted") or []),
+                as_of=as_of,
+                adopted=adopted,
                 brief_resp=brief_resp,
                 eval_summary=eval_payload.get("summary") or {},
+                pending_count=int(approvals.get("pending_count") or 0),
             )
         except Exception as exc:  # noqa: BLE001 — CI should not fail the whole daily job
             discord = {"ok": False, "skipped": False, "error": str(exc)}
@@ -81,6 +95,10 @@ def run_daily(
         "score_prompt": str(score_prompt),
         "debate_prompt": str(debate_prompt),
         "adoption_entries": len(log.get("entries") or []),
+        "approvals_created": approvals.get("created") or [],
+        "approvals_summary": approval_summary(),
+        "ledger_ok": bool(ledger_check.get("ok")),
+        "ledger_events": ledger_check.get("n_events"),
         "eval_summary": eval_payload.get("summary"),
         "discord": discord,
     }

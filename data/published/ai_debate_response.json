@@ -7,7 +7,13 @@
       "name": "三井住友トラストグループ",
       "bull": "スクリーニング通過・1年+71.5%・20日+7.4%。",
       "bear": "vol_1y=0.29 · mdd_1y=-0.16083190419363824 · earnings_next_days=None。",
-      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
+      "roles": {
+        "bull_researcher": "bull",
+        "bear_researcher": "bear",
+        "risk_officer": "risk_officer",
+        "human_approver": "pending_gate"
+      },
       "decision": "BUY",
       "confidence": 64,
       "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
@@ -20,7 +26,13 @@
       "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
       "bull": "スクリーニング通過・1年+88.6%・20日+3.4%。",
       "bear": "vol_1y=0.28 · mdd_1y=-0.09802250255710876 · earnings_next_days=None。",
-      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
+      "roles": {
+        "bull_researcher": "bull",
+        "bear_researcher": "bear",
+        "risk_officer": "risk_officer",
+        "human_approver": "pending_gate"
+      },
       "decision": "BUY",
       "confidence": 64,
       "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
@@ -33,7 +45,13 @@
       "name": "ミスミグループ本社",
       "bull": "スクリーニング通過・1年+75.2%・20日+2.8%。",
       "bear": "vol_1y=0.45 · mdd_1y=-0.17673751759889478 · earnings_next_days=None。",
-      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
+      "roles": {
+        "bull_researcher": "bull",
+        "bear_researcher": "bear",
+        "risk_officer": "risk_officer",
+        "human_approver": "pending_gate"
+      },
       "decision": "BUY",
       "confidence": 64,
       "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
@@ -42,5 +60,11 @@
       "news": null
     }
   ],
-  "committee_summary": "ルールベース議論。BUY は過熱・直近決算を避けた候補のみ。人が最終判断し、発注には接続しない。"
+  "committee_roles": [
+    "bull_researcher",
+    "bear_researcher",
+    "risk_officer",
+    "human_approver"
+  ],
+  "committee_summary": "ルールベース議論（TradingAgents 型の役割分け）。BUY は過熱・直近決算を避けた候補のみ。人が ai approve / reject で最終ゲートし、発注には接続しない。"
 }

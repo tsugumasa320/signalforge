@@ -8,11 +8,45 @@ from pathlib import Path
 from typing import Any
 
 from signalforge.ai.adoption import adoption_eval_path, adoption_log_path
+from signalforge.ai.approval import PUBLISHED_NAME as APPROVALS_PUBLISHED, load_approvals
 from signalforge.ai.discover import PUBLISHED_NAME as DISCOVER_PUBLISHED, load_discover_response
+from signalforge.ai.ledger import PUBLISHED_NAME as LEDGER_PUBLISHED, load_ledger, verify_ledger
 from signalforge.ai.packet import read_json
 from signalforge.ai.publish import PUBLISHED_NAMES, load_response_for_pages, published_response_path
 from signalforge.ai.paths import published_path
 from signalforge.report.static_html import wrap_page
+
+YAHOO_JP_QUOTE = "https://finance.yahoo.co.jp/quote/{ticker}"
+
+
+def _yahoo_jp_url(ticker: str | None) -> str | None:
+    t = str(ticker or "").strip()
+    if not t or t == "—":
+        return None
+    if not t.upper().endswith(".T"):
+        base = t.replace(".t", "").replace(".T", "")
+        if base.isdigit():
+            t = f"{base}.T"
+    return YAHOO_JP_QUOTE.format(ticker=t)
+
+
+def _ticker_link(ticker: str | None) -> str:
+    t = str(ticker or "").strip()
+    if not t:
+        return "—"
+    url = _yahoo_jp_url(t)
+    if not url:
+        return escape(t)
+    return (
+        f'<a href="{escape(url)}" target="_blank" rel="noopener">{escape(t)}</a>'
+    )
+
+
+def _ticker_list_links(tickers: list[Any] | None) -> str:
+    items = [str(t).strip() for t in (tickers or []) if str(t).strip()]
+    if not items:
+        return "—"
+    return ", ".join(_ticker_link(t) for t in items)
 
 
 def _pct_cell(v: Any) -> str:
@@ -22,6 +56,85 @@ def _pct_cell(v: Any) -> str:
         return escape(f"{float(v):+.1%}")
     except (TypeError, ValueError):
         return "—"
+
+
+def render_approvals_section() -> str:
+    store = load_approvals()
+    items = list(store.get("items") or [])
+    if not items:
+        return (
+            '<section id="approvals"><h2>Approval ゲート</h2>'
+            '<p class="muted">ADOPT 提案は <code>ai daily</code> 後に pending になります。'
+            '<code>ai approve</code> / <code>ai reject</code> で人がゲート（発注なし）。</p></section>'
+        )
+    counts = {"pending": 0, "approved": 0, "rejected": 0}
+    for i in items:
+        st = str(i.get("status") or "")
+        if st in counts:
+            counts[st] += 1
+    rows = []
+    for i in reversed(items[-20:]):
+        rows.append(
+            [
+                escape(str(i.get("as_of") or "")),
+                _ticker_link(i.get("ticker")),
+                escape(str(i.get("name") or "")),
+                escape(str(i.get("total") or "")),
+                _badge(str(i.get("status") or "")),
+                escape(str(i.get("note") or "")),
+            ]
+        )
+    return f"""
+    <section id="approvals">
+      <h2>Approval — 人のゲート</h2>
+      <p class="muted">システムは提案のみ。承認は CLI（<code>ai pending</code>）。発注には接続しません。</p>
+      <div class="metrics">
+        <div class="metric"><label>pending</label><value>{counts['pending']}</value></div>
+        <div class="metric"><label>approved</label><value>{counts['approved']}</value></div>
+        <div class="metric"><label>rejected</label><value>{counts['rejected']}</value></div>
+      </div>
+      {_table(["as_of", "ticker", "name", "total", "status", "note"], rows)}
+    </section>
+    """
+
+
+def render_ledger_section() -> str:
+    ledger = load_ledger()
+    events = list(ledger.get("events") or [])
+    check = verify_ledger(ledger)
+    tip = str(check.get("tip") or "")[:16]
+    if not events:
+        return (
+            '<section id="ledger"><h2>Ledger 監査</h2>'
+            '<p class="muted">hash 連鎖の決定台帳はまだ空です。</p></section>'
+        )
+    rows = []
+    for ev in events[-16:]:
+        payload = ev.get("payload") or {}
+        if payload.get("adopted"):
+            detail = _ticker_list_links(payload.get("adopted"))
+        elif payload.get("ticker"):
+            detail = _ticker_link(payload.get("ticker"))
+        else:
+            detail = escape(str(payload.get("source") or payload.get("note") or ""))
+        rows.append(
+            [
+                escape(str(ev.get("seq") or "")),
+                escape(str(ev.get("kind") or "")),
+                escape(str(ev.get("as_of") or "")),
+                detail,
+                escape(str(ev.get("hash") or "")[:12] + "…"),
+            ]
+        )
+    ok = "OK" if check.get("ok") else "BROKEN"
+    return f"""
+    <section id="ledger">
+      <h2>Ledger — hash 連鎖監査</h2>
+      <p class="muted">改ざん検知用の決定台帳。検証: <strong>{escape(ok)}</strong>
+        · tip <code>{escape(tip)}…</code> · events {len(events)}</p>
+      {_table(["#", "kind", "as_of", "detail", "hash"], rows)}
+    </section>
+    """
 
 
 def render_adoption_section() -> str:
@@ -46,14 +159,14 @@ def render_adoption_section() -> str:
     """
     recent = []
     for e in reversed(entries[-8:]):
-        adopted = ", ".join(
-            str(a.get("ticker") or "") for a in (e.get("adopted") or []) if a.get("ticker")
-        ) or "—"
+        adopted = _ticker_list_links(
+            [a.get("ticker") for a in (e.get("adopted") or []) if a.get("ticker")]
+        )
         recent.append(
             [
                 escape(str(e.get("as_of") or "")),
                 escape(str(e.get("source") or "")),
-                escape(adopted),
+                adopted,
                 escape(str(e.get("skipped_count") or 0)),
             ]
         )
@@ -62,7 +175,7 @@ def render_adoption_section() -> str:
         eval_rows.append(
             [
                 escape(str(r.get("as_of") or "")),
-                escape(str(r.get("ticker") or "")),
+                _ticker_link(r.get("ticker")),
                 escape(str(r.get("name") or "")),
                 _pct_cell(r.get("ret_5d")),
                 escape(str(r.get("status_5d") or "")),
@@ -86,9 +199,9 @@ def render_adoption_section() -> str:
 def _badge(text: str | None) -> str:
     s = (text or "—").upper()
     cls = "badge"
-    if s in {"ADOPT", "BUY", "WATCH", "LONG_CANDIDATE"}:
+    if s in {"ADOPT", "BUY", "WATCH", "LONG_CANDIDATE", "APPROVED"}:
         cls += " positive"
-    elif s in {"AVOID", "SKIP", "REDUCE"}:
+    elif s in {"AVOID", "SKIP", "REDUCE", "REJECTED"}:
         cls += " negative"
     return f'<span class="{cls}">{escape(str(text or "—"))}</span>'
 
@@ -118,7 +231,7 @@ def render_brief_section(resp: dict[str, Any] | None) -> str:
         rows.append(
             [
                 _badge(w.get("stance")),
-                escape(str(w.get("ticker") or "")),
+                _ticker_link(w.get("ticker")),
                 escape(str(w.get("name") or "")),
                 escape(str(w.get("confidence") or "")),
                 escape(str(w.get("why") or "")),
@@ -146,7 +259,7 @@ def render_score_section(resp: dict[str, Any] | None) -> str:
         return '<section id="score"><h2>Score</h2><p class="muted">未公開。`ai save-response score` 後に commit してください。</p></section>'
     adopted = resp.get("adopted") or []
     adopted_html = (
-        f'<p class="positive"><strong>ADOPT:</strong> {escape(", ".join(str(t) for t in adopted))}</p>'
+        f'<p class="positive"><strong>ADOPT:</strong> {_ticker_list_links(adopted)}</p>'
         if adopted
         else '<p class="muted">ADOPT なし</p>'
     )
@@ -156,7 +269,7 @@ def render_score_section(resp: dict[str, Any] | None) -> str:
         rows.append(
             [
                 _badge(s.get("decision")),
-                escape(str(s.get("ticker") or "")),
+                _ticker_link(s.get("ticker")),
                 escape(str(s.get("name") or "")),
                 escape(str(s.get("total") or "")),
                 escape(str(f.get("trend", ""))),
@@ -186,7 +299,7 @@ def render_debate_section(resp: dict[str, Any] | None) -> str:
         cards.append(
             f"""
             <div class="card">
-              <h2>{_badge(d.get('decision'))} {escape(str(d.get('ticker') or ''))}
+              <h2>{_badge(d.get('decision'))} {_ticker_link(d.get('ticker'))}
                 {escape(str(d.get('name') or ''))}
                 <span class="muted">({escape(str(d.get('confidence') or ''))})</span>
               </h2>
@@ -226,7 +339,7 @@ def render_discover_section(resp: dict[str, Any] | None) -> str:
             [
                 _badge(s.get("decision")),
                 escape(tag),
-                escape(str(s.get("ticker") or "")),
+                _ticker_link(s.get("ticker")),
                 escape(str(s.get("name") or "")),
                 escape(str(s.get("total") or "")),
                 escape(str(f.get("trend", ""))),
@@ -244,11 +357,11 @@ def render_discover_section(resp: dict[str, Any] | None) -> str:
         母集団 {escape(str(pool.get('after_liquidity') or '—'))}/{escape(str(pool.get('universe_size') or '—'))}
         （売買代金 ≥ {escape(str(pool.get('min_turnover') or '—'))}）
       </p>
-      <p><strong>ADOPT:</strong> {escape(", ".join(cmp_.get("adopted") or []) or "—")}</p>
+      <p><strong>ADOPT:</strong> {_ticker_list_links(cmp_.get("adopted"))}</p>
       <p class="positive"><strong>discover_only（スクリーニング非通過）:</strong>
-        {escape(", ".join(cmp_.get("discover_only") or []) or "—")}</p>
+        {_ticker_list_links(cmp_.get("discover_only"))}</p>
       <p><strong>overlap（スクリーニング通過と一致）:</strong>
-        {escape(", ".join(cmp_.get("overlap_with_screen") or []) or "—")}</p>
+        {_ticker_list_links(cmp_.get("overlap_with_screen"))}</p>
       {_table(["decision", "tag", "ticker", "name", "total", "trend", "mom", "risk", "liq", "event"], rows)}
     </section>
     """
@@ -268,12 +381,14 @@ def render_ai_body(
       GitHub Pages 用の AIトライアル結果です。発注には接続しません。
       日次 Actions が <code>ai daily</code>（ルールベース generator=<strong>{escape(str(gen))}</strong>）で更新します。
       <code>ai discover</code> はトレンド通過を外した発掘比較です。
-      基準日の目安: <strong>{escape(str(as_of))}</strong>
+      ADOPT は承認ゲート（<code>ai approve</code>）経由。基準日の目安: <strong>{escape(str(as_of))}</strong>
     </div>
     {render_brief_section(brief)}
     {render_score_section(score)}
     {render_discover_section(discover)}
     {render_debate_section(debate)}
+    {render_approvals_section()}
+    {render_ledger_section()}
     {render_adoption_section()}
     """
 
@@ -287,7 +402,7 @@ def export_ai_page(output_dir: Path) -> Path:
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = wrap_page(
         title="AIトライアル",
-        subtitle="Brief · Score · Debate · Adoption（参考意見・非自動売買）",
+        subtitle="Brief · Score · Debate · Approval · Ledger · Adoption（参考意見・非自動売買）",
         body=body,
         generated=generated,
         nav_active="ai",
@@ -301,7 +416,13 @@ def export_ai_page(output_dir: Path) -> Path:
         src = published_response_path(kind)
         if src.exists():
             (out / name).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
-    for src in (adoption_log_path(), adoption_eval_path(), published_path(DISCOVER_PUBLISHED)):
+    for src in (
+        adoption_log_path(),
+        adoption_eval_path(),
+        published_path(DISCOVER_PUBLISHED),
+        published_path(APPROVALS_PUBLISHED),
+        published_path(LEDGER_PUBLISHED),
+    ):
         if src.exists():
             (out / src.name).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     return path

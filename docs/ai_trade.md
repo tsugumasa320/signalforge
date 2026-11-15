@@ -52,7 +52,15 @@ uv run signalforge ai daily               # 生成 + published 更新 + adoption
 uv run signalforge ai daily --no-fetch-news  # キャッシュのみ
 uv run signalforge ai discover            # トレンド通過なしで流動性ユニバースから発掘
 uv run signalforge ai evaluate-adoptions  # 成績だけ再計算
+
+# 承認ゲート（TradingAgents / ai-hedge-fund 系の「人が最終確認」）
+uv run signalforge ai pending             # ADOPT 提案の一覧
+uv run signalforge ai approve 7203.T      # 承認（発注しない・台帳に記録）
+uv run signalforge ai reject 6758.T --note "過熱"
+uv run signalforge ai ledger              # hash 連鎖の監査台帳
 ```
+
+`ai daily` は ADOPT を **提案**として `data/published/ai_approvals.json` に pending 登録し、決定を `ai_ledger.json`（hash 連鎖）へ追記する。フォワード成績は提案ベース（システム性能）で集計し、承認は「人が意図として残すか」のゲート。
 
 **内容（日付だけではない）**
 
@@ -83,7 +91,8 @@ uv run signalforge ai daily --no-discord         # 送信なし
 
 公開ハブ: https://tsugumasa320.github.io/signalforge/ai/
 
-載るもの: Brief / Score / Debate / **Adoption 成績**（`ai_adoption_log.json` · `ai_adoption_eval.json`）
+載るもの: Brief / Score / Debate / **Approval** / **Ledger** / **Adoption 成績**
+（`ai_approvals.json` · `ai_ledger.json` · `ai_adoption_log.json` · `ai_adoption_eval.json`）
 
 手動で LLM 返答を使う場合:
 
@@ -106,3 +115,4 @@ uv run signalforge ai save-response brief /path/to/reply.json
 - 自動発注
 
 TradingAgents 等の外部委員会ツールは米国前提が多いため、日本株は本リポの `ai debate` を使う。
+取り入れたのは **役割ラベル（bull/bear/risk/human）・承認ゲート・hash 台帳** のみ（丸ごと導入しない）。

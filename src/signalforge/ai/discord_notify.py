@@ -22,14 +22,17 @@ def build_daily_message(
     adopted: list[str] | None,
     brief_resp: dict[str, Any] | None,
     eval_summary: dict[str, Any] | None = None,
+    pending_count: int | None = None,
 ) -> str:
     adopted = [str(t) for t in (adopted or []) if t]
     brief = brief_resp or {}
     lines = [
         "**SignalForge AI daily**",
         f"基準日: `{as_of or '—'}`",
-        f"ADOPT: {', '.join(f'`{t}`' for t in adopted) if adopted else '—'}",
+        f"ADOPT提案: {', '.join(f'`{t}`' for t in adopted) if adopted else '—'}",
     ]
+    if pending_count is not None:
+        lines.append(f"承認待ち: {pending_count}（`ai pending` / `ai approve`）")
     take = brief.get("market_take")
     if take:
         lines.append(f"要約: {take}")
@@ -86,6 +89,7 @@ def notify_daily(
     adopted: list[str] | None,
     brief_resp: dict[str, Any] | None,
     eval_summary: dict[str, Any] | None = None,
+    pending_count: int | None = None,
     webhook_url: str | None = None,
 ) -> dict[str, Any]:
     """Post daily summary. Skips when webhook URL is missing."""
@@ -97,6 +101,7 @@ def notify_daily(
         adopted=adopted,
         brief_resp=brief_resp,
         eval_summary=eval_summary,
+        pending_count=pending_count,
     )
     result = post_webhook(url, content)
     result["skipped"] = False
