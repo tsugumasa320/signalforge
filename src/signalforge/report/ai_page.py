@@ -7,15 +7,30 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
+from urllib.parse import quote
+
 from signalforge.ai.adoption import adoption_eval_path, adoption_log_path
 from signalforge.ai.approval import PUBLISHED_NAME as APPROVALS_PUBLISHED, load_approvals
 from signalforge.ai.discover import PUBLISHED_NAME as DISCOVER_PUBLISHED, load_discover_response
 from signalforge.ai.ledger import PUBLISHED_NAME as LEDGER_PUBLISHED, load_ledger, verify_ledger
+from signalforge.ai.market_regime import PUBLISHED_NAME as MARKET_PUBLISHED, load_market_regime
 from signalforge.ai.packet import read_json
 from signalforge.ai.publish import PUBLISHED_NAMES, load_response_for_pages, published_response_path
 from signalforge.ai.paths import published_path
 from signalforge.report.static_html import wrap_page
 from signalforge.report.yahoo_jp import yahoo_jp_anchor, yahoo_jp_url
+
+
+def _index_link(ticker: str | None, name: str | None = None) -> str:
+    t = str(ticker or "").strip()
+    if not t:
+        return "—"
+    label = escape(str(name or t))
+    # JP ETFs via shared helper; US cash indices via Yahoo JP quote with encoding
+    if t.endswith(".T"):
+        return yahoo_jp_anchor(t, label=str(name or t))
+    url = f"https://finance.yahoo.co.jp/quote/{quote(t, safe='')}"
+    return f'<a href="{escape(url)}" target="_blank" rel="noopener">{label}</a>'
 
 # Back-compat for dashboard_ai / tests importing private helpers.
 YAHOO_JP_QUOTE = "https://finance.yahoo.co.jp/quote/{ticker}"
@@ -40,6 +55,38 @@ def _pct_cell(v: Any) -> str:
         return escape(f"{float(v):+.1%}")
     except (TypeError, ValueError):
         return "—"
+
+
+def render_market_section() -> str:
+    regime = load_market_regime()
+    if not isinstance(regime, dict):
+        return (
+            '<section id="market"><h2>地合い（Market）</h2>'
+            '<p class="muted">未生成。日次の <code>ai daily</code> または <code>ai market</code> で更新。</p></section>'
+        )
+    rows = []
+    for i in regime.get("indices") or []:
+        rows.append(
+            [
+                _index_link(i.get("ticker"), i.get("name")),
+                escape(str(i.get("region") or "")),
+                _pct_cell(i.get("ret_1d")),
+                _pct_cell(i.get("ret_5d")),
+                _pct_cell(i.get("ret_20d")),
+                _pct_cell(i.get("vs_ma200")),
+                _badge(str(i.get("stance") or "")),
+            ]
+        )
+    return f"""
+    <section id="market">
+      <h2>地合い — 日経 / TOPIX / ダウ / S&amp;P / NASDAQ</h2>
+      <p class="muted">基準日 {escape(str(regime.get('as_of') or '—'))} ·
+        overall <strong>{escape(str(regime.get('overall') or '—'))}</strong> ·
+        JP {escape(str(regime.get('jp') or '—'))} · US {escape(str(regime.get('us') or '—'))}</p>
+      <p>{escape(str(regime.get('takeaway') or ''))}</p>
+      {_table(["index", "region", "1d", "5d", "20d", "vs200", "stance"], rows)}
+    </section>
+    """
 
 
 def render_approvals_section() -> str:
@@ -197,9 +244,9 @@ def render_adoption_section() -> str:
 def _badge(text: str | None) -> str:
     s = (text or "—").upper()
     cls = "badge"
-    if s in {"ADOPT", "BUY", "WATCH", "LONG_CANDIDATE", "APPROVED"}:
+    if s in {"ADOPT", "BUY", "WATCH", "LONG_CANDIDATE", "APPROVED", "RISK_ON", "MIXED_ON"}:
         cls += " positive"
-    elif s in {"AVOID", "SKIP", "REDUCE", "REJECTED"}:
+    elif s in {"AVOID", "SKIP", "REDUCE", "REJECTED", "RISK_OFF", "MIXED_OFF"}:
         cls += " negative"
     return f'<span class="{cls}">{escape(str(text or "—"))}</span>'
 
@@ -381,6 +428,7 @@ def render_ai_body(
       <code>ai discover</code> はトレンド通過を外した発掘比較です。
       ADOPT は承認ゲート（<code>ai approve</code>）経由。基準日の目安: <strong>{escape(str(as_of))}</strong>
     </div>
+    {render_market_section()}
     {render_brief_section(brief)}
     {render_score_section(score)}
     {render_discover_section(discover)}
@@ -400,7 +448,7 @@ def export_ai_page(output_dir: Path) -> Path:
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = wrap_page(
         title="AIトライアル",
-        subtitle="Brief · Score · Debate · Approval · Ledger · Adoption（参考意見・非自動売買）",
+        subtitle="地合い · Brief · Score · Debate · Approval · Ledger · Adoption（参考意見・非自動売買）",
         body=body,
         generated=generated,
         nav_active="ai",
@@ -420,6 +468,7 @@ def export_ai_page(output_dir: Path) -> Path:
         published_path(DISCOVER_PUBLISHED),
         published_path(APPROVALS_PUBLISHED),
         published_path(LEDGER_PUBLISHED),
+        published_path(MARKET_PUBLISHED),
     ):
         if src.exists():
             (out / src.name).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")

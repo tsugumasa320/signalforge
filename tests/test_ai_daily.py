@@ -144,13 +144,24 @@ def test_generate_score_limits_adopt() -> None:
     assert resp["generator"] == "rules/v1"
 
 
-def test_run_daily_and_eval(sample_data: Path) -> None:
+def test_run_daily_and_eval(sample_data: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "signalforge.ai.market_regime.build_market_regime",
+        lambda refresh=False: {
+            "overall": "mixed",
+            "jp": "risk_on",
+            "us": "mixed",
+            "as_of": "2026-11-13",
+            "takeaway": "test",
+        },
+    )
     out = run_daily(
         score_top=2,
         debate_top=1,
         max_adopt=2,
         notify_discord=False,
         fetch_news=False,
+        refresh_market=False,
     )
     assert out["as_of"] == "2026-11-13"
     assert (sample_data / "published" / "ai_brief_response.json").exists()

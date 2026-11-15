@@ -27,7 +27,16 @@ def run_daily(
     out_dir: Path | None = None,
     notify_discord: bool = True,
     fetch_news: bool = True,
+    refresh_market: bool = True,
 ) -> dict[str, Any]:
+    regime: dict[str, Any] | None = None
+    try:
+        from signalforge.ai.market_regime import build_market_regime
+
+        regime = build_market_regime(refresh=refresh_market)
+    except Exception as exc:  # noqa: BLE001 — market fetch must not kill daily
+        regime = {"ok": False, "error": str(exc)}
+
     brief_packet, brief_path, brief_prompt = write_brief(out_dir=out_dir)
     score_packet, score_path, score_prompt = write_score(
         top=score_top,
@@ -102,5 +111,14 @@ def run_daily(
         "ledger_events": ledger_check.get("n_events"),
         "eval_summary": eval_payload.get("summary"),
         "eval_summary_approved": eval_payload.get("summary_approved"),
+        "market_regime": {
+            "overall": (regime or {}).get("overall"),
+            "jp": (regime or {}).get("jp"),
+            "us": (regime or {}).get("us"),
+            "as_of": (regime or {}).get("as_of"),
+            "error": (regime or {}).get("error"),
+        }
+        if regime
+        else None,
         "discord": discord,
     }

@@ -34,6 +34,12 @@ def build_daily_message(
     ]
     if pending_count is not None:
         lines.append(f"承認待ち: {pending_count}（`ai pending` / `ai approve`）")
+    regime = (brief_resp or {}).get("market_regime") if isinstance(brief_resp, dict) else None
+    if isinstance(regime, dict) and regime.get("overall"):
+        lines.append(
+            f"地合い: `{regime.get('overall')}` "
+            f"(JP `{regime.get('jp')}` / US `{regime.get('us')}`)"
+        )
     take = brief.get("market_take")
     if take:
         lines.append(f"要約: {take}")

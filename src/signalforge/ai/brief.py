@@ -31,12 +31,16 @@ def build_brief_packet(
         "diversified_paper": False,
         "tse_strategy_summary": False,
     }
+    from signalforge.ai.market_regime import load_market_regime
+
+    regime = load_market_regime()
     packet: dict[str, Any] = {
         "schema": SCHEMA,
         "generated_at": utc_now_iso(),
         "purpose": "daily_brief",
         "market": "japan",
         "sources": sources,
+        "market_regime": regime,
         "trend_screen": summarize_ranking(ranking_raw, top) if ranking_raw else None,
         "trend_paper": summarize_trend_paper(),
         "diversified_papers": summarize_diversified_papers(diversified_limit),
@@ -62,6 +66,7 @@ def build_brief_packet(
     sources["trend_screen_paper"] = packet["trend_paper"] is not None
     sources["diversified_paper"] = bool(packet["diversified_papers"])
     sources["tse_strategy_summary"] = packet["tse_strategies"] is not None
+    sources["market_regime"] = regime is not None
     return packet
 
 

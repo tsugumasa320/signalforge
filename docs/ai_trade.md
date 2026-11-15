@@ -52,6 +52,7 @@ uv run signalforge ai save-response debate /path/to/reply.json
 uv run signalforge trend-screen ranking   # 材料
 uv run signalforge ai daily               # 生成 + published 更新 + adoption eval（ニュース見出しも取得）
 uv run signalforge ai daily --no-fetch-news  # キャッシュのみ
+uv run signalforge ai market              # 地合い（日経/TOPIX/ダウ/S&P/NASDAQ）
 uv run signalforge ai discover            # トレンド通過なしで流動性ユニバースから発掘
 uv run signalforge ai evaluate-adoptions  # 成績だけ再計算
 
@@ -104,8 +105,12 @@ uv run signalforge ai daily --no-discord         # 送信なし
 
 公開ハブ: https://tsugumasa320.github.io/signalforge/ai/
 
-載るもの: Brief / Score / Debate / **Approval** / **Ledger** / **Adoption 成績**
-（`ai_approvals.json` · `ai_ledger.json` · `ai_adoption_log.json` · `ai_adoption_eval.json`）
+載るもの: **地合い** / Brief / Score / Debate / **Approval** / **Ledger** / **Adoption 成績**
+（`market_regime.json` · `ai_approvals.json` · `ai_ledger.json` · `ai_adoption_log.json` · `ai_adoption_eval.json`）
+
+### 地合い（Market regime）
+
+`ai market` / `ai daily` が日経（1321）、TOPIX（1306）、NYダウ、S&P500、NASDAQ の 1/5/20日リターンと200日線位置から `risk_on` / `mixed` / `risk_off` を付ける。Brief の `market_take` にも要約を載せる。マクロ予測ではなく簡易スナップショット。
 
 手動で LLM 返答を使う場合:
 

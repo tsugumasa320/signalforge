@@ -178,12 +178,50 @@ def render_ai_panel() -> None:
         " 手順: `docs/ai_trade.md` · 公開URL: …/signalforge/ai/"
     )
 
-    tab_b, tab_s, tab_d, tab_g, tab_a = st.tabs(
-        ["Brief", "Score", "Debate", "Gate", "Adoption"]
+    tab_m, tab_b, tab_s, tab_d, tab_g, tab_a = st.tabs(
+        ["地合い", "Brief", "Score", "Debate", "Gate", "Adoption"]
     )
+    with tab_m:
+        from signalforge.ai.market_regime import load_market_regime, market_regime_path
+
+        regime = load_market_regime()
+        st.caption(f"published: {_file_mtime(market_regime_path())}")
+        if not regime:
+            st.info("`uv run signalforge ai market` で地合いを更新してください。")
+        else:
+            c1, c2, c3 = st.columns(3)
+            c1.metric("overall", regime.get("overall") or "—")
+            c2.metric("JP", regime.get("jp") or "—")
+            c3.metric("US", regime.get("us") or "—")
+            st.write(regime.get("takeaway") or "—")
+            rows = []
+            for i in regime.get("indices") or []:
+                rows.append(
+                    {
+                        "name": i.get("name"),
+                        "ticker": i.get("ticker"),
+                        "yahoo": _yahoo_jp_url(i.get("ticker"))
+                        if str(i.get("ticker") or "").endswith(".T")
+                        else f"https://finance.yahoo.co.jp/quote/{i.get('ticker')}",
+                        "ret_5d": i.get("ret_5d"),
+                        "ret_20d": i.get("ret_20d"),
+                        "vs_ma200": i.get("vs_ma200"),
+                        "stance": i.get("stance"),
+                    }
+                )
+            st.dataframe(
+                pd.DataFrame(rows),
+                width="stretch",
+                hide_index=True,
+                column_config={
+                    "yahoo": st.column_config.LinkColumn("Yahoo JP", display_text="開く"),
+                    "ret_5d": st.column_config.NumberColumn(format="%.1%%"),
+                    "ret_20d": st.column_config.NumberColumn(format="%.1%%"),
+                    "vs_ma200": st.column_config.NumberColumn(format="%.1%%"),
+                },
+            )
     with tab_b:
-        _render_brief(brief_resp, _file_mtime(base / "brief_latest.json"))
-    with tab_s:
+        _render_brief(brief_resp, _file_mtime(base / "brief_latest.json"))    with tab_s:
         _render_score(score_resp, _file_mtime(base / "scores_latest.json"))
     with tab_d:
         _render_debate(debate_resp, _file_mtime(base / "debate_latest.json"))

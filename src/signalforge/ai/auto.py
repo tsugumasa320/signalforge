@@ -259,21 +259,38 @@ def generate_brief_response(packet: dict[str, Any], score_resp: dict[str, Any] |
             )
 
     month_ex = paper.get("month_excess")
+    regime = packet.get("market_regime") or {}
+    regime_take = regime.get("takeaway") or ""
+    overall = regime.get("overall")
     market_take = (
         f"トレンド通過 {ts.get('n_pass')} / 目標 {ts.get('n_target')}。"
         f"紙上当月超過は {_pct(month_ex)}。"
-        "ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。"
     )
+    if regime_take:
+        market_take += f" 地合い: {regime_take}"
+    else:
+        market_take += " 地合いデータ未生成（`ai market`）。"
+    market_take += " ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。"
     skip = [
         "過熱銘柄（20日リターンが極端）の追撃",
         "分散ペーパーが弱い局面でのサイズ拡大",
     ]
+    if overall in {"risk_off", "mixed_off"}:
+        skip.append("地合い弱め局面での新規サイズ拡大")
     if any((t.get("earnings_next") for t in targets)):
         skip.append("直近決算銘柄の新規")
 
     return {
         "as_of": as_of,
         "generator": "rules/v1",
+        "market_regime": {
+            "overall": overall,
+            "jp": regime.get("jp"),
+            "us": regime.get("us"),
+            "takeaway": regime_take,
+        }
+        if regime
+        else None,
         "market_take": market_take,
         "watch": watch[:8],
         "paper_notes": [

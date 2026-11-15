@@ -2787,12 +2787,14 @@ def ai_group() -> None:
 @click.option("--max-adopt", default=4, show_default=True, type=int)
 @click.option("--no-discord", is_flag=True, help="Discord 通知を送らない")
 @click.option("--no-fetch-news", is_flag=True, help="Yahoo 見出しを取りに行かない（キャッシュのみ）")
+@click.option("--no-refresh-market", is_flag=True, help="地合い指数の yfinance 更新をしない（キャッシュのみ）")
 def ai_daily_cmd(
     score_top: int,
     debate_top: int,
     max_adopt: int,
     no_discord: bool,
     no_fetch_news: bool,
+    no_refresh_market: bool,
 ) -> None:
     """ルールベースで Brief/Score/Debate を生成し、採択ログと成績評価も更新する。"""
     from signalforge.ai.daily import run_daily
@@ -2804,9 +2806,15 @@ def ai_daily_cmd(
             max_adopt=max_adopt,
             notify_discord=not no_discord,
             fetch_news=not no_fetch_news,
+            refresh_market=not no_refresh_market,
         )
     except FileNotFoundError as exc:
         raise click.ClickException(str(exc)) from exc
+    mr = out.get("market_regime") or {}
+    if mr.get("error"):
+        click.echo(f"market: error {mr['error']}")
+    elif mr.get("overall"):
+        click.echo(f"market: overall={mr.get('overall')} jp={mr.get('jp')} us={mr.get('us')} as_of={mr.get('as_of')}")
     click.echo(f"as_of={out.get('as_of')} adopted={', '.join(out.get('adopted') or []) or '—'}")
     click.echo(f"adoption entries={out.get('adoption_entries')}")
     ap = out.get("approvals_summary") or {}
@@ -2906,6 +2914,31 @@ def ai_discover_cmd(limit: int, min_turnover: float, max_adopt: int, fetch_news:
             f"  {row.get('decision')} {row.get('total')} {row.get('ticker')} {row.get('name')}"
         )
     click.echo(f"published: {path}")
+
+
+@ai_group.command("market")
+@click.option("--refresh/--no-refresh", default=True, show_default=True, help="指数 OHLCV を更新するか")
+def ai_market_cmd(refresh: bool) -> None:
+    """日経・TOPIX・ダウ・S&P・NASDAQ の簡易地合いを更新する。"""
+    from signalforge.ai.market_regime import build_market_regime, market_regime_path
+
+    try:
+        payload = build_market_regime(refresh=refresh)
+    except Exception as exc:  # noqa: BLE001
+        raise click.ClickException(str(exc)) from exc
+    click.echo(
+        f"as_of={payload.get('as_of')} overall={payload.get('overall')} "
+        f"jp={payload.get('jp')} us={payload.get('us')}"
+    )
+    click.echo(payload.get("takeaway") or "")
+    for row in payload.get("indices") or []:
+        r20 = row.get("ret_20d")
+        r20s = "—" if r20 is None else f"{float(r20):+.2%}"
+        click.echo(
+            f"  {row.get('id')}: {row.get('name')} 20d={r20s} "
+            f"vs200={row.get('vs_ma200')} stance={row.get('stance')} ok={row.get('ok')}"
+        )
+    click.echo(f"published: {market_regime_path()}")
 
 
 @ai_group.command("evaluate-adoptions")
