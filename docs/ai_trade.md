@@ -7,7 +7,12 @@ SignalForge の既存出力を AI に渡し、**要約 → 採点 → 議論**�
 ```bash
 uv run signalforge trend-screen ranking   # data/published/trend_screen_ranking.json
 # 任意: paper / diversified / tse_strategy_summary もあればパケットに載る
+# 推奨: 決算カレンダー（Score の event 因子）
+uv run signalforge alt-data fetch --earnings   # data/alt/earnings/*.json
+# JQUANTS_API_KEY があれば J-Quants カレンダー、無ければ yfinance（いずれもローカルキャッシュ）
 ```
+
+Score / Brief / Debate の `earnings_next*` は ranking 行を優先し、欠けていれば `data/alt/earnings` から補完する（ライブ API は呼ばない）。キャッシュも無い銘柄は `event_data=missing` で event 因子を中立点にする。
 
 ## コマンド
 

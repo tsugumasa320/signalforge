@@ -30,9 +30,12 @@ RANK_FIELDS = (
     "risk_adj_1y",
     "up_month_ratio",
     "target",
+    "earnings_last",
     "earnings_next",
     "earnings_next_days",
+    "ex_dividend_date",
     "dividend_yield",
+    "event_data",
 )
 
 
@@ -47,7 +50,8 @@ def read_json(path: Path) -> dict[str, Any] | list[Any] | None:
 
 
 def slim_rank_row(row: dict[str, Any]) -> dict[str, Any]:
-    return {k: row.get(k) for k in RANK_FIELDS if k in row}
+    # Always emit known keys (None when absent) so event enrichment can fill gaps.
+    return {k: row.get(k) for k in RANK_FIELDS}
 
 
 def load_trend_ranking() -> dict[str, Any] | None:
@@ -61,13 +65,22 @@ def load_tse_summary() -> dict[str, Any] | None:
 
 
 def summarize_ranking(raw: dict[str, Any], top: int) -> dict[str, Any]:
-    ranking = [slim_rank_row(r) for r in (raw.get("ranking") or [])[: max(0, top)]]
-    targets = [slim_rank_row(r) for r in (raw.get("targets") or [])]
+    from signalforge.ai.events import enrich_event_rows, event_coverage
+
+    as_of = raw.get("as_of") or raw.get("signal_date")
+    ranking = enrich_event_rows(
+        [slim_rank_row(r) for r in (raw.get("ranking") or [])[: max(0, top)]],
+        as_of=str(as_of) if as_of else None,
+    )
+    targets = enrich_event_rows(
+        [slim_rank_row(r) for r in (raw.get("targets") or [])],
+        as_of=str(as_of) if as_of else None,
+    )
     return {
         "system_id": raw.get("system_id"),
         "version": raw.get("version"),
         "name": raw.get("name"),
-        "as_of": raw.get("as_of") or raw.get("signal_date"),
+        "as_of": as_of,
         "signal_date": raw.get("signal_date"),
         "rebalance_signal_date": raw.get("rebalance_signal_date"),
         "n_universe": raw.get("n_universe"),
@@ -76,6 +89,7 @@ def summarize_ranking(raw: dict[str, Any], top: int) -> dict[str, Any]:
         "warning": raw.get("warning"),
         "targets": targets,
         "ranking_top": ranking,
+        "event_coverage": event_coverage(ranking + targets),
     }
 
 

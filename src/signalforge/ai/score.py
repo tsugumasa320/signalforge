@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from signalforge.ai.events import enrich_event_rows, event_coverage
 from signalforge.ai.packet import (
     load_trend_ranking,
     slim_rank_row,
@@ -42,7 +43,13 @@ RUBRIC = [
         "id": "event",
         "label": "イベント空白",
         "max_points": 20,
-        "hint": "earnings_next_days。直近決算が近いほど減点。情報空白なら加点。",
+        "hint": (
+            "earnings_next / earnings_next_days（trend-screen または "
+            "data/alt/earnings キャッシュ）。直近決算が近いほど減点。"
+            "カレンダー欠損（event_data=missing）は中立点。"
+            "キャッシュありで次回なし／遠い日付は加点。"
+            "ex_dividend_date があれば参考（採点の主因ではない）。"
+        ),
     },
 ]
 
@@ -54,16 +61,27 @@ def build_score_packet(*, top: int = 20) -> dict[str, Any]:
             "data/published/trend_screen_ranking.json がありません。"
             "先に `uv run signalforge trend-screen ranking` を実行してください。"
         )
-    candidates = [slim_rank_row(r) for r in (ranking_raw.get("ranking") or [])[: max(0, top)]]
+    as_of = ranking_raw.get("as_of") or ranking_raw.get("signal_date")
+    candidates = enrich_event_rows(
+        [slim_rank_row(r) for r in (ranking_raw.get("ranking") or [])[: max(0, top)]],
+        as_of=str(as_of) if as_of else None,
+    )
     return {
         "schema": SCHEMA,
         "generated_at": utc_now_iso(),
         "purpose": "candidate_score",
         "market": "japan",
-        "as_of": ranking_raw.get("as_of") or ranking_raw.get("signal_date"),
+        "as_of": as_of,
         "system_id": ranking_raw.get("system_id"),
         "version": ranking_raw.get("version"),
         "rubric": RUBRIC,
+        "event_coverage": event_coverage(candidates),
+        "event_notes": (
+            "event 因子は実決算カレンダー（ranking または data/alt/earnings）を使う。"
+            "キャッシュが無い銘柄は event_data=missing で中立点。"
+            "取得: `uv run signalforge alt-data fetch --earnings` "
+            "（JQUANTS_API_KEY があれば J-Quants カレンダー）。"
+        ),
         "candidates": candidates,
         "response_schema": {
             "as_of": "string|null",

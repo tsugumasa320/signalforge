@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from signalforge.ai.events import enrich_event_fields
 from signalforge.ai.packet import (
     load_trend_ranking,
     read_json,
@@ -16,7 +17,12 @@ from signalforge.ai.paths import ai_dir, load_prompt
 SCHEMA = "signalforge-ai-debate/v1"
 
 
-def _row_by_ticker(ranking: dict[str, Any], ticker: str) -> dict[str, Any] | None:
+def _row_by_ticker(
+    ranking: dict[str, Any],
+    ticker: str,
+    *,
+    as_of: str | None = None,
+) -> dict[str, Any] | None:
     want = ticker.upper().replace(".T", "")
     for key in ("ranking", "targets"):
         for row in ranking.get(key) or []:
@@ -24,7 +30,7 @@ def _row_by_ticker(ranking: dict[str, Any], ticker: str) -> dict[str, Any] | Non
             sym = str(row.get("ticker") or "").upper().replace(".T", "")
             full = str(row.get("ticker") or "").upper()
             if code == want or sym == want or full == ticker.upper():
-                return slim_rank_row(row)
+                return enrich_event_fields(slim_rank_row(row), as_of=as_of)
     return None
 
 
@@ -90,10 +96,12 @@ def build_debate_packet(
         top=top,
         scores_path=scores_path,
     )
+    as_of = ranking.get("as_of") or ranking.get("signal_date")
+    as_of_s = str(as_of) if as_of else None
     names: list[dict[str, Any]] = []
     missing: list[str] = []
     for t in chosen:
-        row = _row_by_ticker(ranking, t)
+        row = _row_by_ticker(ranking, t, as_of=as_of_s)
         if row is None:
             missing.append(t)
             names.append({"ticker": t, "metrics": None})
@@ -104,11 +112,12 @@ def build_debate_packet(
         "generated_at": utc_now_iso(),
         "purpose": "bull_bear_debate",
         "market": "japan",
-        "as_of": ranking.get("as_of") or ranking.get("signal_date"),
+        "as_of": as_of,
         "system_id": ranking.get("system_id"),
         "note": (
             "TradingAgents は米国前提が多いため、日本株は SignalForge 自前の議論パケットを使う。"
             "発注には接続しない。参考意見のみ。"
+            "metrics の earnings_* は ranking または data/alt/earnings キャッシュ。"
         ),
         "context": {"trend_paper": summarize_trend_paper()},
         "names": names,

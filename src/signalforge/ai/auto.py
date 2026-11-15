@@ -62,14 +62,20 @@ def score_candidate(c: dict[str, Any]) -> dict[str, Any]:
         liq = 6.0
 
     days = c.get("earnings_next_days")
-    if days is None:
-        event = 16.0
-    elif float(days) <= 7:
-        event = 6.0
-    elif float(days) <= 21:
-        event = 10.0
+    event_data = c.get("event_data") or ("missing" if days is None else "ranking")
+    if days is not None:
+        if float(days) <= 7:
+            event = 6.0
+        elif float(days) <= 21:
+            event = 10.0
+        else:
+            event = 17.0
+    elif event_data == "missing":
+        # Unknown calendar: neutral (do not invent a blank-window bonus).
+        event = 12.0
     else:
-        event = 17.0
+        # Ranking/cache known but no upcoming date → treat as event-blank.
+        event = 16.0
 
     total = int(round(trend + mom + risk + liq + event))
     decision = "WATCH"
@@ -80,6 +86,7 @@ def score_candidate(c: dict[str, Any]) -> dict[str, Any]:
     elif total < 60:
         decision = "SKIP"
 
+    earn_next = c.get("earnings_next")
     return {
         "ticker": c.get("ticker"),
         "name": c.get("name"),
@@ -96,7 +103,10 @@ def score_candidate(c: dict[str, Any]) -> dict[str, Any]:
             f"1年{_pct(c.get('ret_1y'))} · 20日{_pct(r20)} · "
             f"vol={vol:.2f} · turnover={turn:.0f}"
         ),
-        "risk": f"mdd_1y={c.get('mdd_1y')} · earnings_next_days={days}",
+        "risk": (
+            f"mdd_1y={c.get('mdd_1y')} · earnings_next={earn_next} · "
+            f"earnings_next_days={days} · event_data={event_data}"
+        ),
     }
 
 
@@ -117,7 +127,8 @@ def generate_score_response(packet: dict[str, Any], *, max_adopt: int = 4) -> di
         "adopted": adopted,
         "skipped_reasons": [
             "20日リターンが概ね35%超、または vol_1y>0.9 は SKIP",
-            "決算7日以内は SKIP",
+            "決算7日以内（earnings_next_days≤7）は SKIP",
+            "決算カレンダー欠損は event を中立点（event_data=missing）",
             f"ADOPT は最大 {max_adopt} 銘柄",
         ],
     }
