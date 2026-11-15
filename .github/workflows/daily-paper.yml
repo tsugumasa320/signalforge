@@ -90,6 +90,7 @@ jobs:
             data/published/ai_debate_response.json \
             data/published/ai_adoption_log.json \
             data/published/ai_adoption_eval.json \
+            data/published/ai_discover_response.json \
             data/trend_screen/liquid300.txt || true
           if git diff --staged --quiet; then
             echo "No paper/screening/AI state changes."

@@ -57,5 +57,8 @@ fi
 echo "--- AI trial daily (rules brief/score/debate + adoption eval) ---"
 uv run signalforge ai daily || true
 
+echo "--- AI discover (universe without trend-screen pass gate) ---"
+uv run signalforge ai discover || true
+
 echo "--- export unified dashboard ---"
 uv run signalforge dashboard export --output _site

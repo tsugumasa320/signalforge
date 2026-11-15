@@ -50,6 +50,7 @@ uv run signalforge ai save-response debate /path/to/reply.json
 uv run signalforge trend-screen ranking   # 材料
 uv run signalforge ai daily               # 生成 + published 更新 + adoption eval（ニュース見出しも取得）
 uv run signalforge ai daily --no-fetch-news  # キャッシュのみ
+uv run signalforge ai discover            # トレンド通過なしで流動性ユニバースから発掘
 uv run signalforge ai evaluate-adoptions  # 成績だけ再計算
 ```
 

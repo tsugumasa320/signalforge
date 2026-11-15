@@ -8,8 +8,10 @@ from pathlib import Path
 from typing import Any
 
 from signalforge.ai.adoption import adoption_eval_path, adoption_log_path
+from signalforge.ai.discover import PUBLISHED_NAME as DISCOVER_PUBLISHED, load_discover_response
 from signalforge.ai.packet import read_json
 from signalforge.ai.publish import PUBLISHED_NAMES, load_response_for_pages, published_response_path
+from signalforge.ai.paths import published_path
 from signalforge.report.static_html import wrap_page
 
 
@@ -206,22 +208,71 @@ def render_debate_section(resp: dict[str, Any] | None) -> str:
     """
 
 
+def render_discover_section(resp: dict[str, Any] | None) -> str:
+    if not resp:
+        return (
+            '<section id="discover"><h2>Discover — 独自発掘</h2>'
+            '<p class="muted">未生成。 <code>uv run signalforge ai discover</code></p></section>'
+        )
+    cmp_ = resp.get("compare") or {}
+    pool = resp.get("pool") or {}
+    rows = []
+    for s in (resp.get("scores") or [])[:40]:
+        if s.get("decision") not in {"ADOPT", "WATCH"}:
+            continue
+        f = s.get("factors") or {}
+        tag = "screen" if s.get("screen_passed") else "discover"
+        rows.append(
+            [
+                _badge(s.get("decision")),
+                escape(tag),
+                escape(str(s.get("ticker") or "")),
+                escape(str(s.get("name") or "")),
+                escape(str(s.get("total") or "")),
+                escape(str(f.get("trend", ""))),
+                escape(str(f.get("momentum", ""))),
+                escape(str(f.get("risk", ""))),
+                escape(str(f.get("liquidity", ""))),
+                escape(str(f.get("event", ""))),
+            ]
+        )
+    return f"""
+    <section id="discover">
+      <h2>Discover — トレンド通過なしの独自発掘</h2>
+      <p class="muted">
+        基準日 {escape(str(resp.get('as_of') or '—'))} · generator {escape(str(resp.get('generator') or '—'))} ·
+        母集団 {escape(str(pool.get('after_liquidity') or '—'))}/{escape(str(pool.get('universe_size') or '—'))}
+        （売買代金 ≥ {escape(str(pool.get('min_turnover') or '—'))}）
+      </p>
+      <p><strong>ADOPT:</strong> {escape(", ".join(cmp_.get("adopted") or []) or "—")}</p>
+      <p class="positive"><strong>discover_only（スクリーニング非通過）:</strong>
+        {escape(", ".join(cmp_.get("discover_only") or []) or "—")}</p>
+      <p><strong>overlap（スクリーニング通過と一致）:</strong>
+        {escape(", ".join(cmp_.get("overlap_with_screen") or []) or "—")}</p>
+      {_table(["decision", "tag", "ticker", "name", "total", "trend", "mom", "risk", "liq", "event"], rows)}
+    </section>
+    """
+
+
 def render_ai_body(
     brief: dict[str, Any] | None,
     score: dict[str, Any] | None,
     debate: dict[str, Any] | None,
+    discover: dict[str, Any] | None = None,
 ) -> str:
-    as_ofs = [r.get("as_of") for r in (brief, score, debate) if r and r.get("as_of")]
+    as_ofs = [r.get("as_of") for r in (brief, score, debate, discover) if r and r.get("as_of")]
     as_of = as_ofs[0] if as_ofs else "—"
     gen = (score or {}).get("generator") or (brief or {}).get("generator") or "—"
     return f"""
     <div class="info-box">
       GitHub Pages 用の AIトライアル結果です。発注には接続しません。
       日次 Actions が <code>ai daily</code>（ルールベース generator=<strong>{escape(str(gen))}</strong>）で更新します。
+      <code>ai discover</code> はトレンド通過を外した発掘比較です。
       基準日の目安: <strong>{escape(str(as_of))}</strong>
     </div>
     {render_brief_section(brief)}
     {render_score_section(score)}
+    {render_discover_section(discover)}
     {render_debate_section(debate)}
     {render_adoption_section()}
     """
@@ -231,7 +282,8 @@ def export_ai_page(output_dir: Path) -> Path:
     brief = load_response_for_pages("brief")
     score = load_response_for_pages("score")
     debate = load_response_for_pages("debate")
-    body = render_ai_body(brief, score, debate)
+    discover = load_discover_response()
+    body = render_ai_body(brief, score, debate, discover)
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = wrap_page(
         title="AIトライアル",
@@ -249,7 +301,7 @@ def export_ai_page(output_dir: Path) -> Path:
         src = published_response_path(kind)
         if src.exists():
             (out / name).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
-    for src in (adoption_log_path(), adoption_eval_path()):
+    for src in (adoption_log_path(), adoption_eval_path(), published_path(DISCOVER_PUBLISHED)):
         if src.exists():
             (out / src.name).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     return path

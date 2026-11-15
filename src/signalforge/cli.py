@@ -2863,6 +2863,41 @@ def ai_notify_discord_cmd(dry_run: bool) -> None:
     click.echo("sent" if result.get("ok") else result)
 
 
+@ai_group.command("discover")
+@click.option("--limit", default=300, show_default=True, type=int, help="流動性フィルタ後の最大銘柄数")
+@click.option("--min-turnover", default=5e8, show_default=True, type=float, help="20日売買代金の下限")
+@click.option("--max-adopt", default=8, show_default=True, type=int)
+@click.option("--fetch-news", is_flag=True, help="Yahoo 見出しを取得")
+def ai_discover_cmd(limit: int, min_turnover: float, max_adopt: int, fetch_news: bool) -> None:
+    """トレンド通過を必須にせず、流動性ユニバースからルール発掘する。"""
+    from signalforge.ai.discover import write_discover
+
+    try:
+        packet, resp, path = write_discover(
+            limit=limit,
+            min_turnover=min_turnover,
+            max_adopt=max_adopt,
+            fetch_news=fetch_news,
+        )
+    except FileNotFoundError as exc:
+        raise click.ClickException(str(exc)) from exc
+    pool = packet.get("pool") or {}
+    cmp_ = resp.get("compare") or {}
+    click.echo(
+        f"as_of={resp.get('as_of')} pool={pool.get('after_liquidity')}/{pool.get('universe_size')} "
+        f"(min_turnover={pool.get('min_turnover')})"
+    )
+    click.echo(f"adopted: {', '.join(cmp_.get('adopted') or []) or '—'}")
+    click.echo(f"overlap_with_screen: {', '.join(cmp_.get('overlap_with_screen') or []) or '—'}")
+    click.echo(f"discover_only: {', '.join(cmp_.get('discover_only') or []) or '—'}")
+    click.echo("top non-pass WATCH/ADOPT:")
+    for row in (cmp_.get("top_nonpass_watch") or [])[:8]:
+        click.echo(
+            f"  {row.get('decision')} {row.get('total')} {row.get('ticker')} {row.get('name')}"
+        )
+    click.echo(f"published: {path}")
+
+
 @ai_group.command("evaluate-adoptions")
 def ai_evaluate_adoptions_cmd() -> None:
     """採択ログのフォワードリターンを再計算して published に書く。"""
