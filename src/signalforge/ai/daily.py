@@ -24,9 +24,14 @@ def run_daily(
     max_adopt: int = 4,
     out_dir: Path | None = None,
     notify_discord: bool = True,
+    fetch_news: bool = True,
 ) -> dict[str, Any]:
     brief_packet, brief_path, brief_prompt = write_brief(out_dir=out_dir)
-    score_packet, score_path, score_prompt = write_score(top=score_top, out_dir=out_dir)
+    score_packet, score_path, score_prompt = write_score(
+        top=score_top,
+        out_dir=out_dir,
+        fetch_news=fetch_news,
+    )
     score_resp = generate_score_response(score_packet, max_adopt=max_adopt)
 
     # attach prices from candidates for adoption log

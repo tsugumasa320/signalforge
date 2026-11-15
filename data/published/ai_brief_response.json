@@ -9,15 +9,32 @@
       "stance": "AVOID",
       "confidence": 72,
       "why": "目標入りだが20日+67.9%で過熱。",
-      "risk": "追撃よりサイズ管理。"
+      "risk": "追撃よりサイズ管理。",
+      "surprise": null,
+      "news": null,
+      "content_data": "missing"
     },
     {
       "ticker": "8766.T",
       "name": "東京海上ホールディングス",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 2 位 · 1年+100.6% · 20日+10.0%",
-      "risk": "イベント日付はパケット次第。"
+      "why": "目標 2 位 · 1年+100.6% · 20日+10.0% · 決算発表 1Q",
+      "risk": "イベント日付はパケット次第。",
+      "surprise": {
+        "code": "87660",
+        "disc_date": "2026-08-12",
+        "days_ago": 93,
+        "period": "1Q",
+        "c0": false,
+        "rev_op": null,
+        "op_yoy": null,
+        "opm_delta": null,
+        "basis": "company_forecast_or_yoy",
+        "summary": "決算発表 1Q"
+      },
+      "news": null,
+      "content_data": "surprise"
     },
     {
       "ticker": "6532.T",
@@ -25,7 +42,10 @@
       "stance": "AVOID",
       "confidence": 72,
       "why": "目標入りだが20日+41.7%で過熱。",
-      "risk": "追撃よりサイズ管理。"
+      "risk": "追撃よりサイズ管理。",
+      "surprise": null,
+      "news": null,
+      "content_data": "missing"
     },
     {
       "ticker": "9147.T",
@@ -33,7 +53,10 @@
       "stance": "WATCH",
       "confidence": 70,
       "why": "採点 ADOPT。目標入りかつ過熱が相対的に軽い。",
-      "risk": "スクリーニング遅行・セクター感応。"
+      "risk": "スクリーニング遅行・セクター感応。",
+      "surprise": null,
+      "news": null,
+      "content_data": "missing"
     },
     {
       "ticker": "9962.T",
@@ -41,7 +64,10 @@
       "stance": "WATCH",
       "confidence": 70,
       "why": "採点 ADOPT。目標入りかつ過熱が相対的に軽い。",
-      "risk": "スクリーニング遅行・セクター感応。"
+      "risk": "スクリーニング遅行・セクター感応。",
+      "surprise": null,
+      "news": null,
+      "content_data": "missing"
     },
     {
       "ticker": "3042.T",
@@ -54,7 +80,8 @@
   ],
   "paper_notes": [
     "trend_paper open=True · month_excess=-3.3%",
-    "diversified papers=7 口座を参照"
+    "diversified papers=7 口座を参照",
+    "内容: surprise=earnings_surprise/fins · news=data/alt/news（あれば why に併記）"
   ],
   "skip_today": [
     "過熱銘柄（20日リターンが極端）の追撃",
@@ -64,6 +91,7 @@
   "actions_for_human": [
     "ADOPT / REDUCE 銘柄のチャート確認",
     "紙上ドロー銘柄の出口ルール確認",
+    "サプライズ悪材料・ネガティブ見出しの銘柄は一次情報を確認",
     "採用したら ai adoption ログで追跡（日次で自動）"
   ]
 }

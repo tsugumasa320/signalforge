@@ -77,16 +77,46 @@ def score_candidate(c: dict[str, Any]) -> dict[str, Any]:
         # Ranking/cache known but no upcoming date → treat as event-blank.
         event = 16.0
 
+    surprise = c.get("surprise") if isinstance(c.get("surprise"), dict) else None
+    if surprise and surprise.get("days_ago") is not None and int(surprise["days_ago"]) <= 45:
+        if surprise.get("c0"):
+            event += 2
+        if surprise.get("rev_op") is True:
+            event += 1
+        yoy = surprise.get("op_yoy")
+        if yoy is not None and float(yoy) <= -0.2:
+            event -= 3
+        elif yoy is not None and float(yoy) >= 0.2 and surprise.get("c0"):
+            event += 1
+
+    news_sent = c.get("news_sentiment")
+    if news_sent == "positive":
+        event += 1
+    elif news_sent == "negative":
+        event -= 2
+    event = _clamp(event, 0, 20)
+
     total = int(round(trend + mom + risk + liq + event))
     decision = "WATCH"
     if r20 > 0.35 or vol > 0.9 or (days is not None and float(days) <= 7):
         decision = "SKIP"
+    elif news_sent == "negative" and surprise and surprise.get("c0") is False:
+        decision = "SKIP" if total < 75 else "WATCH"
     elif total >= 70:
         decision = "ADOPT"
     elif total < 60:
         decision = "SKIP"
 
     earn_next = c.get("earnings_next")
+    content_bits = []
+    if surprise and surprise.get("summary"):
+        content_bits.append(str(surprise["summary"]))
+    if news_sent and news_sent != "neutral":
+        content_bits.append(f"news={news_sent}")
+    titles = [str(n.get("title") or "") for n in (c.get("news") or [])[:2] if isinstance(n, dict)]
+    if titles:
+        content_bits.append(" / ".join(titles)[:120])
+
     return {
         "ticker": c.get("ticker"),
         "name": c.get("name"),
@@ -102,11 +132,17 @@ def score_candidate(c: dict[str, Any]) -> dict[str, Any]:
         "why": (
             f"1年{_pct(c.get('ret_1y'))} · 20日{_pct(r20)} · "
             f"vol={vol:.2f} · turnover={turn:.0f}"
+            + ((" · " + " · ".join(content_bits)) if content_bits else "")
         ),
         "risk": (
             f"mdd_1y={c.get('mdd_1y')} · earnings_next={earn_next} · "
-            f"earnings_next_days={days} · event_data={event_data}"
+            f"earnings_next_days={days} · event_data={event_data} · "
+            f"content_data={c.get('content_data')}"
         ),
+        "surprise": surprise,
+        "news": c.get("news"),
+        "news_sentiment": news_sent,
+        "content_data": c.get("content_data"),
     }
 
 
@@ -129,23 +165,53 @@ def generate_score_response(packet: dict[str, Any], *, max_adopt: int = 4) -> di
             "20日リターンが概ね35%超、または vol_1y>0.9 は SKIP",
             "決算7日以内（earnings_next_days≤7）は SKIP",
             "決算カレンダー欠損は event を中立点（event_data=missing）",
+            "直近サプライズ悪材料 + ネガティブ見出しは慎重に SKIP/WATCH",
             f"ADOPT は最大 {max_adopt} 銘柄",
         ],
     }
 
 
+def _content_line(row: dict[str, Any]) -> str:
+    bits: list[str] = []
+    surprise = row.get("surprise") if isinstance(row.get("surprise"), dict) else None
+    if surprise and surprise.get("summary"):
+        bits.append(str(surprise["summary"]))
+    news = row.get("news") or []
+    if news and isinstance(news[0], dict) and news[0].get("title"):
+        bits.append(f"ニュース: {news[0]['title'][:80]}")
+    sent = row.get("news_sentiment")
+    if sent and sent != "neutral":
+        bits.append(f"見出し={sent}")
+    return " · ".join(bits)
+
+
 def generate_brief_response(packet: dict[str, Any], score_resp: dict[str, Any] | None = None) -> dict[str, Any]:
+    from signalforge.ai.content import enrich_content_rows
+    from signalforge.ai.events import enrich_event_rows
+
     ts = packet.get("trend_screen") or {}
     paper = packet.get("trend_paper") or {}
     as_of = ts.get("as_of") or packet.get("generated_at")
-    targets = ts.get("targets") or []
+    as_of_s = str(as_of)[:10] if as_of else None
+    targets = enrich_content_rows(
+        enrich_event_rows(list(ts.get("targets") or []), as_of=as_of_s),
+        as_of=as_of_s,
+        fetch_news=False,
+    )
     holdings = paper.get("holdings") or []
     adopted = set((score_resp or {}).get("adopted") or [])
+    score_by_ticker = {
+        str(s.get("ticker")): s for s in ((score_resp or {}).get("scores") or []) if s.get("ticker")
+    }
 
     watch: list[dict[str, Any]] = []
     for t in targets:
         ticker = str(t.get("ticker") or "")
         r20 = float(t.get("ret_20d") or 0)
+        scored = score_by_ticker.get(ticker) or {}
+        # Prefer score-packet content (may include freshly fetched news).
+        content_src = scored if scored.get("surprise") or scored.get("news") else t
+        content = _content_line(content_src)
         if ticker in adopted:
             stance, conf = "WATCH", 70
             why = "採点 ADOPT。目標入りかつ過熱が相対的に軽い。"
@@ -158,6 +224,8 @@ def generate_brief_response(packet: dict[str, Any], score_resp: dict[str, Any] |
             stance, conf = "WATCH", 62
             why = f"目標 {t.get('rank')} 位 · 1年{_pct(t.get('ret_1y'))} · 20日{_pct(r20)}"
             risk = "イベント日付はパケット次第。"
+        if content:
+            why = f"{why} · {content}"
         watch.append(
             {
                 "ticker": ticker,
@@ -166,6 +234,9 @@ def generate_brief_response(packet: dict[str, Any], score_resp: dict[str, Any] |
                 "confidence": conf,
                 "why": why,
                 "risk": risk,
+                "surprise": content_src.get("surprise"),
+                "news": content_src.get("news"),
+                "content_data": content_src.get("content_data"),
             }
         )
 
@@ -204,11 +275,13 @@ def generate_brief_response(packet: dict[str, Any], score_resp: dict[str, Any] |
         "paper_notes": [
             f"trend_paper open={paper.get('open')} · month_excess={_pct(month_ex)}",
             f"diversified papers={len(packet.get('diversified_papers') or [])} 口座を参照",
+            "内容: surprise=earnings_surprise/fins · news=data/alt/news（あれば why に併記）",
         ],
         "skip_today": skip,
         "actions_for_human": [
             "ADOPT / REDUCE 銘柄のチャート確認",
             "紙上ドロー銘柄の出口ルール確認",
+            "サプライズ悪材料・ネガティブ見出しの銘柄は一次情報を確認",
             "採用したら ai adoption ログで追跡（日次で自動）",
         ],
     }
@@ -231,17 +304,28 @@ def generate_debate_response(packet: dict[str, Any]) -> dict[str, Any]:
             decision, conf = "BUY", 64
         else:
             decision, conf = "HOLD", 58
+        content = _content_line(m)
+        bull = f"スクリーニング通過・1年{_pct(m.get('ret_1y'))}・20日{_pct(r20)}。"
+        bear = f"vol_1y={vol:.2f} · mdd_1y={m.get('mdd_1y')} · earnings_next_days={days}。"
+        if content:
+            bull = f"{bull} 内容: {content}"
+            if m.get("news_sentiment") == "negative" or (
+                isinstance(m.get("surprise"), dict) and (m["surprise"].get("op_yoy") or 0) < -0.2
+            ):
+                bear = f"{bear} 内容リスク: {content}"
         debates.append(
             {
                 "ticker": ticker,
                 "name": name,
-                "bull": f"スクリーニング通過・1年{_pct(m.get('ret_1y'))}・20日{_pct(r20)}。",
-                "bear": f"vol_1y={vol:.2f} · mdd_1y={m.get('mdd_1y')} · earnings_next_days={days}。",
+                "bull": bull,
+                "bear": bear,
                 "risk_officer": "参考意見のみ。発注・サイズ指定はしない。",
                 "decision": decision,
                 "confidence": conf,
                 "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
-                "why_this_could_fail": "スクリーニング遅行やイベントギャップ。",
+                "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
+                "surprise": m.get("surprise"),
+                "news": m.get("news"),
             }
         )
     return {

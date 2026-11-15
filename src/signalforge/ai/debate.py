@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from signalforge.ai.content import enrich_content_fields
 from signalforge.ai.events import enrich_event_fields
 from signalforge.ai.packet import (
     load_trend_ranking,
@@ -30,7 +31,8 @@ def _row_by_ticker(
             sym = str(row.get("ticker") or "").upper().replace(".T", "")
             full = str(row.get("ticker") or "").upper()
             if code == want or sym == want or full == ticker.upper():
-                return enrich_event_fields(slim_rank_row(row), as_of=as_of)
+                slim = enrich_event_fields(slim_rank_row(row), as_of=as_of)
+                return enrich_content_fields(slim, as_of=as_of, fetch_news=False)
     return None
 
 
@@ -117,7 +119,8 @@ def build_debate_packet(
         "note": (
             "TradingAgents は米国前提が多いため、日本株は SignalForge 自前の議論パケットを使う。"
             "発注には接続しない。参考意見のみ。"
-            "metrics の earnings_* は ranking または data/alt/earnings キャッシュ。"
+            "metrics の earnings_* は ranking / alt earnings。"
+            "surprise は earnings_surprise/fins、news は data/alt/news。"
         ),
         "context": {"trend_paper": summarize_trend_paper()},
         "names": names,

@@ -8,7 +8,9 @@ TSE 実験の多くは **日足 OHLCV のみ** で回せますが、カタログ
 | データ | 保存先 | 取得コマンド | 使う戦略例 |
 |--------|--------|--------------|------------|
 | **業種 EW 指数** | `data/alt/sector_indices/` | `uv run signalforge alt-data fetch --sectors` | `sector_leader_laggard`, `bnf_sector_leading_swing`, `pairs_trading_sector` |
-| **決算日（yfinance）** | `data/alt/earnings/*.json` | `uv run signalforge alt-data fetch --earnings` | `earnings_drift`, `kabutan_theme_swing_earnings` |
+| **決算日（yfinance / J-Quants）** | `data/alt/earnings/*.json` | `uv run signalforge alt-data fetch --earnings` | `earnings_drift`, `kabutan_theme_swing_earnings`, trend-screen 表示, **AI Score の event カレンダー** |
+| **決算短信内容（J-Quants）** | `data/earnings_surprise/fins/*.parquet` | `uv run python -m signalforge.research.earnings_surprise fetch-sample` 等 | **AI Score / Brief の surprise（会社予想・YoY）** |
+| **ニュース見出し（Yahoo）** | `data/alt/news/*.json` | `uv run signalforge ai score --fetch-news` / `ai daily` | **AI Score / Brief の news** |
 | **信用残（J-Quants V2）** | `data/alt/credit_margin/*.json` | `uv run signalforge alt-data fetch --jquants-credit` | `credit_balance_contrarian` |
 
 BT 時に `pipeline` が `alt_data.enrich` で列を付与し、専用テンプレ（`sector_relative_momentum` 等）がシグナルを出します。

@@ -15,4 +15,4 @@
 - momentum: 20日/60日。過熱のみの急騰は減点
 - risk: ボラ・MDD・52週DD
 - liquidity: turnover_20d
-- event: earnings_next / earnings_next_days（実カレンダー。ranking または data/alt/earnings）。近いほど減点。event_data=missing は中立。遠いほど加点
+- event: カレンダー（earnings_next_days）＋内容（`surprise` の C0/会社予想/YoY、`news` 見出し）。近い決算は減点。event_data=missing は中立。ポジティブ内容は加点、悪材料見出しは減点。コンセンサス比は無い

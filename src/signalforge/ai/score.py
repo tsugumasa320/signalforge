@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from signalforge.ai.content import content_coverage, enrich_content_rows
 from signalforge.ai.events import enrich_event_rows, event_coverage
 from signalforge.ai.packet import (
     load_trend_ranking,
@@ -41,20 +42,18 @@ RUBRIC = [
     },
     {
         "id": "event",
-        "label": "イベント空白",
+        "label": "イベント／内容",
         "max_points": 20,
         "hint": (
-            "earnings_next / earnings_next_days（trend-screen または "
-            "data/alt/earnings キャッシュ）。直近決算が近いほど減点。"
-            "カレンダー欠損（event_data=missing）は中立点。"
-            "キャッシュありで次回なし／遠い日付は加点。"
-            "ex_dividend_date があれば参考（採点の主因ではない）。"
+            "カレンダー: earnings_next_days（近いほど減点、missing は中立）。"
+            "内容: surprise（会社予想上方/C0・営業利益YoY）と news 見出しキーワードで微調整。"
+            "コンセンサス比ではない（J-Quants 短信ベース）。"
         ),
     },
 ]
 
 
-def build_score_packet(*, top: int = 20) -> dict[str, Any]:
+def build_score_packet(*, top: int = 20, fetch_news: bool = False) -> dict[str, Any]:
     ranking_raw = load_trend_ranking()
     if not ranking_raw:
         raise FileNotFoundError(
@@ -62,10 +61,12 @@ def build_score_packet(*, top: int = 20) -> dict[str, Any]:
             "先に `uv run signalforge trend-screen ranking` を実行してください。"
         )
     as_of = ranking_raw.get("as_of") or ranking_raw.get("signal_date")
+    as_of_s = str(as_of) if as_of else None
     candidates = enrich_event_rows(
         [slim_rank_row(r) for r in (ranking_raw.get("ranking") or [])[: max(0, top)]],
-        as_of=str(as_of) if as_of else None,
+        as_of=as_of_s,
     )
+    candidates = enrich_content_rows(candidates, as_of=as_of_s, fetch_news=fetch_news)
     return {
         "schema": SCHEMA,
         "generated_at": utc_now_iso(),
@@ -76,11 +77,12 @@ def build_score_packet(*, top: int = 20) -> dict[str, Any]:
         "version": ranking_raw.get("version"),
         "rubric": RUBRIC,
         "event_coverage": event_coverage(candidates),
+        "content_coverage": content_coverage(candidates),
         "event_notes": (
-            "event 因子は実決算カレンダー（ranking または data/alt/earnings）を使う。"
-            "キャッシュが無い銘柄は event_data=missing で中立点。"
-            "取得: `uv run signalforge alt-data fetch --earnings` "
-            "（JQUANTS_API_KEY があれば J-Quants カレンダー）。"
+            "event 因子 = カレンダー + 内容。"
+            "カレンダー: ranking / data/alt/earnings。"
+            "サプライズ: data/earnings_surprise/fins（会社予想・YoY。コンセンサスなし）。"
+            "ニュース: data/alt/news（Yahoo見出しキャッシュ。`ai score --fetch-news` で取得）。"
         ),
         "candidates": candidates,
         "response_schema": {
@@ -108,8 +110,13 @@ def build_score_packet(*, top: int = 20) -> dict[str, Any]:
     }
 
 
-def write_score(*, top: int = 20, out_dir: Path | None = None) -> tuple[dict[str, Any], Path, Path]:
-    packet = build_score_packet(top=top)
+def write_score(
+    *,
+    top: int = 20,
+    out_dir: Path | None = None,
+    fetch_news: bool = False,
+) -> tuple[dict[str, Any], Path, Path]:
+    packet = build_score_packet(top=top, fetch_news=fetch_news)
     base = out_dir or ai_dir()
     stamp = (packet.get("as_of") or "unknown").replace("-", "")
     dated = write_json(base / f"scores_packet_{stamp}.json", packet)

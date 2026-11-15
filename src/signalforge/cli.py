@@ -2786,7 +2786,14 @@ def ai_group() -> None:
 @click.option("--debate-top", default=3, show_default=True, type=int)
 @click.option("--max-adopt", default=4, show_default=True, type=int)
 @click.option("--no-discord", is_flag=True, help="Discord 通知を送らない")
-def ai_daily_cmd(score_top: int, debate_top: int, max_adopt: int, no_discord: bool) -> None:
+@click.option("--no-fetch-news", is_flag=True, help="Yahoo 見出しを取りに行かない（キャッシュのみ）")
+def ai_daily_cmd(
+    score_top: int,
+    debate_top: int,
+    max_adopt: int,
+    no_discord: bool,
+    no_fetch_news: bool,
+) -> None:
     """ルールベースで Brief/Score/Debate を生成し、採択ログと成績評価も更新する。"""
     from signalforge.ai.daily import run_daily
 
@@ -2796,6 +2803,7 @@ def ai_daily_cmd(score_top: int, debate_top: int, max_adopt: int, no_discord: bo
             debate_top=debate_top,
             max_adopt=max_adopt,
             notify_discord=not no_discord,
+            fetch_news=not no_fetch_news,
         )
     except FileNotFoundError as exc:
         raise click.ClickException(str(exc)) from exc
@@ -2899,16 +2907,21 @@ def ai_brief_cmd(top: int, diversified_limit: int, strategy_limit: int) -> None:
 
 @ai_group.command("score")
 @click.option("--top", default=20, show_default=True, type=int, help="採点する通過上位件数")
-def ai_score_cmd(top: int) -> None:
+@click.option("--fetch-news", is_flag=True, help="候補の Yahoo 見出しを取得して data/alt/news に保存")
+def ai_score_cmd(top: int, fetch_news: bool) -> None:
     """上位銘柄の採点パケットとルーブリック付きプロンプトを書く。"""
     from signalforge.ai.score import write_score
 
     try:
-        packet, path, prompt_path = write_score(top=top)
+        packet, path, prompt_path = write_score(top=top, fetch_news=fetch_news)
     except FileNotFoundError as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"schema: {packet['schema']}")
-    click.echo(f"as_of={packet.get('as_of')} candidates={len(packet.get('candidates') or [])}")
+    cov = packet.get("content_coverage") or {}
+    click.echo(
+        f"as_of={packet.get('as_of')} candidates={len(packet.get('candidates') or [])} "
+        f"surprise={cov.get('with_surprise')} news={cov.get('with_news')}"
+    )
     click.echo(f"packet: {path}")
     click.echo(f"prompt: {prompt_path}")
     click.echo("次: 返答JSONを data/ai/scores_YYYYMMDD.json と scores_response_latest.json へ保存")

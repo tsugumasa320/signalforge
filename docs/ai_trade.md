@@ -48,9 +48,18 @@ uv run signalforge ai save-response debate /path/to/reply.json
 
 ```bash
 uv run signalforge trend-screen ranking   # 材料
-uv run signalforge ai daily               # 生成 + published 更新 + adoption eval
+uv run signalforge ai daily               # 生成 + published 更新 + adoption eval（ニュース見出しも取得）
+uv run signalforge ai daily --no-fetch-news  # キャッシュのみ
 uv run signalforge ai evaluate-adoptions  # 成績だけ再計算
 ```
+
+**内容（日付だけではない）**
+
+| ソース | パス | 使い方 |
+|--------|------|--------|
+| 決算サプライズ | `data/earnings_surprise/fins/*.parquet` | 会社予想上方 / C0 / 営業利益 YoY（コンセンサス比はなし） |
+| ニュース見出し | `data/alt/news/*.json` | Yahoo 見出し。`ai daily` または `ai score --fetch-news` で取得 |
+
 
 GitHub Actions（`scripts/ci-daily-paper.sh`）が ranking / forward の後に `ai daily` を回し、`data/published/ai_*.json` を commit する。
 

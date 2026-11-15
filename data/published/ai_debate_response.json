@@ -11,7 +11,9 @@
       "decision": "BUY",
       "confidence": 64,
       "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
-      "why_this_could_fail": "スクリーニング遅行やイベントギャップ。"
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
+      "surprise": null,
+      "news": null
     },
     {
       "ticker": "9147.T",
@@ -22,7 +24,9 @@
       "decision": "BUY",
       "confidence": 64,
       "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
-      "why_this_could_fail": "スクリーニング遅行やイベントギャップ。"
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
+      "surprise": null,
+      "news": null
     },
     {
       "ticker": "9962.T",
@@ -33,7 +37,9 @@
       "decision": "BUY",
       "confidence": 64,
       "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
-      "why_this_could_fail": "スクリーニング遅行やイベントギャップ。"
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
+      "surprise": null,
+      "news": null
     }
   ],
   "committee_summary": "ルールベース議論。BUY は過熱・直近決算を避けた候補のみ。人が最終判断し、発注には接続しない。"
