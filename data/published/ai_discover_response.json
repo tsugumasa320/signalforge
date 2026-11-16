@@ -284,10 +284,16 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+70.0% · 20日+11.5% · vol=0.23 · turnover=32266679440 · Asian Equities Traded in the US as American Depositary Receipts Drop Sharply in Thursday Trading / Ginkgo Bioworks Holdi",
+      "why": "1年+70.0% · 20日+11.5% · vol=0.23 · turnover=32266679440 · Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading / Asian Equit",
       "risk": "mdd_1y=-0.19388788056717232 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154847227.html",
+          "published_at": "2026-11-16T15:48:47Z"
+        },
         {
           "title": "Asian Equities Traded in the US as American Depositary Receipts Drop Sharply in Thursday Trading",
           "publisher": "MT Newswires",
@@ -299,19 +305,13 @@
           "publisher": "GuruFocus.com",
           "link": "https://finance.yahoo.com/healthcare/articles/ginkgo-bioworks-holdings-inc-dna-050529129.html",
           "published_at": "2026-11-12T05:05:29Z"
-        },
-        {
-          "title": "ADMA Surges 20.9% Post Q3 Earnings: Buy, Sell or Hold the Stock?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/healthcare/articles/adma-surges-20-9-post-164100233.html",
-          "published_at": "2026-11-11T16:41:00Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-12",
+      "pit_available_at": "2026-11-16",
       "pit_issues": [],
       "screen_passed": true,
       "price": 6937.0
@@ -973,10 +973,16 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+59.0% · 20日+12.2% · vol=0.33 · turnover=20267112290 · BANDAI NAMCO (TSE:7832) Stock May Be 29% Undervalued On Cash Flow / Bandai Namco (TSE:7832) Stock Trades At A Discount D",
+      "why": "1年+59.0% · 20日+12.2% · vol=0.33 · turnover=20267112290 · Bandai Namco (TSE:7832) Stock Trades Below Fair Value As Earnings Guidance Rises / BANDAI NAMCO (TSE:7832) Stock May Be ",
       "risk": "mdd_1y=-0.2133812086369482 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Bandai Namco (TSE:7832) Stock Trades Below Fair Value As Earnings Guidance Rises",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-171809423.html",
+          "published_at": "2026-11-16T17:18:09Z"
+        },
         {
           "title": "BANDAI NAMCO (TSE:7832) Stock May Be 29% Undervalued On Cash Flow",
           "publisher": "Simply Wall St.",
@@ -988,19 +994,13 @@
           "publisher": "Simply Wall St.",
           "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-000953560.html",
           "published_at": "2026-10-02T00:09:53Z"
-        },
-        {
-          "title": "Are Consumer Discretionary Stocks Lagging  Flexsteel Industries (FLXS) This Year?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/consumer-discretionary-stocks-lagging-flexsteel-124002018.html",
-          "published_at": "2026-09-24T12:40:02Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-10-20",
+      "pit_available_at": "2026-11-16",
       "pit_issues": [],
       "screen_passed": true,
       "price": 7066.0

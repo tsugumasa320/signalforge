@@ -277,10 +277,16 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+70.0% · 20日+11.5% · vol=0.23 · turnover=32266679440 · Asian Equities Traded in the US as American Depositary Receipts Drop Sharply in Thursday Trading / Ginkgo Bioworks Holdi",
+      "why": "1年+70.0% · 20日+11.5% · vol=0.23 · turnover=32266679440 · Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading / Asian Equit",
       "risk": "mdd_1y=-0.19388788056717232 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154847227.html",
+          "published_at": "2026-11-16T15:48:47Z"
+        },
         {
           "title": "Asian Equities Traded in the US as American Depositary Receipts Drop Sharply in Thursday Trading",
           "publisher": "MT Newswires",
@@ -304,19 +310,13 @@
           "publisher": "Simply Wall St.",
           "link": "https://finance.yahoo.com/markets/stocks/articles/raised-guidance-could-change-case-201207373.html",
           "published_at": "2026-11-07T20:12:07Z"
-        },
-        {
-          "title": "Healthcare Stocks Fall as Market Rout Spreads",
-          "publisher": "The Wall Street Journal",
-          "link": "https://www.wsj.com/finance/stocks/healthcare-stocks-fall-as-market-rout-spreads-f789b5c8?siteid=yhoof2&yptr=yahoo",
-          "published_at": "2026-11-06T11:54:00Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-12",
+      "pit_available_at": "2026-11-16",
       "pit_issues": [],
       "price": 6937.0
     },
@@ -522,10 +522,16 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+59.0% · 20日+12.2% · vol=0.33 · turnover=20267112290 · BANDAI NAMCO (TSE:7832) Stock May Be 29% Undervalued On Cash Flow / Bandai Namco (TSE:7832) Stock Trades At A Discount D",
+      "why": "1年+59.0% · 20日+12.2% · vol=0.33 · turnover=20267112290 · Bandai Namco (TSE:7832) Stock Trades Below Fair Value As Earnings Guidance Rises / BANDAI NAMCO (TSE:7832) Stock May Be ",
       "risk": "mdd_1y=-0.2133812086369482 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Bandai Namco (TSE:7832) Stock Trades Below Fair Value As Earnings Guidance Rises",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-171809423.html",
+          "published_at": "2026-11-16T17:18:09Z"
+        },
         {
           "title": "BANDAI NAMCO (TSE:7832) Stock May Be 29% Undervalued On Cash Flow",
           "publisher": "Simply Wall St.",
@@ -549,19 +555,13 @@
           "publisher": "Zacks",
           "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-holdings-inc-unsponsored-134003722.html",
           "published_at": "2026-09-04T13:40:03Z"
-        },
-        {
-          "title": "Passing on a $1B idea was his key to success: Spin Master Chair",
-          "publisher": "Yahoo Finance Video",
-          "link": "https://finance.yahoo.com/video/passing-1b-idea-key-success-110000994.html",
-          "published_at": "2026-09-04T11:00:00Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-10-20",
+      "pit_available_at": "2026-11-16",
       "pit_issues": [],
       "price": 7066.0
     },
