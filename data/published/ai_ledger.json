@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-ledger/v1",
-  "updated_at": "2026-11-15T13:42:33+00:00",
+  "updated_at": "2026-11-16T13:06:03+00:00",
   "events": [
     {
       "ts": "2026-11-15T13:35:35+00:00",
@@ -144,6 +144,89 @@
       "prev_hash": "a63d24bcd96c5a694f5f328446ff2bf57d9cd3f671d4a87ea65bdd3f15de5444",
       "hash": "049ae3dd3f69342c588252c2a3c43392c8f021cc63a5cd614943da3a4f8baefe",
       "seq": 9
+    },
+    {
+      "ts": "2026-11-16T13:06:03+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-16",
+      "payload": {
+        "ticker": "8766.T",
+        "name": "東京海上ホールディングス",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "049ae3dd3f69342c588252c2a3c43392c8f021cc63a5cd614943da3a4f8baefe",
+      "hash": "a78d233bc90889e72f69479f4055e77ecc402210edd69b45dc5f24c1cc1d0ee3",
+      "seq": 10
+    },
+    {
+      "ts": "2026-11-16T13:06:03+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-16",
+      "payload": {
+        "ticker": "8725.T",
+        "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "a78d233bc90889e72f69479f4055e77ecc402210edd69b45dc5f24c1cc1d0ee3",
+      "hash": "d8578161ab65065aacbc035dd11f3486002d1902dd932ca6218bdc6369fb81ce",
+      "seq": 11
+    },
+    {
+      "ts": "2026-11-16T13:06:03+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-16",
+      "payload": {
+        "ticker": "8309.T",
+        "name": "三井住友トラストグループ",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "d8578161ab65065aacbc035dd11f3486002d1902dd932ca6218bdc6369fb81ce",
+      "hash": "7bbf2be5085361d0395b2169c30a06830a265973dd54d22390c14f39305a6f74",
+      "seq": 12
+    },
+    {
+      "ts": "2026-11-16T13:06:03+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-16",
+      "payload": {
+        "ticker": "3563.T",
+        "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "7bbf2be5085361d0395b2169c30a06830a265973dd54d22390c14f39305a6f74",
+      "hash": "8dfb37abdafbd468064bc4d92651f99387d671df7daaf59aeb406feef53f5ba2",
+      "seq": 13
+    },
+    {
+      "ts": "2026-11-16T13:06:03+00:00",
+      "kind": "daily_run",
+      "as_of": "2026-11-16",
+      "payload": {
+        "source": "rules/v1",
+        "adopted": [
+          "8766.T",
+          "8725.T",
+          "8309.T",
+          "3563.T"
+        ],
+        "score_n": 20,
+        "debate_n": 3,
+        "roles": [
+          "analyst_score",
+          "brief_summarizer",
+          "bull_researcher",
+          "bear_researcher",
+          "risk_officer",
+          "human_approver"
+        ]
+      },
+      "prev_hash": "8dfb37abdafbd468064bc4d92651f99387d671df7daaf59aeb406feef53f5ba2",
+      "hash": "cc7e61f4926e67bd6f8ce8110f7f14a01e91d7d73bff56938801e63d7e2064e8",
+      "seq": 14
     }
   ]
 }

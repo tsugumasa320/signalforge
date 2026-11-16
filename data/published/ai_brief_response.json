@@ -1,92 +1,198 @@
 {
-  "as_of": "2026-11-13",
+  "as_of": "2026-11-16",
   "generator": "rules/v1",
-  "market_take": "トレンド通過 52 / 目標 5。紙上当月超過は -3.3%。ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
+  "market_regime": {
+    "overall": "risk_off",
+    "jp": "mixed_off",
+    "us": "mixed_off",
+    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-7.5%/弱気（リスクオフ） · ダウ先物:20日+0.4%/まちまち · S&P500先物:20日-2.5%/まちまち · NASDAQ100先物:20日-6.9%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-8.6%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-4.1%/まちまち · NYダウ:20日+0.7%/まちまち"
+  },
+  "market_take": "トレンド通過 46 / 目標 5。紙上当月超過は -1.3%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-7.5%/弱気（リスクオフ） · ダウ先物:20日+0.4%/まちまち · S&P500先物:20日-2.5%/まちまち · NASDAQ100先物:20日-6.9%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-8.6%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-4.1%/まちまち · NYダウ:20日+0.7%/まちまち ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
   "watch": [
     {
       "ticker": "4588.T",
       "name": "オンコリスバイオファーマ",
       "stance": "AVOID",
       "confidence": 72,
-      "why": "目標入りだが20日+67.9%で過熱。",
+      "why": "目標入りだが20日+56.0%で過熱。 · ニュース: Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
       "risk": "追撃よりサイズ管理。",
       "surprise": null,
-      "news": null,
-      "content_data": "missing"
+      "news": [
+        {
+          "title": "Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/oncolys-biopharma-tse-4588-stock-151530351.html",
+          "published_at": "2026-11-12T15:15:30Z"
+        },
+        {
+          "title": "Oncolys BioPharma (TSE:4588) Stock May Trade At A Premium On Book Value",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/oncolys-biopharma-tse-4588-stock-220733787.html",
+          "published_at": "2026-10-25T22:07:33Z"
+        }
+      ],
+      "content_data": "news"
     },
     {
       "ticker": "8766.T",
       "name": "東京海上ホールディングス",
       "stance": "WATCH",
-      "confidence": 62,
-      "why": "目標 2 位 · 1年+100.6% · 20日+10.0% · 決算発表 1Q",
-      "risk": "イベント日付はパケット次第。",
-      "surprise": {
-        "code": "87660",
-        "disc_date": "2026-08-12",
-        "days_ago": 93,
-        "period": "1Q",
-        "c0": false,
-        "rev_op": null,
-        "op_yoy": null,
-        "opm_delta": null,
-        "basis": "company_forecast_or_yoy",
-        "summary": "決算発表 1Q"
-      },
-      "news": null,
-      "content_data": "surprise"
+      "confidence": 70,
+      "why": "採点 ADOPT。目標入りかつ過熱が相対的に軽い。 · ニュース: CB or TKOMY: Which Is the Better Value Stock Right Now?",
+      "risk": "スクリーニング遅行・セクター感応。",
+      "surprise": null,
+      "news": [
+        {
+          "title": "CB or TKOMY: Which Is the Better Value Stock Right Now?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/cb-tkomy-better-value-stock-144002962.html",
+          "published_at": "2026-10-28T14:40:02Z"
+        },
+        {
+          "title": "Is Tokio Marine Holdings (TSE:8766) Priced Below Fair Value After A 5 Year Surge?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tokio-marine-holdings-tse-8766-071340037.html",
+          "published_at": "2026-10-25T07:13:40Z"
+        },
+        {
+          "title": "RNR or TKOMY: Which Is the Better Value Stock Right Now?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/rnr-tkomy-better-value-stock-144004284.html",
+          "published_at": "2026-10-12T14:40:04Z"
+        },
+        {
+          "title": "Australia’s Suncorp shares drop after denying Tokio Marine takeover talks",
+          "publisher": "Investing.com",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/australia-suncorp-shares-drop-denying-063936224.html",
+          "published_at": "2026-10-01T06:39:36Z"
+        },
+        {
+          "title": "Tokio Marine Holdings Inc's Dividend Analysis",
+          "publisher": "GuruFocus.com",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tokio-marine-holdings-incs-dividend-110251815.html",
+          "published_at": "2026-09-29T11:02:51Z"
+        }
+      ],
+      "content_data": "news"
     },
     {
       "ticker": "6532.T",
       "name": "ベイカレント",
-      "stance": "AVOID",
-      "confidence": 72,
-      "why": "目標入りだが20日+41.7%で過熱。",
-      "risk": "追撃よりサイズ管理。",
-      "surprise": null,
-      "news": null,
-      "content_data": "missing"
-    },
-    {
-      "ticker": "9147.T",
-      "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
       "stance": "WATCH",
-      "confidence": 70,
-      "why": "採点 ADOPT。目標入りかつ過熱が相対的に軽い。",
-      "risk": "スクリーニング遅行・セクター感応。",
+      "confidence": 62,
+      "why": "目標 3 位 · 1年+100.7% · 20日+24.0% · ニュース: Tech Rebound Amid General Caution Roils Asian Stock Markets",
+      "risk": "イベント日付はパケット次第。",
       "surprise": null,
-      "news": null,
-      "content_data": "missing"
+      "news": [
+        {
+          "title": "Tech Rebound Amid General Caution Roils Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/tech-rebound-amid-general-caution-104226877.html",
+          "published_at": "2026-11-09T10:42:26Z"
+        },
+        {
+          "title": "Learn Why The Bull Case For Baycurrent Stock Could Change Following Half Year Earnings",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/learn-why-bull-case-baycurrent-051628554.html",
+          "published_at": "2026-10-24T05:16:28Z"
+        },
+        {
+          "title": "Tech Rebound Lifts Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/tech-rebound-lifts-asian-stock-103546692.html",
+          "published_at": "2026-10-16T10:35:46Z"
+        },
+        {
+          "title": "BayCurrent’s Strong FY2026 Results and Dividend Hike Might Change The Case For Investing In BayCurrent (TSE:6532)",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/baycurrent-strong-fy2026-results-dividend-110525780.html",
+          "published_at": "2026-04-23T11:05:25Z"
+        },
+        {
+          "title": "Middle East Outlook Elevates Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/middle-east-outlook-elevates-asian-103743533.html",
+          "published_at": "2026-04-15T10:37:43Z"
+        }
+      ],
+      "content_data": "news"
     },
     {
-      "ticker": "9962.T",
-      "name": "ミスミグループ本社",
+      "ticker": "7747.T",
+      "name": "朝日インテック",
       "stance": "WATCH",
-      "confidence": 70,
-      "why": "採点 ADOPT。目標入りかつ過熱が相対的に軽い。",
-      "risk": "スクリーニング遅行・セクター感応。",
+      "confidence": 62,
+      "why": "目標 4 位 · 1年+78.4% · 20日+19.5% · ニュース: Is Asahi Intecc (TSE:7747) Priced Right for Its Cash Flow?",
+      "risk": "イベント日付はパケット次第。",
       "surprise": null,
-      "news": null,
-      "content_data": "missing"
+      "news": [
+        {
+          "title": "Is Asahi Intecc (TSE:7747) Priced Right for Its Cash Flow?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/asahi-intecc-tse-7747-priced-210817302.html",
+          "published_at": "2026-10-31T21:08:17Z"
+        },
+        {
+          "title": "Is Asahi Intecc (TSE:7747) Cheap Or Is Its Premium P/E Already Priced In?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/asahi-intecc-tse-7747-cheap-042559743.html",
+          "published_at": "2026-09-30T04:25:59Z"
+        }
+      ],
+      "content_data": "news"
     },
     {
-      "ticker": "3042.T",
-      "name": "セキュアヴェイル",
-      "stance": "REDUCE",
-      "confidence": 68,
-      "why": "紙上保有リターン -24.7%。当月の足を引っ張りやすい。",
-      "risk": "ルール上の出口確認。裁量損切りは別判断。"
+      "ticker": "8750.T",
+      "name": "第一ライフグループ",
+      "stance": "WATCH",
+      "confidence": 62,
+      "why": "目標 5 位 · 1年+76.9% · 20日+0.5% · ニュース: Daiichi Life Group Inc (DCNSF) (Q2 2027) Earnings Call Highlights: Adjusted Prof",
+      "risk": "イベント日付はパケット次第。",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Daiichi Life Group Inc (DCNSF) (Q2 2027) Earnings Call Highlights: Adjusted Profit Jumps 33% as ...",
+          "publisher": "GuruFocus.com",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/daiichi-life-group-inc-dcnsf-150134035.html",
+          "published_at": "2026-11-13T15:01:34Z"
+        },
+        {
+          "title": "Challenger rejects Daiichi Life’s acquisition proposal",
+          "publisher": "Life Insurance International",
+          "link": "https://www.lifeinsuranceinternational.com/news/challenger-rejects-daiichi-lifes-acquisition-proposal/",
+          "published_at": "2026-10-26T14:54:22Z"
+        },
+        {
+          "title": "TAL Daiichi Life Australia offers to buy rest of Challenger",
+          "publisher": "Life Insurance International",
+          "link": "https://www.lifeinsuranceinternational.com/news/tal-daiichi-life-australia-buy-rest-challenger/",
+          "published_at": "2026-10-19T14:38:06Z"
+        },
+        {
+          "title": "Challenger shares surge 17% to eight-year high on $5.5 billion Daiichi Life offer",
+          "publisher": "Investing.com",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/challenger-shares-surge-17-eight-021742455.html",
+          "published_at": "2026-10-19T02:17:42Z"
+        },
+        {
+          "title": "Daiichi Life Group Inc's Dividend Analysis",
+          "publisher": "GuruFocus.com",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/daiichi-life-group-incs-dividend-110551094.html",
+          "published_at": "2026-09-29T11:05:51Z"
+        }
+      ],
+      "content_data": "news"
     }
   ],
   "paper_notes": [
-    "trend_paper open=True · month_excess=-3.3%",
+    "trend_paper open=True · month_excess=-1.3%",
     "diversified papers=7 口座を参照",
     "内容: surprise=earnings_surprise/fins · news=data/alt/news（あれば why に併記）"
   ],
   "skip_today": [
     "過熱銘柄（20日リターンが極端）の追撃",
     "分散ペーパーが弱い局面でのサイズ拡大",
-    "直近決算銘柄の新規"
+    "地合い弱め局面での新規サイズ拡大"
   ],
   "actions_for_human": [
     "ADOPT 提案を `ai pending` で確認し、`ai approve` / `ai reject` でゲートする",

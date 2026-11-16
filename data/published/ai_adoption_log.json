@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-adoption-log/v1",
-  "updated_at": "2026-11-15T13:35:35+00:00",
+  "updated_at": "2026-11-16T13:06:03+00:00",
   "entries": [
     {
       "as_of": "2026-11-13",
@@ -105,6 +105,128 @@
         }
       ],
       "skipped_count": 5
+    },
+    {
+      "as_of": "2026-11-16",
+      "logged_at": "2026-11-16T13:06:03+00:00",
+      "source": "rules/v1",
+      "adopted": [
+        {
+          "ticker": "8766.T",
+          "name": "東京海上ホールディングス",
+          "total": 84,
+          "price": 597.4000244140625,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "8725.T",
+          "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
+          "total": 84,
+          "price": 5329.0,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "8309.T",
+          "name": "三井住友トラストグループ",
+          "total": 84,
+          "price": 1786.5,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "3563.T",
+          "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+          "total": 84,
+          "price": 6395.0,
+          "decision": "ADOPT"
+        }
+      ],
+      "watched": [
+        {
+          "ticker": "8630.T",
+          "name": "ＳＯＭＰＯホールディングス",
+          "total": 84,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4502.T",
+          "name": "武田薬品工業",
+          "total": 81,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "8795.T",
+          "name": "Ｔ＆Ｄホールディングス",
+          "total": 80,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "8750.T",
+          "name": "第一ライフグループ",
+          "total": 78,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "6178.T",
+          "name": "日本郵政",
+          "total": 78,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4578.T",
+          "name": "大塚ホールディングス",
+          "total": 78,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7832.T",
+          "name": "バンダイナムコホールディングス",
+          "total": 75,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4503.T",
+          "name": "アステラス製薬",
+          "total": 75,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "2702.T",
+          "name": "日本マクドナルドホールディングス",
+          "total": 72,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7747.T",
+          "name": "朝日インテック",
+          "total": 71,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7867.T",
+          "name": "タカラトミー",
+          "total": 70,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4475.T",
+          "name": "ＨＥＮＮＧＥ",
+          "total": 66,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7581.T",
+          "name": "サイゼリヤ",
+          "total": 65,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "6532.T",
+          "name": "ベイカレント",
+          "total": 62,
+          "decision": "WATCH"
+        }
+      ],
+      "skipped_count": 2
     }
   ]
 }

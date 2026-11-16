@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-approvals/v1",
-  "updated_at": "2026-11-15T13:42:33+00:00",
+  "updated_at": "2026-11-16T13:06:03+00:00",
   "items": [
     {
       "id": "2026-11-13:8309.T",
@@ -53,6 +53,58 @@
       "proposed_at": "2026-11-15T13:35:35+00:00",
       "resolved_at": "2026-11-15T13:42:33+00:00",
       "note": "batch gate"
+    },
+    {
+      "id": "2026-11-16:8766.T",
+      "as_of": "2026-11-16",
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "total": 84,
+      "price": 597.4000244140625,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-16T13:06:03+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-16:8725.T",
+      "as_of": "2026-11-16",
+      "ticker": "8725.T",
+      "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
+      "total": 84,
+      "price": 5329.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-16T13:06:03+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-16:8309.T",
+      "as_of": "2026-11-16",
+      "ticker": "8309.T",
+      "name": "三井住友トラストグループ",
+      "total": 84,
+      "price": 1786.5,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-16T13:06:03+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-16:3563.T",
+      "as_of": "2026-11-16",
+      "ticker": "3563.T",
+      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+      "total": 84,
+      "price": 6395.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-16T13:06:03+00:00",
+      "resolved_at": null,
+      "note": ""
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-adoption-eval/v1",
-  "generated_at": "2026-11-15T13:48:51+00:00",
+  "generated_at": "2026-11-16T13:06:03+00:00",
   "horizons_days": [
     5,
     20
@@ -65,10 +65,70 @@
       "status_20d": "pending",
       "ret_20d": null,
       "price_20d": null
+    },
+    {
+      "as_of": "2026-11-16",
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "score_total": 84,
+      "entry_price": 597.4000244140625,
+      "gate": "pending",
+      "paper_intent": false,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-16",
+      "ticker": "8725.T",
+      "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
+      "score_total": 84,
+      "entry_price": 5329.0,
+      "gate": "pending",
+      "paper_intent": false,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-16",
+      "ticker": "8309.T",
+      "name": "三井住友トラストグループ",
+      "score_total": 84,
+      "entry_price": 1786.5,
+      "gate": "pending",
+      "paper_intent": false,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-16",
+      "ticker": "3563.T",
+      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+      "score_total": 84,
+      "entry_price": 6395.0,
+      "gate": "pending",
+      "paper_intent": false,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
     }
   ],
   "summary": {
-    "n_adopted_rows": 4,
+    "n_adopted_rows": 8,
     "n_eval_5d": 0,
     "mean_ret_5d": null,
     "hit_rate_5d": null,
