@@ -82,6 +82,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # AI / screening / paper artifacts that Pages and the next run should keep.
           git add data/paper/ \
             data/published/trend_screen_ranking.json \
             data/published/trend_screen_forward.json \
@@ -91,7 +92,12 @@ jobs:
             data/published/ai_adoption_log.json \
             data/published/ai_adoption_eval.json \
             data/published/ai_discover_response.json \
-            data/trend_screen/liquid300.txt || true
+            data/published/ai_approvals.json \
+            data/published/ai_ledger.json \
+            data/published/market_regime.json \
+            data/trend_screen/liquid300.txt 2>/dev/null || true
+          # Ignore-tracked paths (e.g. liquid300) must not leave dirty tree before rebase.
+          git add -f data/trend_screen/liquid300.txt 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No paper/screening/AI state changes."
           else
@@ -99,9 +105,13 @@ jobs:
             # 走行中に main が進んでも、取り込み直してから push する
             for _ in 1 2 3; do
               git rebase --abort >/dev/null 2>&1 || true
+              # Leftover unstaged files (OHLCV pkl, alt caches, etc.) block pull --rebase.
+              git stash push --include-untracked -m "ci-daily-paper-pre-rebase" || true
               if git pull --rebase origin main && git push origin HEAD:main; then
+                git stash drop || true
                 exit 0
               fi
+              git stash pop || true
               sleep 10
             done
             exit 1
