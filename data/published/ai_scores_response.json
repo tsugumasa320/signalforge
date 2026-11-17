@@ -657,7 +657,7 @@
         "event": 12
       },
       "why": "1年+78.4% · 20日+19.5% · vol=0.38 · turnover=5307112785 · Is Asahi Intecc (TSE:7747) Priced Right for Its Cash Flow? / Is Asahi Intecc (TSE:7747) Cheap Or Is Its Premium P/E Alre",
-      "risk": "mdd_1y=-0.22647914645974787 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "risk": "mdd_1y=-0.22647914645974787 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
       "surprise": null,
       "news": [
         {
@@ -675,10 +675,12 @@
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
-      "pit_ok": true,
-      "pit_status": "ok",
+      "pit_ok": false,
+      "pit_status": "stripped",
       "pit_available_at": "2026-10-31",
-      "pit_issues": [],
+      "pit_issues": [
+        "news_after_as_of:2026-11-17"
+      ],
       "price": 4179.0
     },
     {
