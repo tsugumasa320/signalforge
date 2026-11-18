@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-adoption-eval/v1",
-  "generated_at": "2026-11-17T19:15:42+00:00",
+  "generated_at": "2026-11-18T19:33:37+00:00",
   "horizons_days": [
     5,
     20
@@ -125,10 +125,70 @@
       "status_20d": "pending",
       "ret_20d": null,
       "price_20d": null
+    },
+    {
+      "as_of": "2026-11-17",
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "score_total": 84,
+      "entry_price": 584.0999755859375,
+      "gate": "pending",
+      "paper_intent": false,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-17",
+      "ticker": "3563.T",
+      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+      "score_total": 84,
+      "entry_price": 6244.0,
+      "gate": "pending",
+      "paper_intent": false,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-17",
+      "ticker": "8630.T",
+      "name": "ＳＯＭＰＯホールディングス",
+      "score_total": 84,
+      "entry_price": 7152.0,
+      "gate": "pending",
+      "paper_intent": false,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
+    },
+    {
+      "as_of": "2026-11-17",
+      "ticker": "7453.T",
+      "name": "良品計画",
+      "score_total": 84,
+      "entry_price": 4979.0,
+      "gate": "pending",
+      "paper_intent": false,
+      "status_5d": "pending",
+      "ret_5d": null,
+      "price_5d": null,
+      "status_20d": "pending",
+      "ret_20d": null,
+      "price_20d": null
     }
   ],
   "summary": {
-    "n_adopted_rows": 8,
+    "n_adopted_rows": 12,
     "n_eval_5d": 0,
     "mean_ret_5d": null,
     "hit_rate_5d": null,

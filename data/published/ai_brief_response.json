@@ -1,20 +1,20 @@
 {
-  "as_of": "2026-11-16",
+  "as_of": "2026-11-17",
   "generator": "rules/v1",
   "market_regime": {
     "overall": "risk_off",
     "jp": "mixed_off",
-    "us": "mixed_off",
-    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-9.5%/弱気（リスクオフ） · ダウ先物:20日-3.6%/弱気（リスクオフ） · S&P500先物:20日-5.3%/弱気（リスクオフ） · NASDAQ100先物:20日-9.2%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-8.6%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-4.1%/まちまち · NYダウ:20日-3.2%/まちまち"
+    "us": "risk_off",
+    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-9.3%/弱気（リスクオフ） · ダウ先物:20日-5.3%/弱気（リスクオフ） · S&P500先物:20日-5.8%/弱気（リスクオフ） · NASDAQ100先物:20日-9.4%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-9.2%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-5.3%/まちまち · NYダウ:20日-5.1%/弱気（リスクオフ）"
   },
-  "market_take": "トレンド通過 46 / 目標 5。紙上当月超過は -1.3%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-9.5%/弱気（リスクオフ） · ダウ先物:20日-3.6%/弱気（リスクオフ） · S&P500先物:20日-5.3%/弱気（リスクオフ） · NASDAQ100先物:20日-9.2%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-8.6%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-4.1%/まちまち · NYダウ:20日-3.2%/まちまち ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
+  "market_take": "トレンド通過 45 / 目標 5。紙上当月超過は -0.6%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-9.3%/弱気（リスクオフ） · ダウ先物:20日-5.3%/弱気（リスクオフ） · S&P500先物:20日-5.8%/弱気（リスクオフ） · NASDAQ100先物:20日-9.4%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-9.2%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-5.3%/まちまち · NYダウ:20日-5.1%/弱気（リスクオフ） ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
   "watch": [
     {
       "ticker": "4588.T",
       "name": "オンコリスバイオファーマ",
       "stance": "AVOID",
       "confidence": 72,
-      "why": "目標入りだが20日+56.0%で過熱。 · ニュース: Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
+      "why": "目標入りだが20日+47.7%で過熱。 · ニュース: Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
       "risk": "追撃よりサイズ管理。",
       "surprise": null,
       "news": [
@@ -29,6 +29,48 @@
           "publisher": "Simply Wall St.",
           "link": "https://finance.yahoo.com/markets/stocks/articles/oncolys-biopharma-tse-4588-stock-220733787.html",
           "published_at": "2026-10-25T22:07:33Z"
+        }
+      ],
+      "content_data": "news"
+    },
+    {
+      "ticker": "6532.T",
+      "name": "ベイカレント",
+      "stance": "WATCH",
+      "confidence": 62,
+      "why": "目標 2 位 · 1年+99.0% · 20日+19.0% · ニュース: Tech Rebound Amid General Caution Roils Asian Stock Markets",
+      "risk": "イベント日付はパケット次第。",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Tech Rebound Amid General Caution Roils Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/tech-rebound-amid-general-caution-104226877.html",
+          "published_at": "2026-11-09T10:42:26Z"
+        },
+        {
+          "title": "Learn Why The Bull Case For Baycurrent Stock Could Change Following Half Year Earnings",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/learn-why-bull-case-baycurrent-051628554.html",
+          "published_at": "2026-10-24T05:16:28Z"
+        },
+        {
+          "title": "Tech Rebound Lifts Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/tech-rebound-lifts-asian-stock-103546692.html",
+          "published_at": "2026-10-16T10:35:46Z"
+        },
+        {
+          "title": "BayCurrent’s Strong FY2026 Results and Dividend Hike Might Change The Case For Investing In BayCurrent (TSE:6532)",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/baycurrent-strong-fy2026-results-dividend-110525780.html",
+          "published_at": "2026-04-23T11:05:25Z"
+        },
+        {
+          "title": "Middle East Outlook Elevates Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/middle-east-outlook-elevates-asian-103743533.html",
+          "published_at": "2026-04-15T10:37:43Z"
         }
       ],
       "content_data": "news"
@@ -76,116 +118,80 @@
       "content_data": "news"
     },
     {
-      "ticker": "6532.T",
-      "name": "ベイカレント",
+      "ticker": "7867.T",
+      "name": "タカラトミー",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 3 位 · 1年+100.7% · 20日+24.0% · ニュース: Tech Rebound Amid General Caution Roils Asian Stock Markets",
+      "why": "目標 4 位 · 1年+85.7% · 20日+19.2% · ニュース: TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
         {
-          "title": "Tech Rebound Amid General Caution Roils Asian Stock Markets",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/tech-rebound-amid-general-caution-104226877.html",
-          "published_at": "2026-11-09T10:42:26Z"
-        },
-        {
-          "title": "Learn Why The Bull Case For Baycurrent Stock Could Change Following Half Year Earnings",
+          "title": "TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/learn-why-bull-case-baycurrent-051628554.html",
-          "published_at": "2026-10-24T05:16:28Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-tse-7867-stock-still-121613696.html",
+          "published_at": "2026-11-12T12:16:13Z"
         },
         {
-          "title": "Tech Rebound Lifts Asian Stock Markets",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/tech-rebound-lifts-asian-stock-103546692.html",
-          "published_at": "2026-10-16T10:35:46Z"
-        },
-        {
-          "title": "BayCurrent’s Strong FY2026 Results and Dividend Hike Might Change The Case For Investing In BayCurrent (TSE:6532)",
+          "title": "Is TOMY Company (TSE:7867) Undervalued Despite Its 382% Five Year Run?",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/baycurrent-strong-fy2026-results-dividend-110525780.html",
-          "published_at": "2026-04-23T11:05:25Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-company-tse-7867-undervalued-200832236.html",
+          "published_at": "2026-10-26T20:08:32Z"
         },
         {
-          "title": "Middle East Outlook Elevates Asian Stock Markets",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/middle-east-outlook-elevates-asian-103743533.html",
-          "published_at": "2026-04-15T10:37:43Z"
+          "title": "Why TOMY Company (TSE:7867) Is Getting Fresh Attention",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/why-tomy-company-tse-7867-111250689.html",
+          "published_at": "2026-09-21T11:12:50Z"
         }
       ],
       "content_data": "news"
     },
     {
-      "ticker": "7747.T",
-      "name": "朝日インテック",
+      "ticker": "9147.T",
+      "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 4 位 · 1年+78.4% · 20日+19.5% · ニュース: Is Asahi Intecc (TSE:7747) Priced Right for Its Cash Flow?",
+      "why": "目標 5 位 · 1年+84.7% · 20日+0.8% · ニュース: 3 Stocks Tied To Shifting Trade Routes Investors May Want To Watch",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
         {
-          "title": "Is Asahi Intecc (TSE:7747) Priced Right for Its Cash Flow?",
+          "title": "3 Stocks Tied To Shifting Trade Routes Investors May Want To Watch",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/asahi-intecc-tse-7747-priced-210817302.html",
-          "published_at": "2026-10-31T21:08:17Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/3-stocks-tied-shifting-trade-232303469.html",
+          "published_at": "2026-11-15T23:23:03Z"
         },
         {
-          "title": "Is Asahi Intecc (TSE:7747) Cheap Or Is Its Premium P/E Already Priced In?",
+          "title": "Nippon Express launches Transpacific air freight service to meet AI-driven cargo demand",
+          "publisher": "Supply Chain Dive",
+          "link": "https://www.supplychaindive.com/news/ai-driven-cargo-bump-sparks-transpacific-air-freight-service/832399/",
+          "published_at": "2026-10-09T15:34:00Z"
+        },
+        {
+          "title": "Nippon Express aims to boost US transport reliability with 5-day service",
+          "publisher": "Supply Chain Dive",
+          "link": "https://www.supplychaindive.com/news/nippon-express-aims-to-boost-us-transport-reliability-with-5-day-service/832372/",
+          "published_at": "2026-10-08T14:32:00Z"
+        },
+        {
+          "title": "3 Logistics Stocks Where Pricing Power Could Matter Most Now",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/asahi-intecc-tse-7747-cheap-042559743.html",
-          "published_at": "2026-09-30T04:25:59Z"
-        }
-      ],
-      "content_data": "news"
-    },
-    {
-      "ticker": "8750.T",
-      "name": "第一ライフグループ",
-      "stance": "WATCH",
-      "confidence": 62,
-      "why": "目標 5 位 · 1年+76.9% · 20日+0.5% · ニュース: Daiichi Life Group Inc (DCNSF) (Q2 2027) Earnings Call Highlights: Adjusted Prof",
-      "risk": "イベント日付はパケット次第。",
-      "surprise": null,
-      "news": [
-        {
-          "title": "Daiichi Life Group Inc (DCNSF) (Q2 2027) Earnings Call Highlights: Adjusted Profit Jumps 33% as ...",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/daiichi-life-group-inc-dcnsf-150134035.html",
-          "published_at": "2026-11-13T15:01:34Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/3-logistics-stocks-where-pricing-050902338.html",
+          "published_at": "2026-10-06T05:09:02Z"
         },
         {
-          "title": "Challenger rejects Daiichi Life’s acquisition proposal",
-          "publisher": "Life Insurance International",
-          "link": "https://www.lifeinsuranceinternational.com/news/challenger-rejects-daiichi-lifes-acquisition-proposal/",
-          "published_at": "2026-10-26T14:54:22Z"
-        },
-        {
-          "title": "TAL Daiichi Life Australia offers to buy rest of Challenger",
-          "publisher": "Life Insurance International",
-          "link": "https://www.lifeinsuranceinternational.com/news/tal-daiichi-life-australia-buy-rest-challenger/",
-          "published_at": "2026-10-19T14:38:06Z"
-        },
-        {
-          "title": "Challenger shares surge 17% to eight-year high on $5.5 billion Daiichi Life offer",
-          "publisher": "Investing.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/challenger-shares-surge-17-eight-021742455.html",
-          "published_at": "2026-10-19T02:17:42Z"
-        },
-        {
-          "title": "Daiichi Life Group Inc's Dividend Analysis",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/daiichi-life-group-incs-dividend-110551094.html",
-          "published_at": "2026-09-29T11:05:51Z"
+          "title": "Nippon Express $1.6B Canada deal leads logistics investment wave",
+          "publisher": "FreightWaves",
+          "link": "https://finance.yahoo.com/economy/policy/articles/nippon-express-1-6b-canada-143138983.html",
+          "published_at": "2026-04-21T14:31:38Z"
         }
       ],
       "content_data": "news"
     }
   ],
   "paper_notes": [
-    "trend_paper open=True · month_excess=-1.3%",
+    "trend_paper open=True · month_excess=-0.6%",
     "diversified papers=7 口座を参照",
     "内容: surprise=earnings_surprise/fins · news=data/alt/news（あれば why に併記）"
   ],

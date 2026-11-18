@@ -1,11 +1,11 @@
 {
-  "as_of": "2026-11-16",
+  "as_of": "2026-11-17",
   "generator": "rules/v1",
   "debates": [
     {
       "ticker": "8766.T",
       "name": "東京海上ホールディングス",
-      "bull": "スクリーニング通過・1年+103.0%・20日+7.0%。 内容: ニュース: CB or TKOMY: Which Is the Better Value Stock Right Now?",
+      "bull": "スクリーニング通過・1年+96.7%・20日+5.3%。 内容: ニュース: CB or TKOMY: Which Is the Better Value Stock Right Now?",
       "bear": "vol_1y=0.45 · mdd_1y=-0.13825641652644627 · earnings_next_days=None。",
       "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
       "roles": {
@@ -41,10 +41,10 @@
       ]
     },
     {
-      "ticker": "8725.T",
-      "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
-      "bull": "スクリーニング通過・1年+71.4%・20日+3.6%。 内容: ニュース: MS&AD Insurance Group Holdings (TSE:8725) Highlights Its US Business, Is The Ups",
-      "bear": "vol_1y=0.27 · mdd_1y=-0.11106030203395145 · earnings_next_days=None。",
+      "ticker": "3563.T",
+      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+      "bull": "スクリーニング通過・1年+59.8%・20日+3.5%。 内容: ニュース: Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
+      "bear": "vol_1y=0.47 · mdd_1y=-0.21092713982111122 · earnings_next_days=None。",
       "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
       "roles": {
         "bull_researcher": "bull",
@@ -59,30 +59,30 @@
       "surprise": null,
       "news": [
         {
-          "title": "MS&AD Insurance Group Holdings (TSE:8725) Highlights Its US Business, Is The Upside Already Priced In?",
+          "title": "Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/ms-ad-insurance-group-holdings-080744196.html",
-          "published_at": "2026-10-18T08:07:44Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/why-food-life-companies-shares-190928184.html",
+          "published_at": "2026-11-15T19:09:28Z"
         },
         {
-          "title": "Assessing MS&AD Insurance Group Holdings (TSE:8725) Valuation After Recent Share Price Momentum",
+          "title": "Food & Life Companies (TSE:3563) Stock Could Be Cheap Despite A 373% Run",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/assessing-ms-ad-insurance-group-181248061.html",
-          "published_at": "2026-06-03T18:12:48Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-042723997.html",
+          "published_at": "2026-10-19T04:27:23Z"
         },
         {
-          "title": "MS&AD Insurance Group Holdings Inc (MSADF) Full Year 2026 Earnings Call Highlights: Record ...",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/ms-ad-insurance-group-holdings-010149260.html",
-          "published_at": "2026-05-29T01:01:49Z"
+          "title": "Food & Life Companies (TSE:3563) Is Up 10.0% After Mounting Global Food Inflation Concerns - What's Changed",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-010951577.html",
+          "published_at": "2026-07-14T01:09:51Z"
         }
       ]
     },
     {
-      "ticker": "8309.T",
-      "name": "三井住友トラストグループ",
-      "bull": "スクリーニング通過・1年+70.7%・20日+6.4%。 内容: ニュース: Sumitomo Mitsui Trust Group Inc's Dividend Analysis",
-      "bear": "vol_1y=0.29 · mdd_1y=-0.16083190419363824 · earnings_next_days=None。",
+      "ticker": "8630.T",
+      "name": "ＳＯＭＰＯホールディングス",
+      "bull": "スクリーニング通過・1年+57.4%・20日+2.6%。 内容: ニュース: Is Sompo Holdings (TSE:8630) Still Below Fair Value on Earnings?",
+      "bear": "vol_1y=0.32 · mdd_1y=-0.13473193333205524 · earnings_next_days=None。",
       "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
       "roles": {
         "bull_researcher": "bull",
@@ -97,22 +97,22 @@
       "surprise": null,
       "news": [
         {
-          "title": "Sumitomo Mitsui Trust Group Inc's Dividend Analysis",
+          "title": "Is Sompo Holdings (TSE:8630) Still Below Fair Value on Earnings?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/sompo-holdings-tse-8630-still-151553640.html",
+          "published_at": "2026-10-20T15:15:53Z"
+        },
+        {
+          "title": "Sompo Holdings Inc's Dividend Analysis",
           "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-incs-111044923.html",
-          "published_at": "2026-09-29T11:10:44Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/sompo-holdings-incs-dividend-analysis-110812488.html",
+          "published_at": "2026-09-29T11:08:12Z"
         },
         {
-          "title": "Sumitomo Mitsui Trust Group (TSE:8309) Stock May Be 39% Undervalued On Equity Returns",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-tse-191400931.html",
-          "published_at": "2026-09-22T19:14:00Z"
-        },
-        {
-          "title": "Sumitomo Mitsui Trust Group (TSE:8309) Rallies As Investors Reassess Whether It Still Looks Undervalued",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-tse-231731858.html",
-          "published_at": "2026-09-21T23:17:31Z"
+          "title": "Toyota backs Tier IV in level 4 autonomous vehicle push",
+          "publisher": "Just Auto",
+          "link": "https://www.just-auto.com/news/toyota-tier-iv-l4-autonomous-vehicle-push/",
+          "published_at": "2026-06-10T18:14:09Z"
         }
       ]
     }
