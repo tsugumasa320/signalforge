@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-11-17",
+  "as_of": "2026-11-18",
   "generator": "rules/v1",
   "scores": [
     {
@@ -14,7 +14,7 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+96.7% · 20日+5.3% · vol=0.45 · turnover=46130792832 · CB or TKOMY: Which Is the Better Value Stock Right Now? / Is Tokio Marine Holdings (TSE:8766) Priced Below Fair Value Af",
+      "why": "1年+93.7% · 20日+6.8% · vol=0.45 · turnover=45910152521 · CB or TKOMY: Which Is the Better Value Stock Right Now? / Is Tokio Marine Holdings (TSE:8766) Priced Below Fair Value Af",
       "risk": "mdd_1y=-0.13825641652644627 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
@@ -55,335 +55,21 @@
       "pit_status": "ok",
       "pit_available_at": "2026-10-28",
       "pit_issues": [],
-      "price": 584.0999755859375
-    },
-    {
-      "ticker": "3563.T",
-      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
-      "total": 84,
-      "decision": "ADOPT",
-      "factors": {
-        "trend": 20,
-        "momentum": 18,
-        "risk": 16,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+59.8% · 20日+3.5% · vol=0.47 · turnover=18744872505 · Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance / Food & Life Companies (TSE:3563) Stock Co",
-      "risk": "mdd_1y=-0.21092713982111122 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
-      "surprise": null,
-      "news": [
-        {
-          "title": "Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/why-food-life-companies-shares-190928184.html",
-          "published_at": "2026-11-15T19:09:28Z"
-        },
-        {
-          "title": "Food & Life Companies (TSE:3563) Stock Could Be Cheap Despite A 373% Run",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-042723997.html",
-          "published_at": "2026-10-19T04:27:23Z"
-        },
-        {
-          "title": "Food & Life Companies (TSE:3563) Is Up 10.0% After Mounting Global Food Inflation Concerns - What's Changed",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-010951577.html",
-          "published_at": "2026-07-14T01:09:51Z"
-        }
-      ],
-      "news_sentiment": "neutral",
-      "content_data": "news",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": "2026-11-15",
-      "pit_issues": [],
-      "price": 6244.0
-    },
-    {
-      "ticker": "8630.T",
-      "name": "ＳＯＭＰＯホールディングス",
-      "total": 84,
-      "decision": "ADOPT",
-      "factors": {
-        "trend": 20,
-        "momentum": 18,
-        "risk": 16,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+57.4% · 20日+2.6% · vol=0.32 · turnover=20563762275 · Is Sompo Holdings (TSE:8630) Still Below Fair Value on Earnings? / Sompo Holdings Inc's Dividend Analysis",
-      "risk": "mdd_1y=-0.13473193333205524 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
-      "surprise": null,
-      "news": [
-        {
-          "title": "Is Sompo Holdings (TSE:8630) Still Below Fair Value on Earnings?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sompo-holdings-tse-8630-still-151553640.html",
-          "published_at": "2026-10-20T15:15:53Z"
-        },
-        {
-          "title": "Sompo Holdings Inc's Dividend Analysis",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sompo-holdings-incs-dividend-analysis-110812488.html",
-          "published_at": "2026-09-29T11:08:12Z"
-        },
-        {
-          "title": "Toyota backs Tier IV in level 4 autonomous vehicle push",
-          "publisher": "Just Auto",
-          "link": "https://www.just-auto.com/news/toyota-tier-iv-l4-autonomous-vehicle-push/",
-          "published_at": "2026-06-10T18:14:09Z"
-        },
-        {
-          "title": "Did Sompo’s ¥18.2b February Buyback Just Recast Sompo Holdings' (TSE:8630) Capital-Efficiency Narrative?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/news/did-sompo-18-2b-february-011311473.html",
-          "published_at": "2026-03-07T01:13:11Z"
-        },
-        {
-          "title": "Sompo Holdings (TSE:8630): Is the Recent Valuation Discount Still Justified?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/news/sompo-holdings-tse-8630-recent-221353219.html",
-          "published_at": "2025-11-20T22:13:53Z"
-        }
-      ],
-      "news_sentiment": "neutral",
-      "content_data": "news",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": "2026-10-20",
-      "pit_issues": [],
-      "price": 7152.0
-    },
-    {
-      "ticker": "7453.T",
-      "name": "良品計画",
-      "total": 84,
-      "decision": "ADOPT",
-      "factors": {
-        "trend": 20,
-        "momentum": 18,
-        "risk": 16,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+50.5% · 20日+5.5% · vol=0.43 · turnover=17569101005 · Church & Dwight Expands Hair Care Portfolio With BALI CARE Investment / Corteva's Q3 Earnings Miss Estimates on Brazil W",
-      "risk": "mdd_1y=-0.18002987659817404 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
-      "surprise": null,
-      "news": [
-        {
-          "title": "Church & Dwight Expands Hair Care Portfolio With BALI CARE Investment",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/church-dwight-expands-hair-care-150500696.html",
-          "published_at": "2026-11-17T15:05:00Z"
-        },
-        {
-          "title": "Corteva's Q3 Earnings Miss Estimates on Brazil Weakness, Sales Lag",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/cortevas-q3-earnings-miss-estimates-165700522.html",
-          "published_at": "2026-11-12T16:57:00Z"
-        },
-        {
-          "title": "Can Post Holdings' Foodservice Benefit From Normalized Egg Pricing?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/post-holdings-foodservice-benefit-normalized-163000603.html",
-          "published_at": "2026-11-11T16:30:00Z"
-        },
-        {
-          "title": "Will Medifast's Metabolic Health Institute Strengthen Its Edge?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/healthcare/articles/medifasts-metabolic-health-institute-strengthen-182200372.html",
-          "published_at": "2026-11-10T18:22:00Z"
-        }
-      ],
-      "news_sentiment": "neutral",
-      "content_data": "news",
-      "pit_ok": false,
-      "pit_status": "stripped",
-      "pit_available_at": "2026-11-17",
-      "pit_issues": [
-        "news_after_as_of:2026-11-18"
-      ],
-      "price": 4979.0
-    },
-    {
-      "ticker": "4502.T",
-      "name": "武田薬品工業",
-      "total": 81,
-      "decision": "WATCH",
-      "factors": {
-        "trend": 17,
-        "momentum": 18,
-        "risk": 16,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+66.4% · 20日+11.0% · vol=0.23 · turnover=32436009225 · Novavax Eyes New Partnerships as Sanofi Advances COVID-Flu Vaccine Trial / Asian Equities Traded in the US as American D",
-      "risk": "mdd_1y=-0.19388788056717232 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
-      "surprise": null,
-      "news": [
-        {
-          "title": "Novavax Eyes New Partnerships as Sanofi Advances COVID-Flu Vaccine Trial",
-          "publisher": "MarketBeat",
-          "link": "https://www.marketbeat.com/instant-alerts/event-novavax-eyes-new-partnerships-as-sanofi-advances-covid-flu-vaccine-trial-2026-11-17/?utm_source=yahoofinance&utm_medium=yahoofinance",
-          "published_at": "2026-11-17T21:12:07Z"
-        },
-        {
-          "title": "Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154847227.html",
-          "published_at": "2026-11-16T15:48:47Z"
-        },
-        {
-          "title": "Asian Equities Traded in the US as American Depositary Receipts Drop Sharply in Thursday Trading",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154418495.html",
-          "published_at": "2026-11-12T15:44:18Z"
-        },
-        {
-          "title": "Ginkgo Bioworks Holdings Inc (DNA) Q3 2026 Earnings Call Highlights: Cost Cuts, First Big ...",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/healthcare/articles/ginkgo-bioworks-holdings-inc-dna-050529129.html",
-          "published_at": "2026-11-12T05:05:29Z"
-        },
-        {
-          "title": "ADMA Surges 20.9% Post Q3 Earnings: Buy, Sell or Hold the Stock?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/healthcare/articles/adma-surges-20-9-post-164100233.html",
-          "published_at": "2026-11-11T16:41:00Z"
-        }
-      ],
-      "news_sentiment": "neutral",
-      "content_data": "news",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": "2026-11-17",
-      "pit_issues": [],
-      "price": 6931.0
-    },
-    {
-      "ticker": "2269.T",
-      "name": "明治ホールディングス",
-      "total": 80,
-      "decision": "WATCH",
-      "factors": {
-        "trend": 20,
-        "momentum": 18,
-        "risk": 16,
-        "liquidity": 14,
-        "event": 12
-      },
-      "why": "1年+51.5% · 20日+6.7% · vol=0.25 · turnover=5864406075 · Can Meiji Holdings (TSE:2269) Justify Its Price After The Buyback? / Meiji sells China dairy business to Shanghai AustAs",
-      "risk": "mdd_1y=-0.11039282430869468 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
-      "surprise": null,
-      "news": [
-        {
-          "title": "Can Meiji Holdings (TSE:2269) Justify Its Price After The Buyback?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/meiji-holdings-tse-2269-justify-211854983.html",
-          "published_at": "2026-11-16T21:18:54Z"
-        },
-        {
-          "title": "Meiji sells China dairy business to Shanghai AustAsia Food",
-          "publisher": "Just Food",
-          "link": "https://www.just-food.com/news/meiji-sells-china-dairy-business/",
-          "published_at": "2026-07-22T13:05:00Z"
-        },
-        {
-          "title": "Japan’s Meiji books another impairment on China food business",
-          "publisher": "Just Food",
-          "link": "https://www.just-food.com/news/japans-meiji-books-another-impairment-on-china-food-business/",
-          "published_at": "2026-03-25T13:28:04Z"
-        },
-        {
-          "title": "Meiji to invest in Hello Panda production in US",
-          "publisher": "Just Food",
-          "link": "https://www.just-food.com/news/meiji-to-invest-in-hello-panda-production-in-us/",
-          "published_at": "2026-03-10T12:14:27Z"
-        },
-        {
-          "title": "Meiji Holdings (TSE:2269): Gauging Valuation After Earnings Guidance Update and Higher Interim Dividend",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/news/meiji-holdings-tse-2269-gauging-010802310.html",
-          "published_at": "2025-11-25T01:08:02Z"
-        }
-      ],
-      "news_sentiment": "neutral",
-      "content_data": "news",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": "2026-11-16",
-      "pit_issues": [],
-      "price": 4612.0
-    },
-    {
-      "ticker": "8725.T",
-      "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
-      "total": 78,
-      "decision": "WATCH",
-      "factors": {
-        "trend": 20,
-        "momentum": 12,
-        "risk": 16,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+64.5% · 20日+0.8% · vol=0.27 · turnover=23297009850 · MS&AD Insurance Group Holdings (TSE:8725) Highlights Its US Business, Is The Upside Already Priced In? / Assessing MS&AD",
-      "risk": "mdd_1y=-0.11106030203395145 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
-      "surprise": null,
-      "news": [
-        {
-          "title": "MS&AD Insurance Group Holdings (TSE:8725) Highlights Its US Business, Is The Upside Already Priced In?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/ms-ad-insurance-group-holdings-080744196.html",
-          "published_at": "2026-10-18T08:07:44Z"
-        },
-        {
-          "title": "Assessing MS&AD Insurance Group Holdings (TSE:8725) Valuation After Recent Share Price Momentum",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/assessing-ms-ad-insurance-group-181248061.html",
-          "published_at": "2026-06-03T18:12:48Z"
-        },
-        {
-          "title": "MS&AD Insurance Group Holdings Inc (MSADF) Full Year 2026 Earnings Call Highlights: Record ...",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/ms-ad-insurance-group-holdings-010149260.html",
-          "published_at": "2026-05-29T01:01:49Z"
-        },
-        {
-          "title": "MS&AD posts annual profit growth, plans merger and buyback",
-          "publisher": "Life Insurance International",
-          "link": "https://www.lifeinsuranceinternational.com/news/msad-annual-profit-merger-buyback/",
-          "published_at": "2026-05-21T09:15:30Z"
-        },
-        {
-          "title": "A Look At MS&AD Insurance Group (TSE:8725) Valuation After Recent Share Price Weakness",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/look-ms-ad-insurance-group-150732839.html",
-          "published_at": "2026-04-27T15:07:32Z"
-        }
-      ],
-      "news_sentiment": "neutral",
-      "content_data": "news",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": "2026-10-18",
-      "pit_issues": [],
-      "price": 5202.0
+      "price": 581.2999877929688
     },
     {
       "ticker": "8309.T",
       "name": "三井住友トラストグループ",
-      "total": 78,
-      "decision": "WATCH",
+      "total": 84,
+      "decision": "ADOPT",
       "factors": {
         "trend": 20,
-        "momentum": 12,
+        "momentum": 18,
         "risk": 16,
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+62.0% · 20日+1.5% · vol=0.29 · turnover=16526811505 · Sumitomo Mitsui Trust Group Inc's Dividend Analysis / Sumitomo Mitsui Trust Group (TSE:8309) Stock May Be 39% Undervalue",
+      "why": "1年+59.6% · 20日+5.3% · vol=0.29 · turnover=16621545355 · Sumitomo Mitsui Trust Group Inc's Dividend Analysis / Sumitomo Mitsui Trust Group (TSE:8309) Stock May Be 39% Undervalue",
       "risk": "mdd_1y=-0.16083190419363824 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
@@ -424,113 +110,225 @@
       "pit_status": "ok",
       "pit_available_at": "2026-09-29",
       "pit_issues": [],
-      "price": 1712.0
+      "price": 1697.5
     },
     {
-      "ticker": "4578.T",
-      "name": "大塚ホールディングス",
-      "total": 78,
-      "decision": "WATCH",
+      "ticker": "3563.T",
+      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+      "total": 84,
+      "decision": "ADOPT",
       "factors": {
         "trend": 20,
-        "momentum": 12,
+        "momentum": 18,
         "risk": 16,
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+51.2% · 20日+1.3% · vol=0.32 · turnover=15212152750 · Why Vera Therapeutics Stock Is Jumping on New Kidney Drug Trial Results / Recent Price Trend in Otsuka Holdings Co., Ltd",
-      "risk": "mdd_1y=-0.1416765053128689 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "why": "1年+56.7% · 20日+3.8% · vol=0.47 · turnover=18514465515 · Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance / Food & Life Companies (TSE:3563) Stock Co",
+      "risk": "mdd_1y=-0.21092713982111122 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
         {
-          "title": "Why Vera Therapeutics Stock Is Jumping on New Kidney Drug Trial Results",
-          "publisher": "Barrons.com",
-          "link": "https://www.barrons.com/articles/vera-therapeutics-stock-kidney-drug-trial-7fc70a40?siteid=yhoof2&yptr=yahoo",
-          "published_at": "2026-09-15T16:03:00Z"
+          "title": "Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/why-food-life-companies-shares-190928184.html",
+          "published_at": "2026-11-15T19:09:28Z"
         },
         {
-          "title": "Recent Price Trend in Otsuka Holdings Co., Ltd. - Unsponsored ADR (OTSKY) is Your Friend, Here's Why",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/news/recent-price-trend-otsuka-holdings-135503656.html",
-          "published_at": "2026-01-26T13:55:03Z"
+          "title": "Food & Life Companies (TSE:3563) Stock Could Be Cheap Despite A 373% Run",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-042723997.html",
+          "published_at": "2026-10-19T04:27:23Z"
+        },
+        {
+          "title": "Food & Life Companies (TSE:3563) Is Up 10.0% After Mounting Global Food Inflation Concerns - What's Changed",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-010951577.html",
+          "published_at": "2026-07-14T01:09:51Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-09-15",
+      "pit_available_at": "2026-11-15",
       "pit_issues": [],
-      "price": 12475.0
+      "price": 6242.0
     },
     {
-      "ticker": "7832.T",
-      "name": "バンダイナムコホールディングス",
-      "total": 75,
+      "ticker": "8630.T",
+      "name": "ＳＯＭＰＯホールディングス",
+      "total": 84,
+      "decision": "ADOPT",
+      "factors": {
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 12
+      },
+      "why": "1年+55.3% · 20日+3.9% · vol=0.32 · turnover=20776386565 · Is Sompo Holdings (TSE:8630) Still Below Fair Value on Earnings? / Sompo Holdings Inc's Dividend Analysis",
+      "risk": "mdd_1y=-0.13473193333205524 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Is Sompo Holdings (TSE:8630) Still Below Fair Value on Earnings?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/sompo-holdings-tse-8630-still-151553640.html",
+          "published_at": "2026-10-20T15:15:53Z"
+        },
+        {
+          "title": "Sompo Holdings Inc's Dividend Analysis",
+          "publisher": "GuruFocus.com",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/sompo-holdings-incs-dividend-analysis-110812488.html",
+          "published_at": "2026-09-29T11:08:12Z"
+        },
+        {
+          "title": "Toyota backs Tier IV in level 4 autonomous vehicle push",
+          "publisher": "Just Auto",
+          "link": "https://www.just-auto.com/news/toyota-tier-iv-l4-autonomous-vehicle-push/",
+          "published_at": "2026-06-10T18:14:09Z"
+        },
+        {
+          "title": "Did Sompo’s ¥18.2b February Buyback Just Recast Sompo Holdings' (TSE:8630) Capital-Efficiency Narrative?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/news/did-sompo-18-2b-february-011311473.html",
+          "published_at": "2026-03-07T01:13:11Z"
+        },
+        {
+          "title": "Sompo Holdings (TSE:8630): Is the Recent Valuation Discount Still Justified?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/news/sompo-holdings-tse-8630-recent-221353219.html",
+          "published_at": "2025-11-20T22:13:53Z"
+        }
+      ],
+      "news_sentiment": "neutral",
+      "content_data": "news",
+      "pit_ok": true,
+      "pit_status": "ok",
+      "pit_available_at": "2026-10-20",
+      "pit_issues": [],
+      "price": 7057.0
+    },
+    {
+      "ticker": "4502.T",
+      "name": "武田薬品工業",
+      "total": 81,
       "decision": "WATCH",
       "factors": {
         "trend": 17,
-        "momentum": 12,
+        "momentum": 18,
         "risk": 16,
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+54.9% · 20日+12.2% · vol=0.33 · turnover=20254636410 · Bandai Namco (TSE:7832) Stock Trades Below Fair Value As Earnings Guidance Rises / BANDAI NAMCO (TSE:7832) Stock May Be ",
-      "risk": "mdd_1y=-0.2133812086369482 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "why": "1年+62.4% · 20日+8.9% · vol=0.23 · turnover=32404406470 · Novavax Eyes New Partnerships as Sanofi Advances COVID-Flu Vaccine Trial / Asian Equities Traded in the US as American D",
+      "risk": "mdd_1y=-0.19388788056717232 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
       "surprise": null,
       "news": [
         {
-          "title": "Bandai Namco (TSE:7832) Stock Trades Below Fair Value As Earnings Guidance Rises",
+          "title": "Novavax Eyes New Partnerships as Sanofi Advances COVID-Flu Vaccine Trial",
+          "publisher": "MarketBeat",
+          "link": "https://www.marketbeat.com/instant-alerts/event-novavax-eyes-new-partnerships-as-sanofi-advances-covid-flu-vaccine-trial-2026-11-17/?utm_source=yahoofinance&utm_medium=yahoofinance",
+          "published_at": "2026-11-17T21:12:07Z"
+        },
+        {
+          "title": "Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154847227.html",
+          "published_at": "2026-11-16T15:48:47Z"
+        },
+        {
+          "title": "Asian Equities Traded in the US as American Depositary Receipts Drop Sharply in Thursday Trading",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154418495.html",
+          "published_at": "2026-11-12T15:44:18Z"
+        },
+        {
+          "title": "Ginkgo Bioworks Holdings Inc (DNA) Q3 2026 Earnings Call Highlights: Cost Cuts, First Big ...",
+          "publisher": "GuruFocus.com",
+          "link": "https://finance.yahoo.com/healthcare/articles/ginkgo-bioworks-holdings-inc-dna-050529129.html",
+          "published_at": "2026-11-12T05:05:29Z"
+        }
+      ],
+      "news_sentiment": "neutral",
+      "content_data": "news",
+      "pit_ok": false,
+      "pit_status": "stripped",
+      "pit_available_at": "2026-11-17",
+      "pit_issues": [
+        "news_after_as_of:2026-11-19"
+      ],
+      "price": 6869.0
+    },
+    {
+      "ticker": "8725.T",
+      "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
+      "total": 81,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 12
+      },
+      "why": "1年+61.9% · 20日+2.5% · vol=0.27 · turnover=22982664295 · MS&AD Insurance Group Holdings (TSE:8725) Highlights Its US Business, Is The Upside Already Priced In? / Assessing MS&AD",
+      "risk": "mdd_1y=-0.11106030203395145 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "surprise": null,
+      "news": [
+        {
+          "title": "MS&AD Insurance Group Holdings (TSE:8725) Highlights Its US Business, Is The Upside Already Priced In?",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-171809423.html",
-          "published_at": "2026-11-16T17:18:09Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/ms-ad-insurance-group-holdings-080744196.html",
+          "published_at": "2026-10-18T08:07:44Z"
         },
         {
-          "title": "BANDAI NAMCO (TSE:7832) Stock May Be 29% Undervalued On Cash Flow",
+          "title": "Assessing MS&AD Insurance Group Holdings (TSE:8725) Valuation After Recent Share Price Momentum",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-211158418.html",
-          "published_at": "2026-10-20T21:11:58Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/assessing-ms-ad-insurance-group-181248061.html",
+          "published_at": "2026-06-03T18:12:48Z"
         },
         {
-          "title": "Bandai Namco (TSE:7832) Stock Trades At A Discount Despite Its 141% Run",
+          "title": "MS&AD Insurance Group Holdings Inc (MSADF) Full Year 2026 Earnings Call Highlights: Record ...",
+          "publisher": "GuruFocus.com",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/ms-ad-insurance-group-holdings-010149260.html",
+          "published_at": "2026-05-29T01:01:49Z"
+        },
+        {
+          "title": "MS&AD posts annual profit growth, plans merger and buyback",
+          "publisher": "Life Insurance International",
+          "link": "https://www.lifeinsuranceinternational.com/news/msad-annual-profit-merger-buyback/",
+          "published_at": "2026-05-21T09:15:30Z"
+        },
+        {
+          "title": "A Look At MS&AD Insurance Group (TSE:8725) Valuation After Recent Share Price Weakness",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-000953560.html",
-          "published_at": "2026-10-02T00:09:53Z"
-        },
-        {
-          "title": "Are Consumer Discretionary Stocks Lagging  Flexsteel Industries (FLXS) This Year?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/consumer-discretionary-stocks-lagging-flexsteel-124002018.html",
-          "published_at": "2026-09-24T12:40:02Z"
-        },
-        {
-          "title": "Is Bandai Namco Holdings Inc. - Unsponsored ADR (NCBDY) Outperforming Other Consumer Discretionary Stocks This Year?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-holdings-inc-unsponsored-134003722.html",
-          "published_at": "2026-09-04T13:40:03Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/look-ms-ad-insurance-group-150732839.html",
+          "published_at": "2026-04-27T15:07:32Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-16",
+      "pit_available_at": "2026-10-18",
       "pit_issues": [],
-      "price": 7034.0
+      "price": 5161.0
     },
     {
       "ticker": "4503.T",
       "name": "アステラス製薬",
-      "total": 75,
+      "total": 81,
       "decision": "WATCH",
       "factors": {
         "trend": 17,
-        "momentum": 12,
+        "momentum": 18,
         "risk": 16,
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+52.1% · 20日+12.6% · vol=0.31 · turnover=15980636410 · Astellas Pharma (TSE:4503) Stock Could Be 42% Below Fair Value / Is Astellas Pharma (ALPMY) Outperforming Other Medical ",
+      "why": "1年+50.1% · 20日+11.9% · vol=0.31 · turnover=16369798830 · Astellas Pharma (TSE:4503) Stock Could Be 42% Below Fair Value / Is Astellas Pharma (ALPMY) Outperforming Other Medical ",
       "risk": "mdd_1y=-0.20714950324088732 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
@@ -571,21 +369,21 @@
       "pit_status": "ok",
       "pit_available_at": "2026-11-10",
       "pit_issues": [],
-      "price": 2730.0
+      "price": 2725.0
     },
     {
       "ticker": "9147.T",
       "name": "ＮＩＰＰＯＮ　ＥＸＰＲＥＳＳホールディングス",
-      "total": 74,
+      "total": 80,
       "decision": "WATCH",
       "factors": {
         "trend": 20,
-        "momentum": 12,
+        "momentum": 18,
         "risk": 16,
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+84.7% · 20日+0.8% · vol=0.28 · turnover=6391479740 · 3 Stocks Tied To Shifting Trade Routes Investors May Want To Watch / Nippon Express launches Transpacific air freight se",
+      "why": "1年+77.5% · 20日+2.3% · vol=0.28 · turnover=6338374740 · 3 Stocks Tied To Shifting Trade Routes Investors May Want To Watch / Nippon Express launches Transpacific air freight se",
       "risk": "mdd_1y=-0.09802250255710876 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
@@ -626,21 +424,127 @@
       "pit_status": "ok",
       "pit_available_at": "2026-11-15",
       "pit_issues": [],
-      "price": 5888.0
+      "price": 5886.0
     },
     {
-      "ticker": "2702.T",
-      "name": "日本マクドナルドホールディングス",
-      "total": 72,
+      "ticker": "2269.T",
+      "name": "明治ホールディングス",
+      "total": 80,
       "decision": "WATCH",
       "factors": {
-        "trend": 17,
-        "momentum": 9,
+        "trend": 20,
+        "momentum": 18,
+        "risk": 16,
+        "liquidity": 14,
+        "event": 12
+      },
+      "why": "1年+52.5% · 20日+7.5% · vol=0.25 · turnover=6366236965 · Can Meiji Holdings (TSE:2269) Justify Its Price After The Buyback? / Meiji sells China dairy business to Shanghai AustAs",
+      "risk": "mdd_1y=-0.11039282430869468 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Can Meiji Holdings (TSE:2269) Justify Its Price After The Buyback?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/meiji-holdings-tse-2269-justify-211854983.html",
+          "published_at": "2026-11-16T21:18:54Z"
+        },
+        {
+          "title": "Meiji sells China dairy business to Shanghai AustAsia Food",
+          "publisher": "Just Food",
+          "link": "https://www.just-food.com/news/meiji-sells-china-dairy-business/",
+          "published_at": "2026-07-22T13:05:00Z"
+        },
+        {
+          "title": "Japan’s Meiji books another impairment on China food business",
+          "publisher": "Just Food",
+          "link": "https://www.just-food.com/news/japans-meiji-books-another-impairment-on-china-food-business/",
+          "published_at": "2026-03-25T13:28:04Z"
+        },
+        {
+          "title": "Meiji to invest in Hello Panda production in US",
+          "publisher": "Just Food",
+          "link": "https://www.just-food.com/news/meiji-to-invest-in-hello-panda-production-in-us/",
+          "published_at": "2026-03-10T12:14:27Z"
+        },
+        {
+          "title": "Meiji Holdings (TSE:2269): Gauging Valuation After Earnings Guidance Update and Higher Interim Dividend",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/news/meiji-holdings-tse-2269-gauging-010802310.html",
+          "published_at": "2025-11-25T01:08:02Z"
+        }
+      ],
+      "news_sentiment": "neutral",
+      "content_data": "news",
+      "pit_ok": true,
+      "pit_status": "ok",
+      "pit_available_at": "2026-11-16",
+      "pit_issues": [],
+      "price": 4677.0
+    },
+    {
+      "ticker": "7453.T",
+      "name": "良品計画",
+      "total": 80,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 16,
+        "momentum": 18,
         "risk": 16,
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+59.0% · 20日+20.6% · vol=0.26 · turnover=13454785275",
+      "why": "1年+49.3% · 20日+3.1% · vol=0.43 · turnover=17548906715 · Is DSM Firmenich AG - Sponsored ADR (DSFIY) Stock Outpacing Its Consumer Staples Peers This Year? / Church & Dwight Expa",
+      "risk": "mdd_1y=-0.18002987659817404 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Is DSM Firmenich AG - Sponsored ADR (DSFIY) Stock Outpacing Its Consumer Staples Peers This Year?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/dsm-firmenich-ag-sponsored-adr-134002643.html",
+          "published_at": "2026-11-18T13:40:02Z"
+        },
+        {
+          "title": "Church & Dwight Expands Hair Care Portfolio With BALI CARE Investment",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/church-dwight-expands-hair-care-150500696.html",
+          "published_at": "2026-11-17T15:05:00Z"
+        },
+        {
+          "title": "Corteva's Q3 Earnings Miss Estimates on Brazil Weakness, Sales Lag",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/cortevas-q3-earnings-miss-estimates-165700522.html",
+          "published_at": "2026-11-12T16:57:00Z"
+        },
+        {
+          "title": "Can Post Holdings' Foodservice Benefit From Normalized Egg Pricing?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/post-holdings-foodservice-benefit-normalized-163000603.html",
+          "published_at": "2026-11-11T16:30:00Z"
+        }
+      ],
+      "news_sentiment": "neutral",
+      "content_data": "news",
+      "pit_ok": false,
+      "pit_status": "stripped",
+      "pit_available_at": "2026-11-18",
+      "pit_issues": [
+        "news_after_as_of:2026-11-19"
+      ],
+      "price": 4888.0
+    },
+    {
+      "ticker": "2702.T",
+      "name": "日本マクドナルドホールディングス",
+      "total": 75,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 12
+      },
+      "why": "1年+59.2% · 20日+19.2% · vol=0.26 · turnover=13701955255",
       "risk": "mdd_1y=-0.17345750873108268 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
@@ -650,64 +554,127 @@
       "pit_status": "ok",
       "pit_available_at": null,
       "pit_issues": [],
-      "price": 9710.0
+      "price": 9772.0
     },
     {
-      "ticker": "7867.T",
-      "name": "タカラトミー",
-      "total": 70,
+      "ticker": "7832.T",
+      "name": "バンダイナムコホールディングス",
+      "total": 75,
       "decision": "WATCH",
       "factors": {
-        "trend": 20,
+        "trend": 17,
         "momentum": 12,
         "risk": 16,
-        "liquidity": 10,
+        "liquidity": 18,
         "event": 12
       },
-      "why": "1年+85.7% · 20日+19.2% · vol=0.34 · turnover=4635994325 · TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues / Is TOMY Company (TSE:7867) Undervalued De",
-      "risk": "mdd_1y=-0.14384560687153836 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "why": "1年+57.8% · 20日+12.0% · vol=0.33 · turnover=20893077330 · Bandai Namco (TSE:7832) Stock Trades Below Fair Value As Earnings Guidance Rises / BANDAI NAMCO (TSE:7832) Stock May Be ",
+      "risk": "mdd_1y=-0.21133265861313744 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
         {
-          "title": "TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
+          "title": "Bandai Namco (TSE:7832) Stock Trades Below Fair Value As Earnings Guidance Rises",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-tse-7867-stock-still-121613696.html",
-          "published_at": "2026-11-12T12:16:13Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-171809423.html",
+          "published_at": "2026-11-16T17:18:09Z"
         },
         {
-          "title": "Is TOMY Company (TSE:7867) Undervalued Despite Its 382% Five Year Run?",
+          "title": "BANDAI NAMCO (TSE:7832) Stock May Be 29% Undervalued On Cash Flow",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-company-tse-7867-undervalued-200832236.html",
-          "published_at": "2026-10-26T20:08:32Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-211158418.html",
+          "published_at": "2026-10-20T21:11:58Z"
         },
         {
-          "title": "Why TOMY Company (TSE:7867) Is Getting Fresh Attention",
+          "title": "Bandai Namco (TSE:7832) Stock Trades At A Discount Despite Its 141% Run",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/why-tomy-company-tse-7867-111250689.html",
-          "published_at": "2026-09-21T11:12:50Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-tse-7832-stock-000953560.html",
+          "published_at": "2026-10-02T00:09:53Z"
+        },
+        {
+          "title": "Are Consumer Discretionary Stocks Lagging  Flexsteel Industries (FLXS) This Year?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/consumer-discretionary-stocks-lagging-flexsteel-124002018.html",
+          "published_at": "2026-09-24T12:40:02Z"
+        },
+        {
+          "title": "Is Bandai Namco Holdings Inc. - Unsponsored ADR (NCBDY) Outperforming Other Consumer Discretionary Stocks This Year?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/bandai-namco-holdings-inc-unsponsored-134003722.html",
+          "published_at": "2026-09-04T13:40:03Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-12",
+      "pit_available_at": "2026-11-16",
       "pit_issues": [],
-      "price": 5398.0
+      "price": 7149.0
     },
     {
-      "ticker": "7747.T",
-      "name": "朝日インテック",
-      "total": 68,
+      "ticker": "7272.T",
+      "name": "ヤマハ発動機",
+      "total": 74,
       "decision": "WATCH",
       "factors": {
-        "trend": 17,
-        "momentum": 9,
+        "trend": 20,
+        "momentum": 12,
         "risk": 16,
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+81.0% · 20日+22.5% · vol=0.38 · turnover=5628336935 · Asahi Intecc (TSE:7747) Stock Looks Hard To Call As Cash Flow Keeps Pace / Is Asahi Intecc (TSE:7747) Priced Right for I",
+      "why": "1年+68.1% · 20日+0.1% · vol=0.42 · turnover=9686523842 · Deere (DE) Expands Into Side By Sides As Federal Scrutiny Builds / Harley-Davidson Stock Jumps as Citi Bets on a Turnaro",
+      "risk": "mdd_1y=-0.18100077120221858 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Deere (DE) Expands Into Side By Sides As Federal Scrutiny Builds",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/deere-expands-side-sides-federal-011209240.html",
+          "published_at": "2026-10-09T01:12:09Z"
+        },
+        {
+          "title": "Harley-Davidson Stock Jumps as Citi Bets on a Turnaround",
+          "publisher": "Barrons.com",
+          "link": "https://www.barrons.com/articles/harley-davidson-stock-price-citi-upgrade-77ec256f?siteid=yhoof2&yptr=yahoo",
+          "published_at": "2026-10-05T14:08:00Z"
+        },
+        {
+          "title": "Yamaha Motor (TSE:7272) Stock Looks Fully Priced As Its 116% Run Continues",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/yamaha-motor-tse-7272-stock-161145846.html",
+          "published_at": "2026-09-26T16:11:45Z"
+        },
+        {
+          "title": "Yamaha Ends Georgia Side-by-Side Assembly as Record Profits Mask a $76M Loss",
+          "publisher": "Backfire News",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/yamaha-ends-georgia-side-side-230700104.html",
+          "published_at": "2026-08-07T23:07:00Z"
+        }
+      ],
+      "news_sentiment": "neutral",
+      "content_data": "news",
+      "pit_ok": false,
+      "pit_status": "stripped",
+      "pit_available_at": "2026-10-09",
+      "pit_issues": [
+        "news_after_as_of:2026-11-19"
+      ],
+      "price": 1798.5
+    },
+    {
+      "ticker": "7747.T",
+      "name": "朝日インテック",
+      "total": 71,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 17,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 14,
+        "event": 12
+      },
+      "why": "1年+77.8% · 20日+16.1% · vol=0.38 · turnover=5545929285 · Asahi Intecc (TSE:7747) Stock Looks Hard To Call As Cash Flow Keeps Pace / Is Asahi Intecc (TSE:7747) Priced Right for I",
       "risk": "mdd_1y=-0.22647914645974787 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
@@ -736,62 +703,50 @@
       "pit_status": "ok",
       "pit_available_at": "2026-11-17",
       "pit_issues": [],
-      "price": 4259.0
+      "price": 4225.0
     },
     {
-      "ticker": "7581.T",
-      "name": "サイゼリヤ",
-      "total": 68,
+      "ticker": "7867.T",
+      "name": "タカラトミー",
+      "total": 67,
       "decision": "WATCH",
       "factors": {
-        "trend": 17,
-        "momentum": 12,
-        "risk": 13,
-        "liquidity": 14,
+        "trend": 20,
+        "momentum": 9,
+        "risk": 16,
+        "liquidity": 10,
         "event": 12
       },
-      "why": "1年+65.8% · 20日+19.4% · vol=0.43 · turnover=5144814350 · Saizeriya (TSE:7581) Stock Seems Reasonable On Its 207% Five Year Run / How Investors May Respond To Saizeriya (TSE:7581",
-      "risk": "mdd_1y=-0.2951048965445542 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "why": "1年+88.2% · 20日+21.0% · vol=0.34 · turnover=4745991325 · TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues / Is TOMY Company (TSE:7867) Undervalued De",
+      "risk": "mdd_1y=-0.14384560687153836 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
         {
-          "title": "Saizeriya (TSE:7581) Stock Seems Reasonable On Its 207% Five Year Run",
+          "title": "TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/saizeriya-tse-7581-stock-seems-201214868.html",
-          "published_at": "2026-11-13T20:12:14Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-tse-7867-stock-still-121613696.html",
+          "published_at": "2026-11-12T12:16:13Z"
         },
         {
-          "title": "How Investors May Respond To Saizeriya (TSE:7581) Dividend Hike And Guidance",
+          "title": "Is TOMY Company (TSE:7867) Undervalued Despite Its 382% Five Year Run?",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/investors-may-respond-saizeriya-tse-171625556.html",
-          "published_at": "2026-10-26T17:16:25Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-company-tse-7867-undervalued-200832236.html",
+          "published_at": "2026-10-26T20:08:32Z"
         },
         {
-          "title": "Saizeriya (TSE:7581) Q4 Earnings Expose A Margin Squeeze Beneath Sales Growth",
+          "title": "Why TOMY Company (TSE:7867) Is Getting Fresh Attention",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/saizeriya-tse-7581-q4-earnings-131105306.html",
-          "published_at": "2026-10-16T13:11:05Z"
-        },
-        {
-          "title": "Saizeriya (TSE:7581) Stock May Be 49% Undervalued On Cash Flow",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/saizeriya-tse-7581-stock-may-041942488.html",
-          "published_at": "2026-10-01T04:19:42Z"
-        },
-        {
-          "title": "China’s big food chains retreat from deep discounts – report",
-          "publisher": "Verdict Food Service",
-          "link": "https://www.verdictfoodservice.com/news/chinas-big-food-chains-retreat/",
-          "published_at": "2026-02-04T10:19:36Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/why-tomy-company-tse-7867-111250689.html",
+          "published_at": "2026-09-21T11:12:50Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-13",
+      "pit_available_at": "2026-11-12",
       "pit_issues": [],
-      "price": 9040.0
+      "price": 5475.0
     },
     {
       "ticker": "6532.T",
@@ -805,7 +760,7 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+99.0% · 20日+19.0% · vol=0.58 · turnover=23888895750 · Tech Rebound Amid General Caution Roils Asian Stock Markets / Learn Why The Bull Case For Baycurrent Stock Could Change ",
+      "why": "1年+90.4% · 20日+16.5% · vol=0.57 · turnover=23821921575 · Tech Rebound Amid General Caution Roils Asian Stock Markets / Learn Why The Bull Case For Baycurrent Stock Could Change ",
       "risk": "mdd_1y=-0.4639733612711523 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
@@ -846,82 +801,76 @@
       "pit_status": "ok",
       "pit_available_at": "2026-11-09",
       "pit_issues": [],
-      "price": 12780.0
+      "price": 12630.0
     },
     {
-      "ticker": "4475.T",
-      "name": "ＨＥＮＮＧＥ",
-      "total": 60,
+      "ticker": "7581.T",
+      "name": "サイゼリヤ",
+      "total": 64,
       "decision": "WATCH",
       "factors": {
         "trend": 17,
         "momentum": 12,
-        "risk": 9,
+        "risk": 13,
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+62.2% · 20日+18.6% · vol=0.62 · turnover=4705437625",
-      "risk": "mdd_1y=-0.35602264077373713 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
-      "surprise": null,
-      "news": null,
-      "news_sentiment": null,
-      "content_data": "missing",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": null,
-      "pit_issues": [],
-      "price": 2240.0
-    },
-    {
-      "ticker": "4588.T",
-      "name": "オンコリスバイオファーマ",
-      "total": 59,
-      "decision": "SKIP",
-      "factors": {
-        "trend": 20,
-        "momentum": 4,
-        "risk": 5,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+700.4% · 20日+47.7% · vol=1.09 · turnover=13166361750 · Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags / Oncolys BioPharma (TSE:4588) Stock May Tr",
-      "risk": "mdd_1y=-0.38057663125948404 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "why": "1年+64.8% · 20日+14.8% · vol=0.43 · turnover=4871286150 · Saizeriya (TSE:7581) Stock Seems Reasonable On Its 207% Five Year Run / How Investors May Respond To Saizeriya (TSE:7581",
+      "risk": "mdd_1y=-0.2951048965445542 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
         {
-          "title": "Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
+          "title": "Saizeriya (TSE:7581) Stock Seems Reasonable On Its 207% Five Year Run",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/oncolys-biopharma-tse-4588-stock-151530351.html",
-          "published_at": "2026-11-12T15:15:30Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/saizeriya-tse-7581-stock-seems-201214868.html",
+          "published_at": "2026-11-13T20:12:14Z"
         },
         {
-          "title": "Oncolys BioPharma (TSE:4588) Stock May Trade At A Premium On Book Value",
+          "title": "How Investors May Respond To Saizeriya (TSE:7581) Dividend Hike And Guidance",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/oncolys-biopharma-tse-4588-stock-220733787.html",
-          "published_at": "2026-10-25T22:07:33Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/investors-may-respond-saizeriya-tse-171625556.html",
+          "published_at": "2026-10-26T17:16:25Z"
+        },
+        {
+          "title": "Saizeriya (TSE:7581) Q4 Earnings Expose A Margin Squeeze Beneath Sales Growth",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/saizeriya-tse-7581-q4-earnings-131105306.html",
+          "published_at": "2026-10-16T13:11:05Z"
+        },
+        {
+          "title": "Saizeriya (TSE:7581) Stock May Be 49% Undervalued On Cash Flow",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/saizeriya-tse-7581-stock-may-041942488.html",
+          "published_at": "2026-10-01T04:19:42Z"
+        },
+        {
+          "title": "China’s big food chains retreat from deep discounts – report",
+          "publisher": "Verdict Food Service",
+          "link": "https://www.verdictfoodservice.com/news/chinas-big-food-chains-retreat/",
+          "published_at": "2026-02-04T10:19:36Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-12",
+      "pit_available_at": "2026-11-13",
       "pit_issues": [],
-      "price": 7620.0
+      "price": 8940.0
     },
     {
       "ticker": "3994.T",
       "name": "マネーフォワード",
-      "total": 57,
-      "decision": "SKIP",
+      "total": 60,
+      "decision": "WATCH",
       "factors": {
-        "trend": 17,
-        "momentum": 12,
+        "trend": 14,
+        "momentum": 18,
         "risk": 6,
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+66.4% · 20日+12.5% · vol=0.68 · turnover=4080766540 · Money Forward (TSE:3994) Stock Looks Above Fair Value As It Rises 79% / Money Forward (TSE:3994) Q3 Results Pit Revenue ",
+      "why": "1年+58.2% · 20日+3.4% · vol=0.69 · turnover=4238588870 · Money Forward (TSE:3994) Stock Looks Above Fair Value As It Rises 79% / Money Forward (TSE:3994) Q3 Results Pit Revenue ",
       "risk": "mdd_1y=-0.46712302352487467 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
@@ -956,14 +905,75 @@
       "pit_status": "ok",
       "pit_available_at": "2026-11-11",
       "pit_issues": [],
-      "price": 7260.0
+      "price": 6806.0
+    },
+    {
+      "ticker": "4588.T",
+      "name": "オンコリスバイオファーマ",
+      "total": 59,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 20,
+        "momentum": 4,
+        "risk": 5,
+        "liquidity": 18,
+        "event": 12
+      },
+      "why": "1年+612.7% · 20日+45.3% · vol=1.09 · turnover=13541051750 · Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags / Oncolys BioPharma (TSE:4588) Stock May Tr",
+      "risk": "mdd_1y=-0.38057663125948404 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/oncolys-biopharma-tse-4588-stock-151530351.html",
+          "published_at": "2026-11-12T15:15:30Z"
+        },
+        {
+          "title": "Oncolys BioPharma (TSE:4588) Stock May Trade At A Premium On Book Value",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/oncolys-biopharma-tse-4588-stock-220733787.html",
+          "published_at": "2026-10-25T22:07:33Z"
+        }
+      ],
+      "news_sentiment": "neutral",
+      "content_data": "news",
+      "pit_ok": true,
+      "pit_status": "ok",
+      "pit_available_at": "2026-11-12",
+      "pit_issues": [],
+      "price": 7540.0
+    },
+    {
+      "ticker": "4475.T",
+      "name": "ＨＥＮＮＧＥ",
+      "total": 57,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 17,
+        "momentum": 9,
+        "risk": 9,
+        "liquidity": 10,
+        "event": 12
+      },
+      "why": "1年+75.4% · 20日+26.0% · vol=0.62 · turnover=4700080330",
+      "risk": "mdd_1y=-0.34082555076113863 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "surprise": null,
+      "news": null,
+      "news_sentiment": null,
+      "content_data": "missing",
+      "pit_ok": true,
+      "pit_status": "ok",
+      "pit_available_at": null,
+      "pit_issues": [],
+      "price": 2367.0
     }
   ],
   "adopted": [
     "8766.T",
+    "8309.T",
     "3563.T",
-    "8630.T",
-    "7453.T"
+    "8630.T"
   ],
   "skipped_reasons": [
     "20日リターンが概ね35%超、または vol_1y>0.9 は SKIP",

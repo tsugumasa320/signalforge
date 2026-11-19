@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-approvals/v1",
-  "updated_at": "2026-11-18T19:33:37+00:00",
+  "updated_at": "2026-11-19T19:13:15+00:00",
   "items": [
     {
       "id": "2026-11-13:8309.T",
@@ -155,6 +155,58 @@
       "source": "rules/v1",
       "status": "pending",
       "proposed_at": "2026-11-18T19:33:37+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-18:8766.T",
+      "as_of": "2026-11-18",
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "total": 84,
+      "price": 581.2999877929688,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-19T19:13:15+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-18:8309.T",
+      "as_of": "2026-11-18",
+      "ticker": "8309.T",
+      "name": "三井住友トラストグループ",
+      "total": 84,
+      "price": 1697.5,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-19T19:13:15+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-18:3563.T",
+      "as_of": "2026-11-18",
+      "ticker": "3563.T",
+      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+      "total": 84,
+      "price": 6242.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-19T19:13:15+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-18:8630.T",
+      "as_of": "2026-11-18",
+      "ticker": "8630.T",
+      "name": "ＳＯＭＰＯホールディングス",
+      "total": 84,
+      "price": 7057.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-19T19:13:15+00:00",
       "resolved_at": null,
       "note": ""
     }

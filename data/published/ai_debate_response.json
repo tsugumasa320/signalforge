@@ -1,11 +1,11 @@
 {
-  "as_of": "2026-11-17",
+  "as_of": "2026-11-18",
   "generator": "rules/v1",
   "debates": [
     {
       "ticker": "8766.T",
       "name": "東京海上ホールディングス",
-      "bull": "スクリーニング通過・1年+96.7%・20日+5.3%。 内容: ニュース: CB or TKOMY: Which Is the Better Value Stock Right Now?",
+      "bull": "スクリーニング通過・1年+93.7%・20日+6.8%。 内容: ニュース: CB or TKOMY: Which Is the Better Value Stock Right Now?",
       "bear": "vol_1y=0.45 · mdd_1y=-0.13825641652644627 · earnings_next_days=None。",
       "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
       "roles": {
@@ -41,9 +41,47 @@
       ]
     },
     {
+      "ticker": "8309.T",
+      "name": "三井住友トラストグループ",
+      "bull": "スクリーニング通過・1年+59.6%・20日+5.3%。 内容: ニュース: Sumitomo Mitsui Trust Group Inc's Dividend Analysis",
+      "bear": "vol_1y=0.29 · mdd_1y=-0.16083190419363824 · earnings_next_days=None。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
+      "roles": {
+        "bull_researcher": "bull",
+        "bear_researcher": "bear",
+        "risk_officer": "risk_officer",
+        "human_approver": "pending_gate"
+      },
+      "decision": "BUY",
+      "confidence": 64,
+      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Sumitomo Mitsui Trust Group Inc's Dividend Analysis",
+          "publisher": "GuruFocus.com",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-incs-111044923.html",
+          "published_at": "2026-09-29T11:10:44Z"
+        },
+        {
+          "title": "Sumitomo Mitsui Trust Group (TSE:8309) Stock May Be 39% Undervalued On Equity Returns",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-tse-191400931.html",
+          "published_at": "2026-09-22T19:14:00Z"
+        },
+        {
+          "title": "Sumitomo Mitsui Trust Group (TSE:8309) Rallies As Investors Reassess Whether It Still Looks Undervalued",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-tse-231731858.html",
+          "published_at": "2026-09-21T23:17:31Z"
+        }
+      ]
+    },
+    {
       "ticker": "3563.T",
       "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
-      "bull": "スクリーニング通過・1年+59.8%・20日+3.5%。 内容: ニュース: Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
+      "bull": "スクリーニング通過・1年+56.7%・20日+3.8%。 内容: ニュース: Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
       "bear": "vol_1y=0.47 · mdd_1y=-0.21092713982111122 · earnings_next_days=None。",
       "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
       "roles": {
@@ -75,44 +113,6 @@
           "publisher": "Simply Wall St.",
           "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-010951577.html",
           "published_at": "2026-07-14T01:09:51Z"
-        }
-      ]
-    },
-    {
-      "ticker": "8630.T",
-      "name": "ＳＯＭＰＯホールディングス",
-      "bull": "スクリーニング通過・1年+57.4%・20日+2.6%。 内容: ニュース: Is Sompo Holdings (TSE:8630) Still Below Fair Value on Earnings?",
-      "bear": "vol_1y=0.32 · mdd_1y=-0.13473193333205524 · earnings_next_days=None。",
-      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
-      "roles": {
-        "bull_researcher": "bull",
-        "bear_researcher": "bear",
-        "risk_officer": "risk_officer",
-        "human_approver": "pending_gate"
-      },
-      "decision": "BUY",
-      "confidence": 64,
-      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
-      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
-      "surprise": null,
-      "news": [
-        {
-          "title": "Is Sompo Holdings (TSE:8630) Still Below Fair Value on Earnings?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sompo-holdings-tse-8630-still-151553640.html",
-          "published_at": "2026-10-20T15:15:53Z"
-        },
-        {
-          "title": "Sompo Holdings Inc's Dividend Analysis",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sompo-holdings-incs-dividend-analysis-110812488.html",
-          "published_at": "2026-09-29T11:08:12Z"
-        },
-        {
-          "title": "Toyota backs Tier IV in level 4 autonomous vehicle push",
-          "publisher": "Just Auto",
-          "link": "https://www.just-auto.com/news/toyota-tier-iv-l4-autonomous-vehicle-push/",
-          "published_at": "2026-06-10T18:14:09Z"
         }
       ]
     }
