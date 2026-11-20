@@ -59,8 +59,8 @@ TERM_TIPS: dict[str, str] = {
     "col_earn_next": "取得済みカレンダー上の、これから来る決算発表日。",
     "col_div_y": "直近の配当利回り（年率の目安）。データが無い銘柄は — です。",
     "col_exdiv": "権利落ち日の目安。配当を受け取るには、通常その前に保有が必要です。",
-    "col_yutai": "株主優待の種類。リンクがある場合は優待しらべの会社ページです。",
-    "col_yutai_m": "優待の権利が確定する月。複数ある場合は「・」でつなぎます。",
+    "col_yutai": "株主優待の有無・種類（参考）。種類は有報からの推定でずれることがあります。リンクは優待しらべの会社ページです。",
+    "col_yutai_m": "優待の権利確定月（参考）。優待しらべと優待めぐりを突合した月です。複数は「・」つなぎ。IRと違う場合はIRを優先。",
     "cagr": "年率換算のリターン。複利で伸ばしたときのペース感です。",
     "bench_cagr": "比較対象（TOPIX連動ETF 1306）の年率リターン。",
     "total_ret": "期間全体の累積リターン（手数料控除後）。",
@@ -321,7 +321,9 @@ def _lab_section(payload: dict[str, Any]) -> str:
         <strong>決算・配当・優待</strong>は参考表示です（通過条件には使いません）。
         決算日は取得済みカレンダー、配当は Yahoo Finance、優待は
         <a href="https://yutai-shirabe.com/download/index.html" target="_blank" rel="noopener">優待しらべ</a>
-        （EDINET 有報由来）です。内容・権利日は変更されうるので、売買前に各社IRで確認してください。
+        （EDINET 有報の自動抽出）を主に、権利月・必要株数は
+        <a href="https://yutai-meguri.com/" target="_blank" rel="noopener">優待めぐり</a>
+        と突合しています。種類の分類や権利月は推定・欠落があり得るので、売買前に各社IRで確認してください。
         銘柄コード横の Yahoo は日本版ファイナンスへのリンクです。
       </div>
       <div class="lab-controls">
@@ -493,7 +495,9 @@ def _lab_section(payload: dict[str, Any]) -> str:
       }}
       function yutaiCell(r) {{
         if (!r.yutai) return '—';
-        const label = r.yutai_type || 'あり';
+        const raw = (r.yutai_type || '').trim();
+        const unknown = !raw || raw === '記載なし' || raw === '読み取れず' || raw === '不明';
+        const label = unknown ? 'あり' : raw;
         if (r.yutai_url) {{
           return `<a href="${{r.yutai_url}}" target="_blank" rel="noopener">${{label}}</a>`;
         }}

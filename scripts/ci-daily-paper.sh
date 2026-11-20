@@ -19,6 +19,11 @@ else
   echo "--- trend-screen liquid universe OHLCV update ---"
   uv run python - <<'PY'
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+import pandas as pd
+
 from signalforge.data.cache import ParquetCache
 from signalforge.data.fetcher import MarketDataFetcher
 from signalforge.research.trend_screen.ruleset import load_adopted
@@ -34,6 +39,30 @@ if "1306.T" not in tickers:
     tickers = [*tickers, "1306.T"]
 cache = ParquetCache()
 fetcher = MarketDataFetcher(data_source="yfinance")
+
+
+def _last_bar_date(sym: str):
+    df = cache.load(sym, "1d")
+    if df is None or df.empty:
+        return None
+    ts = pd.Timestamp(df.index.max())
+    if ts.tzinfo is not None:
+        ts = ts.tz_convert("UTC")
+    return ts.date()
+
+
+def _expected_jp_session_date():
+    """CI は東証引け後想定。土日祝は直近の平日を期待する（祝日カレンダーは持たない）。"""
+    now = datetime.now(ZoneInfo("Asia/Tokyo"))
+    day = now.date()
+    # 16:00 JST 前は「前日セッション」まで揃っていれば十分
+    if now.hour < 16:
+        day -= timedelta(days=1)
+    while day.weekday() >= 5:
+        day -= timedelta(days=1)
+    return day
+
+
 ok = fail = 0
 with ThreadPoolExecutor(max_workers=8) as pool:
     futs = {pool.submit(cache.update, sym, "1d", fetcher): sym for sym in tickers}
@@ -45,6 +74,43 @@ with ThreadPoolExecutor(max_workers=8) as pool:
             fail += 1
             print(f"✗ {futs[fut]}: {exc}", flush=True)
 print(f"trend-screen bars updated ok={ok} fail={fail} universe={len(tickers)}", flush=True)
+
+expected = _expected_jp_session_date()
+lagging = []
+for sym in tickers:
+    last = _last_bar_date(sym)
+    if last is None or last < expected:
+        lagging.append(sym)
+print(
+    f"trend-screen bar tip expected>={expected} lagging={len(lagging)}/{len(tickers)}",
+    flush=True,
+)
+if lagging:
+    # Yahoo が遅い／キャッシュ先端が古いときに1日遅れの基準日になるのを防ぐ
+    ok2 = fail2 = 0
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futs = {
+            pool.submit(cache.load_or_fetch, sym, "1d", fetcher, True): sym
+            for sym in lagging
+        }
+        for fut in as_completed(futs):
+            try:
+                fut.result()
+                ok2 += 1
+            except Exception as exc:
+                fail2 += 1
+                print(f"✗ refresh {futs[fut]}: {exc}", flush=True)
+    still = sum(
+        1
+        for sym in tickers
+        if (d := _last_bar_date(sym)) is None or d < expected
+    )
+    print(
+        f"trend-screen refresh ok={ok2} fail={fail2} still_lagging={still}",
+        flush=True,
+    )
+tips = sorted({str(_last_bar_date(sym)) for sym in tickers if _last_bar_date(sym)})
+print(f"trend-screen bar tip dates: {tips[-5:]}", flush=True)
 PY
 
   echo "--- trend-screen full ranking (published JSON) ---"

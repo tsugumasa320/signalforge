@@ -59,3 +59,11 @@ def yutai_dir() -> Path:
 
 def yutai_list_path() -> Path:
     return yutai_dir() / "yutai-list.csv"
+
+
+def yutai_meguri_stats_path() -> Path:
+    return yutai_dir() / "meguri-stock-stats.csv"
+
+
+def yutai_meguri_stats_path() -> Path:
+    return yutai_dir() / "meguri-stock-stats.csv"

@@ -2,9 +2,10 @@ name: Daily paper update
 
 on:
   schedule:
-    # 毎日 09:17 UTC = JST 18:17。東証は 15:30 引け。
+    # 毎日 11:17 UTC = JST 20:17。東証 15:30 引け後 + Yahoo 日足反映待ち。
+    # （以前の 09:17 UTC だと Actions 遅延と相まって基準日が1営業日遅れやすかった）
     # 毎時0分は GitHub が予定を捨てることがあるので、17分に置く。
-    - cron: "17 9 * * *"
+    - cron: "17 11 * * *"
   workflow_dispatch:
     inputs:
       publish_only:

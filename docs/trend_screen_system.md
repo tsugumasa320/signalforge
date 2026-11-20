@@ -16,7 +16,7 @@ uv run signalforge dashboard export --output _site   # Pages に screen/trend.ht
 
 GitHub Pages: `/screen/trend.html`（ナビ「トレンド・スクリーニング」）。  
 ページ上の **条件ラボ**（安定度スコア・上昇月割合・経路DD、直近/次回決算、配当利回り・権利落、優待、Yahooファイナンス日本版リンクなども参考表示） で一次条件・売買代金・直近20日・25日線・52週DD・上位N・並び替えを切り替え、通過銘柄をその場で再ランキングできる（ブラウザ内のみ。採用ルールは変わらない）。  
-企業イベントは通過条件に使わない。優待は [優待しらべ](https://yutai-shirabe.com/download/index.html)（EDINET 有報由来）、配当は yfinance、決算日は `data/alt/earnings` キャッシュ。  
+企業イベントは通過条件に使わない。優待は [優待しらべ](https://yutai-shirabe.com/download/index.html)（EDINET 有報の自動抽出）を主とし、権利月・必要株数は [優待めぐり](https://yutai-meguri.com/) の統計 CSV と突合して欠落を補う。種類ラベルは推定のためずれることがある。配当は yfinance、決算日は `data/alt/earnings` キャッシュ。  
 
 
 **基準日:** サイトのランキングは「日足が揃う最新営業日」で毎日更新する。  

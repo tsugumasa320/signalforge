@@ -84,3 +84,48 @@ def test_yahoo_jp_url_and_earnings_around():
     # キャッシュが無くてもキーは揃う
     ev = earnings_around("7203.T", "2026-11-13")
     assert "earnings_last" in ev and "earnings_next" in ev
+
+
+def test_yutai_month_merge_and_unknown_type():
+    from signalforge.research.trend_screen.corporate_events import (
+        _clean_yutai_type,
+        _merge_yutai_months,
+        _parse_month_nums,
+    )
+
+    assert _parse_month_nums("2・8月") == [2, 8]
+    assert _parse_month_nums("3月・9月") == [3, 9]
+    assert _merge_yutai_months("2月", "2・8月") == "2月・8月"
+    assert _merge_yutai_months("9月", "3月・9月") == "3月・9月"
+    assert _clean_yutai_type("記載なし") is None
+    assert _clean_yutai_type("自社の優待券") == "自社の優待券"
+
+
+def test_load_yutai_map_merges_meguri(tmp_path, monkeypatch):
+    from signalforge.research.trend_screen import corporate_events as ce
+
+    shirabe = tmp_path / "yutai-list.csv"
+    shirabe.write_text(
+        "\ufeffコード,会社名,市場,業種,権利確定月,基準日,必要株数,継続保有の条件,優待の種類,年額の推定（円）,会社ページのURL,有報の提出日\n"
+        "8267,イオン,東証プライム,小売業,2月,2月末日,100,条件の記載なし,自社の優待券,,https://yutai-shirabe.com/c/8267.html,2026-01-01\n"
+        "3391,ツルハHD,東証プライム,小売業,,,条件の記載なし,記載なし,,https://yutai-shirabe.com/c/3391.html,2026-01-01\n",
+        encoding="utf-8",
+    )
+    meguri = tmp_path / "meguri-stock-stats.csv"
+    meguri.write_text(
+        "\ufeff証券コード,銘柄名,掲載店舗数,必要株数(最低),権利確定月,データ基準日\n"
+        "8267,イオン,548,100,2・8月,2026-11-17\n"
+        "3391,ツルハHD,6175,100,2月,2026-11-17\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(ce, "yutai_list_path", lambda: shirabe)
+    monkeypatch.setattr(ce, "yutai_meguri_stats_path", lambda: meguri)
+    monkeypatch.setattr(ce, "ensure_yutai_list", lambda **kwargs: shirabe)
+    monkeypatch.setattr(ce, "ensure_yutai_meguri_stats", lambda **kwargs: meguri)
+
+    ymap = ce.load_yutai_map()
+    assert ymap["8267"]["yutai_months"] == "2月・8月"
+    assert ymap["8267"]["yutai_type"] == "自社の優待券"
+    assert ymap["3391"]["yutai_months"] == "2月"
+    assert ymap["3391"]["yutai_min_shares"] == 100
+    assert ymap["3391"]["yutai_type"] is None

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import time
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -11,10 +12,12 @@ from typing import Any
 from urllib.request import urlopen
 
 from signalforge.alt_data.earnings import load_earnings
-from signalforge.alt_data.paths import dividends_path, yutai_list_path
+from signalforge.alt_data.paths import dividends_path, yutai_list_path, yutai_meguri_stats_path
 
 YUTAI_CSV_URL = "https://yutai-shirabe.com/download/yutai-list.csv"
+YUTAI_MEGURI_CSV_URL = "https://yutai-meguri.com/stats/stock-stats.csv"
 YAHOO_JP_QUOTE = "https://finance.yahoo.co.jp/quote/{ticker}"
+_YUTAI_UNKNOWN_TYPES = frozenset({"", "記載なし", "読み取れず", "不明"})
 
 _EMPTY = {
     "yahoo_jp_url": None,
@@ -229,24 +232,102 @@ def dividend_fields(
     }
 
 
-def ensure_yutai_list(*, max_age_days: int = 30, force: bool = False) -> Path:
-    path = yutai_list_path()
+def _download_csv(url: str, path: Path, *, max_age_days: int, force: bool) -> Path:
     if path.exists() and not force:
         age = (_parse_as_of(None) - datetime.fromtimestamp(path.stat().st_mtime).date()).days
-        if age <= max_age_days and path.stat().st_size > 1000:
+        if age <= max_age_days and path.stat().st_size > 200:
             return path
-    with urlopen(YUTAI_CSV_URL, timeout=60) as resp:
-        data = resp.read()
-    path.write_bytes(data)
+    with urlopen(url, timeout=60) as resp:
+        path.write_bytes(resp.read())
     return path
 
 
+def ensure_yutai_list(*, max_age_days: int = 7, force: bool = False) -> Path:
+    return _download_csv(YUTAI_CSV_URL, yutai_list_path(), max_age_days=max_age_days, force=force)
+
+
+def ensure_yutai_meguri_stats(*, max_age_days: int = 7, force: bool = False) -> Path:
+    return _download_csv(
+        YUTAI_MEGURI_CSV_URL,
+        yutai_meguri_stats_path(),
+        max_age_days=max_age_days,
+        force=force,
+    )
+
+
+def _parse_month_nums(text: str | None) -> list[int]:
+    if not text:
+        return []
+    seen: set[int] = set()
+    out: list[int] = []
+    for m in re.findall(r"(\d{1,2})", str(text)):
+        n = int(m)
+        if 1 <= n <= 12 and n not in seen:
+            seen.add(n)
+            out.append(n)
+    return out
+
+
+def _format_yutai_months(months: list[int]) -> str | None:
+    if not months:
+        return None
+    return "・".join(f"{m}月" for m in months)
+
+
+def _merge_yutai_months(*texts: str | None) -> str | None:
+    merged: list[int] = []
+    seen: set[int] = set()
+    for text in texts:
+        for m in _parse_month_nums(text):
+            if m not in seen:
+                seen.add(m)
+                merged.append(m)
+    return _format_yutai_months(sorted(merged))
+
+
+def _clean_yutai_type(raw: str | None) -> str | None:
+    text = (raw or "").strip() or None
+    if text is None or text in _YUTAI_UNKNOWN_TYPES:
+        return None
+    return text
+
+
+def _load_meguri_supplement(*, refresh: bool = False) -> dict[str, dict[str, Any]]:
+    """優待めぐり（店舗優待寄り）で権利月・必要株数を補完する。"""
+    try:
+        path = ensure_yutai_meguri_stats(force=refresh)
+    except Exception:
+        return {}
+    if not path.exists() or path.stat().st_size < 40:
+        return {}
+    out: dict[str, dict[str, Any]] = {}
+    try:
+        text = path.read_text(encoding="utf-8-sig")
+    except OSError:
+        return {}
+    for row in csv.DictReader(text.splitlines()):
+        code = str(row.get("証券コード") or "").strip()
+        if not code:
+            continue
+        months = _format_yutai_months(_parse_month_nums(row.get("権利確定月")))
+        min_raw = row.get("必要株数(最低)") or row.get("必要株数")
+        try:
+            min_shares = int(float(min_raw)) if str(min_raw or "").strip() else None
+        except (TypeError, ValueError):
+            min_shares = None
+        out[code] = {
+            "yutai_months": months,
+            "yutai_min_shares": min_shares,
+        }
+    return out
+
+
 def load_yutai_map(*, refresh: bool = False) -> dict[str, dict[str, Any]]:
+    """優待しらべを主、優待めぐりで権利月・必要株数を突合したマップ。"""
     path = ensure_yutai_list(force=refresh)
     out: dict[str, dict[str, Any]] = {}
     text = path.read_text(encoding="utf-8-sig")
-    reader = csv.DictReader(text.splitlines())
-    for row in reader:
+    for row in csv.DictReader(text.splitlines()):
         code = str(row.get("コード") or "").strip()
         if not code:
             continue
@@ -260,14 +341,38 @@ def load_yutai_map(*, refresh: bool = False) -> dict[str, dict[str, Any]]:
             annual_i = int(float(annual)) if str(annual).strip() else None
         except (TypeError, ValueError):
             annual_i = None
+        ytype = _clean_yutai_type(row.get("優待の種類"))
+        months = _format_yutai_months(_parse_month_nums(row.get("権利確定月")))
         out[code] = {
             "yutai": True,
-            "yutai_months": (row.get("権利確定月") or "").strip() or None,
+            "yutai_months": months,
             "yutai_record": (row.get("基準日") or "").strip() or None,
             "yutai_min_shares": min_shares_i,
-            "yutai_type": (row.get("優待の種類") or "").strip() or None,
+            "yutai_type": ytype,
             "yutai_annual_est": annual_i,
             "yutai_url": (row.get("会社ページのURL") or "").strip() or None,
+        }
+
+    meguri = _load_meguri_supplement(refresh=refresh)
+    for code, extra in meguri.items():
+        if code in out:
+            base = out[code]
+            base["yutai_months"] = _merge_yutai_months(
+                base.get("yutai_months"),
+                extra.get("yutai_months"),
+            )
+            if base.get("yutai_min_shares") is None and extra.get("yutai_min_shares") is not None:
+                base["yutai_min_shares"] = extra["yutai_min_shares"]
+            continue
+        # しらべに無いがめぐりにある銘柄は「あり」のみ（種類は不明）
+        out[code] = {
+            "yutai": True,
+            "yutai_months": extra.get("yutai_months"),
+            "yutai_record": None,
+            "yutai_min_shares": extra.get("yutai_min_shares"),
+            "yutai_type": None,
+            "yutai_annual_est": None,
+            "yutai_url": f"https://yutai-shirabe.com/c/{code}.html",
         }
     return out
 
