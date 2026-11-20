@@ -29,6 +29,7 @@ uv run signalforge alt-data jquants-test
 ## 4. 決算日（Free プランで可）
 
 `JQUANTS_API_KEY` があるとき `--earnings` は **J-Quants 決算カレンダー** を使います。
+取得結果は `data/alt/earnings/` にキャッシュされ、trend-screen と `ai score` / `ai daily` の event 因子が参照します（キーが無くても既存キャッシュや yfinance 取得分があれば動く）。
 
 ```bash
 uv run signalforge alt-data fetch --earnings --limit 50

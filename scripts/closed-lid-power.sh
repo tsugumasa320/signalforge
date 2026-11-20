@@ -71,6 +71,7 @@ closed_lid_power_off() {
   if [[ ! -f "$backup" ]]; then
     echo "バックアップがありません。既定値に近い設定へ戻します…"
     sudo pmset -b sleep 1 disablesleep 0 standby 1 powernap 1 autopoweroff 1
+    sudo pmset -a disablesleep 0
     rm -f "$flag"
     return 0
   fi
@@ -84,6 +85,9 @@ closed_lid_power_off() {
   if ((${#args[@]} > 0)); then
     sudo pmset -b "${args[@]}"
   fi
+  # disablesleep は -g custom に出ず、バックアップに残らない。システム全体でスリープを止めたままになる。
+  sudo pmset -a disablesleep 0
+  sudo pmset -b autopoweroff 1
   rm -f "$flag" "$backup"
   echo "✅ 蓋閉じモード OFF（通常のスリープ設定に戻しました）"
 }
