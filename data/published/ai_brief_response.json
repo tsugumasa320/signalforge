@@ -1,21 +1,21 @@
 {
-  "as_of": "2026-11-18",
+  "as_of": "2026-11-20",
   "generator": "rules/v1",
   "market_regime": {
     "overall": "risk_off",
     "jp": "risk_off",
     "us": "risk_off",
-    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-6.6%/弱気（リスクオフ） · ダウ先物:20日-6.8%/弱気（リスクオフ） · S&P500先物:20日-6.0%/弱気（リスクオフ） · NASDAQ100先物:20日-8.1%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-7.9%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-4.7%/弱気（リスクオフ） · NYダウ:20日-6.8%/弱気（リスクオフ）"
+    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-9.7%/弱気（リスクオフ） · ダウ先物:20日-6.2%/弱気（リスクオフ） · S&P500先物:20日-6.8%/弱気（リスクオフ） · NASDAQ100先物:20日-10.2%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-10.3%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-8.2%/弱気（リスクオフ） · NYダウ:20日-7.1%/弱気（リスクオフ）"
   },
-  "market_take": "トレンド通過 45 / 目標 5。紙上当月超過は -0.7%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-6.6%/弱気（リスクオフ） · ダウ先物:20日-6.8%/弱気（リスクオフ） · S&P500先物:20日-6.0%/弱気（リスクオフ） · NASDAQ100先物:20日-8.1%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-7.9%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-4.7%/弱気（リスクオフ） · NYダウ:20日-6.8%/弱気（リスクオフ） ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
+  "market_take": "トレンド通過 38 / 目標 5。紙上当月超過は -0.9%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-9.7%/弱気（リスクオフ） · ダウ先物:20日-6.2%/弱気（リスクオフ） · S&P500先物:20日-6.8%/弱気（リスクオフ） · NASDAQ100先物:20日-10.2%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-10.3%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-8.2%/弱気（リスクオフ） · NYダウ:20日-7.1%/弱気（リスクオフ） ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
   "watch": [
     {
       "ticker": "4588.T",
       "name": "オンコリスバイオファーマ",
-      "stance": "AVOID",
-      "confidence": 72,
-      "why": "目標入りだが20日+45.3%で過熱。 · ニュース: Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
-      "risk": "追撃よりサイズ管理。",
+      "stance": "WATCH",
+      "confidence": 62,
+      "why": "目標 1 位 · 1年+549.8% · 20日+23.9% · ニュース: Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
+      "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
         {
@@ -37,11 +37,17 @@
       "ticker": "8766.T",
       "name": "東京海上ホールディングス",
       "stance": "WATCH",
-      "confidence": 70,
-      "why": "採点 ADOPT。目標入りかつ過熱が相対的に軽い。 · ニュース: CB or TKOMY: Which Is the Better Value Stock Right Now?",
-      "risk": "スクリーニング遅行・セクター感応。",
+      "confidence": 62,
+      "why": "目標 2 位 · 1年+89.7% · 20日+1.1% · ニュース: High AI Anxiety Blunts Asian Stock Markets",
+      "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
+        {
+          "title": "High AI Anxiety Blunts Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/high-ai-anxiety-blunts-asian-105448167.html",
+          "published_at": "2026-11-20T10:54:48Z"
+        },
         {
           "title": "CB or TKOMY: Which Is the Better Value Stock Right Now?",
           "publisher": "Zacks",
@@ -65,12 +71,6 @@
           "publisher": "Investing.com",
           "link": "https://finance.yahoo.com/markets/stocks/articles/australia-suncorp-shares-drop-denying-063936224.html",
           "published_at": "2026-10-01T06:39:36Z"
-        },
-        {
-          "title": "Tokio Marine Holdings Inc's Dividend Analysis",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tokio-marine-holdings-incs-dividend-110251815.html",
-          "published_at": "2026-09-29T11:02:51Z"
         }
       ],
       "content_data": "news"
@@ -80,7 +80,7 @@
       "name": "ベイカレント",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 3 位 · 1年+90.4% · 20日+16.5% · ニュース: Tech Rebound Amid General Caution Roils Asian Stock Markets",
+      "why": "目標 3 位 · 1年+87.4% · 20日+11.7% · ニュース: Tech Rebound Amid General Caution Roils Asian Stock Markets",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
@@ -122,7 +122,7 @@
       "name": "タカラトミー",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 4 位 · 1年+88.2% · 20日+21.0% · ニュース: TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
+      "why": "目標 4 位 · 1年+87.2% · 20日+15.3% · ニュース: TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
@@ -148,38 +148,19 @@
       "content_data": "news"
     },
     {
-      "ticker": "7747.T",
-      "name": "朝日インテック",
+      "ticker": "4475.T",
+      "name": "ＨＥＮＮＧＥ",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 5 位 · 1年+77.8% · 20日+16.1% · ニュース: Asahi Intecc (TSE:7747) Stock Looks Hard To Call As Cash Flow Keeps Pace",
+      "why": "目標 5 位 · 1年+77.1% · 20日+4.6%",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
-      "news": [
-        {
-          "title": "Asahi Intecc (TSE:7747) Stock Looks Hard To Call As Cash Flow Keeps Pace",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/asahi-intecc-tse-7747-stock-002344443.html",
-          "published_at": "2026-11-17T00:23:44Z"
-        },
-        {
-          "title": "Is Asahi Intecc (TSE:7747) Priced Right for Its Cash Flow?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/asahi-intecc-tse-7747-priced-210817302.html",
-          "published_at": "2026-10-31T21:08:17Z"
-        },
-        {
-          "title": "Is Asahi Intecc (TSE:7747) Cheap Or Is Its Premium P/E Already Priced In?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/asahi-intecc-tse-7747-cheap-042559743.html",
-          "published_at": "2026-09-30T04:25:59Z"
-        }
-      ],
-      "content_data": "news"
+      "news": null,
+      "content_data": "missing"
     }
   ],
   "paper_notes": [
-    "trend_paper open=True · month_excess=-0.7%",
+    "trend_paper open=True · month_excess=-0.9%",
     "diversified papers=7 口座を参照",
     "内容: surprise=earnings_surprise/fins · news=data/alt/news（あれば why に併記）"
   ],

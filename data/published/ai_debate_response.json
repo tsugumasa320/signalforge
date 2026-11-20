@@ -1,88 +1,12 @@
 {
-  "as_of": "2026-11-18",
+  "as_of": "2026-11-20",
   "generator": "rules/v1",
   "debates": [
     {
-      "ticker": "8766.T",
-      "name": "東京海上ホールディングス",
-      "bull": "スクリーニング通過・1年+93.7%・20日+6.8%。 内容: ニュース: CB or TKOMY: Which Is the Better Value Stock Right Now?",
-      "bear": "vol_1y=0.45 · mdd_1y=-0.13825641652644627 · earnings_next_days=None。",
-      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
-      "roles": {
-        "bull_researcher": "bull",
-        "bear_researcher": "bear",
-        "risk_officer": "risk_officer",
-        "human_approver": "pending_gate"
-      },
-      "decision": "BUY",
-      "confidence": 64,
-      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
-      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
-      "surprise": null,
-      "news": [
-        {
-          "title": "CB or TKOMY: Which Is the Better Value Stock Right Now?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/cb-tkomy-better-value-stock-144002962.html",
-          "published_at": "2026-10-28T14:40:02Z"
-        },
-        {
-          "title": "Is Tokio Marine Holdings (TSE:8766) Priced Below Fair Value After A 5 Year Surge?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tokio-marine-holdings-tse-8766-071340037.html",
-          "published_at": "2026-10-25T07:13:40Z"
-        },
-        {
-          "title": "RNR or TKOMY: Which Is the Better Value Stock Right Now?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/rnr-tkomy-better-value-stock-144004284.html",
-          "published_at": "2026-10-12T14:40:04Z"
-        }
-      ]
-    },
-    {
-      "ticker": "8309.T",
-      "name": "三井住友トラストグループ",
-      "bull": "スクリーニング通過・1年+59.6%・20日+5.3%。 内容: ニュース: Sumitomo Mitsui Trust Group Inc's Dividend Analysis",
-      "bear": "vol_1y=0.29 · mdd_1y=-0.16083190419363824 · earnings_next_days=None。",
-      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
-      "roles": {
-        "bull_researcher": "bull",
-        "bear_researcher": "bear",
-        "risk_officer": "risk_officer",
-        "human_approver": "pending_gate"
-      },
-      "decision": "BUY",
-      "confidence": 64,
-      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
-      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
-      "surprise": null,
-      "news": [
-        {
-          "title": "Sumitomo Mitsui Trust Group Inc's Dividend Analysis",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-incs-111044923.html",
-          "published_at": "2026-09-29T11:10:44Z"
-        },
-        {
-          "title": "Sumitomo Mitsui Trust Group (TSE:8309) Stock May Be 39% Undervalued On Equity Returns",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-tse-191400931.html",
-          "published_at": "2026-09-22T19:14:00Z"
-        },
-        {
-          "title": "Sumitomo Mitsui Trust Group (TSE:8309) Rallies As Investors Reassess Whether It Still Looks Undervalued",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/sumitomo-mitsui-trust-group-tse-231731858.html",
-          "published_at": "2026-09-21T23:17:31Z"
-        }
-      ]
-    },
-    {
       "ticker": "3563.T",
       "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
-      "bull": "スクリーニング通過・1年+56.7%・20日+3.8%。 内容: ニュース: Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
-      "bear": "vol_1y=0.47 · mdd_1y=-0.21092713982111122 · earnings_next_days=None。",
+      "bull": "スクリーニング通過・1年+76.7%・20日+3.0%。 内容: ニュース: Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
+      "bear": "vol_1y=0.45 · mdd_1y=-0.21092713982111122 · earnings_next_days=None。",
       "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
       "roles": {
         "bull_researcher": "bull",
@@ -113,6 +37,82 @@
           "publisher": "Simply Wall St.",
           "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-010951577.html",
           "published_at": "2026-07-14T01:09:51Z"
+        }
+      ]
+    },
+    {
+      "ticker": "7453.T",
+      "name": "良品計画",
+      "bull": "スクリーニング通過・1年+65.4%・20日+4.9%。 内容: ニュース: CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth Engine?",
+      "bear": "vol_1y=0.42 · mdd_1y=-0.18002987659817404 · earnings_next_days=None。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
+      "roles": {
+        "bull_researcher": "bull",
+        "bear_researcher": "bear",
+        "risk_officer": "risk_officer",
+        "human_approver": "pending_gate"
+      },
+      "decision": "BUY",
+      "confidence": 64,
+      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
+      "surprise": null,
+      "news": [
+        {
+          "title": "CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth Engine?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/chds-e-commerce-sales-surge-164500993.html",
+          "published_at": "2026-11-19T16:45:00Z"
+        },
+        {
+          "title": "Is DSM Firmenich AG - Sponsored ADR (DSFIY) Stock Outpacing Its Consumer Staples Peers This Year?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/dsm-firmenich-ag-sponsored-adr-134002643.html",
+          "published_at": "2026-11-18T13:40:02Z"
+        },
+        {
+          "title": "Church & Dwight Expands Hair Care Portfolio With BALI CARE Investment",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/church-dwight-expands-hair-care-150500696.html",
+          "published_at": "2026-11-17T15:05:00Z"
+        }
+      ]
+    },
+    {
+      "ticker": "4502.T",
+      "name": "武田薬品工業",
+      "bull": "スクリーニング通過・1年+65.1%・20日+9.8%。 内容: ニュース: Takeda (TSE:4502) Stock May Look Reasonable Despite Its ORZEYFUL Launch",
+      "bear": "vol_1y=0.23 · mdd_1y=-0.19388788056717232 · earnings_next_days=None。",
+      "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
+      "roles": {
+        "bull_researcher": "bull",
+        "bear_researcher": "bear",
+        "risk_officer": "risk_officer",
+        "human_approver": "pending_gate"
+      },
+      "decision": "BUY",
+      "confidence": 64,
+      "invalidation": "vs_ma25 が負転、または20日リターンが急反落。",
+      "why_this_could_fail": "スクリーニング遅行やイベントギャップ・決算内容の織り込み遅れ。",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Takeda (TSE:4502) Stock May Look Reasonable Despite Its ORZEYFUL Launch",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/healthcare/articles/takeda-tse-4502-stock-may-181656317.html",
+          "published_at": "2026-11-19T18:16:56Z"
+        },
+        {
+          "title": "Novavax Eyes New Partnerships as Sanofi Advances COVID-Flu Vaccine Trial",
+          "publisher": "MarketBeat",
+          "link": "https://www.marketbeat.com/instant-alerts/event-novavax-eyes-new-partnerships-as-sanofi-advances-covid-flu-vaccine-trial-2026-11-17/?utm_source=yahoofinance&utm_medium=yahoofinance",
+          "published_at": "2026-11-17T21:12:07Z"
+        },
+        {
+          "title": "Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154847227.html",
+          "published_at": "2026-11-16T15:48:47Z"
         }
       ]
     }
