@@ -16,7 +16,12 @@ from signalforge.research.trend_screen.config import (
     RET_1Y_STEPS,
     RET_3Y_STEPS,
 )
-from signalforge.research.trend_screen.horse import _clean, _load_bars
+from signalforge.research.trend_screen.duke_fundamentals import (
+    FUND_GATE_KEYS,
+    FUND_GATE_LABELS,
+    evaluate_duke_fundamentals,
+)
+from signalforge.research.trend_screen.horse import _clean, _load_bars, _load_funds
 from signalforge.research.trend_screen.improve import _stats_at
 from signalforge.research.trend_screen.ruleset import SystemRules, load_adopted, rules_markdown
 from signalforge.research.trend_screen.system import (
@@ -39,6 +44,18 @@ GATE_LABELS = {
     "ret_20d": "直近20日下落なし",
     "above_ma25": "終値>25日線",
     "dd_52w": "52週高値からの下落上限",
+    # DUKE。図23 第2ステージ + 新高値ブレイク
+    "duke_above_sma150_200": "終値>SMA150&200",
+    "duke_sma150_gt_200": "SMA150>SMA200",
+    "duke_sma200_up": "SMA200上昇（約1カ月）",
+    "duke_sma50_stack": "SMA50>SMA150&200",
+    "duke_off_52w_low": "52週安値+25%以上",
+    "duke_near_52w_high": "52週高値の25%以内",
+    "duke_above_sma50": "終値≧SMA50−10%",
+    "duke_rs_pos": "対市場RS（6週）プラス",
+    "duke_volume_surge": "出来高比率≧1.5",
+    "duke_fresh_break": "新高値ブレイク（当日）",
+    **FUND_GATE_LABELS,
 }
 
 # サイト上でON/OFFできる条件（採用ルールの部品）
@@ -53,6 +70,44 @@ LAB_GATE_KEYS = (
     "ret_20d",
     "above_ma25",
     "dd_52w",
+    "duke_above_sma150_200",
+    "duke_sma150_gt_200",
+    "duke_sma200_up",
+    "duke_sma50_stack",
+    "duke_off_52w_low",
+    "duke_near_52w_high",
+    "duke_above_sma50",
+    "duke_rs_pos",
+    "duke_volume_surge",
+    "duke_fresh_break",
+    *FUND_GATE_KEYS,
+)
+
+TREND_LAB_GATE_KEYS = (
+    "above_ma200",
+    "ma200_up",
+    "ma75_up",
+    "ret_1y_pos",
+    "ret_3y_pos",
+    "excess_1y",
+    "turnover",
+    "ret_20d",
+    "above_ma25",
+    "dd_52w",
+)
+
+DUKE_LAB_GATE_KEYS = (
+    "duke_above_sma150_200",
+    "duke_sma150_gt_200",
+    "duke_sma200_up",
+    "duke_sma50_stack",
+    "duke_off_52w_low",
+    "duke_near_52w_high",
+    "duke_above_sma50",
+    "duke_rs_pos",
+    "duke_volume_surge",
+    "duke_fresh_break",
+    *FUND_GATE_KEYS,
 )
 
 
@@ -110,8 +165,118 @@ def _empty_snap(*, had_bar: bool = False) -> dict[str, Any]:
         "vol_1y": None,
         "risk_adj_1y": None,
         "turnover_20d": None,
+        "volume_ratio_20": None,
+        "market_rs_30d": None,
+        "pct_above_52w_low": None,
+        "pct_of_52w_high": None,
+        "duke_score": None,
+        "fund_sales_yoy": None,
+        "fund_op_yoy": None,
+        "fund_op_margin": None,
+        "target_price_fund": None,
+        "upside_pct": None,
+        "stop_price": None,
+        "t1_price": None,
+        "t2_price": None,
+        "t3_price": None,
         "gates": {k: False for k in LAB_GATE_KEYS},
     }
+
+
+def _duke_gate_snapshot(
+    px: pd.Series,
+    volume: pd.Series | None,
+    bench: pd.Series,
+    loc: int,
+    price: float,
+) -> dict[str, Any]:
+    """DUKE。図23 + 新高値ブレイク用ゲート（終値系列で近似）。"""
+    out: dict[str, Any] = {
+        "volume_ratio_20": None,
+        "market_rs_30d": None,
+        "pct_above_52w_low": None,
+        "pct_of_52w_high": None,
+        "duke_score": None,
+        "gates": {k: False for k in DUKE_LAB_GATE_KEYS},
+    }
+    if loc < 200:
+        return out
+
+    sma50 = px.rolling(50, min_periods=50).mean()
+    sma150 = px.rolling(150, min_periods=150).mean()
+    sma200 = px.rolling(200, min_periods=200).mean()
+    s50 = float(sma50.iloc[loc]) if pd.notna(sma50.iloc[loc]) else None
+    s150 = float(sma150.iloc[loc]) if pd.notna(sma150.iloc[loc]) else None
+    s200 = float(sma200.iloc[loc]) if pd.notna(sma200.iloc[loc]) else None
+    s200_prev = None
+    if loc >= 21 and pd.notna(sma200.iloc[loc - 21]):
+        s200_prev = float(sma200.iloc[loc - 21])
+
+    lookback = 252
+    window = px.iloc[max(0, loc - lookback + 1) : loc + 1]
+    low_52 = float(window.min()) if len(window) else None
+    high_52 = float(window.max()) if len(window) else None
+    prior_high = float(px.iloc[max(0, loc - lookback) : loc].max()) if loc > 0 else None
+
+    pct_off_low = None
+    pct_of_high = None
+    if low_52 and low_52 > 0:
+        pct_off_low = price / low_52 - 1.0
+    if high_52 and high_52 > 0:
+        pct_of_high = price / high_52
+
+    vol_ratio = None
+    if volume is not None:
+        vol = _clean(volume).reindex(px.index)
+        if loc < len(vol) and pd.notna(vol.iloc[loc]):
+            vma = vol.rolling(20, min_periods=10).mean()
+            if pd.notna(vma.iloc[loc]) and float(vma.iloc[loc]) > 0:
+                vol_ratio = float(vol.iloc[loc]) / float(vma.iloc[loc])
+
+    market_rs = None
+    if loc >= 30:
+        bpx = _clean(bench).reindex(px.index)
+        stock_sum = float(px.pct_change().iloc[loc - 29 : loc + 1].sum())
+        if loc < len(bpx) and bpx.iloc[loc - 29 : loc + 1].notna().sum() >= 20:
+            bench_sum = float(bpx.pct_change().iloc[loc - 29 : loc + 1].sum())
+            market_rs = (stock_sum - bench_sum) * 100.0
+
+    gates = {
+        "duke_above_sma150_200": bool(s150 is not None and s200 is not None and price > s150 and price > s200),
+        "duke_sma150_gt_200": bool(s150 is not None and s200 is not None and s150 > s200),
+        "duke_sma200_up": bool(s200 is not None and s200_prev is not None and s200 > s200_prev),
+        "duke_sma50_stack": bool(
+            s50 is not None and s150 is not None and s200 is not None and s50 > s150 and s50 > s200
+        ),
+        "duke_off_52w_low": bool(pct_off_low is not None and pct_off_low >= 0.25),
+        "duke_near_52w_high": bool(pct_of_high is not None and pct_of_high >= 0.75),
+        "duke_above_sma50": bool(s50 is not None and price >= s50 * 0.90),
+        "duke_rs_pos": bool(market_rs is not None and market_rs > 0),
+        "duke_volume_surge": bool(vol_ratio is not None and vol_ratio >= 1.5),
+        "duke_fresh_break": bool(prior_high is not None and price > prior_high),
+    }
+
+    # 並び用: 高値接近度 + RS + 出来高（いずれも正規化して合成）
+    score_parts: list[float] = []
+    if pct_of_high is not None:
+        score_parts.append(max(0.0, min(1.0, (pct_of_high - 0.75) / 0.25)) * 40.0)
+    if market_rs is not None:
+        score_parts.append(max(0.0, min(40.0, market_rs * 2.0)))
+    if vol_ratio is not None:
+        score_parts.append(max(0.0, min(20.0, (vol_ratio - 1.0) * 10.0)))
+    duke_score = round(sum(score_parts), 1) if score_parts else None
+
+    out.update(
+        {
+            "volume_ratio_20": vol_ratio,
+            "market_rs_30d": market_rs,
+            "pct_above_52w_low": pct_off_low,
+            "pct_of_52w_high": pct_of_high,
+            "duke_score": duke_score,
+            "gates": gates,
+        }
+    )
+    return out
 
 
 def _steady_metrics(window: pd.Series) -> dict[str, float | None]:
@@ -231,6 +396,7 @@ def _gate_snapshot(
 
     stats = _stats_at(close, volume, signal)
     steady = _steady_metrics(px.iloc[max(0, loc - RET_1Y_STEPS) : loc + 1])
+    duke = _duke_gate_snapshot(px, volume, bench, loc, price)
     gates = {
         "above_ma200": bool(m200 is not None and price > m200),
         "ma200_up": bool(m200 is not None and m200_prev is not None and m200 > m200_prev),
@@ -242,6 +408,7 @@ def _gate_snapshot(
         "ret_20d": bool(stats.get("ret_20d") is not None and float(stats["ret_20d"]) > 0),
         "above_ma25": bool(stats.get("vs_ma25") is not None and float(stats["vs_ma25"]) > 0),
         "dd_52w": bool(stats.get("dd_52w") is not None),
+        **duke["gates"],
     }
     return {
         "had_bar": True,
@@ -260,6 +427,11 @@ def _gate_snapshot(
         "vol_1y": stats.get("vol_1y"),
         "risk_adj_1y": stats.get("risk_adj_1y"),
         "turnover_20d": stats.get("turnover_20d"),
+        "volume_ratio_20": duke.get("volume_ratio_20"),
+        "market_rs_30d": duke.get("market_rs_30d"),
+        "pct_above_52w_low": duke.get("pct_above_52w_low"),
+        "pct_of_52w_high": duke.get("pct_of_52w_high"),
+        "duke_score": duke.get("duke_score"),
         "gates": gates,
     }
 
@@ -290,6 +462,7 @@ def build_ranking(
         signal = latest_asof_day(closes)
     n_on_signal, coverage_ok, warning = _signal_coverage(closes, signal)
     listing, sectors = _listing_maps()
+    fund_map = _load_funds(sorted(closes), fetch_missing=False)
 
     from signalforge.research.trend_screen.corporate_events import (
         event_fields_for,
@@ -328,6 +501,21 @@ def build_ranking(
         elif stats.get("dd_52w") is not None:
             gates["dd_52w"] = True
 
+        box_height = None
+        px_series = _clean(series)
+        if snap.get("had_bar") and snap.get("price") is not None and signal in px_series.index:
+            loc = px_series.index.get_loc(signal)
+            if isinstance(loc, int) and loc >= 60:
+                window = px_series.iloc[loc - 60 : loc]
+                if len(window) >= 20:
+                    box_height = float(window.max() - window.min())
+        fund = evaluate_duke_fundamentals(
+            fund_map.get(code),
+            price=snap.get("price"),
+            box_height=box_height,
+        )
+        gates.update(fund.gates)
+
         primary_keys = ("above_ma200", "ma200_up", "ma75_up", "ret_1y_pos", "ret_3y_pos", "excess_1y")
         mask_ok = bool(snap["had_bar"] and all(gates[k] for k in primary_keys))
         extra_ok, extra_fails = _passes_extra(rules, stats)
@@ -362,13 +550,28 @@ def build_ranking(
                 "vol_1y": stats.get("vol_1y"),
                 "risk_adj_1y": stats.get("risk_adj_1y"),
                 "turnover_20d": stats.get("turnover_20d"),
+                "volume_ratio_20": snap.get("volume_ratio_20"),
+                "market_rs_30d": snap.get("market_rs_30d"),
+                "pct_above_52w_low": snap.get("pct_above_52w_low"),
+                "pct_of_52w_high": snap.get("pct_of_52w_high"),
+                "duke_score": snap.get("duke_score"),
+                "box_height": box_height,
+                **fund.to_row_fields(),
                 "gates": gates,
+                "midplan_kpi_hint": None,
+                "midplan_human_todos": None,
             }
         )
+
+    from signalforge.research.trend_screen.midplan_card import sector_hints
 
     # 配当は既存キャッシュのみ使う（ランキング中の yfinance 一括取得は重い／弾かれやすい）
     for row in rows:
         row.update(event_fields_for(row["ticker"], as_of=as_of_s, yutai_map=yutai_map))
+        hints = sector_hints(str(row.get("sector") or ""))
+        row["midplan_kpi_hint"] = hints["kpi"]
+        row["midplan_revenue_mix_hint"] = hints["revenue_mix"]
+        row["midplan_market_hint"] = hints["market"]
 
     passers = [r for r in rows if r["passed"]]
     passers.sort(key=lambda r: (-(r["ret_1y"] or -1e9), r["code"]))
@@ -412,18 +615,58 @@ def build_ranking(
         for r in passers[: rules.top_n]
     ]
 
+    trend_gates = {
+        "above_ma200": True,
+        "ma200_up": True,
+        "ma75_up": True,
+        "ret_1y_pos": True,
+        "ret_3y_pos": True,
+        "excess_1y": True,
+        "turnover": rules.min_turnover is not None,
+        "ret_20d": rules.min_ret_20d is not None,
+        "above_ma25": bool(rules.require_above_ma25),
+        "dd_52w": rules.max_dd_52w is not None,
+        **{k: False for k in DUKE_LAB_GATE_KEYS},
+    }
+    # スクリーニング用: 図23第2ステージ＋ファンダ（売上/営利/利益率）。出来高/当日ブレイク/目標上振れは任意
+    duke_gates = {
+        **{k: False for k in TREND_LAB_GATE_KEYS},
+        **{k: True for k in DUKE_LAB_GATE_KEYS},
+        "duke_volume_surge": False,
+        "duke_fresh_break": False,
+        "fund_upside_pos": False,
+        "turnover": False,
+        "ret_20d": False,
+        "above_ma25": False,
+        "dd_52w": False,
+    }
+    # トレンド採用プリセットではファンダ条件はOFF
+    for k in FUND_GATE_KEYS:
+        trend_gates[k] = False
     lab_defaults = {
-        "gates": {
-            "above_ma200": True,
-            "ma200_up": True,
-            "ma75_up": True,
-            "ret_1y_pos": True,
-            "ret_3y_pos": True,
-            "excess_1y": True,
-            "turnover": rules.min_turnover is not None,
-            "ret_20d": rules.min_ret_20d is not None,
-            "above_ma25": bool(rules.require_above_ma25),
-            "dd_52w": rules.max_dd_52w is not None,
+        "gates": dict(trend_gates),
+        "active_preset": "trend",
+        "presets": {
+            "trend": {
+                "label": "長期トレンド（採用）",
+                "gates": trend_gates,
+                "rank_by": rules.rank_by or "ret_1y",
+                "top_n": int(rules.top_n),
+                "min_steady_score": 0.0,
+                "min_up_month_ratio": 0.0,
+                "max_mdd_1y": -1.0,
+                "min_trend_r2": 0.0,
+            },
+            "duke": {
+                "label": "DUKE新高値ブレイク",
+                "gates": duke_gates,
+                "rank_by": "duke_score",
+                "top_n": 10,
+                "min_steady_score": 0.0,
+                "min_up_month_ratio": 0.0,
+                "max_mdd_1y": -1.0,
+                "min_trend_r2": 0.0,
+            },
         },
         "min_turnover": float(rules.min_turnover or 0.0),
         "min_ret_20d": float(rules.min_ret_20d if rules.min_ret_20d is not None else 0.0),
@@ -451,6 +694,7 @@ def build_ranking(
         "n_on_signal": n_on_signal,
         "n_pass": len(passers),
         "n_target": len(targets),
+        "n_fund_ready": sum(1 for r in rows if (r.get("gates") or {}).get("fund_data")),
         "coverage_ok": coverage_ok,
         "warning": warning,
         "note": (

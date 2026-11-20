@@ -30,6 +30,25 @@ TERM_TIPS: dict[str, str] = {
     "passed": "いまの採用条件をすべて満たした銘柄数。",
     "targets": "通過銘柄を並べたうえで、実際に持つ想定の上位N銘柄。",
     "lab": "採用ルールを変えずに、条件のON/OFFや閾値をこの場で試す画面です。結果は保存されません。",
+    "preset_toggle": "長期トレンド（採用ルール）と DUKE。新高値ブレイク（図23第2ステージ）をワンクリックで切り替えます。",
+    "duke_score": "高値接近度・対市場RS・出来高を合成したDUKE向け参考点（高いほどブレイク候補寄り）。",
+    "duke_above_sma150_200": "終値が150日・200日移動平均より上（第2ステージ①）。",
+    "duke_sma150_gt_200": "150日線が200日線より上（第2ステージ②）。",
+    "duke_sma200_up": "200日線が約1カ月上昇（第2ステージ③）。",
+    "duke_sma50_stack": "50日線が150日・200日線より上（第2ステージ④）。",
+    "duke_off_52w_low": "終値が52週安値から25%以上上（第2ステージ⑤）。",
+    "duke_near_52w_high": "終値が52週高値の25%以内（第2ステージ⑥）。",
+    "duke_above_sma50": "終値が50日線のほぼ上（−10%まで許容・第2ステージ⑦）。",
+    "duke_rs_pos": "直近約6週で市場平均より強い（第2ステージ⑧）。",
+    "duke_volume_surge": "出来高が20日平均の1.5倍以上。",
+    "duke_fresh_break": "当日終値が過去約1年の高値を更新した初動日。",
+    "fund_data": "通期の売上・利益キャッシュがある。",
+    "fund_sales_up": "直近通期の売上が前年比プラス。",
+    "fund_op_up": "直近通期の営業利益が前年比プラス。",
+    "fund_margin_ok": "営業利益率が前年比で2ポイント超悪化していない。",
+    "fund_upside_pos": "ファンダ目標株価（予想EPS×想定PER）が現値より上。",
+    "target_fund": "粗いファンダ目標。予想EPS（成長外挿）×成長帯ごとの想定PER。中計ストーリーは含まない。",
+    "stop_t1": "損切り目安は現値−10%。T1は＋20%（建値引き上げ）。T2は直近60日ボックス値幅を足した計測目標。T3は＋100%の参考。",
     "above_ma200": "終値が200日移動平均より上。中長期の上昇トレンド側にいる目安です。",
     "ma200_up": "200日線自体が上向き（60営業日前より高い）。トレンドが続いているかの目安です。",
     "ma75_up": "75日線が上向き（20営業日前より高い）。中期の勢いの目安です。",
@@ -212,6 +231,25 @@ def _lab_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 "vol_1y": row.get("vol_1y"),
                 "risk_adj_1y": row.get("risk_adj_1y"),
                 "turnover_20d": row.get("turnover_20d"),
+                "volume_ratio_20": row.get("volume_ratio_20"),
+                "market_rs_30d": row.get("market_rs_30d"),
+                "pct_above_52w_low": row.get("pct_above_52w_low"),
+                "pct_of_52w_high": row.get("pct_of_52w_high"),
+                "duke_score": row.get("duke_score"),
+                "fund_sales_yoy": row.get("fund_sales_yoy"),
+                "fund_op_yoy": row.get("fund_op_yoy"),
+                "fund_op_margin": row.get("fund_op_margin"),
+                "trailing_per": row.get("trailing_per"),
+                "fwd_eps": row.get("fwd_eps"),
+                "assumed_per": row.get("assumed_per"),
+                "target_price_fund": row.get("target_price_fund"),
+                "upside_pct": row.get("upside_pct"),
+                "stop_price": row.get("stop_price"),
+                "t1_price": row.get("t1_price"),
+                "t2_price": row.get("t2_price"),
+                "t3_price": row.get("t3_price"),
+                "box_height": row.get("box_height"),
+                "midplan_kpi_hint": row.get("midplan_kpi_hint"),
                 "gates": row.get("gates") or {},
                 "yahoo_jp_url": row.get("yahoo_jp_url"),
                 "earnings_last": row.get("earnings_last"),
@@ -246,7 +284,7 @@ def _lab_section(payload: dict[str, Any]) -> str:
     lab = _lab_payload(payload)
     defaults = lab.get("lab_defaults") or {}
     gate_labels = lab.get("gate_labels") or {}
-    gate_order = [
+    trend_gate_order = [
         "above_ma200",
         "ma200_up",
         "ma75_up",
@@ -258,28 +296,43 @@ def _lab_section(payload: dict[str, Any]) -> str:
         "above_ma25",
         "dd_52w",
     ]
+    duke_gate_order = [
+        "duke_above_sma150_200",
+        "duke_sma150_gt_200",
+        "duke_sma200_up",
+        "duke_sma50_stack",
+        "duke_off_52w_low",
+        "duke_near_52w_high",
+        "duke_above_sma50",
+        "duke_rs_pos",
+        "duke_volume_surge",
+        "duke_fresh_break",
+    ]
+    fund_gate_order = [
+        "fund_data",
+        "fund_sales_up",
+        "fund_op_up",
+        "fund_margin_ok",
+        "fund_upside_pos",
+    ]
     gate_defaults = defaults.get("gates") or {}
-    gate_tip_keys = {
-        "above_ma200": "above_ma200",
-        "ma200_up": "ma200_up",
-        "ma75_up": "ma75_up",
-        "ret_1y_pos": "ret_1y_pos",
-        "ret_3y_pos": "ret_3y_pos",
-        "excess_1y": "excess_1y",
-        "turnover": "turnover",
-        "ret_20d": "ret_20d",
-        "above_ma25": "above_ma25",
-        "dd_52w": "dd_52w",
-    }
-    checks = []
-    for key in gate_order:
-        label = gate_labels.get(key, key)
-        checked = " checked" if gate_defaults.get(key, False) else ""
-        tip_html = _tip(str(label), gate_tip_keys.get(key, key), plain=True)
-        checks.append(
-            f'<label class="gate"><input type="checkbox" data-gate="{escape(key)}"{checked}/> '
-            f"{tip_html}</label>"
-        )
+    gate_tip_keys = {k: k for k in trend_gate_order + duke_gate_order + fund_gate_order}
+
+    def _gate_checks(keys: list[str]) -> str:
+        bits = []
+        for key in keys:
+            label = gate_labels.get(key, key)
+            checked = " checked" if gate_defaults.get(key, False) else ""
+            tip_html = _tip(str(label), gate_tip_keys.get(key, key), plain=True)
+            bits.append(
+                f'<label class="gate"><input type="checkbox" data-gate="{escape(key)}"{checked}/> '
+                f"{tip_html}</label>"
+            )
+        return "".join(bits)
+
+    trend_checks = _gate_checks(trend_gate_order)
+    duke_checks = _gate_checks(duke_gate_order)
+    fund_checks = _gate_checks(fund_gate_order)
     min_turn = float(defaults.get("min_turnover") or 0) / 1e8
     min_ret20 = float(defaults.get("min_ret_20d") or 0) * 100
     max_dd = float(defaults.get("max_dd_52w") if defaults.get("max_dd_52w") is not None else -1) * 100
@@ -304,18 +357,36 @@ def _lab_section(payload: dict[str, Any]) -> str:
       .lab-actions {{ display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; }}
       .lab-actions button {{ background:var(--accent); color:#fff; border:0; border-radius:6px; padding:0.45rem 0.9rem; cursor:pointer; font-size:0.85rem; }}
       .lab-actions button.secondary {{ background:#334155; }}
+      .preset-toggle {{ display:inline-flex; border:1px solid #334155; border-radius:8px; overflow:hidden; }}
+      .preset-toggle button {{ background:#0b1220; color:var(--muted); border:0; border-radius:0; padding:0.55rem 1rem; cursor:pointer; font-size:0.9rem; }}
+      .preset-toggle button.active {{ background:var(--accent); color:#fff; }}
       #lab-summary {{ font-size:0.9rem; color:var(--muted); }}
       #lab-table td, #lab-table th {{ white-space:nowrap; }}
       #lab-table td.name {{ white-space:normal; max-width:14rem; }}
+      .gate-group h3 {{ margin:0.5rem 0 0.35rem; font-size:0.95rem; }}
     </style>
     <section id="lab">
       <h2>{_tip("条件ラボ", "lab")}（この場で試す）</h2>
       <p class="muted">採用ルールを初期値に、条件のON/OFFと閾値を変えて通過銘柄を並べ替えます。結果はブラウザ内のみで、採用ルール自体は変わりません。母集団は流動性上位約300（採用ルール）。? にマウスを置くと用語の説明が出ます。</p>
+      <div class="lab-actions" style="margin-bottom:0.75rem">
+        <span class="muted">{_tip("スクリーニング切替", "preset_toggle")}</span>
+        <div class="preset-toggle" role="group" aria-label="スクリーニング切替">
+          <button type="button" id="lab-preset-trend" class="active">長期トレンド</button>
+          <button type="button" id="lab-preset-duke">DUKE新高値ブレイク</button>
+        </div>
+        <span id="lab-preset-note" class="muted"></span>
+      </div>
       <div class="info-box">
         <strong>安定度スコア（0–100）</strong>は「じわじわ上がってきたか」の参考値です。
         上昇月の割合・値動きの直線性（trend R²）・1年の経路最大DD・ボラを合成。
         急騰あとの失速銘柄は低く出やすいです。買ってすぐ含み損が不安なときは、
         安定度や上昇月割合で絞り、並びを安定度にすると見やすいです。
+      </div>
+      <div class="info-box">
+        <strong>DUKE新高値ブレイク</strong>は図23の第2ステージ（SMA50/150/200・52週・対市場RS）と
+        ファンダ（売上・営利YoY、利益率）を必須にし、並びは {_tip("DUKEスコア", "duke_score")} です。
+        {_tip("ファンダ目標株価", "target_fund")} と {_tip("損切り/T1–T3", "stop_t1")} も表示します。
+        「出来高急増」「当日ブレイク」「目標＞現値」は初期OFFです。
       </div>
       <div class="info-box">
         <strong>決算・配当・優待</strong>は参考表示です（通過条件には使いません）。
@@ -327,9 +398,17 @@ def _lab_section(payload: dict[str, Any]) -> str:
         銘柄コード横の Yahoo は日本版ファイナンスへのリンクです。
       </div>
       <div class="lab-controls">
-        <div>
-          <h3>必須条件</h3>
-          <div class="gate-grid">{''.join(checks)}</div>
+        <div class="gate-group">
+          <h3>長期トレンド条件</h3>
+          <div class="gate-grid">{trend_checks}</div>
+        </div>
+        <div class="gate-group">
+          <h3>DUKE / 第2ステージ条件</h3>
+          <div class="gate-grid">{duke_checks}</div>
+        </div>
+        <div class="gate-group">
+          <h3>ファンダ条件（通期）</h3>
+          <div class="gate-grid">{fund_checks}</div>
         </div>
         <div class="param-row">
           <label class="param">{_tip("売買代金下限（億円）", "min_turnover")}
@@ -359,6 +438,12 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <label class="param">{_tip("並び替え", "rank_by")}
             <select id="lab-rankby">
               <option value="ret_1y" {"selected" if rank_by == "ret_1y" else ""}>1年リターン</option>
+              <option value="duke_score" {"selected" if rank_by == "duke_score" else ""}>DUKEスコア</option>
+              <option value="upside_pct">ファンダ上振れ%</option>
+              <option value="target_price_fund">ファンダ目標株価</option>
+              <option value="market_rs_30d">対市場RS（6週）</option>
+              <option value="pct_of_52w_high">52週高値接近度</option>
+              <option value="volume_ratio_20">出来高比率</option>
               <option value="steady_score" {"selected" if rank_by == "steady_score" else ""}>安定度スコア</option>
               <option value="ret_20d" {"selected" if rank_by == "ret_20d" else ""}>20日リターン</option>
               <option value="ret_60d" {"selected" if rank_by == "ret_60d" else ""}>60日リターン</option>
@@ -384,6 +469,18 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <thead>
             <tr>
               <th>#</th><th>コード</th><th>会社名</th><th>業種</th>
+              <th>{_tip("DUKE", "duke_score")}</th>
+              <th>{_tip("目標", "target_fund")}</th>
+              <th>上振れ</th>
+              <th>{_tip("損切", "stop_t1")}</th>
+              <th>T1</th>
+              <th>T2箱</th>
+              <th>売上YoY</th>
+              <th>営利YoY</th>
+              <th>KPIヒント</th>
+              <th>RS6週</th>
+              <th>出来高比</th>
+              <th>高値比</th>
               <th>{_tip("安定度", "col_steady")}</th>
               <th>{_tip("上昇月", "col_upm")}</th>
               <th>{_tip("経路DD", "col_mdd")}</th>
@@ -411,6 +508,8 @@ def _lab_section(payload: dict[str, Any]) -> str:
       const DATA = JSON.parse(raw.textContent);
       const defaults = DATA.lab_defaults || {{}};
       const universe = DATA.universe || [];
+      const presets = defaults.presets || {{}};
+      let activePreset = defaults.active_preset || 'trend';
 
       function pct(v, digits=1) {{
         if (v === null || v === undefined || Number.isNaN(v)) return '—';
@@ -422,10 +521,6 @@ def _lab_section(payload: dict[str, Any]) -> str:
       function yen(v) {{
         if (v === null || v === undefined || Number.isNaN(v)) return '—';
         return Math.round(Number(v)).toLocaleString('ja-JP');
-      }}
-      function oku(v) {{
-        if (v === null || v === undefined || Number.isNaN(v)) return '—';
-        return (Number(v) / 1e8).toFixed(1);
       }}
       function gateOn(key) {{
         const el = document.querySelector('input[data-gate="'+key+'"]');
@@ -448,7 +543,11 @@ def _lab_section(payload: dict[str, Any]) -> str:
         const g = row.gates || {{}};
         const required = [
           'above_ma200','ma200_up','ma75_up','ret_1y_pos','ret_3y_pos','excess_1y',
-          'turnover','ret_20d','above_ma25','dd_52w'
+          'turnover','ret_20d','above_ma25','dd_52w',
+          'duke_above_sma150_200','duke_sma150_gt_200','duke_sma200_up','duke_sma50_stack',
+          'duke_off_52w_low','duke_near_52w_high','duke_above_sma50','duke_rs_pos',
+          'duke_volume_surge','duke_fresh_break',
+          'fund_data','fund_sales_up','fund_op_up','fund_margin_ok','fund_upside_pos'
         ];
         for (const key of required) {{
           if (!gateOn(key)) continue;
@@ -474,6 +573,7 @@ def _lab_section(payload: dict[str, Any]) -> str:
         if (p.minUpM > 0 && (row.up_month_ratio == null || row.up_month_ratio < p.minUpM)) return false;
         if (p.maxMdd > -0.999 && (row.mdd_1y == null || row.mdd_1y < p.maxMdd)) return false;
         if (p.minR2 > 0 && (row.trend_r2 == null || row.trend_r2 < p.minR2)) return false;
+        if (activePreset === 'duke') return row.price != null;
         return row.ret_1y != null;
       }}
       function score(row, rankBy) {{
@@ -509,6 +609,36 @@ def _lab_section(payload: dict[str, Any]) -> str:
         const tip = (d === null || d === undefined) ? '' : `（あと${{d}}日）`;
         return txt(r.earnings_next) + tip;
       }}
+      function setPresetButtons() {{
+        const t = document.getElementById('lab-preset-trend');
+        const d = document.getElementById('lab-preset-duke');
+        if (t) t.classList.toggle('active', activePreset === 'trend');
+        if (d) d.classList.toggle('active', activePreset === 'duke');
+        const note = document.getElementById('lab-preset-note');
+        if (note) {{
+          note.textContent = activePreset === 'duke'
+            ? '図23第2ステージ＋出来高で絞り込み中'
+            : '採用の長期トレンド条件で絞り込み中';
+        }}
+      }}
+      function applyPreset(name) {{
+        const preset = presets[name];
+        if (!preset) return;
+        activePreset = name;
+        const g = preset.gates || {{}};
+        document.querySelectorAll('input[data-gate]').forEach(el => {{
+          const key = el.getAttribute('data-gate');
+          el.checked = !!g[key];
+        }});
+        document.getElementById('lab-topn').value = preset.top_n || defaults.top_n || 5;
+        document.getElementById('lab-rankby').value = preset.rank_by || 'ret_1y';
+        document.getElementById('lab-min-steady').value = preset.min_steady_score || 0;
+        document.getElementById('lab-min-upm').value = ((preset.min_up_month_ratio || 0) * 100);
+        document.getElementById('lab-max-mdd').value = ((preset.max_mdd_1y != null ? preset.max_mdd_1y : -1) * 100);
+        document.getElementById('lab-min-r2').value = preset.min_trend_r2 || 0;
+        setPresetButtons();
+        render();
+      }}
       function render() {{
         const p = readParams();
         const pass = universe.filter(r => passes(r, p));
@@ -520,9 +650,10 @@ def _lab_section(payload: dict[str, Any]) -> str:
           <div class="metric"><label>通過</label><value>${{pass.length}}</value></div>
           <div class="metric"><label>上位N</label><value>${{targets.length}}</value></div>
           <div class="metric"><label>ユニバース</label><value>${{universe.length}}</value></div>
+          <div class="metric"><label>モード</label><value>${{activePreset === 'duke' ? 'DUKE' : 'トレンド'}}</value></div>
         `;
         document.getElementById('lab-targets').innerHTML = targets.length
-          ? targets.map((r,i) => `<li>${{yahooLink(r)}} ${{r.name || ''}} · 安定度 ${{num(r.steady_score,1)}} · 1年 ${{pct(r.ret_1y)}} · 次回決算 ${{txt(r.earnings_next)}} · 優待 ${{r.yutai ? (r.yutai_months || 'あり') : '—'}}</li>`).join('')
+          ? targets.map((r,i) => `<li>${{yahooLink(r)}} ${{r.name || ''}} · 目標 ${{yen(r.target_price_fund)}} · 上振れ ${{pct(r.upside_pct)}} · DUKE ${{num(r.duke_score,1)}} · 1年 ${{pct(r.ret_1y)}}</li>`).join('')
           : '<li class="muted">条件に合う銘柄なし</li>';
         const tb = document.querySelector('#lab-table tbody');
         tb.innerHTML = pass.map((r,i) => {{
@@ -532,6 +663,18 @@ def _lab_section(payload: dict[str, Any]) -> str:
             <td>${{yahooLink(r)}}</td>
             <td class="name">${{r.name || ''}}</td>
             <td class="muted">${{r.sector || ''}}</td>
+            <td>${{num(r.duke_score,1)}}</td>
+            <td>${{yen(r.target_price_fund)}}</td>
+            <td>${{pct(r.upside_pct)}}</td>
+            <td>${{yen(r.stop_price)}}</td>
+            <td>${{yen(r.t1_price)}}</td>
+            <td>${{yen(r.t2_price)}}</td>
+            <td>${{pct(r.fund_sales_yoy)}}</td>
+            <td>${{pct(r.fund_op_yoy)}}</td>
+            <td class="name muted">${{txt(r.midplan_kpi_hint)}}</td>
+            <td>${{num(r.market_rs_30d,1)}}</td>
+            <td>${{num(r.volume_ratio_20,2)}}</td>
+            <td>${{pct(r.pct_of_52w_high ? (r.pct_of_52w_high - 1) : null)}}</td>
             <td>${{num(r.steady_score,1)}}</td>
             <td>${{pct(r.up_month_ratio,0)}}</td>
             <td>${{pct(r.mdd_1y)}}</td>
@@ -549,23 +692,13 @@ def _lab_section(payload: dict[str, Any]) -> str:
         }}).join('');
       }}
       function reset() {{
-        const g = defaults.gates || {{}};
-        document.querySelectorAll('input[data-gate]').forEach(el => {{
-          el.checked = !!g[el.getAttribute('data-gate')];
-        }});
+        applyPreset('trend');
         document.getElementById('lab-min-turn').value = ((defaults.min_turnover || 0) / 1e8);
         document.getElementById('lab-min-ret20').value = ((defaults.min_ret_20d || 0) * 100);
         document.getElementById('lab-max-dd').value = ((defaults.max_dd_52w != null ? defaults.max_dd_52w : -1) * 100);
-        document.getElementById('lab-min-steady').value = defaults.min_steady_score || 0;
-        document.getElementById('lab-min-upm').value = ((defaults.min_up_month_ratio || 0) * 100);
-        document.getElementById('lab-max-mdd').value = ((defaults.max_mdd_1y != null ? defaults.max_mdd_1y : -1) * 100);
-        document.getElementById('lab-min-r2').value = defaults.min_trend_r2 || 0;
-        document.getElementById('lab-topn').value = defaults.top_n || 5;
-        document.getElementById('lab-rankby').value = defaults.rank_by || 'ret_1y';
-        render();
       }}
       function steadyPreset() {{
-        reset();
+        applyPreset('trend');
         document.getElementById('lab-min-steady').value = 55;
         document.getElementById('lab-min-upm').value = 55;
         document.getElementById('lab-max-mdd').value = -25;
@@ -577,13 +710,15 @@ def _lab_section(payload: dict[str, Any]) -> str:
       document.getElementById('lab-apply').addEventListener('click', render);
       document.getElementById('lab-reset').addEventListener('click', reset);
       document.getElementById('lab-steady').addEventListener('click', steadyPreset);
+      document.getElementById('lab-preset-trend').addEventListener('click', () => applyPreset('trend'));
+      document.getElementById('lab-preset-duke').addEventListener('click', () => applyPreset('duke'));
       document.querySelectorAll('.lab-controls input, .lab-controls select').forEach(el => {{
         el.addEventListener('change', render);
       }});
-      // ? クリックでチェックボックスが切り替わらないようにする
       document.querySelectorAll('.tip-mark').forEach(el => {{
         el.addEventListener('click', (e) => {{ e.preventDefault(); e.stopPropagation(); }});
       }});
+      setPresetButtons();
       render();
     }})();
     </script>

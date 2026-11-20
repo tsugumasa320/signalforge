@@ -413,9 +413,35 @@ strategies:
     backtest_style: swing
     catalog_style: daytrade
   youtube_new_high_box_break:
-    template: donchian_breakout
+    template: duke_new_high_break
     params:
-      period: 20
+      lookback: 252
+      volume_ratio_min: 1.5
+      box_lookback: 60
+      max_box_range_pct: 0.40
+      min_base_bars: 20
+      require_bullish_close: true
+      require_stage2: true
+      sma200_up_bars: 21
+      min_above_52w_low_pct: 0.25
+      max_below_52w_high_pct: 0.25
+      ma50_slack_pct: 0.10
+      require_market_rs: true
+      market_rs_col: market_rs_30d
+      require_fund: true
+    capital:
+      max_position_pct: 0.2
+    exit:
+      use_atr_exits: false
+      stop_loss_pct: 0.10
+      breakeven_trigger_pct: 0.20
+      box_stop_lookback: 60
+      max_hold_bars: 252
+      pyramid_tranches: 5
+    data_deps:
+      - market_index
+      - fund_annuals
+    approximation: 図23第2ステージ＋通期ファンダ＋ブレイク。1銘柄上限1/5・試し玉1/5ずつ積み上げ。中計ストーリーは人手
     catalog_style: swing
   youtube_elliott_multiframe:
     template: ma_cross

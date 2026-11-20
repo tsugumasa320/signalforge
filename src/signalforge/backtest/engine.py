@@ -42,6 +42,16 @@ class BacktestEngine:
         self.atr_tp = exit_rules.get("atr_tp_multiple", 3.0)
         self.atr_sl = exit_rules.get("atr_sl_multiple", 1.5)
         self.max_hold = profile.max_hold_bars
+        # Percent / structure exits (e.g. DUKE 新高値ブレイク: -10% + box底 + 建値引き上げ)
+        self.stop_loss_pct = exit_rules.get("stop_loss_pct")
+        self.breakeven_trigger_pct = exit_rules.get("breakeven_trigger_pct")
+        self.box_stop_lookback = exit_rules.get("box_stop_lookback")
+        self.use_atr_exits = bool(exit_rules.get("use_atr_exits", self.stop_loss_pct is None))
+        # DUKE 試し玉: 1銘柄上限の 1/N ずつ。含み益時のみ同額で買い増し（ナンピン禁止）
+        raw_tranches = exit_rules.get("pyramid_tranches")
+        self.pyramid_tranches = int(raw_tranches) if raw_tranches else 0
+        if self.pyramid_tranches < 0:
+            self.pyramid_tranches = 0
         from signalforge.config import market_context
 
         self.blackout = int(market_context(cfg).get("earnings_blackout_days", 0))
@@ -50,6 +60,12 @@ class BacktestEngine:
         self._entry_ml_expl: dict[str, Any] | None = None
         self._cash_at_entry = 0.0
         self._entry_cost_basis = 0.0
+        self._stop_price: float | None = None
+        self._breakeven_armed = False
+        self._box_stop_floor: float | None = None
+        self._pyramid_filled = 0
+        self._pyramid_tranche_budget = 0.0
+        self._pyramid_adds = 0
 
     def run(
         self,
@@ -115,7 +131,19 @@ class BacktestEngine:
                 exit_price = None
                 reason = ""
 
-                if side == "long":
+                if self.stop_loss_pct is not None and side == "long" and self._stop_price is not None:
+                    # +20% などで建値ストップへ引き上げ
+                    if (
+                        self.breakeven_trigger_pct is not None
+                        and not self._breakeven_armed
+                        and float(row["high"]) >= entry_price * (1.0 + float(self.breakeven_trigger_pct))
+                    ):
+                        self._breakeven_armed = True
+                        self._stop_price = max(float(self._stop_price), entry_price)
+                    if float(row["low"]) <= float(self._stop_price):
+                        exit_price = float(self._stop_price)
+                        reason = "breakeven_stop" if self._breakeven_armed else "stop_loss"
+                elif self.use_atr_exits and side == "long":
                     tp = entry_price + row["atr_14"] * self.atr_tp
                     sl = entry_price - row["atr_14"] * self.atr_sl
                     if row["high"] >= tp:
@@ -124,7 +152,7 @@ class BacktestEngine:
                     elif row["low"] <= sl:
                         exit_price = sl
                         reason = "stop_loss"
-                else:
+                elif self.use_atr_exits:
                     tp = entry_price - row["atr_14"] * self.atr_tp
                     sl = entry_price + row["atr_14"] * self.atr_sl
                     if row["low"] <= tp:
@@ -200,6 +228,8 @@ class BacktestEngine:
                             "hold_bars": bars_held,
                             "reason": reason,
                             "is_oos": self._entry_is_oos,
+                            "pyramid_adds": self._pyramid_adds,
+                            "pyramid_filled": self._pyramid_filled,
                             **breakdown.to_dict(),
                         }
                     )
@@ -209,6 +239,55 @@ class BacktestEngine:
                     self._entry_signal_idx = None
                     self._entry_ml_expl = None
                     self._entry_cost_breakdown = TradeCostBreakdown()
+                    self._stop_price = None
+                    self._breakeven_armed = False
+                    self._box_stop_floor = None
+                    self._pyramid_filled = 0
+                    self._pyramid_tranche_budget = 0.0
+                    self._pyramid_adds = 0
+
+            # Scale-in: 含み益時のみ同額で買い増し（ピラミッド）
+            if (
+                position != 0
+                and side == "long"
+                and self.pyramid_tranches > 1
+                and self._pyramid_filled < self.pyramid_tranches
+                and self._pyramid_tranche_budget > 0
+                and i + 1 < len(df)
+                and entry_price > 0
+                and float(row["close"]) > float(entry_price)
+            ):
+                add_price = self.profile.entry_fill_price(df, i, "long")
+                raw_add = add_price
+                add_price = self.cost_model.apply_entry_slippage(raw_add, "long")
+                # ナンピン禁止: 加重平均を押し下げる買い増しはスキップ
+                if add_price > float(entry_price) and add_price > 0:
+                    budget = min(float(self._pyramid_tranche_budget), float(cash))
+                    if budget > 0:
+                        shares, fee, add_bd = self.cost_model.solve_entry(budget, add_price)
+                        entry_cost = shares * add_price + fee
+                        if shares > 0 and entry_cost <= cash + 1e-9:
+                            self.cost_model.record_slippage(
+                                shares, raw_add, add_price, add_bd, is_entry=True
+                            )
+                            prev_shares = float(position_shares)
+                            new_shares = prev_shares + shares
+                            entry_price = (
+                                (entry_price * prev_shares + add_price * shares) / new_shares
+                                if new_shares > 0
+                                else entry_price
+                            )
+                            position_shares = new_shares
+                            cash -= entry_cost
+                            self._entry_cost_basis += entry_cost
+                            self._pyramid_filled += 1
+                            self._pyramid_adds += 1
+                            # 手数料内訳を累積
+                            bd = self._entry_cost_breakdown
+                            bd.buy_fees_usd += add_bd.buy_fees_usd
+                            bd.commission_usd += add_bd.commission_usd
+                            bd.slippage_entry_usd += add_bd.slippage_entry_usd
+                            self._refresh_stop_after_pyramid(entry_price)
 
             if position == 0 and signals.iloc[i] != 0 and i + 1 < len(df):
                 if self.blackout > 0 and is_earnings_blackout(ts, self.blackout):
@@ -251,9 +330,16 @@ class BacktestEngine:
                         equity_now = cash + position_shares * mark
                     else:
                         equity_now = cash + (entry_price - mark) * position_shares
-                budget = self._capital.entry_budget(cash, equity=equity_now)
-                if budget <= 0:
+                full_budget = self._capital.entry_budget(cash, equity=equity_now)
+                if full_budget <= 0:
                     continue
+                # 試し玉: 上限の 1/N。ピラミッド無しなら従来どおり全額
+                if self.pyramid_tranches > 1 and sig_side == "long":
+                    budget = full_budget / float(self.pyramid_tranches)
+                    self._pyramid_tranche_budget = budget
+                else:
+                    budget = full_budget
+                    self._pyramid_tranche_budget = 0.0
                 if sig_side == "long":
                     shares, fee, breakdown = self.cost_model.solve_entry(budget, entry_price)
                     entry_cost = shares * entry_price + fee
@@ -267,6 +353,7 @@ class BacktestEngine:
                 self.cost_model.record_slippage(shares, raw_entry, entry_price, breakdown, is_entry=True)
                 if shares <= 0:
                     self._entry_cost_basis = 0.0
+                    self._pyramid_tranche_budget = 0.0
                     continue
                 position = 1
                 position_shares = shares
@@ -276,6 +363,11 @@ class BacktestEngine:
                 self._entry_is_oos = is_oos
                 self._entry_ml_expl = ml_expl
                 self._entry_cost_breakdown = breakdown
+                self._stop_price = self._initial_stop_price(df, i, entry_price, sig_side)
+                self._box_stop_floor = self._box_stop_component(df, i, entry_price, sig_side)
+                self._breakeven_armed = False
+                self._pyramid_filled = 1 if (self.pyramid_tranches > 1 and sig_side == "long") else 0
+                self._pyramid_adds = 0
                 trades_today += 1
 
             equity.iloc[i] = cash
@@ -321,6 +413,47 @@ class BacktestEngine:
                 "entry_cost_breakdown": self._entry_cost_breakdown.to_dict(),
             },
         )
+
+    def _box_stop_component(
+        self, df: pd.DataFrame, signal_idx: int, entry_price: float, side: str
+    ) -> float | None:
+        """ボックス底だけ（%-ストップとの max は呼び出し側）。"""
+        if self.stop_loss_pct is None or side != "long":
+            return None
+        lb = self.box_stop_lookback
+        if not lb:
+            return None
+        lookback = int(lb)
+        start = max(0, signal_idx - lookback)
+        if signal_idx <= start:
+            return None
+        return float(df["low"].iloc[start:signal_idx].min())
+
+    def _initial_stop_price(self, df: pd.DataFrame, signal_idx: int, entry_price: float, side: str) -> float | None:
+        """DUKE ルール近似: max(買値-10%, ボックス底) を初期ストップにする。"""
+        if self.stop_loss_pct is None or side != "long":
+            return None
+        pct_stop = float(entry_price) * (1.0 - float(self.stop_loss_pct))
+        box_low = self._box_stop_component(df, signal_idx, entry_price, side)
+        if box_low is None:
+            return pct_stop
+        # 底が買値から10%以内なら底割れ、それ以上離れていれば -10%
+        return max(pct_stop, box_low)
+
+    def _refresh_stop_after_pyramid(self, avg_entry: float) -> None:
+        """買い増し後: %-ストップを加重平均建値基準に更新（建値ストップ武装後は下げない）。"""
+        if self.stop_loss_pct is None:
+            return
+        pct_stop = float(avg_entry) * (1.0 - float(self.stop_loss_pct))
+        floor = self._box_stop_floor
+        candidate = max(pct_stop, float(floor)) if floor is not None else pct_stop
+        if self._breakeven_armed:
+            candidate = max(candidate, float(avg_entry))
+        if self._stop_price is None:
+            self._stop_price = candidate
+        else:
+            # ストップは引き上げのみ（ナンピン相当の緩和を禁止）
+            self._stop_price = max(float(self._stop_price), candidate)
 
     def _build_summary(self, audit_rec, reason: str) -> str:
         if audit_rec and audit_rec.all_passed:

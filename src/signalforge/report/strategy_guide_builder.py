@@ -245,6 +245,41 @@ def _guide_high_br(p: dict, approx: str | None) -> dict[str, Any]:
     }
 
 
+@_register("duke_new_high_break")
+def _guide_duke_nhb(p: dict, approx: str | None) -> dict[str, Any]:
+    lb = p.get("lookback", 252)
+    vol = p.get("volume_ratio_min", 1.5)
+    box = p.get("box_lookback", 60)
+    stage = bool(p.get("require_stage2", True))
+    entry = [
+        f"終値 > 過去 {lb} 日高値（前日まで）",
+        f"出来高比率 ≥ {vol}",
+        f"直前 {box} 日が保ち合い（値幅上限あり）",
+        "ブレイク前に高値から離れたベース形成",
+    ]
+    if stage:
+        entry.extend(
+            [
+                "第2ステージ: 終値 > SMA150/200、SMA150>SMA200、SMA200上昇",
+                "第2ステージ: SMA50 > SMA150/200、52週安値+25%以上・高値圏25%以内",
+                "第2ステージ: 終値 ≒ SMA50上、対市場RS（約6週）プラス",
+            ]
+        )
+    return {
+        "concept": (
+            "DUKE。新高値ブレイク投資法のテクニカル近似。"
+            f"約 {lb} 日高値を出来高増でブレイクし、保ち合いベースからの初動だけ買う。"
+            + (" 図23の第2ステージ認定を併用。" if stage else "")
+        ),
+        "entry_long": entry,
+        "signal_buy": "新高値ブレイク **買い**（翌営業日寄り）",
+        "signal_sell": "−10% またはボックス底割れ。+20% 後は建値ストップ",
+        "entry_short": ["なし"],
+        "market": "成長株のボックス脱出・第2ステージ上昇局面（ファンダは未使用）。",
+        "approximation": approx,
+    }
+
+
 @_register("gap_up")
 def _guide_gap_up(p: dict, approx: str | None) -> dict[str, Any]:
     g = float(p.get("min_gap_pct", 0.01)) * 100

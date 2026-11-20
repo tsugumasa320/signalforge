@@ -2739,6 +2739,74 @@ def trend_screen_ranking_cmd(limit: int, top: int) -> None:
     click.echo(f"公開JSON: {path}")
 
 
+@trend_screen_group.command("midplan")
+@click.option("--ticker", default=None, help="例: 6532.T")
+@click.option("--from-duke", is_flag=True, help="公開ランキングのDUKE通過候補にカードを一括生成")
+@click.option("--top", default=10, show_default=True, type=int, help="--from-duke 時の件数")
+def trend_screen_midplan_cmd(ticker: str | None, from_duke: bool, top: int) -> None:
+    """図56中計チェックカード（半自動）。市場規模・KPIは人手TODO付き。"""
+    from signalforge.research.trend_screen.midplan_card import (
+        build_midplan_card,
+        format_midplan_text,
+        save_midplan_card,
+    )
+    from signalforge.research.trend_screen.ranking import load_ranking
+
+    if from_duke:
+        payload = load_ranking()
+        if not payload:
+            raise click.ClickException("trend_screen_ranking.json がありません。先に trend-screen ranking")
+        duke_gates = ((payload.get("lab_defaults") or {}).get("presets") or {}).get("duke", {}).get("gates") or {}
+        required = [k for k, v in duke_gates.items() if v]
+        rows = []
+        for row in payload.get("universe") or []:
+            g = row.get("gates") or {}
+            if required and all(g.get(k) for k in required):
+                rows.append(row)
+        rows.sort(key=lambda r: -(r.get("duke_score") or -1e9))
+        rows = rows[: max(0, top)]
+        if not rows:
+            click.echo("DUKE通過候補がありません。")
+            return
+        for row in rows:
+            card = build_midplan_card(
+                ticker=str(row.get("ticker") or row.get("code")),
+                name=str(row.get("name") or ""),
+                sector=str(row.get("sector") or ""),
+                price=row.get("price"),
+                box_height=row.get("box_height"),
+            )
+            path = save_midplan_card(card)
+            click.echo(f"{card.code} → {path}")
+        return
+
+    if not ticker:
+        raise click.ClickException("--ticker か --from-duke を指定してください")
+    sym = ticker if "." in ticker else f"{ticker}.T"
+    listing_name = ""
+    listing_sector = ""
+    try:
+        from signalforge.universe.tse_listing import listing_by_ticker
+
+        meta = listing_by_ticker().get(sym) or {}
+        listing_name = str(meta.get("name") or "")
+        listing_sector = str(meta.get("sector_tse") or "")
+    except Exception:
+        pass
+    price = None
+    try:
+        from signalforge.research.trend_screen.load import load_bars
+
+        bars = load_bars(sym, refresh=False)
+        price = float(bars["close"].iloc[-1])
+    except Exception:
+        pass
+    card = build_midplan_card(ticker=sym, name=listing_name, sector=listing_sector, price=price)
+    path = save_midplan_card(card)
+    click.echo(format_midplan_text(card))
+    click.echo(f"\nJSON: {path}")
+
+
 @trend_screen_group.command("forward")
 @click.option("--limit", default=0, type=int, help="0なら採用ルールのユニバース上限")
 def trend_screen_forward_cmd(limit: int) -> None:

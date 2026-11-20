@@ -9,6 +9,7 @@ TEMPLATE_DATA_DEPS: dict[str, list[str]] = {
     "sector_spread_zscore": ["sector_index"],
     "post_earnings_drift": ["earnings"],
     "credit_margin_contrarian": ["credit_balance"],
+    "duke_new_high_break": ["market_index", "fund_annuals"],
 }
 
 # Not yet implemented — BT stays blocked or proxy until fetch exists.

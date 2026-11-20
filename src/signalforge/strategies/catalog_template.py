@@ -187,6 +187,151 @@ def _high_breakout_rsi(df: pd.DataFrame, params: dict, strat: BaseStrategy) -> p
     return signals
 
 
+def _duke_stage2_ok(
+    close: float,
+    *,
+    sma50: float,
+    sma150: float,
+    sma200: float,
+    sma200_prev: float,
+    low_52w: float,
+    high_52w: float,
+    market_rs: float | None,
+    params: dict,
+) -> tuple[bool, list[RuleCheck]]:
+    """図23 第2ステージ入りの認定基準（Weinstein/DUKE 系）。"""
+    ma_up_bars_ok = sma200 > sma200_prev  # 呼び出し側で N 営業日前と比較済み
+    min_above_low = float(params.get("min_above_52w_low_pct", 0.25))
+    max_below_high = float(params.get("max_below_52w_high_pct", 0.25))
+    ma50_slack = float(params.get("ma50_slack_pct", 0.10))
+    require_rs = bool(params.get("require_market_rs", True))
+
+    above_long = close > sma150 and close > sma200
+    ma150_over_200 = sma150 > sma200
+    ma50_stack = sma50 > sma150 and sma50 > sma200
+    off_low = low_52w > 0 and (close / low_52w - 1.0) >= min_above_low
+    near_high = high_52w > 0 and close >= high_52w * (1.0 - max_below_high)
+    above_ma50 = close >= sma50 * (1.0 - ma50_slack)
+    rs_ok = True
+    if require_rs:
+        rs_ok = market_rs is not None and market_rs == market_rs and float(market_rs) > 0.0
+
+    checks = [
+        RuleCheck("close > SMA150 & SMA200", above_long),
+        RuleCheck("SMA150 > SMA200", ma150_over_200),
+        RuleCheck("SMA200 rising", ma_up_bars_ok),
+        RuleCheck("SMA50 > SMA150 & SMA200", ma50_stack),
+        RuleCheck(f"close ≥ 52w low +{min_above_low:.0%}", off_low),
+        RuleCheck(f"close within {max_below_high:.0%} of 52w high", near_high),
+        RuleCheck(f"close ≥ SMA50 -{ma50_slack:.0%}", above_ma50),
+        RuleCheck("RS vs market > 0 (6w)", rs_ok, detail="" if market_rs is None else f"rs={float(market_rs):.2f}"),
+    ]
+    return all(c.passed for c in checks), checks
+
+
+def _duke_new_high_break(df: pd.DataFrame, params: dict, strat: BaseStrategy) -> pd.Series:
+    """DUKE。新高値ブレイク（テクニカル近似）。
+
+    公開ルールのコア: 長期高値ブレイク＋出来高増＋保ち合いベースからの初動。
+    オプションで図23「第2ステージ」認定（SMA50/150/200・52週・RS）を追加。
+    ファンダ（業績ビッグチェンジ）はデータ無しのため未使用。
+    """
+    lookback = int(params.get("lookback", 252))
+    vol_min = float(params.get("volume_ratio_min", 1.5))
+    box_lookback = int(params.get("box_lookback", 60))
+    max_box_range = float(params.get("max_box_range_pct", 0.40))
+    min_base_bars = int(params.get("min_base_bars", 20))
+    require_bullish = bool(params.get("require_bullish_close", True))
+    require_stage2 = bool(params.get("require_stage2", True))
+    require_fund = bool(params.get("require_fund", True))
+    sma200_up_bars = int(params.get("sma200_up_bars", 21))  # 最低1カ月上昇
+    rs_col = str(params.get("market_rs_col", "market_rs_30d"))
+    fund_keys = ("fund_data", "fund_sales_up", "fund_op_up", "fund_margin_ok")
+
+    close_s = df["close"].astype(float)
+    sma50 = close_s.rolling(50).mean()
+    sma150 = close_s.rolling(150).mean()
+    sma200 = close_s.rolling(200).mean()
+    low_52w = df["low"].rolling(lookback).min()
+    high_52w = df["high"].rolling(lookback).max()
+    prior_high = df["high"].rolling(lookback).max().shift(1)
+
+    signals = pd.Series(0, index=df.index)
+    start = max(lookback, box_lookback, min_base_bars, 200, sma200_up_bars) + 1
+    for i in range(start, len(df)):
+        row = df.iloc[i]
+        ph = float(prior_high.iloc[i])
+        if not (ph == ph) or ph <= 0:
+            continue
+        px = float(row["close"])
+        breakout = px > ph
+        if not breakout:
+            continue
+        # 直前に高値へ未到達＝ベース形成後の初動（直近で高値タッチしていない）
+        recent_hi = float(df["high"].iloc[i - min_base_bars : i].max())
+        base_ok = recent_hi < ph
+        box = df.iloc[i - box_lookback : i]
+        box_hi = float(box["high"].max())
+        box_lo = float(box["low"].min())
+        box_range = (box_hi - box_lo) / px if px else 999.0
+        vol = float(row.get("volume_ratio_20", 0) or 0)
+        vol_ok = vol >= vol_min
+        candle_ok = px > float(row["open"]) if require_bullish else True
+        if not (base_ok and box_range <= max_box_range and vol_ok and candle_ok):
+            continue
+
+        stage_checks: list[RuleCheck] = []
+        if require_stage2:
+            s50, s150, s200 = float(sma50.iloc[i]), float(sma150.iloc[i]), float(sma200.iloc[i])
+            s200_prev = float(sma200.iloc[i - sma200_up_bars])
+            if not all(x == x for x in (s50, s150, s200, s200_prev)):
+                continue
+            rs_raw = row.get(rs_col) if rs_col in df.columns else None
+            try:
+                market_rs = None if rs_raw is None or rs_raw != rs_raw else float(rs_raw)
+            except (TypeError, ValueError):
+                market_rs = None
+            stage_ok, stage_checks = _duke_stage2_ok(
+                px,
+                sma50=s50,
+                sma150=s150,
+                sma200=s200,
+                sma200_prev=s200_prev,
+                low_52w=float(low_52w.iloc[i]),
+                high_52w=float(high_52w.iloc[i]),
+                market_rs=market_rs,
+                params=params,
+            )
+            if not stage_ok:
+                continue
+
+        fund_checks: list[RuleCheck] = []
+        if require_fund:
+            fund_ok = True
+            for fk in fund_keys:
+                val = row.get(fk) if fk in df.columns else None
+                passed = bool(val) if val is not None and val == val else False
+                fund_checks.append(RuleCheck(fk, passed))
+                fund_ok = fund_ok and passed
+            if not fund_ok:
+                continue
+
+        signals.iloc[i] = 1
+        strat._record_audit(
+            df.index[i],
+            "long",
+            [
+                RuleCheck(f"close > {lookback}d high", True),
+                RuleCheck(f"volume_ratio >= {vol_min}", True, detail=f"vol={vol:.2f}"),
+                RuleCheck(f"base >= {min_base_bars}d", True),
+                RuleCheck(f"box range <= {max_box_range:.0%}", True, detail=f"range={box_range:.1%}"),
+                *stage_checks,
+                *fund_checks,
+            ],
+        )
+    return signals
+
+
 def _gap_up(df: pd.DataFrame, params: dict, strat: BaseStrategy) -> pd.Series:
     min_gap = float(params.get("min_gap_pct", 0.01))
     signals = pd.Series(0, index=df.index)
@@ -499,6 +644,7 @@ _TEMPLATE_REGISTRY: dict[str, Callable[..., pd.Series]] = {
     "adx_trend": _adx_trend,
     "momentum_ema": _momentum_ema,
     "high_breakout_rsi": _high_breakout_rsi,
+    "duke_new_high_break": _duke_new_high_break,
     "gap_up": _gap_up,
     "gap_fill_reversal": _gap_fill_reversal,
     "macd_histogram_reversal": _macd_histogram_reversal,
@@ -540,22 +686,23 @@ def resolve_catalog_strategy(catalog_id: str, cfg: dict[str, Any]) -> BaseStrate
     if not entry:
         raise ValueError(f"No implementation map for catalog id: {catalog_id}")
 
+    # Map defaults first; cfg / cfg_override strategy_params win (for sweeps & A/B).
+    params = {**entry.get("params", {}), **cfg.get("strategy_params", {})}
+
     if entry.get("builtin"):
         from signalforge.strategies.registry import STRATEGY_REGISTRY
 
         cls = STRATEGY_REGISTRY[entry["builtin"]]
-        merged = {**cfg, "strategy_params": {**cfg.get("strategy_params", {}), **entry.get("params", {})}}
-        return cls(merged)
+        return cls({**cfg, "strategy_params": params})
 
     if entry.get("template") == "builtin_macd":
         from signalforge.strategies.registry import STRATEGY_REGISTRY
 
-        merged = {**cfg, "strategy_params": {**cfg.get("strategy_params", {}), **entry.get("params", {})}}
-        return STRATEGY_REGISTRY["macd_cross"](merged)
+        return STRATEGY_REGISTRY["macd_cross"]({**cfg, "strategy_params": params})
 
     merged = {
         **cfg,
-        "strategy_params": {**cfg.get("strategy_params", {}), **entry.get("params", {})},
+        "strategy_params": params,
         "_catalog_template": entry["template"],
         "_catalog_id": catalog_id,
         "_approximation": entry.get("approximation"),

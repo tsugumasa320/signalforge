@@ -41,17 +41,32 @@ def _strategy_exit_map() -> dict[str, dict[str, Any]]:
     return {sid: dict(spec["exit"]) for sid, spec in impl.items() if isinstance(spec, dict) and spec.get("exit")}
 
 
+@lru_cache(maxsize=1)
+def _strategy_capital_map() -> dict[str, dict[str, Any]]:
+    impl = load_implementation_map().get("strategies") or {}
+    return {
+        sid: dict(spec["capital"])
+        for sid, spec in impl.items()
+        if isinstance(spec, dict) and isinstance(spec.get("capital"), dict)
+    }
+
+
 def _apply_strategy_exit(cfg: dict[str, Any], strategy_name: str | None) -> None:
-    """Per-strategy exit (implementation_map `exit:`) over style defaults; cfg_override still wins."""
-    exit_rules = _strategy_exit_map().get(str(strategy_name or ""))
-    if not exit_rules:
-        return
-    rules = dict(cfg.get("rules") or {})
-    rules["exit"] = {**(rules.get("exit") or {}), **{k: v for k, v in exit_rules.items() if k != "max_hold_bars"}}
-    cfg["rules"] = rules
-    if "max_hold_bars" in exit_rules:
-        rules["exit"]["max_hold_bars"] = int(exit_rules["max_hold_bars"])
-        cfg["backtest"] = {**(cfg.get("backtest") or {}), "max_hold_bars": int(exit_rules["max_hold_bars"])}
+    """Per-strategy exit/capital (implementation_map) over style defaults; cfg_override still wins."""
+    sid = str(strategy_name or "")
+    exit_rules = _strategy_exit_map().get(sid)
+    if exit_rules:
+        rules = dict(cfg.get("rules") or {})
+        rules["exit"] = {**(rules.get("exit") or {}), **{k: v for k, v in exit_rules.items() if k != "max_hold_bars"}}
+        cfg["rules"] = rules
+        if "max_hold_bars" in exit_rules:
+            rules["exit"]["max_hold_bars"] = int(exit_rules["max_hold_bars"])
+            cfg["backtest"] = {**(cfg.get("backtest") or {}), "max_hold_bars": int(exit_rules["max_hold_bars"])}
+    capital = _strategy_capital_map().get(sid)
+    if capital:
+        bt = dict(cfg.get("backtest") or {})
+        bt["capital"] = {**(bt.get("capital") or {}), **capital}
+        cfg["backtest"] = bt
 
 
 def run_backtest_pipeline(

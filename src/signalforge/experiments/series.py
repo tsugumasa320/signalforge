@@ -51,6 +51,10 @@ def pack_trades(trades: pd.DataFrame) -> list[dict[str, Any]]:
             item["ep"] = float(t["entry_price"])
         if t.get("exit_price") is not None and pd.notna(t.get("exit_price")):
             item["xp"] = float(t["exit_price"])
+        if t.get("pyramid_adds") is not None and pd.notna(t.get("pyramid_adds")):
+            item["pa"] = int(t["pyramid_adds"])
+        if t.get("pyramid_filled") is not None and pd.notna(t.get("pyramid_filled")):
+            item["pn"] = int(t["pyramid_filled"])
         out.append(item)
     return out
 

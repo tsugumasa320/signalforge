@@ -1002,6 +1002,9 @@ strategies:
   - type: youtube
     title: 松井証券 MATSUI DIALOG — DUKE×KEN
     url: https://www.youtube.com/watch?v=9I139lbHAvc
+  - type: book
+    title: 1勝4敗でもしっかり儲ける 新高値ブレイク投資術（DUKE。）
+  implementation_note: 1年高値＋出来高＋ベース＋図23第2ステージ（SMA50/150/200・52週・RS対1321）＋通期ファンダ。決済-10%/ボックス底/+20%建値。1銘柄上限1/5・試し玉1/5ピラミッド積み上げ
 - id: youtube_elliott_multiframe
   name: エリオット波動 × マルチタイムフレーム
   implemented: true

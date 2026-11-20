@@ -27,12 +27,56 @@ def _days_since_last_event(index: pd.DatetimeIndex, event_dates: list[str]) -> p
     return pd.Series(out, index=index, dtype=float)
 
 
+def _attach_fund_gates(out: pd.DataFrame, ticker: str) -> pd.DataFrame:
+    """Attach static DUKE fund gates (point-in-time近似: 最新通期キャッシュ)。"""
+    try:
+        from signalforge.research.trend_screen.duke_fundamentals import evaluate_duke_fundamentals
+        from signalforge.research.trend_screen.load import load_annuals
+    except Exception:
+        return out
+    try:
+        annuals, _ = load_annuals(ticker, refresh=False)
+    except Exception:
+        annuals = []
+    price = float(out["close"].iloc[-1]) if len(out) and "close" in out.columns else None
+    snap = evaluate_duke_fundamentals(annuals, price=price)
+    for key, ok in snap.gates.items():
+        out[key] = bool(ok)
+    if snap.target_price_fund is not None:
+        out["target_price_fund"] = float(snap.target_price_fund)
+    if snap.upside_pct is not None:
+        out["upside_pct"] = float(snap.upside_pct)
+    return out
+
+
+def _attach_market_rs(out: pd.DataFrame, lookbacks: tuple[int, ...] = (30,)) -> pd.DataFrame:
+    """Relative strength vs Nikkei 225 ETF (1321.T) over ~6 weeks (30 sessions)."""
+    from signalforge.report.benchmark import load_nikkei225_close
+
+    bench = load_nikkei225_close(refresh=False)
+    if bench is None or bench.empty:
+        return out
+    aligned = bench.reindex(out.index).ffill()
+    stock_ret = out["close"].astype(float).pct_change()
+    bench_ret = aligned.astype(float).pct_change()
+    for lb in lookbacks:
+        out[f"market_rs_{lb}d"] = (stock_ret.rolling(lb).sum() - bench_ret.rolling(lb).sum()) * 100.0
+    out["market_index_close"] = aligned.astype(float)
+    return out
+
+
 def enrich_dataframe(df: pd.DataFrame, ticker: str, strategy_id: str) -> pd.DataFrame:
     deps = data_deps_for_strategy(strategy_id)
     if not deps:
         return df
     out = df.copy()
     listing = listing_by_ticker().get(ticker) or {}
+
+    if "market_index" in deps and ticker != "1321.T":
+        out = _attach_market_rs(out)
+
+    if "fund_annuals" in deps:
+        out = _attach_fund_gates(out, ticker)
 
     if "sector_index" in deps:
         sector = listing.get("sector_tse")
