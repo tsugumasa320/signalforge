@@ -1,0 +1,46 @@
+{
+  "period": "2025-08-28〜2026-08-28",
+  "source": "data/research/broad_pit/comparison.json",
+  "sha256": "3acc7437962cfceeced7cac0d2a5a66a03a7996221cc11052e04edf9e3136902",
+  "note": "過去に閲覧済みの探索結果。長期優位性は未確認。配当除外。TOPIX +35.03%、日経225 +56.28%を両戦略とも下回る。",
+  "strategies": {
+    "bb_rsi_120": {
+      "strategy": "bb_lower_rsi_oversold_hold120_no_tp",
+      "return_pct": 8.658254870922931,
+      "max_dd_pct": -10.619159945990631,
+      "closed_trades": 15,
+      "valid_price_study": true,
+      "unresolved_positions": [],
+      "corporate_action_exposures": [],
+      "spec": {
+        "name": "bb_lower_rsi_oversold_hold120_no_tp",
+        "signal": "bb_lower_rsi_oversold",
+        "hold": 120,
+        "sl": 2.0,
+        "tp": null,
+        "tranches": 1,
+        "duke": false,
+        "close_stop": null
+      }
+    },
+    "rsi_recovery_120": {
+      "strategy": "rsi_dip_200ma_hold120_no_tp",
+      "return_pct": 8.863568973217383,
+      "max_dd_pct": -24.811797202244122,
+      "closed_trades": 33,
+      "valid_price_study": true,
+      "unresolved_positions": [],
+      "corporate_action_exposures": [],
+      "spec": {
+        "name": "rsi_dip_200ma_hold120_no_tp",
+        "signal": "rsi_dip_200ma",
+        "hold": 120,
+        "sl": 2.0,
+        "tp": null,
+        "tranches": 1,
+        "duke": false,
+        "close_stop": null
+      }
+    }
+  }
+}

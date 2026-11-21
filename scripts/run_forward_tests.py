@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 import pandas as pd
 import yfinance as yf
-from signalforge.paper.forward_test import (JST,SPECS,create_book,advance_book,duke_candidates,save_book,fingerprint,good_bar)
+from signalforge.paper.forward_test import (JST,SPECS,create_book,advance_book,strategy_candidates,save_book,fingerprint,good_bar)
 
 ROOT=Path(__file__).resolve().parents[1]
 STATE=ROOT/'data/paper/forward_tests'
@@ -96,8 +96,8 @@ def main():
     if calendar.empty:raise RuntimeError('No completed session')
     latest=str(calendar[-1].date())
     coverage=sum(t in frames and str(frames[t].index[-1].date())==latest for t in universe)/len(universe)
-    candidates=duke_candidates(frames,universe,latest)
     for key,b in books.items():
+        candidates=strategy_candidates(key,frames,universe,latest)
         for date in calendar:
             day=str(date.date())
             if day<=b['start_date'] or (b['last_session'] and day<=b['last_session']):continue
@@ -105,13 +105,13 @@ def main():
             if day==latest:relevant|={c['ticker'] for c in candidates}
             relevant|={'1306.T','1321.T'}
             bars={t:raw_bar(frames.get(t),day) for t in relevant}
-            cov=coverage if key=='duke_stage2' else float(good_bar(bars.get(SPECS[key]['ticker'])))
+            cov=coverage if SPECS[key]['ticker'] is None else float(good_bar(bars.get(SPECS[key]['ticker'])))
             updated=advance_book(b,day,bars,candidates if day==latest else [],now,coverage=cov,plan=day==latest)
             if updated!=b:
                 updated.setdefault('observations',[]).append({'date':day,'recorded_at':now.isoformat(),'bars':bars,'coverage':cov,'universe_hash':universe_hash})
             b=updated
             if b['issues']:break
-        b['last_attempt_at']=now.isoformat();b['latest_data_session']=latest;b['coverage']=coverage if key=='duke_stage2' else float(good_bar(raw_bar(frames.get(SPECS[key]['ticker']),latest)))
+        b['last_attempt_at']=now.isoformat();b['latest_data_session']=latest;b['coverage']=coverage if SPECS[key]['ticker'] is None else float(good_bar(raw_bar(frames.get(SPECS[key]['ticker']),latest)))
         save_book(STATE/f'{key}.json',b)
         print(key,b['status'],'last session',b['last_session'],'fills',len(b['fills']),flush=True)
     (CACHE/'last_run.json').write_text(json.dumps({'at':now.isoformat(),'as_of':latest,'coverage':coverage,'failed':failures,'universe_hash':universe_hash},indent=2))

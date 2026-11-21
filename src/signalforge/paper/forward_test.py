@@ -21,6 +21,8 @@ FEE=.00105
 SLIP=.0003
 SPECS={
     'duke_stage2': {'label':'DUKE 第2ステージ・5分割','ticker':None,'lot':100},
+    'bb_rsi_120': {'label':'BB下限＋RSI・120日保有','ticker':None,'lot':100},
+    'rsi_recovery_120': {'label':'200日線上のRSI回復・120日保有','ticker':None,'lot':100},
     'nikkei_hold': {'label':'日経225 ETF保有','ticker':'1321.T','lot':10},
     'topix_hold': {'label':'TOPIX ETF保有','ticker':'1306.T','lot':10},
 }
@@ -34,11 +36,19 @@ def fingerprint(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False,allow_nan=False).encode()).hexdigest()
 
 
+def rules_for(strategy):
+    rules=deepcopy(RULES)
+    if strategy in ('bb_rsi_120','rsi_recovery_120'):
+        rules.update(tranches=1,max_hold_sessions=120,entry=strategy+'_v1',
+                     stop='entry - 2 * prior ATR14',take=None,breakeven=False)
+    return rules
+
+
 def create_book(strategy,now,universe_hash):
     if strategy not in SPECS:raise ValueError(strategy)
     return {'schema_version':VERSION,'strategy':strategy,'label':SPECS[strategy]['label'],
             'created_at':now.isoformat(),'start_date':now.astimezone(JST).date().isoformat(),
-            'rules':deepcopy(RULES),'rules_hash':fingerprint(RULES),'universe_hash':universe_hash,
+            'rules':rules_for(strategy),'rules_hash':fingerprint(rules_for(strategy)),'universe_hash':universe_hash,
             'cash':RULES['initial_cash'],'positions':{},'pending':[], 'last_session':None,
             'decisions':[],'fills':[],'equity':[],'events':[],'issues':[], 'status':'waiting_for_first_session'}
 
@@ -66,13 +76,14 @@ def advance_book(original,day,bars,candidates,now,*,coverage=1.,plan=True):
     In a catch-up run, plan=False on all but the latest session. Standing stops
     can fill on missed days; no newly inferred historical discretionary orders.
     """
-    if original['rules_hash']!=fingerprint(RULES):raise ValueError('Forward rules changed; create a new cohort')
+    if original['rules_hash']!=fingerprint(rules_for(original['strategy'])):raise ValueError('Forward rules changed; create a new cohort')
     if day<=original['start_date'] or (original['last_session'] and day<=original['last_session']):return deepcopy(original)
     b=deepcopy(original)
     close_time=pd.Timestamp(day+' 16:00',tz=JST)
     if pd.Timestamp(now)<close_time:raise ValueError('Session has not closed')
     if b['issues']:return b
-    spec=SPECS[b['strategy']];positions=b['positions']
+    spec=SPECS[b['strategy']];positions=b['positions'];duke=b['strategy']=='duke_stage2'
+    rules=rules_for(b['strategy'])
     # Apply observed split ratios to held shares and already-recorded orders.
     for ticker in set(positions)|{p['ticker'] for p in b['pending']}:
         bar=bars.get(ticker)
@@ -88,6 +99,7 @@ def advance_book(original,day,bars,candidates,now,*,coverage=1.,plan=True):
                 if order['ticker']==ticker:
                     order['shares']*=factor
                     if order.get('box') is not None:order['box']/=factor
+                    if order.get('atr') is not None:order['atr']/=factor
             b['events'].append({'date':day,'ticker':ticker,'type':'split','factor':factor})
         if ticker in positions and good_bar(bar):
             p=positions[ticker]
@@ -121,7 +133,7 @@ def advance_book(original,day,bars,candidates,now,*,coverage=1.,plan=True):
             p['stop']=max(p['stop'],p['entry']*.9,p['entry'] if p['armed'] else 0)
         else:
             positions[ticker]={'shares':shares,'entry':price,'spent':spent,'sector':order['sector'],'budget':order['budget'],
-                'stop':max(price*.9,order['box']) if spec['ticker'] is None else 0.,'armed':False,'tranches':1,'age':0,'mark':price}
+                'stop':(max(price*.9,order['box']) if duke else price-2*order['atr']) if spec['ticker'] is None else 0.,'armed':False,'tranches':1,'age':0,'mark':price}
         b['fills'].append({'date':day,'ticker':ticker,'side':'buy','shares':shares,'price':price,'fee':shares*price*FEE,'signal_date':order['signal_date'],'decision_recorded_at':order['recorded_at'],'recorded_at':now.isoformat()})
     b['pending']=carry
     for ticker,p in list(positions.items()):
@@ -142,12 +154,12 @@ def advance_book(original,day,bars,candidates,now,*,coverage=1.,plan=True):
     stamp=now.isoformat();orders=[]
     for ticker,p in positions.items():
         bar=bars[ticker]
-        if spec['ticker'] is None and float(bar['high'])>=p['entry']*1.2:
+        if duke and float(bar['high'])>=p['entry']*1.2:
             p['armed']=True;p['stop']=max(p['stop'],p['entry'])
-        if spec['ticker'] is None and p['age']>=252 and not any(o['ticker']==ticker for o in carry):
+        if spec['ticker'] is None and p['age']>=rules['max_hold_sessions'] and not any(o['ticker']==ticker for o in carry):
             orders.append({'ticker':ticker,'side':'sell','shares':p['shares'],'reason':'max_hold','signal_date':day,'recorded_at':stamp})
     reserve=b['cash'];planned=set(positions)
-    def buy(ticker,budget,sector,box):
+    def buy(ticker,budget,sector,box,atr=None):
         nonlocal reserve
         bar=bars.get(ticker)
         if not good_bar(bar):return
@@ -155,6 +167,7 @@ def advance_book(original,day,bars,candidates,now,*,coverage=1.,plan=True):
         shares=math.floor(min(budget,reserve)/(price*(1+FEE)*spec['lot']))*spec['lot']
         if shares<=0:return
         orders.append({'ticker':ticker,'side':'buy','shares':shares,'budget':budget,'sector':sector,'box':box,'signal_date':day,'recorded_at':stamp})
+        if atr is not None:orders[-1]['atr']=atr
         reserve-=shares*price*(1+FEE);planned.add(ticker)
     if coverage>=.95:
         if spec['ticker']:
@@ -162,12 +175,12 @@ def advance_book(original,day,bars,candidates,now,*,coverage=1.,plan=True):
         else:
             exiting={o['ticker'] for o in carry+orders if o['side']=='sell'}
             for ticker,p in positions.items():
-                if ticker not in exiting and p['tranches']<5 and p['mark']>p['entry']:buy(ticker,p['budget'],p['sector'],p['stop'])
+                if duke and ticker not in exiting and p['tranches']<5 and p['mark']>p['entry']:buy(ticker,p['budget'],p['sector'],p['stop'])
             sectors={t:p['sector'] for t,p in positions.items()}
             for c in sorted(candidates,key=lambda c:(-c['turnover'],c['ticker'])):
                 ticker=c['ticker'];sector=c['sector']
                 if ticker in planned or len(planned)>=5 or sum(sectors.get(t)==sector for t in planned)>=2:continue
-                buy(ticker,equity*.2/5,sector,c['box']);sectors[ticker]=sector
+                buy(ticker,equity*.2/rules['tranches'],sector,c.get('box'),c.get('atr'));sectors[ticker]=sector
     b['pending']+=orders
     b['decisions'].append({'date':day,'recorded_at':stamp,'coverage':coverage,'candidates':deepcopy(candidates) if not spec['ticker'] else [],'orders':deepcopy(orders),'rules_hash':b['rules_hash'],'cash':b['cash']})
     return b
@@ -195,6 +208,44 @@ def duke_candidates(frames,universe,day):
             h.shift().rolling(20).max().iloc[-1]<hi,(h.shift().rolling(60).max().iloc[-1]-box)/c.iloc[-1]<=.4,
             (v/v.rolling(20).mean()).shift().iloc[-1]>=1.5,c.iloc[-1]>f.open.iloc[-1],c.iloc[-1]*v.iloc[-1]>=5e8]
         if all(checks):out.append({'ticker':ticker,'sector':meta['sector_tse'],'box':float(box),'turnover':float(c.iloc[-1]*v.iloc[-1]),'close':float(c.iloc[-1])})
+    return out
+
+
+def strategy_candidates(strategy,frames,universe,day):
+    """Frozen existing mean-reversion entries, using close-known indicators.
+
+    Preserve the research's one-bar lag for RSI, EMA, BB and ATR; the RSI
+    crossing compares the two previously completed RSI values.
+    """
+    if strategy=='duke_stage2':return duke_candidates(frames,universe,day)
+    if SPECS[strategy]['ticker']:return []
+    bench=frames['1321.T']['close'].loc[:day]
+    if len(bench)<200 or str(bench.index[-1].date())!=day or bench.iloc[-1]<=bench.tail(200).mean():return []
+    out=[]
+    for ticker,meta in universe.items():
+        f=frames.get(ticker)
+        if f is None:continue
+        f=f.loc[:day]
+        required=201 if strategy=='rsi_recovery_120' else 21
+        if len(f)<required or str(f.index[-1].date())!=day:continue
+        if not np.isfinite(f[['open','high','low','close','volume']].to_numpy()).all():continue
+        c,h,l=f.close,f.high,f.low
+        if not good_bar(f.iloc[-1].to_dict()) or c.iloc[-1]*f.volume.iloc[-1]<5e8:continue
+        previous=c.shift()
+        atr=pd.concat([h-l,(h-previous).abs(),(l-previous).abs()],axis=1).max(axis=1).rolling(14).mean().shift().iloc[-1]
+        if not np.isfinite(atr) or atr<=0:continue
+        delta=c.diff()
+        gain=delta.clip(lower=0).rolling(14).mean()
+        loss=(-delta.clip(upper=0)).rolling(14).mean()
+        rsi=(100-100/(1+gain/loss.replace(0,np.nan))).shift()
+        if strategy=='bb_rsi_120':
+            lower=(c.rolling(20).mean()-2*c.rolling(20).std()).shift().iloc[-1]
+            entry=c.iloc[-1]<=lower and rsi.iloc[-1]<=30
+        else:
+            ema=c.ewm(span=200,adjust=False).mean().shift().iloc[-1]
+            entry=rsi.iloc[-2]<35<=rsi.iloc[-1] and c.iloc[-1]>ema
+        if entry:out.append({'ticker':ticker,'sector':meta['sector_tse'],'atr':float(atr),
+                             'turnover':float(c.iloc[-1]*f.volume.iloc[-1]),'close':float(c.iloc[-1])})
     return out
 
 
