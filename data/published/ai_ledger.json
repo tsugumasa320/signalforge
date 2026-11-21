@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-ledger/v1",
-  "updated_at": "2026-11-21T03:57:03+00:00",
+  "updated_at": "2026-11-21T08:39:20+00:00",
   "events": [
     {
       "ts": "2026-11-15T13:35:35+00:00",
@@ -557,6 +557,33 @@
       "prev_hash": "9ae5cc1d2be7a9bf0ed5f7bdbe13218dea31e46d48d55901f7c4094857ec0fb7",
       "hash": "64b9b6748ab65395f1b9fa93dc9fb8ede9148270d2d81ff62dbcd52a5e2ca3c0",
       "seq": 32
+    },
+    {
+      "ts": "2026-11-21T08:39:20+00:00",
+      "kind": "daily_run",
+      "as_of": "2026-11-20",
+      "payload": {
+        "source": "rules/v1",
+        "adopted": [
+          "3563.T",
+          "7453.T",
+          "4502.T",
+          "7832.T"
+        ],
+        "score_n": 20,
+        "debate_n": 3,
+        "roles": [
+          "analyst_score",
+          "brief_summarizer",
+          "bull_researcher",
+          "bear_researcher",
+          "risk_officer",
+          "human_approver"
+        ]
+      },
+      "prev_hash": "64b9b6748ab65395f1b9fa93dc9fb8ede9148270d2d81ff62dbcd52a5e2ca3c0",
+      "hash": "ae755a831c447ab2876093313257967351d2d6f301acf1ddcd853d2cf1426cc9",
+      "seq": 33
     }
   ]
 }
