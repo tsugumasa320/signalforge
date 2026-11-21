@@ -36,8 +36,8 @@ def export_research_review(output_dir):
     {_table(d['sensitivity'],{'baseline':'DUKE・修正後','without_top1':'利益最大の1銘柄を除外','without_top3':'利益上位3銘柄を除外'})}</section>
     <section><h2>100株単位と端数購入は別の結果になる</h2><p>{escape(d['recent_period'])}。同じ生株価・当時の月次マスター・戦略で数量条件だけを変更。長期表とはデータ・計算条件が異なります。</p>
     {_table(d['recent_units'],{'raw_price_board_lots':'100株単位','raw_price_fractional':'端数購入を許可'})}</section>
-    <section><h2>ペーパーの運用状況</h2><p>{escape(d['paper_note'])}</p><p><a href="../index.html#paper">フォワード成績を見る</a></p></section>
-    <p class="muted">監査結果は日次ペーパーとは別に更新します。<a href="snapshot.json">公開用スナップショットと出典ハッシュ</a></p>'''
+    <section><h2>フォワードテストの状況</h2><p>{escape(d['paper_note'])}</p><p><a href="../index.html#paper">フォワード成績を見る</a></p></section>
+    <p class="muted">監査結果はフォワードテストの成績とは別に更新します。<a href="snapshot.json">公開用スナップショットと出典ハッシュ</a></p>'''
     directory=output_dir/'research';directory.mkdir(parents=True,exist_ok=True)
     (directory/'snapshot.json').write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     path=directory/'index.html';path.write_text(wrap_page(title='最新の検証状況 — SignalForge',subtitle='採用判断は保留・長期成績は参考研究',body=body,generated=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC'),nav_active='research',depth=1),encoding='utf-8')

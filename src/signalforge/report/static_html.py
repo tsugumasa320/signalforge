@@ -162,7 +162,7 @@ def render_nav(active: str, depth: int = 0) -> str:
     p = _prefix_for(depth)
     links = [
         ("hub", "🏠 ホーム", f"{p}index.html"),
-        ("paper", "📈 Paper 成績", f"{p}index.html#paper"),
+        ("paper", "📈 フォワードテスト", f"{p}index.html#paper"),
         ("screen", "🔍 トレンド・スクリーニング", f"{p}screen/trend.html"),
         ("ai", "AIトライアル", f"{p}ai/index.html"),
         ("research", "🔎 最新の検証状況", f"{p}research/index.html"),

@@ -782,7 +782,7 @@ def render_trend_screen_body(payload: dict[str, Any], *, forward: dict[str, Any]
 
     {_lab_section(payload)}
 
-    {_forward_section(forward if forward is not None else _load_forward())}
+    <section id="forward"><h2>フォワードテスト</h2><p>日々の判断・注文を保存する新しい口座で観測します。</p><a href="../index.html#forward">フォワードテストの成績を見る →</a></section>
 
     <section id="rules">
       <h2>採用規則</h2>
@@ -825,7 +825,8 @@ def export_trend_screen_page(
     screen_dir = output_dir / "screen"
     from signalforge.research.trend_screen.ranking import published_ranking_path
 
-    for src in (published_ranking_path(), published_forward_path()):
+    (screen_dir / published_forward_path().name).unlink(missing_ok=True)
+    for src in (published_ranking_path(),):
         if src.exists():
             (screen_dir / src.name).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     return path

@@ -340,6 +340,7 @@ def export_hub(
     diversified_rows: list[dict] | None = None,
 ) -> Path:
     from signalforge.report.research_review import review_banner
+    from signalforge.report.forward_test_page import summary_html
     guide_ids = sorted({r['strategy'] for r in diversified_rows or []})
     guide_links = "".join(
         f'<a href="guide/{k}.html">{escape(strategy_display_title(k))}</a> '
@@ -350,18 +351,17 @@ def export_hub(
 
     body = f"""
     <div class="info-box">
-      日本株の検証状況と仮想フォワード運用を掲載しています。長期研究とペーパーの成績は別の結果です。
+      日本株戦略の長期研究と、登録後の仮想売買を記録するフォワードテストを掲載しています。
     </div>
 
     {review_banner()}
 
-    <section id="paper">
-      <h2>📈 Paper Trading — フォワード成績</h2>
-      <p class="muted">GitHub Pages は Actions 日次更新（JST 20:17）後が最新</p>
-      <h3>1口座 · 分散（TSE · 仮想運用）</h3>
-      <p class="muted">¥300万 · 同時5 · 20%/回 · 売買代金 ≥ 5億円 · シグナル集中日のみ · 売買代金順 · 同業種2まで</p>
-      <p>既存口座の継続観測です。最新研究の採用順位ではなく、研究用DUKEと同じ条件とは限りません。</p>
-      {_comparison_table(diversified_rows or [], kind="paper")}
+    <section id="paper"><span id="forward"></span>
+      <h2>📈 フォワードテスト</h2>
+      <p>最新の長期参考比較からDUKE第2ステージを検証対象に追加し、日経225・TOPIXのETF保有と同時に観測します。</p>
+      <p>各300万円で新規開始。登録後の判断・注文・約定を保存し、日足で仮想売買します。過去の研究リターンは引き継ぎません。</p>
+      <p class="muted">GitHub Actionsで毎日20:17 JSTに更新予定。取引のない日は成績が進みません。配当・分配金を除いた価格ベースの比較です。</p>
+      {summary_html()}
     </section>
 
     <section id="screen">
@@ -376,16 +376,15 @@ def export_hub(
       <p><a href="ai/index.html">AIトライアル結果を見る →</a></p>
     </section>
 
-    <section id="guides">
-      <h2>📚 戦略解説（{len(guide_ids)} 戦略）</h2>
-      <p>{guide_links}</p>
+    <section id="guides"><h2>📚 売買ルール</h2>
+      <p><a href="forward/duke_stage2.html">DUKE 第2ステージ</a> · <a href="forward/nikkei_hold.html">日経225 ETF保有</a> · <a href="forward/topix_hold.html">TOPIX ETF保有</a></p>
     </section>
     """
 
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = wrap_page(
         title="SignalForge Dashboard",
-        subtitle="最新の検証状況 · Paperフォワード · 戦略解説",
+        subtitle="最新の検証状況 · フォワードテスト · 戦略解説",
         body=body,
         generated=generated,
         nav_active="hub",
@@ -435,7 +434,7 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
         return export_guides_only(output_dir)
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    for sub, keep_prefix in (("guide", None), ("paper", "diversified_")):
+    for sub, keep_prefix in (("guide", None), ("paper", None)):
         d = output_dir / sub
         if not d.is_dir():
             continue
@@ -444,24 +443,11 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
                 continue
             path.unlink(missing_ok=True)
 
-    paper_rows: list[dict] = []
-    for style, strategy in PAPER_SIMULATIONS:
-        export_paper_page(output_dir, style, strategy, refresh=refresh, depth=1)
-        row = paper_summary_row(style, strategy, refresh=refresh)
-        if row:
-            paper_rows.append(row)
-
-    diversified_rows: list[dict] = []
-    for book in list_diversified_paper_books():
-        export_diversified_paper_page(output_dir, book, depth=1, refresh=refresh)
-        diversified_rows.append(diversified_paper_summary_row(book))
-
-    # Legacy experiment rankings are no longer published.
-    backtest_rows = []
-    guide_ids = sorted({r["strategy"] for r in diversified_rows})
-    for strategy_key in guide_ids:
-        export_strategy_guide(output_dir, strategy_key)
-    export_guides_index(output_dir, guide_ids=guide_ids)
+    # Replayed legacy books must not appear as append-only forward results.
+    paper_rows, diversified_rows, backtest_rows = [], [], []
+    export_guides_index(output_dir, guide_ids=[])
+    from signalforge.report.forward_test_page import export_forward_pages
+    export_forward_pages(output_dir)
 
     from signalforge.report.ai_page import export_ai_page
     from signalforge.report.trend_screen_page import export_trend_screen_page

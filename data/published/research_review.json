@@ -2,7 +2,7 @@
   "schema_version": 1,
   "review_date": "2026-11-21",
   "status": "adoption_pending",
-  "headline": "DUKEの採用判断は保留。長期成績は参考研究です。",
+  "headline": "実運用への採用判断は保留。DUKEをフォワードテストに追加しました。",
   "period": {
     "start": "2016-01-04",
     "end": "2026-08-28"
@@ -94,7 +94,7 @@
     }
   ],
   "recent_period": "2025-08-28〜2026-08-28",
-  "paper_note": "ペーパーは別途継続中の仮想フォワード口座です。今回の研究結果による戦略の入れ替えは行っていません。研究用DUKEと同じ条件とは限りません。",
+  "paper_note": "2026-11-21にDUKE第2ステージ・日経225 ETF保有・TOPIX ETF保有を登録しました。各300万円で登録後の判断から観測します。単元株と配当を除く価格ベースで再検証するため、長期参考比較と同じ成績を再現する保証はありません。",
   "sources": {
     "comparison": {
       "path": "data/research/long_stocks_guarded/comparison.json",
