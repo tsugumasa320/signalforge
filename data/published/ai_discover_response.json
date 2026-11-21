@@ -58,10 +58,16 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+65.4% · 20日+4.9% · vol=0.42 · turnover=17464525225 · CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth Engine? / Is DSM Firmenich AG - Sponsored ADR (DSFIY) Stock Outp",
+      "why": "1年+65.4% · 20日+4.9% · vol=0.42 · turnover=17464525225 · Can Boston Beer Sustain Margin Gains Despite Cost Inflation? / CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth E",
       "risk": "mdd_1y=-0.18002987659817404 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Can Boston Beer Sustain Margin Gains Despite Cost Inflation?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/boston-beer-sustain-margin-gains-145700256.html",
+          "published_at": "2026-11-20T14:57:00Z"
+        },
         {
           "title": "CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth Engine?",
           "publisher": "Zacks",
@@ -73,19 +79,13 @@
           "publisher": "Zacks",
           "link": "https://finance.yahoo.com/markets/stocks/articles/dsm-firmenich-ag-sponsored-adr-134002643.html",
           "published_at": "2026-11-18T13:40:02Z"
-        },
-        {
-          "title": "Church & Dwight Expands Hair Care Portfolio With BALI CARE Investment",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/church-dwight-expands-hair-care-150500696.html",
-          "published_at": "2026-11-17T15:05:00Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-19",
+      "pit_available_at": "2026-11-20",
       "pit_issues": [],
       "screen_passed": true,
       "price": 4822.0
@@ -127,10 +127,16 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+65.1% · 20日+9.8% · vol=0.23 · turnover=33860189960 · Takeda (TSE:4502) Stock May Look Reasonable Despite Its ORZEYFUL Launch / Novavax Eyes New Partnerships as Sanofi Advanc",
+      "why": "1年+65.1% · 20日+9.8% · vol=0.23 · turnover=33860189960 · Asian Equities Traded in the US as American Depositary Receipts Decline in Friday Trading; Tumble 7% for Week / Takeda (",
       "risk": "mdd_1y=-0.19388788056717232 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Asian Equities Traded in the US as American Depositary Receipts Decline in Friday Trading; Tumble 7% for Week",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154056709.html",
+          "published_at": "2026-11-20T15:40:56Z"
+        },
         {
           "title": "Takeda (TSE:4502) Stock May Look Reasonable Despite Its ORZEYFUL Launch",
           "publisher": "Simply Wall St.",
@@ -142,19 +148,13 @@
           "publisher": "MarketBeat",
           "link": "https://www.marketbeat.com/instant-alerts/event-novavax-eyes-new-partnerships-as-sanofi-advances-covid-flu-vaccine-trial-2026-11-17/?utm_source=yahoofinance&utm_medium=yahoofinance",
           "published_at": "2026-11-17T21:12:07Z"
-        },
-        {
-          "title": "Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154847227.html",
-          "published_at": "2026-11-16T15:48:47Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-19",
+      "pit_available_at": "2026-11-20",
       "pit_issues": [],
       "screen_passed": true,
       "price": 6973.0
@@ -391,34 +391,34 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+49.9% · 20日+10.6% · vol=0.31 · turnover=17153305998 · Astellas Pharma (TSE:4503) Stock Could Be 42% Below Fair Value / Is Astellas Pharma (ALPMY) Outperforming Other Medical ",
+      "why": "1年+49.9% · 20日+10.6% · vol=0.31 · turnover=17153305998 · Is Astellas Pharma (ALPMY) Stock Outpacing Its Medical Peers This Year? / Are Investors Undervaluing Astellas Pharma (AL",
       "risk": "mdd_1y=-0.20714950324088732 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Is Astellas Pharma (ALPMY) Stock Outpacing Its Medical Peers This Year?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/astellas-pharma-alpmy-stock-outpacing-134004081.html",
+          "published_at": "2026-11-20T13:40:04Z"
+        },
+        {
+          "title": "Are Investors Undervaluing Astellas Pharma (ALPMY) Right Now?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/investors-undervaluing-astellas-pharma-alpmy-134002238.html",
+          "published_at": "2026-11-20T13:40:02Z"
+        },
         {
           "title": "Astellas Pharma (TSE:4503) Stock Could Be 42% Below Fair Value",
           "publisher": "Simply Wall St.",
           "link": "https://finance.yahoo.com/markets/stocks/articles/astellas-pharma-tse-4503-stock-181553610.html",
           "published_at": "2026-11-10T18:15:53Z"
-        },
-        {
-          "title": "Is Astellas Pharma (ALPMY) Outperforming Other Medical Stocks This Year?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/healthcare/articles/astellas-pharma-alpmy-outperforming-other-134001093.html",
-          "published_at": "2026-11-04T13:40:01Z"
-        },
-        {
-          "title": "Lilly shuffles business structure; Novartis writes off part of Avidity deal",
-          "publisher": "BioPharma Dive",
-          "link": "https://www.biopharmadive.com/news/lilly-global-markets-novartis-avidity-astellas-talzenna-prana/872857/",
-          "published_at": "2026-10-28T13:27:00Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-10",
+      "pit_available_at": "2026-11-20",
       "pit_issues": [],
       "screen_passed": true,
       "price": 2751.5

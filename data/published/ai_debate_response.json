@@ -43,7 +43,7 @@
     {
       "ticker": "7453.T",
       "name": "良品計画",
-      "bull": "スクリーニング通過・1年+65.4%・20日+4.9%。 内容: ニュース: CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth Engine?",
+      "bull": "スクリーニング通過・1年+65.4%・20日+4.9%。 内容: ニュース: Can Boston Beer Sustain Margin Gains Despite Cost Inflation?",
       "bear": "vol_1y=0.42 · mdd_1y=-0.18002987659817404 · earnings_next_days=None。",
       "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
       "roles": {
@@ -59,6 +59,12 @@
       "surprise": null,
       "news": [
         {
+          "title": "Can Boston Beer Sustain Margin Gains Despite Cost Inflation?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/boston-beer-sustain-margin-gains-145700256.html",
+          "published_at": "2026-11-20T14:57:00Z"
+        },
+        {
           "title": "CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth Engine?",
           "publisher": "Zacks",
           "link": "https://finance.yahoo.com/markets/stocks/articles/chds-e-commerce-sales-surge-164500993.html",
@@ -69,19 +75,13 @@
           "publisher": "Zacks",
           "link": "https://finance.yahoo.com/markets/stocks/articles/dsm-firmenich-ag-sponsored-adr-134002643.html",
           "published_at": "2026-11-18T13:40:02Z"
-        },
-        {
-          "title": "Church & Dwight Expands Hair Care Portfolio With BALI CARE Investment",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/church-dwight-expands-hair-care-150500696.html",
-          "published_at": "2026-11-17T15:05:00Z"
         }
       ]
     },
     {
       "ticker": "4502.T",
       "name": "武田薬品工業",
-      "bull": "スクリーニング通過・1年+65.1%・20日+9.8%。 内容: ニュース: Takeda (TSE:4502) Stock May Look Reasonable Despite Its ORZEYFUL Launch",
+      "bull": "スクリーニング通過・1年+65.1%・20日+9.8%。 内容: ニュース: Asian Equities Traded in the US as American Depositary Receipts Decline in Frida",
       "bear": "vol_1y=0.23 · mdd_1y=-0.19388788056717232 · earnings_next_days=None。",
       "risk_officer": "参考意見のみ。発注・サイズ指定はしない。人間が ai approve するまで paper intent にしない。",
       "roles": {
@@ -97,6 +97,12 @@
       "surprise": null,
       "news": [
         {
+          "title": "Asian Equities Traded in the US as American Depositary Receipts Decline in Friday Trading; Tumble 7% for Week",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154056709.html",
+          "published_at": "2026-11-20T15:40:56Z"
+        },
+        {
           "title": "Takeda (TSE:4502) Stock May Look Reasonable Despite Its ORZEYFUL Launch",
           "publisher": "Simply Wall St.",
           "link": "https://finance.yahoo.com/healthcare/articles/takeda-tse-4502-stock-may-181656317.html",
@@ -107,12 +113,6 @@
           "publisher": "MarketBeat",
           "link": "https://www.marketbeat.com/instant-alerts/event-novavax-eyes-new-partnerships-as-sanofi-advances-covid-flu-vaccine-trial-2026-11-17/?utm_source=yahoofinance&utm_medium=yahoofinance",
           "published_at": "2026-11-17T21:12:07Z"
-        },
-        {
-          "title": "Asian Equities Traded in the US as American Depositary Receipts Start Week Sharply Lower in Monday Trading",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154847227.html",
-          "published_at": "2026-11-16T15:48:47Z"
         }
       ]
     }

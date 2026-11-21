@@ -57,10 +57,16 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+65.4% · 20日+4.9% · vol=0.42 · turnover=17464525225 · CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth Engine? / Is DSM Firmenich AG - Sponsored ADR (DSFIY) Stock Outp",
+      "why": "1年+65.4% · 20日+4.9% · vol=0.42 · turnover=17464525225 · Can Boston Beer Sustain Margin Gains Despite Cost Inflation? / CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth E",
       "risk": "mdd_1y=-0.18002987659817404 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Can Boston Beer Sustain Margin Gains Despite Cost Inflation?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/boston-beer-sustain-margin-gains-145700256.html",
+          "published_at": "2026-11-20T14:57:00Z"
+        },
         {
           "title": "CHD's E-Commerce Sales Surge 20%: Is Digital Its Growth Engine?",
           "publisher": "Zacks",
@@ -84,19 +90,13 @@
           "publisher": "Zacks",
           "link": "https://finance.yahoo.com/markets/stocks/articles/cortevas-q3-earnings-miss-estimates-165700522.html",
           "published_at": "2026-11-12T16:57:00Z"
-        },
-        {
-          "title": "Can Post Holdings' Foodservice Benefit From Normalized Egg Pricing?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/post-holdings-foodservice-benefit-normalized-163000603.html",
-          "published_at": "2026-11-11T16:30:00Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-19",
+      "pit_available_at": "2026-11-20",
       "pit_issues": [],
       "price": 4822.0
     },
@@ -112,10 +112,16 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+65.1% · 20日+9.8% · vol=0.23 · turnover=33860189960 · Takeda (TSE:4502) Stock May Look Reasonable Despite Its ORZEYFUL Launch / Novavax Eyes New Partnerships as Sanofi Advanc",
+      "why": "1年+65.1% · 20日+9.8% · vol=0.23 · turnover=33860189960 · Asian Equities Traded in the US as American Depositary Receipts Decline in Friday Trading; Tumble 7% for Week / Takeda (",
       "risk": "mdd_1y=-0.19388788056717232 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Asian Equities Traded in the US as American Depositary Receipts Decline in Friday Trading; Tumble 7% for Week",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154056709.html",
+          "published_at": "2026-11-20T15:40:56Z"
+        },
         {
           "title": "Takeda (TSE:4502) Stock May Look Reasonable Despite Its ORZEYFUL Launch",
           "publisher": "Simply Wall St.",
@@ -139,19 +145,13 @@
           "publisher": "MT Newswires",
           "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-154418495.html",
           "published_at": "2026-11-12T15:44:18Z"
-        },
-        {
-          "title": "Ginkgo Bioworks Holdings Inc (DNA) Q3 2026 Earnings Call Highlights: Cost Cuts, First Big ...",
-          "publisher": "GuruFocus.com",
-          "link": "https://finance.yahoo.com/healthcare/articles/ginkgo-bioworks-holdings-inc-dna-050529129.html",
-          "published_at": "2026-11-12T05:05:29Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-19",
+      "pit_available_at": "2026-11-20",
       "pit_issues": [],
       "price": 6973.0
     },
@@ -308,10 +308,22 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+49.9% · 20日+10.6% · vol=0.31 · turnover=17153305998 · Astellas Pharma (TSE:4503) Stock Could Be 42% Below Fair Value / Is Astellas Pharma (ALPMY) Outperforming Other Medical ",
+      "why": "1年+49.9% · 20日+10.6% · vol=0.31 · turnover=17153305998 · Is Astellas Pharma (ALPMY) Stock Outpacing Its Medical Peers This Year? / Are Investors Undervaluing Astellas Pharma (AL",
       "risk": "mdd_1y=-0.20714950324088732 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
+        {
+          "title": "Is Astellas Pharma (ALPMY) Stock Outpacing Its Medical Peers This Year?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/astellas-pharma-alpmy-stock-outpacing-134004081.html",
+          "published_at": "2026-11-20T13:40:04Z"
+        },
+        {
+          "title": "Are Investors Undervaluing Astellas Pharma (ALPMY) Right Now?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/investors-undervaluing-astellas-pharma-alpmy-134002238.html",
+          "published_at": "2026-11-20T13:40:02Z"
+        },
         {
           "title": "Astellas Pharma (TSE:4503) Stock Could Be 42% Below Fair Value",
           "publisher": "Simply Wall St.",
@@ -329,25 +341,13 @@
           "publisher": "BioPharma Dive",
           "link": "https://www.biopharmadive.com/news/lilly-global-markets-novartis-avidity-astellas-talzenna-prana/872857/",
           "published_at": "2026-10-28T13:27:00Z"
-        },
-        {
-          "title": "Astellas fortifies immuno-oncology pipeline on $1.3bn Audax licensing deal",
-          "publisher": "Pharmaceutical Technology",
-          "link": "https://www.pharmaceutical-technology.com/news/astellas-audax-immuno-oncology-deal-dax-044/",
-          "published_at": "2026-10-28T12:06:41Z"
-        },
-        {
-          "title": "Is Elevance Health, Inc. (ELV) Outperforming Other Medical Stocks This Year?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/elevance-health-inc-elv-outperforming-124002827.html",
-          "published_at": "2026-10-19T12:40:02Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
       "pit_ok": true,
       "pit_status": "ok",
-      "pit_available_at": "2026-11-10",
+      "pit_available_at": "2026-11-20",
       "pit_issues": [],
       "price": 2751.5
     },
