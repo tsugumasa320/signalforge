@@ -113,6 +113,11 @@ tips = sorted({str(_last_bar_date(sym)) for sym in tickers if _last_bar_date(sym
 print(f"trend-screen bar tip dates: {tips[-5:]}", flush=True)
 PY
 
+  # CI has no local data/trend_screen/fins cache. DUKE's default preset requires
+  # annual fundamentals, so populate them before calculating its gates.
+  echo "--- trend-screen annual fundamentals (DUKE) ---"
+  uv run signalforge trend-screen fetch-funds
+
   echo "--- trend-screen full ranking (published JSON) ---"
   uv run signalforge trend-screen ranking --top 10
 
