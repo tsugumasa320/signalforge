@@ -339,21 +339,8 @@ def export_hub(
     backtest_rows: list[dict],
     diversified_rows: list[dict] | None = None,
 ) -> Path:
-    chart_html = ""
-    top_chart = [
-        r
-        for r in backtest_rows[:25]
-        if r.get("profit_factor") is not None and r.get("profit_factor") == r.get("profit_factor")
-    ]
-    if top_chart:
-        chart_payload = [
-            {"strategy": str(r.get("strategy_label", r.get("strategy")))[:48], "profit_factor": float(r["profit_factor"])}
-            for r in top_chart
-        ]
-        fig = plot_strategy_comparison(chart_payload, metric="profit_factor")
-        chart_html = fig_to_html_block(fig, include_plotlyjs="cdn", div_id="bt-compare")
-
-    guide_ids = hub_guide_strategy_ids(backtest_rows) if backtest_rows else []
+    from signalforge.report.research_review import review_banner
+    guide_ids = sorted({r['strategy'] for r in diversified_rows or []})
     guide_links = "".join(
         f'<a href="guide/{k}.html">{escape(strategy_display_title(k))}</a> '
         for k in guide_ids[:40]
@@ -363,15 +350,17 @@ def export_hub(
 
     body = f"""
     <div class="info-box">
-      日本株向けテクニカル分析ダッシュボード（ローカル Streamlit 版と同等の比較・解説を静的サイト化）。
-      Paper = TSE 分散フォワード。バックテスト表 = 保存済み TSE 実験（3521銘柄・典型値）。
+      日本株の検証状況と仮想フォワード運用を掲載しています。長期研究とペーパーの成績は別の結果です。
     </div>
+
+    {review_banner()}
 
     <section id="paper">
       <h2>📈 Paper Trading — フォワード成績</h2>
-      <p class="muted">GitHub Pages は Actions 日次更新（JST 18:17）後が最新</p>
-      <h3>1口座 · 分散（TSE · 実運用近似）</h3>
+      <p class="muted">GitHub Pages は Actions 日次更新（JST 20:17）後が最新</p>
+      <h3>1口座 · 分散（TSE · 仮想運用）</h3>
       <p class="muted">¥300万 · 同時5 · 20%/回 · 売買代金 ≥ 5億円 · シグナル集中日のみ · 売買代金順 · 同業種2まで</p>
+      <p>既存口座の継続観測です。最新研究の採用順位ではなく、研究用DUKEと同じ条件とは限りません。</p>
       {_comparison_table(diversified_rows or [], kind="paper")}
     </section>
 
@@ -387,20 +376,6 @@ def export_hub(
       <p><a href="ai/index.html">AIトライアル結果を見る →</a></p>
     </section>
 
-    <section id="intraday">
-      <h2>⏱ 短期足の実験</h2>
-      <p class="muted">5分足は約60日、1分足は約7日。数字は全銘柄の中央値です。</p>
-      {_intraday_table()}
-    </section>
-
-    <section id="backtest">
-      <h2>⚖️ 日足の実験 — 戦略比較（事前バックテスト）</h2>
-      <p class="muted">日足 · japan コスト · 1口座列 = 実運用ルールでの全期間シミュレーション（並び順）· 中央値列 = 全銘柄BTの典型値。5分足と1分足は上の表。</p>
-      <p class="muted">{escape(tse_curation_note())}</p>
-      {chart_html}
-      {_comparison_table(backtest_rows, kind="tse")}
-    </section>
-
     <section id="guides">
       <h2>📚 戦略解説（{len(guide_ids)} 戦略）</h2>
       <p>{guide_links}</p>
@@ -410,7 +385,7 @@ def export_hub(
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = wrap_page(
         title="SignalForge Dashboard",
-        subtitle="日本株マルチ戦略分析 — Paper · バックテスト · 戦略解説",
+        subtitle="最新の検証状況 · Paperフォワード · 戦略解説",
         body=body,
         generated=generated,
         nav_active="hub",
@@ -481,8 +456,9 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
         export_diversified_paper_page(output_dir, book, depth=1, refresh=refresh)
         diversified_rows.append(diversified_paper_summary_row(book))
 
-    backtest_rows = collect_tse_experiment_rows()
-    guide_ids = hub_guide_strategy_ids(backtest_rows)
+    # Legacy experiment rankings are no longer published.
+    backtest_rows = []
+    guide_ids = sorted({r["strategy"] for r in diversified_rows})
     for strategy_key in guide_ids:
         export_strategy_guide(output_dir, strategy_key)
     export_guides_index(output_dir, guide_ids=guide_ids)
@@ -493,6 +469,8 @@ def export_full_site(output_dir: Path, *, refresh: bool = False, guides_only: bo
     # 公開 JSON が無ければ作る。日次 CI では先に ranking を更新してから export する。
     export_trend_screen_page(output_dir, rebuild=False)
     export_ai_page(output_dir)
+    from signalforge.report.research_review import export_research_review
+    export_research_review(output_dir)
 
     hub = export_hub(output_dir, paper_rows, backtest_rows, diversified_rows)
     (output_dir / ".nojekyll").touch()

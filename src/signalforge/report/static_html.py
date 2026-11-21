@@ -165,7 +165,7 @@ def render_nav(active: str, depth: int = 0) -> str:
         ("paper", "📈 Paper 成績", f"{p}index.html#paper"),
         ("screen", "🔍 トレンド・スクリーニング", f"{p}screen/trend.html"),
         ("ai", "AIトライアル", f"{p}ai/index.html"),
-        ("backtest", "⚖️ バックテスト比較", f"{p}index.html#backtest"),
+        ("research", "🔎 最新の検証状況", f"{p}research/index.html"),
         ("guides", "📚 戦略解説", f"{p}index.html#guides"),
     ]
     parts = ["<nav>"]

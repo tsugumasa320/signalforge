@@ -1,0 +1,44 @@
+"""Publish only the current audited snapshot; never rank legacy experiment data."""
+from datetime import datetime, timezone
+from html import escape
+import json
+from pathlib import Path
+from signalforge.report.static_html import wrap_page
+
+SNAPSHOT=Path('data/published/research_review.json')
+LABELS={'duke_stage2':'DUKE 第2ステージ・5分割','13210':'日経225 ETF保有','13060':'TOPIX ETF保有','pullback':'移動平均の押し目','donchian20':'20日ドンチャン','smooth_donchian':'改良ドンチャン'}
+
+def load_review():
+    doc=json.loads(SNAPSHOT.read_text(encoding='utf-8'))
+    if doc.get('schema_version')!=1 or doc.get('status')!='adoption_pending':
+        raise ValueError('Unsupported research review; adoption requires explicit review')
+    return doc
+
+def review_banner(depth=0):
+    d=load_review();prefix='../'*depth
+    return f'''<section id="research-review"><h2>最新の検証状況</h2>
+    <p><strong>{escape(d['headline'])}</strong></p>
+    <p>監査日：{escape(d['review_date'])}。旧実験値の掲載を終了し、修正後の参考結果を掲載しています。</p>
+    <p><a href="{prefix}research/index.html">最新の比較・修正内容・残る課題を見る →</a></p></section>'''
+
+def _table(rows, labels):
+    cells=''.join(f"<tr><td>{escape(labels.get(r.get('case',r['strategy']),r['strategy']))}</td><td>{r['return_pct']:+.2f}%</td><td>{r['cagr_pct']:+.2f}%</td><td>{r['max_dd_pct']:.2f}%</td></tr>" for r in rows)
+    return '<div style="overflow-x:auto"><table><thead><tr><th>条件</th><th>累積リターン</th><th>年率</th><th>最大下落率</th></tr></thead><tbody>'+cells+'</tbody></table></div>'
+
+def export_research_review(output_dir):
+    d=load_review();notes=''.join(f'<li>{escape(n)}</li>' for n in d['limitations'])
+    body=f'''<section><h1>最新の戦略検証</h1><p>監査日：{escape(d['review_date'])}</p>
+    <div class="info-box"><strong>{escape(d['headline'])}</strong><p>実運用の推奨順位ではありません。指数を上回る再現性は未確認です。</p></div></section>
+    <section><h2>修正後の長期比較 — 参考値</h2><p>{escape(d['period']['start'])}〜{escape(d['period']['end'])}・保存済み個別株{d['stock_count']:,}銘柄</p><p>{escape(d['method'])}</p>
+    <ul>{notes}</ul>{_table(d['long_results'],LABELS)}</section>
+    <section><h2>今回修正した問題</h2><p>{escape(d['fix'])}</p><p>修正前の数値は掲載していません。成績の上昇だけでは信頼性が確認されたことにはなりません。</p></section>
+    <section><h2>利益が少数銘柄に偏っていないか</h2><p>事後的に利益上位の銘柄を除いて再計算した感度分析です。将来使える銘柄選定ルールではなく、この結果だけで戦略を否定するものでもありません。</p>
+    {_table(d['sensitivity'],{'baseline':'DUKE・修正後','without_top1':'利益最大の1銘柄を除外','without_top3':'利益上位3銘柄を除外'})}</section>
+    <section><h2>100株単位と端数購入は別の結果になる</h2><p>{escape(d['recent_period'])}。同じ生株価・当時の月次マスター・戦略で数量条件だけを変更。長期表とはデータ・計算条件が異なります。</p>
+    {_table(d['recent_units'],{'raw_price_board_lots':'100株単位','raw_price_fractional':'端数購入を許可'})}</section>
+    <section><h2>ペーパーの運用状況</h2><p>{escape(d['paper_note'])}</p><p><a href="../index.html#paper">フォワード成績を見る</a></p></section>
+    <p class="muted">監査結果は日次ペーパーとは別に更新します。<a href="snapshot.json">公開用スナップショットと出典ハッシュ</a></p>'''
+    directory=output_dir/'research';directory.mkdir(parents=True,exist_ok=True)
+    (directory/'snapshot.json').write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    path=directory/'index.html';path.write_text(wrap_page(title='最新の検証状況 — SignalForge',subtitle='採用判断は保留・長期成績は参考研究',body=body,generated=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC'),nav_active='research',depth=1),encoding='utf-8')
+    return path

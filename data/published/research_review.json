@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-11-21",
+  "status": "adoption_pending",
+  "headline": "DUKEの採用判断は保留。長期成績は参考研究です。",
+  "period": {
+    "start": "2016-01-04",
+    "end": "2026-08-28"
+  },
+  "stock_count": 3686,
+  "method": "初期300万円・最大5銘柄・1銘柄20%・同業種2まで。調整後価格と端数購入を使い、翌日始値で売買。財務条件なしのDUKE第2ステージ・5分割を含む4戦略を固定。",
+  "limitations": [
+    "過去の上場廃止銘柄が不足し、生存者バイアスが残る。",
+    "当時の100株単位・生株価・実売買代金・業種を完全には再現していない。",
+    "配当・権利・株式交換など企業行動の処理は未完了。",
+    "期間はすべて過去に確認済みで、未見データによる検証ではない。"
+  ],
+  "fix": "新しい銘柄コードに前身企業の古い価格が接続されていたため、保存マスターで新たに登場したコードの初出前履歴を使わない制限を追加。月次観測なので完全な上場日復元ではありません。",
+  "long_results": [
+    {
+      "strategy": "duke_stage2",
+      "return_pct": 451.1258830322431,
+      "cagr_pct": 17.362122511943888,
+      "max_dd_pct": -28.058930867901775
+    },
+    {
+      "strategy": "13210",
+      "return_pct": 319.2830964382365,
+      "cagr_pct": 14.390521201938045,
+      "max_dd_pct": -30.8996057891467
+    },
+    {
+      "strategy": "13060",
+      "return_pct": 240.67665751295456,
+      "cagr_pct": 12.184467468054239,
+      "max_dd_pct": -32.42378394280803
+    },
+    {
+      "strategy": "pullback",
+      "return_pct": -38.638931068147144,
+      "cagr_pct": -4.477705093443651,
+      "max_dd_pct": -56.29385734156853
+    },
+    {
+      "strategy": "donchian20",
+      "return_pct": -87.41797921356427,
+      "cagr_pct": -17.669974121059617,
+      "max_dd_pct": -91.9918892400227
+    },
+    {
+      "strategy": "smooth_donchian",
+      "return_pct": -87.93390215470782,
+      "cagr_pct": -17.992670813522427,
+      "max_dd_pct": -93.97496695098708
+    }
+  ],
+  "sensitivity": [
+    {
+      "case": "baseline",
+      "strategy": "duke_stage2",
+      "return_pct": 451.1258830322431,
+      "cagr_pct": 17.362122511943888,
+      "max_dd_pct": -28.058930867901775
+    },
+    {
+      "case": "without_top1",
+      "strategy": "duke_stage2",
+      "return_pct": 286.8842001401633,
+      "cagr_pct": 13.53088173497714,
+      "max_dd_pct": -28.058930867901775
+    },
+    {
+      "case": "without_top3",
+      "strategy": "duke_stage2",
+      "return_pct": 139.06054421329114,
+      "cagr_pct": 8.518389914707281,
+      "max_dd_pct": -32.195815179592024
+    }
+  ],
+  "recent_units": [
+    {
+      "case": "raw_price_board_lots",
+      "strategy": "duke_stage2",
+      "return_pct": -2.435157312504077,
+      "cagr_pct": -2.4302283689290882,
+      "max_dd_pct": -18.526441970030728
+    },
+    {
+      "case": "raw_price_fractional",
+      "strategy": "duke_stage2",
+      "return_pct": -10.455101051943139,
+      "cagr_pct": -10.434835551732014,
+      "max_dd_pct": -25.72228664571268
+    }
+  ],
+  "recent_period": "2025-08-28〜2026-08-28",
+  "paper_note": "ペーパーは別途継続中の仮想フォワード口座です。今回の研究結果による戦略の入れ替えは行っていません。研究用DUKEと同じ条件とは限りません。",
+  "sources": {
+    "comparison": {
+      "path": "data/research/long_stocks_guarded/comparison.json",
+      "sha256": "657daa94a0a7da8b306d9d7ff5ec11cb2272797ec1545e88d755510dee3d5277"
+    },
+    "audit": {
+      "path": "data/research/duke_long_audit_guarded/audit.json",
+      "sha256": "52b3d4e36d158ccdcf504907c252655a43e5ba2ec2cb304304acc27e67969001"
+    },
+    "data_audit": {
+      "path": "data/research/long_stocks_guarded/data_audit.json",
+      "sha256": "a3f10c5a0fd1200111be9316bd2d1587ad429cba81b47d63b0ea3728060c1ff5"
+    }
+  }
+}

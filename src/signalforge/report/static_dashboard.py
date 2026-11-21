@@ -345,8 +345,11 @@ def export_diversified_paper_page(output_dir: Path, book, *, depth: int = 1, ref
         position_pct=book.position_pct,
         entry_rules=book.entry_rules(),
     )
+    from signalforge.report.research_review import review_banner
     queue = "売買代金の大きい順" if book.entry_priority == "sector_turnover" else escape(str(book.entry_priority))
     body = f"""
+    {review_banner(depth)}
+    <p>仮想フォワード口座の継続観測です。研究結果による戦略の採用・入れ替えは行っていません。</p>
     {rules_html}
     <div class="info-box">
       1口座 ¥{book.initial_capital:,.0f} · 同時最大 {book.max_positions} 銘柄 ·
