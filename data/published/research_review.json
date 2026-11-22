@@ -153,6 +153,79 @@
         "max_dd_pct": -23.144557346608718
       }
     ],
+    "exit_sensitivity": [
+      {
+        "name": "no_fixed_target",
+        "rule": "固定利食いなし。指数200日線回復・120営業日・2ATR損切りで退出。",
+        "closed_trades": 363,
+        "costs": {
+          "1": {
+            "return_pct": 105.41521774711748,
+            "max_dd_pct": -22.638518079990668
+          },
+          "2": {
+            "return_pct": 68.87832993987848,
+            "max_dd_pct": -22.771154543247885
+          },
+          "3": {
+            "return_pct": 39.7585506021767,
+            "max_dd_pct": -23.144557346608718
+          }
+        }
+      },
+      {
+        "name": "middle_band",
+        "rule": "終値が20日移動平均を下から上へ回復したら翌営業日始値で退出。",
+        "closed_trades": 510,
+        "costs": {
+          "1": {
+            "return_pct": 67.22659544204535,
+            "max_dd_pct": -28.153993503261898
+          }
+        }
+      },
+      {
+        "name": "rsi_cross_50",
+        "rule": "RSI14が50を下から上へ回復したら翌営業日始値で退出。",
+        "closed_trades": 499,
+        "costs": {
+          "1": {
+            "return_pct": 111.08502615919127,
+            "max_dd_pct": -21.440684434759138
+          },
+          "2": {
+            "return_pct": 58.66076742712638,
+            "max_dd_pct": -23.923215640996542
+          },
+          "3": {
+            "return_pct": 22.269632585446786,
+            "max_dd_pct": -26.33698665015546
+          }
+        }
+      },
+      {
+        "name": "take_profit_1atr",
+        "rule": "買値+1ATRに日中高値が到達したら利食い。",
+        "closed_trades": 710,
+        "costs": {
+          "1": {
+            "return_pct": 22.442859142970264,
+            "max_dd_pct": -31.270682221613242
+          }
+        }
+      },
+      {
+        "name": "take_profit_2atr",
+        "rule": "買値+2ATRに日中高値が到達したら利食い。",
+        "closed_trades": 516,
+        "costs": {
+          "1": {
+            "return_pct": 68.26306875201998,
+            "max_dd_pct": -25.941309246527943
+          }
+        }
+      }
+    ],
     "rules": {
       "entry": "日経225が200日線下。個別株終値が前日時点の20日ボリンジャー下限（−2σ）以下、RSI14が30以下。",
       "selection": "売買代金代理値5億円以上から売買代金順。最大5銘柄、1銘柄20%、同業種最大2。",
@@ -177,6 +250,10 @@
       "bb_cost_sensitivity.json": {
         "path": "data/research/bear_regime_20261122/bb_cost_sensitivity.json",
         "sha256": "cb592be824a05e034d0f1ad19914e32ce3f1b0d1ad88dfaf1bd6c81a57ce3119"
+      },
+      "bb_exit_sensitivity.json": {
+        "path": "data/research/bear_regime_20261122/bb_exit_sensitivity.json",
+        "sha256": "a0fe1261f9d7d5ba40a5c764fbe5eb426c38537ef37dc319d8669be65c85f5eb"
       },
       "data_audit.json": {
         "path": "data/research/bear_regime_20261122/data_audit.json",
