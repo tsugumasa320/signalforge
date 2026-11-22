@@ -9,6 +9,7 @@ def bear_market_snapshot():
     benchmark=json.loads((base/'benchmark_1321.json').read_text())
     costs=json.loads((base/'bb_cost_sensitivity.json').read_text())
     exit_test=json.loads((base/'bb_exit_sensitivity.json').read_text())
+    breakout=json.loads((base/'52w_breakout_rs.json').read_text())
     audit=json.loads((base/'data_audit.json').read_text())
     sustained=json.loads((base/'sustained_episodes.json').read_text())
     inverse=json.loads((base/'inverse_1571.json').read_text())
@@ -22,6 +23,13 @@ def bear_market_snapshot():
             'name':row['name'],'rule':row['rule'],'closed_trades':row['closed_trades'],'costs':{}})
         item['costs'][str(row['cost_multiple'])]={
             'return_pct':row['return_pct'],'max_dd_pct':row['max_dd_pct']}
+    breakout_rows=[{
+        'cost_multiple':row['cost_multiple'],'return_pct':row['return_pct'],
+        'max_dd_pct':row['max_dd_pct'],'final_equity_jpy':row['final_equity_jpy'],
+        'buys':row['buys'],'closed_trades':row['closed_trades'],
+        'mean_invested_pct':row['mean_invested_pct'],
+    } for row in breakout['results']]
+    existing={row['strategy']:row for row in comparison['stock_results']}
     return {
       'period':{'start':comparison['contract']['period'][0],'end':comparison['contract']['period'][1]},
       'market_rule':'1321終値が200日単純移動平均を下回る局面だけ個別株を売買。上回った日の判定後、翌営業日始値で手仕舞い。',
@@ -44,6 +52,28 @@ def bear_market_snapshot():
       ],
       'cost_sensitivity':cost_rows,
       'exit_sensitivity':list(exit_rows.values()),
+      'new_high_breakout':{
+        'results':breakout_rows,
+        'comparators':[
+          {'strategy':'DUKE第2ステージ（252日高値＋上昇条件）',
+           'return_pct':existing['duke_stage2']['return_pct'],
+           'max_dd_pct':existing['duke_stage2']['max_dd_pct'],
+           'buys':existing['duke_stage2']['buys'],
+           'mean_invested_pct':existing['duke_stage2']['mean_invested_pct']},
+          {'strategy':'20日高値ブレイク（Donchian）',
+           'return_pct':existing['donchian20']['return_pct'],
+           'max_dd_pct':existing['donchian20']['max_dd_pct'],
+           'buys':existing['donchian20']['buys'],
+           'mean_invested_pct':existing['donchian20']['mean_invested_pct']},
+        ],
+        'rules':{
+          'entry':'1321が200日線下。個別株が過去252営業日の高値を終値で更新し、個別株の200日線上かつ200日線が21営業日前より上、60営業日リターンが1321を上回る。売買代金代理値5億円以上。',
+          'selection':'60営業日超過リターン順。最大5銘柄、1銘柄20%、同業種最大2。',
+          'exit':'買値から2ATR下の損切り。個別株が50日線を終値で下回る、1321が200日線を回復する、または120営業日保有で翌営業日始値に売却。',
+        },
+        'limitations':breakout['limitations'],
+        'strategy_source_sha256':breakout['source_sha256'],
+      },
       'rules':{
         'entry':'日経225が200日線下。個別株終値が前日時点の20日ボリンジャー下限（−2σ）以下、RSI14が30以下。',
         'selection':'売買代金代理値5億円以上から売買代金順。最大5銘柄、1銘柄20%、同業種最大2。',
@@ -59,7 +89,7 @@ def bear_market_snapshot():
       'sources':{
         name:{'path':str((base/name).relative_to(ROOT)),
               'sha256':hashlib.sha256((base/name).read_bytes()).hexdigest()}
-        for name in ('comparison.json','benchmark_1321.json','bb_cost_sensitivity.json','bb_exit_sensitivity.json',
+        for name in ('comparison.json','benchmark_1321.json','bb_cost_sensitivity.json','bb_exit_sensitivity.json','52w_breakout_rs.json',
                      'data_audit.json','sustained_episodes.json','inverse_1571.json')
       },
     }

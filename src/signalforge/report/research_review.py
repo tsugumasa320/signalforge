@@ -45,6 +45,23 @@ def _bear_market_section(study):
         f"<tr><td>{escape(row['rule'])}</td>{exit_cells(row,1)}{exit_cells(row,2)}{exit_cells(row,3)}<td>{row['closed_trades']}</td></tr>"
         for row in study.get('exit_sensitivity',[])
     )
+    breakout=study.get('new_high_breakout',{})
+    breakout_cost_rows=''.join(
+        f"<tr><td>{row['cost_multiple']}倍</td><td>{row['return_pct']:+.2f}%</td><td>{row['max_dd_pct']:.2f}%</td><td>¥{row['final_equity_jpy']:,.0f}</td></tr>"
+        for row in breakout.get('results',[])
+    )
+    breakout_comparators=''.join(
+        f"<tr><td>{escape(row['strategy'])}</td><td>{row['return_pct']:+.2f}%</td><td>{row['max_dd_pct']:.2f}%</td><td>{row['buys']}</td><td>{row['mean_invested_pct']:.1f}%</td></tr>"
+        for row in breakout.get('comparators',[])
+    )
+    breakout_rules=''.join(
+        f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>"
+        for label,value in (
+            ('買い条件',breakout.get('rules',{}).get('entry','')),
+            ('銘柄選択・資金配分',breakout.get('rules',{}).get('selection','')),
+            ('売却条件',breakout.get('rules',{}).get('exit','')),
+        ) if value
+    )
     rules=''.join(f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>" for label,value in (
         ('買い候補',study['rules']['entry']),
         ('銘柄選択・資金配分',study['rules']['selection']),
@@ -64,6 +81,12 @@ def _bear_market_section(study):
     <p>入口・2ATR損切り・120営業日上限・指数200日線回復時の退出を揃えて比較しました。固定利食いなし案と、20日中心線回復・RSI50上抜け・+1ATR/+2ATR目標を比較しています。</p>
     <div style="overflow-x:auto"><table><thead><tr><th>退出ルール</th><th colspan="2">通常コスト</th><th colspan="2">コスト2倍</th><th colspan="2">コスト3倍</th><th>売買回数</th></tr><tr><th></th><th>累積リターン</th><th>最大下落率</th><th>累積リターン</th><th>最大下落率</th><th>累積リターン</th><th>最大下落率</th><th></th></tr></thead><tbody>{exit_rows}</tbody></table></div>
     <p>通常コストではRSI50上抜けが固定利食いなしをわずかに上回りましたが、売買回数が増え、コスト2倍・3倍では下回りました。今回の探索結果だけでは採用せず、フォワード口座にも登録していません。</p>
+    <h3>下落中の52週高値ブレイク</h3>
+    <p>指数が200日線下でも、個別株が強い状態で252営業日高値を更新するルールを検証しました。52週高値を使う既存のDUKE第2ステージ、20日Donchianとは入口・出口条件が異なるため、以下は参考比較です。</p>
+    <ul>{breakout_rules}</ul>
+    <div style="overflow-x:auto"><table><thead><tr><th>52週高値＋相対強度案のコスト倍率</th><th>累積リターン</th><th>最大下落率</th><th>期末資産</th></tr></thead><tbody>{breakout_cost_rows}</tbody></table></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>参考比較（各戦略の元の退出設定）</th><th>累積リターン</th><th>最大下落率</th><th>買い注文</th><th>平均投資比率</th></tr></thead><tbody>{breakout_comparators}</tbody></table></div>
+    <p>新規案は通常コストでも大きくマイナスで、コストを増やすとさらに悪化しました。今回の条件では採用しません。比較対象とは保有期間・退出設定が異なり、現存銘柄の調整後価格を使う探索結果です。</p>
     <p>20営業日以上続いた下落区間は{sample['episodes_20plus_sessions']}回（最長{sample['longest_episode_sessions']}営業日）。BB案がプラスだったのは{sample['bb_profitable_episodes']}回、1321の下落局面保有を上回ったのは{sample['bb_episodes_beating_1321']}回です。</p>
     <ul>{limitations}</ul>
     <p class="muted">この下落局面用の条件はフォワードテストへ登録していません。フォワード欄のBB＋RSI（指数200日線上での条件）とは別ルールです。</p></section>'''

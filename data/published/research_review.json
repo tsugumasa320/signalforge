@@ -226,6 +226,69 @@
         }
       }
     ],
+    "new_high_breakout": {
+      "results": [
+        {
+          "cost_multiple": 1,
+          "return_pct": -85.90737788107202,
+          "max_dd_pct": -88.53947797181775,
+          "final_equity_jpy": 422778.6635678394,
+          "buys": 449,
+          "closed_trades": 449,
+          "mean_invested_pct": 22.23547009288113
+        },
+        {
+          "cost_multiple": 2,
+          "return_pct": -88.70766366957173,
+          "max_dd_pct": -90.66543521763606,
+          "final_equity_jpy": 338770.08991284826,
+          "buys": 449,
+          "closed_trades": 449,
+          "mean_invested_pct": 22.231098696461167
+        },
+        {
+          "cost_multiple": 3,
+          "return_pct": -90.94397364068345,
+          "max_dd_pct": -92.39079064537164,
+          "final_equity_jpy": 271680.7907794964,
+          "buys": 449,
+          "closed_trades": 449,
+          "mean_invested_pct": 22.219571367751648
+        }
+      ],
+      "comparators": [
+        {
+          "strategy": "DUKE第2ステージ（252日高値＋上昇条件）",
+          "return_pct": -16.34794607105139,
+          "max_dd_pct": -19.770134671820273,
+          "buys": 313,
+          "mean_invested_pct": 7.4524250759849755
+        },
+        {
+          "strategy": "20日高値ブレイク（Donchian）",
+          "return_pct": -67.59050408127325,
+          "max_dd_pct": -77.17773730713407,
+          "buys": 769,
+          "mean_invested_pct": 20.99553753253629
+        }
+      ],
+      "rules": {
+        "entry": "1321が200日線下。個別株が過去252営業日の高値を終値で更新し、個別株の200日線上かつ200日線が21営業日前より上、60営業日リターンが1321を上回る。売買代金代理値5億円以上。",
+        "selection": "60営業日超過リターン順。最大5銘柄、1銘柄20%、同業種最大2。",
+        "exit": "買値から2ATR下の損切り。個別株が50日線を終値で下回る、1321が200日線を回復する、または120営業日保有で翌営業日始値に売却。"
+      },
+      "limitations": [
+        "Exploratory historical comparison; no independent untouched out-of-sample period.",
+        "Current-survivor universe and adjusted prices; historical membership, delistings, corporate actions, and actual board lots are incomplete.",
+        "Turnover is a price-times-volume proxy, not historical exchange-recorded yen turnover.",
+        "Open positions at the period end are marked to market, not forcibly liquidated."
+      ],
+      "strategy_source_sha256": {
+        "scripts/backtest_bear_52w_breakout.py": "ae9a955990334169b1a6461eb6527a24ed349aeee096a160bc8fcbfe17ad4a50",
+        "scripts/compare_long_stocks.py": "64baf7621a40ad57b7af9eae630b03de18f34b92eb8eebc7acf6ef0c39f948ce",
+        "src/signalforge/research/broad_pit.py": "f75ae085dfa7e754e45c7a67701fc6befb20c2cde0637b0823eee9bf7e00bea9"
+      }
+    },
     "rules": {
       "entry": "日経225が200日線下。個別株終値が前日時点の20日ボリンジャー下限（−2σ）以下、RSI14が30以下。",
       "selection": "売買代金代理値5億円以上から売買代金順。最大5銘柄、1銘柄20%、同業種最大2。",
@@ -254,6 +317,10 @@
       "bb_exit_sensitivity.json": {
         "path": "data/research/bear_regime_20261122/bb_exit_sensitivity.json",
         "sha256": "a0fe1261f9d7d5ba40a5c764fbe5eb426c38537ef37dc319d8669be65c85f5eb"
+      },
+      "52w_breakout_rs.json": {
+        "path": "data/research/bear_regime_20261122/52w_breakout_rs.json",
+        "sha256": "8bc304761b0f4143e6c1b7823d6f4c82b36edff457c38a2334ed95c481a522c2"
       },
       "data_audit.json": {
         "path": "data/research/bear_regime_20261122/data_audit.json",
