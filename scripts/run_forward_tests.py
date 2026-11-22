@@ -6,7 +6,8 @@ from datetime import datetime
 import json
 import pandas as pd
 import yfinance as yf
-from signalforge.paper.forward_test import (JST,SPECS,create_book,advance_book,strategy_candidates,save_book,fingerprint,good_bar)
+from signalforge.paper.forward_test import (JST,SPECS,REGIME_SWITCHES,create_book,advance_book,strategy_candidates,market_regime,
+                                            save_book,fingerprint,good_bar)
 
 ROOT=Path(__file__).resolve().parents[1]
 STATE=ROOT/'data/paper/forward_tests'
@@ -106,7 +107,9 @@ def main():
             relevant|={'1306.T','1321.T'}
             bars={t:raw_bar(frames.get(t),day) for t in relevant}
             cov=coverage if SPECS[key]['ticker'] is None else float(good_bar(bars.get(SPECS[key]['ticker'])))
-            updated=advance_book(b,day,bars,candidates if day==latest else [],now,coverage=cov,plan=day==latest)
+            regime=market_regime(frames,day,REGIME_SWITCHES[key]) if key in REGIME_SWITCHES and day==latest else None
+            updated=advance_book(b,day,bars,candidates if day==latest else [],now,
+                                 coverage=cov,plan=day==latest,regime=regime)
             if updated!=b:
                 updated.setdefault('observations',[]).append({'date':day,'recorded_at':now.isoformat(),'bars':bars,'coverage':cov,'universe_hash':universe_hash})
             b=updated

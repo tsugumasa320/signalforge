@@ -2,7 +2,7 @@
   "schema_version": 1,
   "review_date": "2026-11-22",
   "status": "adoption_pending",
-  "headline": "指数の長期買い持ちが全期間の累積リターンで首位。下落局面はBB下限＋RSIを候補として検証しましたが、採用判断は保留です。",
+  "headline": "同条件の長期比較ではSMA200の地合い切替が+355.96%、1321買い持ちが+319.28%。ただし高コストと後半期間では指数に劣後し、実運用の最適戦略とは未確認です。",
   "period": {
     "start": "2016-01-04",
     "end": "2026-08-28"
@@ -336,6 +336,269 @@
       }
     }
   },
+  "matched_comparison": {
+    "period": {
+      "start": "2016-01-04",
+      "end": "2026-08-28"
+    },
+    "universe_size": 3686,
+    "sessions": {
+      "bull_sessions": 1901,
+      "bear_sessions": 702,
+      "neutral_missing_sessions": 0
+    },
+    "account": {
+      "initial_cash": 3000000.0,
+      "max_positions": 5,
+      "per_name_planned_weight": 0.2,
+      "duke_tranches": 5,
+      "sector_limit": 2,
+      "turnover_proxy_yen": 500000000,
+      "fee_each_side": 0.00105,
+      "slippage_each_side": 0.0003,
+      "fractional_adjusted_research_shares": true
+    },
+    "regime_leaders": [
+      {
+        "regime": "上昇局面",
+        "strategy": "DUKE第2ステージ",
+        "return_pct": 112.0421029710561,
+        "cagr_pct": 7.304464037326408,
+        "max_dd_pct": -27.56148574166358,
+        "final_equity": 6361263.089131683,
+        "buys": 740,
+        "closed_trades": 216,
+        "benchmark": {
+          "strategy": "1321上昇局面保有",
+          "return_pct": 87.29163349844032,
+          "cagr_pct": 6.062465872183198,
+          "max_dd_pct": -32.54438578309139,
+          "final_equity": 5618749.004953209,
+          "buys": 59,
+          "closed_trades": 58
+        }
+      },
+      {
+        "regime": "下落局面",
+        "strategy": "BB下限＋RSI",
+        "return_pct": 105.41521774711748,
+        "cagr_pct": 6.985362158997366,
+        "max_dd_pct": -22.638518079990668,
+        "final_equity": 6162456.532413525,
+        "buys": 363,
+        "closed_trades": 363,
+        "benchmark": {
+          "strategy": "1321下落局面保有",
+          "return_pct": 64.63371590419027,
+          "cagr_pct": 4.787399171788986,
+          "max_dd_pct": -22.81759679859038,
+          "final_equity": 4939011.477125708,
+          "buys": 59,
+          "closed_trades": 59
+        }
+      }
+    ],
+    "whole_period": {
+      "switch": {
+        "return_pct": 355.9566282408315,
+        "cagr_pct": 15.293761675167094,
+        "max_dd_pct": -27.56148574166357,
+        "final_equity": 13678698.847224945,
+        "buys": 1046,
+        "closed_trades": 523
+      },
+      "1321_buy_hold": {
+        "return_pct": 319.2830964382365,
+        "cagr_pct": 14.390521201938045,
+        "max_dd_pct": -30.8996057891467,
+        "final_equity": 12578492.893147096,
+        "buys": 1,
+        "closed_trades": 0
+      }
+    },
+    "cost_sensitivity": [
+      {
+        "cost_multiple": 1,
+        "switch": {
+          "return_pct": 355.9566282408315,
+          "max_dd_pct": -27.56148574166357,
+          "final_equity": 13678698.847224945
+        },
+        "1321_buy_hold": {
+          "return_pct": 319.2830964382365,
+          "max_dd_pct": -30.8996057891467,
+          "final_equity": 12578492.893147096
+        }
+      },
+      {
+        "cost_multiple": 2,
+        "switch": {
+          "return_pct": 258.86065709506175,
+          "max_dd_pct": -29.485129112622076,
+          "final_equity": 10765819.712851852
+        },
+        "1321_buy_hold": {
+          "return_pct": 318.1555956010394,
+          "max_dd_pct": -30.89891622643668,
+          "final_equity": 12544667.868031181
+        }
+      },
+      {
+        "cost_multiple": 3,
+        "switch": {
+          "return_pct": 183.53778305338065,
+          "max_dd_pct": -33.31414977218466,
+          "final_equity": 8506133.491601419
+        },
+        "1321_buy_hold": {
+          "return_pct": 317.0311309747136,
+          "max_dd_pct": -30.89822482785888,
+          "final_equity": 12510933.929241408
+        }
+      }
+    ],
+    "period_splits": [
+      {
+        "window": "2016_2020",
+        "switch": {
+          "return_pct": 142.78058286167888,
+          "max_dd_pct": -25.519727701762207,
+          "final_equity": 7283417.485850367
+        },
+        "1321_buy_hold": {
+          "return_pct": 58.45209540889462,
+          "max_dd_pct": -30.8996057891467,
+          "final_equity": 4753562.862266839
+        }
+      },
+      {
+        "window": "2021_2026",
+        "switch": {
+          "return_pct": 108.10715896251133,
+          "max_dd_pct": -27.561485741663596,
+          "final_equity": 6243214.76887534
+        },
+        "1321_buy_hold": {
+          "return_pct": 167.5625080431717,
+          "max_dd_pct": -24.86832438797495,
+          "final_equity": 8026875.2412951505
+        }
+      }
+    ],
+    "engine_parity": {
+      "duke": true,
+      "bb": true
+    },
+    "limitations": [
+      "Previously explored 2016-01-04 to 2026-08-28 data; this is not untouched out-of-sample.",
+      "Survivor/history-universe approximation, current sector labels, adjusted prices and turnover proxy remain.",
+      "Fractional research shares are not executable Japanese board lots; dividends, taxes and full corporate actions are incomplete.",
+      "Regime switches are based on the 1321 close and execute next open; no hysteresis is used.",
+      "Results rank fixed strategies only; they do not establish a future optimum."
+    ],
+    "source": {
+      "path": "data/research/regime_strategy_comparison_20261122/comparison.json",
+      "sha256": "49ae02424538702aedb3c67aa11094887441be919ad7285d6cee025ffca6340d"
+    }
+  },
+  "regime_switch": {
+    "period": {
+      "start": "2016-01-04",
+      "end": "2026-08-28"
+    },
+    "long_thresholds": [
+      {
+        "ma_sessions": 150,
+        "cost_1x": 719.483685379458,
+        "cost_2x": 510.2911399123423,
+        "cost_3x": 359.7317726543188,
+        "max_dd_1x": -27.106624509362188
+      },
+      {
+        "ma_sessions": 200,
+        "cost_1x": 355.9566282408315,
+        "cost_2x": 258.86065709506175,
+        "cost_3x": 183.53778305338065,
+        "max_dd_1x": -27.56148574166357
+      },
+      {
+        "ma_sessions": 250,
+        "cost_1x": 338.20410669717444,
+        "cost_2x": 249.601017723128,
+        "cost_3x": 185.74404031716512,
+        "max_dd_1x": -34.69497615555349
+      }
+    ],
+    "benchmark_costs": [
+      319.2830964382365,
+      318.1555956010394,
+      317.0311309747136
+    ],
+    "recent_period": {
+      "start": "2025-08-27",
+      "end": "2026-08-28"
+    },
+    "recent_regime_sessions": {
+      "bull": 244,
+      "bear": 0,
+      "neutral": 0
+    },
+    "recent_execution": [
+      {
+        "case": "切替 SMA150（DUKE上昇／BB下落）",
+        "return_pct": -2.435157312504077,
+        "max_dd_pct": -18.526441970030728,
+        "buys": 75,
+        "closed_trades": 18
+      },
+      {
+        "case": "切替 SMA200（DUKE上昇／BB下落）",
+        "return_pct": -2.435157312504077,
+        "max_dd_pct": -18.526441970030728,
+        "buys": 75,
+        "closed_trades": 18
+      },
+      {
+        "case": "切替 SMA250（DUKE上昇／BB下落）",
+        "return_pct": -2.435157312504077,
+        "max_dd_pct": -18.526441970030728,
+        "buys": 75,
+        "closed_trades": 18
+      },
+      {
+        "case": "BB下落のみ（下落日なし）",
+        "return_pct": 0.0,
+        "max_dd_pct": 0.0,
+        "buys": 0,
+        "closed_trades": 0
+      },
+      {
+        "case": "1321買い持ち・1口単位",
+        "return_pct": 56.27759076905332,
+        "max_dd_pct": -16.097095570338084,
+        "buys": 1,
+        "closed_trades": 0
+      }
+    ],
+    "forward": {
+      "status": "3口座を登録済み。全口座が初回取引日待ちで、約定はまだありません。",
+      "variants": [
+        "SMA150：1321終値が150日線より上ならDUKE、下ならBB＋RSI。",
+        "SMA200：1321終値が200日線より上ならDUKE、下ならBB＋RSI。",
+        "SMA250：1321終値が250日線より上ならDUKE、下ならBB＋RSI。"
+      ]
+    },
+    "limitations": [
+      "SMA150/200/250はいずれも同じ既知の長期データで比較済み。最高リターンの150日線を選んで採用せず、追加の期間外データで評価する。",
+      "100株単位・月次銘柄マスターを使えた直近期間は上昇判定だけで、BB下落ルールは未検証。",
+      "長期Yahoo比較は調整価格・端株・現存銘柄の近似ユニバースで、真の過去銘柄集合や企業行動を完全には再現しない。",
+      "市場インパクト、配当、税、部分約定、価格制限の待ち行列は含まない。"
+    ],
+    "sources": {
+      "report_sha256": "20fafcbd0beac7813d1c9e36011992544533528b32a55fd266ab57d4b02ea160",
+      "script_sha256": "883105333e93f20acbceae88da8bde97d6dc0ad69c272882c503af4158781556"
+    }
+  },
   "sources": {
     "comparison": {
       "path": "data/research/long_stocks_guarded/comparison.json",
@@ -349,6 +612,10 @@
       "path": "data/research/long_stocks_guarded/data_audit.json",
       "sha256": "a3f10c5a0fd1200111be9316bd2d1587ad429cba81b47d63b0ea3728060c1ff5"
     },
-    "bear_market": "data/research/bear_regime_20261122/"
+    "bear_market": "data/research/bear_regime_20261122/",
+    "matched_comparison": {
+      "path": "data/research/regime_strategy_comparison_20261122/comparison.json",
+      "sha256": "49ae02424538702aedb3c67aa11094887441be919ad7285d6cee025ffca6340d"
+    }
   }
 }

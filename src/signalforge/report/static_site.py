@@ -358,7 +358,7 @@ def export_hub(
 
     <section id="paper"><span id="forward"></span>
       <h2>📈 フォワードテスト</h2>
-      <p>DUKE第2ステージに、広範囲の直近検証でプラスだったBB下限＋RSI・RSI回復の120日保有を追加。個別株3戦略と日経225・TOPIXのETF保有を観測します。追加2戦略の参考成績は各口座の詳細に掲載しています。</p>
+      <p>DUKE第2ステージ、BB下限＋RSI、RSI回復、上昇時DUKE・下落時BB＋RSIの一口座切替、日経225・TOPIXのETF保有を観測します。切替はSMA150・200・250の3定義で並行記録し、各口座は同値・判定不能時に現金です。</p>
       <p>各300万円で新規開始。登録後の判断・注文・約定を保存し、日足で仮想売買します。過去の研究リターンは引き継ぎません。</p>
       <p class="muted">GitHub Actionsで毎日20:17 JSTに更新予定。取引のない日は成績が進みません。配当・分配金を除いた価格ベースの比較です。</p>
       {summary_html()}
@@ -377,7 +377,7 @@ def export_hub(
     </section>
 
     <section id="guides"><h2>📚 売買ルール</h2>
-      <p><a href="forward/duke_stage2.html">DUKE 第2ステージ</a> · <a href="forward/bb_rsi_120.html">BB下限＋RSI</a> · <a href="forward/rsi_recovery_120.html">RSI回復</a> · <a href="forward/nikkei_hold.html">日経225 ETF保有</a> · <a href="forward/topix_hold.html">TOPIX ETF保有</a></p>
+      <p><a href="forward/duke_stage2.html">DUKE 第2ステージ</a> · <a href="forward/bb_rsi_120.html">BB下限＋RSI</a> · <a href="forward/rsi_recovery_120.html">RSI回復</a> · <a href="forward/duke_bull_bb_bear.html">切替 SMA200</a> · <a href="forward/duke_bull_bb_bear_sma150.html">切替 SMA150</a> · <a href="forward/duke_bull_bb_bear_sma250.html">切替 SMA250</a> · <a href="forward/nikkei_hold.html">日経225 ETF保有</a> · <a href="forward/topix_hold.html">TOPIX ETF保有</a></p>
     </section>
     """
 

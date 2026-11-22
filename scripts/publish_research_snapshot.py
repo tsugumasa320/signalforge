@@ -94,13 +94,92 @@ def bear_market_snapshot():
       },
     }
 
+def matched_regime_snapshot():
+    """The audited, same-account comparison for the 200-day regime switch."""
+    base=ROOT/'data/research/regime_strategy_comparison_20261122'
+    comparison=json.loads((base/'comparison.json').read_text())
+    audit=json.loads((base/'data_audit.json').read_text())
+    rows={(r['regime'],r['strategy']):r for r in comparison['results']}
+    def metrics(row):
+        return {k:row[k] for k in ('return_pct','cagr_pct','max_dd_pct','final_equity',
+                                     'buys','closed_trades') if k in row}
+    costs=[]
+    for multiple in (1,2,3):
+        switch=next(r for r in comparison['cost_sensitivity']
+                    if r['cost_multiple']==multiple and r['regime']=='switch')
+        index=next(r for r in comparison['cost_sensitivity']
+                   if r['cost_multiple']==multiple and r['regime']=='all'
+                   and r['strategy']=='1321_buy_hold')
+        costs.append({'cost_multiple':multiple,'switch':metrics(switch),
+                      '1321_buy_hold':metrics(index)})
+    splits=[]
+    for window in ('2016_2020','2021_2026'):
+        switch=next(r for r in comparison['period_splits']
+                    if r['window']==window and r['regime']=='switch')
+        index=next(r for r in comparison['period_splits']
+                   if r['window']==window and r['regime']=='all'
+                   and r['strategy']=='1321_buy_hold')
+        splits.append({'window':window,'switch':metrics(switch),
+                       '1321_buy_hold':metrics(index)})
+    contract=comparison['contract']
+    return {
+      'period':{'start':contract['period'][0],'end':contract['period'][1]},
+      'universe_size':audit['stock_count'],
+      'sessions':comparison['state_sessions'],
+      'account':{k:contract[k] for k in ('initial_cash','max_positions',
+          'per_name_planned_weight','duke_tranches','sector_limit',
+          'turnover_proxy_yen','fee_each_side','slippage_each_side',
+          'fractional_adjusted_research_shares')},
+      'regime_leaders':[
+        {'regime':'上昇局面','strategy':'DUKE第2ステージ',
+         **metrics(rows[('bull','duke_stage2')]),
+         'benchmark':{'strategy':'1321上昇局面保有',
+                      **metrics(rows[('bull','1321_conditional_hold')])}},
+        {'regime':'下落局面','strategy':'BB下限＋RSI',
+         **metrics(rows[('bear','bb_rsi_120')]),
+         'benchmark':{'strategy':'1321下落局面保有',
+                      **metrics(rows[('bear','1321_conditional_hold')])}},
+      ],
+      'whole_period':{
+        'switch':metrics(comparison['switch']),
+        '1321_buy_hold':metrics(rows[('all','1321_buy_hold')]),
+      },
+      'cost_sensitivity':costs,
+      'period_splits':splits,
+      'engine_parity':comparison['engine_parity'],
+      'limitations':contract['limitations'],
+      'source':{'path':str((base/'comparison.json').relative_to(ROOT)),
+                'sha256':hashlib.sha256((base/'comparison.json').read_bytes()).hexdigest()},
+    }
+
+def regime_forward_status():
+    state=ROOT/'data/paper/forward_tests'
+    ids=('duke_bull_bb_bear_sma150','duke_bull_bb_bear','duke_bull_bb_bear_sma250')
+    labels=(
+      'SMA150：1321終値が150日線より上ならDUKE、下ならBB＋RSI。',
+      'SMA200：1321終値が200日線より上ならDUKE、下ならBB＋RSI。',
+      'SMA250：1321終値が250日線より上ならDUKE、下ならBB＋RSI。',
+    )
+    books=[json.loads((state/f'{key}.json').read_text()) for key in ids]
+    filled=sum(bool(book.get('fills')) for book in books)
+    if filled==0 and all(book.get('status')=='waiting_for_first_session' for book in books):
+        status='3口座を登録済み。全口座が初回取引日待ちで、約定はまだありません。'
+    else:
+        status=f'3口座を登録済み。約定記録のある口座は{filled}/3です。'
+    return {'status':status,'variants':list(labels)}
+
 def main():
     paths={'comparison':ROOT/'data/research/long_stocks_guarded/comparison.json','audit':ROOT/'data/research/duke_long_audit_guarded/audit.json','data_audit':ROOT/'data/research/long_stocks_guarded/data_audit.json'}
     docs={k:json.loads(p.read_text()) for k,p in paths.items()}
     comp=docs['comparison'];audit=docs['audit']
     assert comp['contract']['membership_guard'] and audit['plan']['membership_guard']
     def row(r):return {k:r[k] for k in ['strategy','return_pct','cagr_pct','max_dd_pct']}
-    output={'schema_version':1,'review_date':'2026-11-22','status':'adoption_pending','headline':'指数の長期買い持ちが全期間の累積リターンで首位。下落局面はBB下限＋RSIを候補として検証しましたが、採用判断は保留です。','period':{'start':'2016-01-04','end':'2026-08-28'},'stock_count':docs['data_audit']['stock_count'],
+    target=ROOT/'data/published/research_review.json'
+    previous=json.loads(target.read_text()) if target.exists() else {}
+    regime_switch=previous.get('regime_switch')
+    if regime_switch:
+        regime_switch['forward']=regime_forward_status()
+    output={'schema_version':1,'review_date':'2026-11-22','status':'adoption_pending','headline':'同条件の長期比較ではSMA200の地合い切替が+355.96%、1321買い持ちが+319.28%。ただし高コストと後半期間では指数に劣後し、実運用の最適戦略とは未確認です。','period':{'start':'2016-01-04','end':'2026-08-28'},'stock_count':docs['data_audit']['stock_count'],
       'method':'初期300万円・最大5銘柄・1銘柄20%・同業種2まで。調整後価格と端数購入を使い、翌日始値で売買。財務条件なしのDUKE第2ステージ・5分割を含む4戦略を固定。',
       'limitations':['過去の上場廃止銘柄が不足し、生存者バイアスが残る。','当時の100株単位・生株価・実売買代金・業種を完全には再現していない。','配当・権利・株式交換など企業行動の処理は未完了。','期間はすべて過去に確認済みで、未見データによる検証ではない。'],
       'fix':'新しい銘柄コードに前身企業の古い価格が接続されていたため、保存マスターで新たに登場したコードの初出前履歴を使わない制限を追加。月次観測なので完全な上場日復元ではありません。',
@@ -109,6 +188,8 @@ def main():
       'recent_units':[dict(case=r['case'],**row(r)) for r in audit['recent_bridge']],
       'recent_period':'2025-08-28〜2026-08-28','paper_note':'DUKE第2ステージ・BB下限＋RSI（120日保有）・RSI回復（120日保有）と、比較用の日経225 ETF・TOPIX ETFを登録しました。追加2戦略は直近の広範囲検証でプラスでしたが、指数超過・長期優位性は未確認です。各300万円で登録後の判断から観測します。単元株と配当を除く価格ベースで再検証するため、長期参考比較と同じ成績を再現する保証はありません。',
       'bear_market':bear_market_snapshot(),
-      'sources':{**{k:{'path':str(p.relative_to(ROOT)),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for k,p in paths.items()},'bear_market':'data/research/bear_regime_20261122/'} }
-    target=ROOT/'data/published/research_review.json';target.write_text(json.dumps(output,ensure_ascii=False,indent=2,allow_nan=False)+'\n');print(target)
+      'matched_comparison':matched_regime_snapshot(),
+      'regime_switch':regime_switch,
+      'sources':{**{k:{'path':str(p.relative_to(ROOT)),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for k,p in paths.items()},'bear_market':'data/research/bear_regime_20261122/','matched_comparison':matched_regime_snapshot()['source']} }
+    target.write_text(json.dumps(output,ensure_ascii=False,indent=2,allow_nan=False)+'\n');print(target)
 if __name__=='__main__':main()
