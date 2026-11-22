@@ -254,7 +254,7 @@
         "event": 12
       },
       "why": "1年+89.7% · 20日+1.1% · vol=0.45 · turnover=46000730376 · High AI Anxiety Blunts Asian Stock Markets / CB or TKOMY: Which Is the Better Value Stock Right Now?",
-      "risk": "mdd_1y=-0.13825641652644627 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "risk": "mdd_1y=-0.13825641652644627 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
       "surprise": null,
       "news": [
         {
@@ -280,20 +280,16 @@
           "publisher": "Zacks",
           "link": "https://finance.yahoo.com/markets/stocks/articles/rnr-tkomy-better-value-stock-144004284.html",
           "published_at": "2026-10-12T14:40:04Z"
-        },
-        {
-          "title": "Australia’s Suncorp shares drop after denying Tokio Marine takeover talks",
-          "publisher": "Investing.com",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/australia-suncorp-shares-drop-denying-063936224.html",
-          "published_at": "2026-10-01T06:39:36Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
-      "pit_ok": true,
-      "pit_status": "ok",
+      "pit_ok": false,
+      "pit_status": "stripped",
       "pit_available_at": "2026-11-20",
-      "pit_issues": [],
+      "pit_issues": [
+        "news_after_as_of:2026-11-22"
+      ],
       "price": 577.5
     },
     {

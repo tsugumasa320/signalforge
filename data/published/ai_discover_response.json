@@ -273,7 +273,7 @@
         "event": 12
       },
       "why": "1年+89.7% · 20日+1.1% · vol=0.45 · turnover=46000730376 · High AI Anxiety Blunts Asian Stock Markets / CB or TKOMY: Which Is the Better Value Stock Right Now?",
-      "risk": "mdd_1y=-0.13825641652644627 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "risk": "mdd_1y=-0.13825641652644627 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
       "surprise": null,
       "news": [
         {
@@ -287,20 +287,16 @@
           "publisher": "Zacks",
           "link": "https://finance.yahoo.com/markets/stocks/articles/cb-tkomy-better-value-stock-144002962.html",
           "published_at": "2026-10-28T14:40:02Z"
-        },
-        {
-          "title": "Is Tokio Marine Holdings (TSE:8766) Priced Below Fair Value After A 5 Year Surge?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tokio-marine-holdings-tse-8766-071340037.html",
-          "published_at": "2026-10-25T07:13:40Z"
         }
       ],
       "news_sentiment": "neutral",
       "content_data": "news",
-      "pit_ok": true,
-      "pit_status": "ok",
+      "pit_ok": false,
+      "pit_status": "stripped",
       "pit_available_at": "2026-11-20",
-      "pit_issues": [],
+      "pit_issues": [
+        "news_after_as_of:2026-11-22"
+      ],
       "screen_passed": true,
       "price": 577.5
     },
