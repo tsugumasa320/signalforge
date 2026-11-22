@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "review_date": "2026-11-21",
+  "review_date": "2026-11-22",
   "status": "adoption_pending",
-  "headline": "実運用への採用判断は保留。DUKEと反発型2戦略をフォワードテストで観測します。",
+  "headline": "指数の長期買い持ちが全期間の累積リターンで首位。下落局面はBB下限＋RSIを候補として検証しましたが、採用判断は保留です。",
   "period": {
     "start": "2016-01-04",
     "end": "2026-08-28"
@@ -95,6 +95,103 @@
   ],
   "recent_period": "2025-08-28〜2026-08-28",
   "paper_note": "DUKE第2ステージ・BB下限＋RSI（120日保有）・RSI回復（120日保有）と、比較用の日経225 ETF・TOPIX ETFを登録しました。追加2戦略は直近の広範囲検証でプラスでしたが、指数超過・長期優位性は未確認です。各300万円で登録後の判断から観測します。単元株と配当を除く価格ベースで再検証するため、長期参考比較と同じ成績を再現する保証はありません。",
+  "bear_market": {
+    "period": {
+      "start": "2016-01-04",
+      "end": "2026-08-28"
+    },
+    "market_rule": "1321終値が200日単純移動平均を下回る局面だけ個別株を売買。上回った日の判定後、翌営業日始値で手仕舞い。",
+    "sample": {
+      "sessions": 2603,
+      "below_200_sessions": 702,
+      "below_200_periods": 59,
+      "episodes_20plus_sessions": 10,
+      "longest_episode_sessions": 166,
+      "bb_profitable_episodes": 6,
+      "bb_episodes_beating_1321": 6
+    },
+    "results": [
+      {
+        "strategy": "BB下限＋RSI（下落局面だけ）",
+        "return_pct": 105.41521774711748,
+        "max_dd_pct": -22.638518079990668,
+        "final_equity_jpy": 6162456.532413525
+      },
+      {
+        "strategy": "1321を200日線下だけ保有",
+        "return_pct": 64.6337159041903,
+        "max_dd_pct": -22.81759679859038,
+        "final_equity_jpy": 4939011.477125709
+      },
+      {
+        "strategy": "現金待機",
+        "return_pct": 0.0,
+        "max_dd_pct": 0.0,
+        "final_equity_jpy": 3000000.0
+      },
+      {
+        "strategy": "1571インバースを200日線下で保有",
+        "return_pct": -65.8064842802994,
+        "max_dd_pct": -72.27590302699703,
+        "final_equity_jpy": 1025805.471591018
+      }
+    ],
+    "cost_sensitivity": [
+      {
+        "cost_multiple": 1,
+        "return_pct": 105.41521774711748,
+        "max_dd_pct": -22.638518079990668
+      },
+      {
+        "cost_multiple": 2,
+        "return_pct": 68.87832993987848,
+        "max_dd_pct": -22.771154543247885
+      },
+      {
+        "cost_multiple": 3,
+        "return_pct": 39.7585506021767,
+        "max_dd_pct": -23.144557346608718
+      }
+    ],
+    "rules": {
+      "entry": "日経225が200日線下。個別株終値が前日時点の20日ボリンジャー下限（−2σ）以下、RSI14が30以下。",
+      "selection": "売買代金代理値5億円以上から売買代金順。最大5銘柄、1銘柄20%、同業種最大2。",
+      "exit": "固定利食い目標なし。買値から2ATR下で損切り、最大120営業日保有、または指数が200日線を回復した後の翌営業日始値で手仕舞い。"
+    },
+    "status": "探索候補。現行フォワード口座には未登録。フォワード掲載中のBB案（指数200日線上の条件）とは別ルール。",
+    "limitations": [
+      "現存銘柄の過去株価を使う探索で、生存者・過去の構成銘柄バイアスが残る。",
+      "2016〜2026年8月のみ。200日線下は702/2,603営業日、20日以上続いた区間は10回で、複数年の下げ相場を十分検証していない。",
+      "調整後価格・端数株、売買代金代理値を使う。企業行動・実際の売買単位を完全再現していない。",
+      "同じ過去期間で多数の候補を探索した結果で、独立した未見データの確認ではない。"
+    ],
+    "sources": {
+      "comparison.json": {
+        "path": "data/research/bear_regime_20261122/comparison.json",
+        "sha256": "725899e41b67cfa54f5b6500ec6c994e7922617db57c301369fe8d843cdf378d"
+      },
+      "benchmark_1321.json": {
+        "path": "data/research/bear_regime_20261122/benchmark_1321.json",
+        "sha256": "959584b2d435cd3888efa4dc640783ebd159afe1e6744b81040a625e46a431a0"
+      },
+      "bb_cost_sensitivity.json": {
+        "path": "data/research/bear_regime_20261122/bb_cost_sensitivity.json",
+        "sha256": "cb592be824a05e034d0f1ad19914e32ce3f1b0d1ad88dfaf1bd6c81a57ce3119"
+      },
+      "data_audit.json": {
+        "path": "data/research/bear_regime_20261122/data_audit.json",
+        "sha256": "8020124ecf5f82086e9d2031bd3b31de5b59fa8b892ad1670501c532ba6768dc"
+      },
+      "sustained_episodes.json": {
+        "path": "data/research/bear_regime_20261122/sustained_episodes.json",
+        "sha256": "307853bc17646f84a33925b355e9b91b8429aa7b9182a7fe3d9121ef2dc7a3a0"
+      },
+      "inverse_1571.json": {
+        "path": "data/research/bear_regime_20261122/inverse_1571.json",
+        "sha256": "5e85cebea241e4ef1df32a73f78dca2d7bf9ea845f7fb536474a679df1954a37"
+      }
+    }
+  },
   "sources": {
     "comparison": {
       "path": "data/research/long_stocks_guarded/comparison.json",
@@ -107,6 +204,7 @@
     "data_audit": {
       "path": "data/research/long_stocks_guarded/data_audit.json",
       "sha256": "a3f10c5a0fd1200111be9316bd2d1587ad429cba81b47d63b0ea3728060c1ff5"
-    }
+    },
+    "bear_market": "data/research/bear_regime_20261122/"
   }
 }

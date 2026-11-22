@@ -25,12 +25,43 @@ def _table(rows, labels):
     cells=''.join(f"<tr><td>{escape(labels.get(r.get('case',r['strategy']),r['strategy']))}</td><td>{r['return_pct']:+.2f}%</td><td>{r['cagr_pct']:+.2f}%</td><td>{r['max_dd_pct']:.2f}%</td></tr>" for r in rows)
     return '<div style="overflow-x:auto"><table><thead><tr><th>条件</th><th>累積リターン</th><th>年率</th><th>最大下落率</th></tr></thead><tbody>'+cells+'</tbody></table></div>'
 
+def _bear_market_section(study):
+    if not study:
+        return ''
+    result_rows=''.join(
+        f"<tr><td>{escape(row['strategy'])}</td><td>{row['return_pct']:+.2f}%</td><td>{row['max_dd_pct']:.2f}%</td><td>¥{row['final_equity_jpy']:,.0f}</td></tr>"
+        for row in study['results']
+    )
+    cost_rows=''.join(
+        f"<tr><td>{row['cost_multiple']}倍</td><td>{row['return_pct']:+.2f}%</td><td>{row['max_dd_pct']:.2f}%</td></tr>"
+        for row in study['cost_sensitivity']
+    )
+    rules=''.join(f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>" for label,value in (
+        ('買い候補',study['rules']['entry']),
+        ('銘柄選択・資金配分',study['rules']['selection']),
+        ('売却・損切り',study['rules']['exit']),
+    ))
+    limitations=''.join(f"<li>{escape(note)}</li>" for note in study['limitations'])
+    sample=study['sample']
+    return f'''<section><h2>下落局面の追加検証</h2>
+    <p>{escape(study['period']['start'])}〜{escape(study['period']['end'])}。日経225 ETF（1321）が200日線を下回る間の売買を検証しました。下回ったのは{sample['below_200_sessions']:,}/{sample['sessions']:,}営業日、区間は{sample['below_200_periods']}回です。</p>
+    <div class="info-box"><strong>候補: BB下限＋RSIの反発買い</strong><p>{escape(study['status'])}</p></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>条件</th><th>累積リターン</th><th>最大下落率</th><th>期末資産（300万円開始）</th></tr></thead><tbody>{result_rows}</tbody></table></div>
+    <p>BB案は2σです（20日ボリンジャー下限）。固定利食い目標はありません。指数が200日線を回復した翌営業日、保有120営業日到達、または2ATRの損切りで手仕舞います。</p>
+    <ul>{rules}</ul>
+    <h3>売買コストを増やした感度</h3>
+    <div style="overflow-x:auto"><table><thead><tr><th>通常コストに対する倍率</th><th>累積リターン</th><th>最大下落率</th></tr></thead><tbody>{cost_rows}</tbody></table></div>
+    <p>20営業日以上続いた下落区間は{sample['episodes_20plus_sessions']}回（最長{sample['longest_episode_sessions']}営業日）。BB案がプラスだったのは{sample['bb_profitable_episodes']}回、1321の下落局面保有を上回ったのは{sample['bb_episodes_beating_1321']}回です。</p>
+    <ul>{limitations}</ul>
+    <p class="muted">この下落局面用の条件はフォワードテストへ登録していません。フォワード欄のBB＋RSI（指数200日線上での条件）とは別ルールです。</p></section>'''
+
 def export_research_review(output_dir):
     d=load_review();notes=''.join(f'<li>{escape(n)}</li>' for n in d['limitations'])
     body=f'''<section><h1>最新の戦略検証</h1><p>監査日：{escape(d['review_date'])}</p>
     <div class="info-box"><strong>{escape(d['headline'])}</strong><p>実運用の推奨順位ではありません。指数を上回る再現性は未確認です。</p></div></section>
     <section><h2>修正後の長期比較 — 参考値</h2><p>{escape(d['period']['start'])}〜{escape(d['period']['end'])}・保存済み個別株{d['stock_count']:,}銘柄</p><p>{escape(d['method'])}</p>
     <ul>{notes}</ul>{_table(d['long_results'],LABELS)}</section>
+    {_bear_market_section(d.get('bear_market'))}
     <section><h2>今回修正した問題</h2><p>{escape(d['fix'])}</p><p>修正前の数値は掲載していません。成績の上昇だけでは信頼性が確認されたことにはなりません。</p></section>
     <section><h2>利益が少数銘柄に偏っていないか</h2><p>事後的に利益上位の銘柄を除いて再計算した感度分析です。将来使える銘柄選定ルールではなく、この結果だけで戦略を否定するものでもありません。</p>
     {_table(d['sensitivity'],{'baseline':'DUKE・修正後','without_top1':'利益最大の1銘柄を除外','without_top3':'利益上位3銘柄を除外'})}</section>
