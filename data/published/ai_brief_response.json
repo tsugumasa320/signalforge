@@ -5,9 +5,9 @@
     "overall": "risk_off",
     "jp": "risk_off",
     "us": "risk_off",
-    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-12.8%/弱気（リスクオフ） · ダウ先物:20日-8.0%/弱気（リスクオフ） · S&P500先物:20日-9.5%/弱気（リスクオフ） · NASDAQ100先物:20日-13.7%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-10.3%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-8.2%/弱気（リスクオフ） · NYダウ:20日-7.8%/弱気（リスクオフ）"
+    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-7.3%/弱気（リスクオフ） · ダウ先物:20日-5.3%/弱気（リスクオフ） · S&P500先物:20日-5.8%/弱気（リスクオフ） · NASDAQ100先物:20日-8.8%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-10.3%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-8.2%/弱気（リスクオフ） · NYダウ:20日-5.3%/弱気（リスクオフ）"
   },
-  "market_take": "トレンド通過 38 / 目標 5。紙上当月超過は -0.9%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-12.8%/弱気（リスクオフ） · ダウ先物:20日-8.0%/弱気（リスクオフ） · S&P500先物:20日-9.5%/弱気（リスクオフ） · NASDAQ100先物:20日-13.7%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-10.3%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-8.2%/弱気（リスクオフ） · NYダウ:20日-7.8%/弱気（リスクオフ） ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
+  "market_take": "トレンド通過 38 / 目標 5。紙上当月超過は -0.9%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-7.3%/弱気（リスクオフ） · ダウ先物:20日-5.3%/弱気（リスクオフ） · S&P500先物:20日-5.8%/弱気（リスクオフ） · NASDAQ100先物:20日-8.8%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-10.3%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-8.2%/弱気（リスクオフ） · NYダウ:20日-5.3%/弱気（リスクオフ） ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
   "watch": [
     {
       "ticker": "4588.T",
@@ -34,37 +34,31 @@
       "content_data": "news"
     },
     {
-      "ticker": "8766.T",
-      "name": "東京海上ホールディングス",
+      "ticker": "7867.T",
+      "name": "タカラトミー",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 2 位 · 1年+89.7% · 20日+1.1% · ニュース: High AI Anxiety Blunts Asian Stock Markets",
+      "why": "目標 2 位 · 1年+87.5% · 20日+15.3% · ニュース: TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
         {
-          "title": "High AI Anxiety Blunts Asian Stock Markets",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/high-ai-anxiety-blunts-asian-105448167.html",
-          "published_at": "2026-11-20T10:54:48Z"
-        },
-        {
-          "title": "CB or TKOMY: Which Is the Better Value Stock Right Now?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/cb-tkomy-better-value-stock-144002962.html",
-          "published_at": "2026-10-28T14:40:02Z"
-        },
-        {
-          "title": "Is Tokio Marine Holdings (TSE:8766) Priced Below Fair Value After A 5 Year Surge?",
+          "title": "TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
           "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tokio-marine-holdings-tse-8766-071340037.html",
-          "published_at": "2026-10-25T07:13:40Z"
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-tse-7867-stock-still-121613696.html",
+          "published_at": "2026-11-12T12:16:13Z"
         },
         {
-          "title": "RNR or TKOMY: Which Is the Better Value Stock Right Now?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/rnr-tkomy-better-value-stock-144004284.html",
-          "published_at": "2026-10-12T14:40:04Z"
+          "title": "Is TOMY Company (TSE:7867) Undervalued Despite Its 382% Five Year Run?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-company-tse-7867-undervalued-200832236.html",
+          "published_at": "2026-10-26T20:08:32Z"
+        },
+        {
+          "title": "Why TOMY Company (TSE:7867) Is Getting Fresh Attention",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/why-tomy-company-tse-7867-111250689.html",
+          "published_at": "2026-09-21T11:12:50Z"
         }
       ],
       "content_data": "news"
@@ -112,45 +106,45 @@
       "content_data": "news"
     },
     {
-      "ticker": "7867.T",
-      "name": "タカラトミー",
-      "stance": "WATCH",
-      "confidence": 62,
-      "why": "目標 4 位 · 1年+87.2% · 20日+15.3% · ニュース: TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
-      "risk": "イベント日付はパケット次第。",
-      "surprise": null,
-      "news": [
-        {
-          "title": "TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-tse-7867-stock-still-121613696.html",
-          "published_at": "2026-11-12T12:16:13Z"
-        },
-        {
-          "title": "Is TOMY Company (TSE:7867) Undervalued Despite Its 382% Five Year Run?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-company-tse-7867-undervalued-200832236.html",
-          "published_at": "2026-10-26T20:08:32Z"
-        },
-        {
-          "title": "Why TOMY Company (TSE:7867) Is Getting Fresh Attention",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/why-tomy-company-tse-7867-111250689.html",
-          "published_at": "2026-09-21T11:12:50Z"
-        }
-      ],
-      "content_data": "news"
-    },
-    {
       "ticker": "4475.T",
       "name": "ＨＥＮＮＧＥ",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 5 位 · 1年+77.1% · 20日+4.6%",
+      "why": "目標 4 位 · 1年+77.6% · 20日+4.6%",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": null,
       "content_data": "missing"
+    },
+    {
+      "ticker": "3563.T",
+      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+      "stance": "WATCH",
+      "confidence": 70,
+      "why": "採点 ADOPT。目標入りかつ過熱が相対的に軽い。 · ニュース: Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
+      "risk": "スクリーニング遅行・セクター感応。",
+      "surprise": null,
+      "news": [
+        {
+          "title": "Why Food & Life Companies Shares Are In Focus After Strong Earnings Guidance",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/why-food-life-companies-shares-190928184.html",
+          "published_at": "2026-11-15T19:09:28Z"
+        },
+        {
+          "title": "Food & Life Companies (TSE:3563) Stock Could Be Cheap Despite A 373% Run",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-042723997.html",
+          "published_at": "2026-10-19T04:27:23Z"
+        },
+        {
+          "title": "Food & Life Companies (TSE:3563) Is Up 10.0% After Mounting Global Food Inflation Concerns - What's Changed",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/food-life-companies-tse-3563-010951577.html",
+          "published_at": "2026-07-14T01:09:51Z"
+        }
+      ],
+      "content_data": "news"
     }
   ],
   "paper_notes": [

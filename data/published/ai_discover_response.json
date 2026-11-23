@@ -261,50 +261,10 @@
       "price": 3030.0
     },
     {
-      "ticker": "8766.T",
-      "name": "東京海上ホールディングス",
-      "total": 78,
-      "decision": "ADOPT",
-      "factors": {
-        "trend": 20,
-        "momentum": 12,
-        "risk": 16,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+89.7% · 20日+1.1% · vol=0.45 · turnover=46000730376 · High AI Anxiety Blunts Asian Stock Markets / CB or TKOMY: Which Is the Better Value Stock Right Now?",
-      "risk": "mdd_1y=-0.13825641652644627 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
-      "surprise": null,
-      "news": [
-        {
-          "title": "High AI Anxiety Blunts Asian Stock Markets",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/high-ai-anxiety-blunts-asian-105448167.html",
-          "published_at": "2026-11-20T10:54:48Z"
-        },
-        {
-          "title": "CB or TKOMY: Which Is the Better Value Stock Right Now?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/cb-tkomy-better-value-stock-144002962.html",
-          "published_at": "2026-10-28T14:40:02Z"
-        }
-      ],
-      "news_sentiment": "neutral",
-      "content_data": "news",
-      "pit_ok": false,
-      "pit_status": "stripped",
-      "pit_available_at": "2026-11-20",
-      "pit_issues": [
-        "news_after_as_of:2026-11-22"
-      ],
-      "screen_passed": true,
-      "price": 577.5
-    },
-    {
       "ticker": "6367.T",
       "name": "ダイキン工業",
       "total": 77,
-      "decision": "WATCH",
+      "decision": "ADOPT",
       "factors": {
         "trend": 13,
         "momentum": 18,
@@ -312,8 +272,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+21.3% · 20日+11.9% · vol=0.33 · turnover=30828257825",
-      "risk": "mdd_1y=-0.2193117164898747 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+21.4% · 20日+11.9% · vol=0.33 · turnover=30828257825",
+      "risk": "mdd_1y=-0.2193116258741259 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -338,7 +298,7 @@
         "event": 12
       },
       "why": "1年-5.3% · 20日+2.5% · vol=0.28 · turnover=22007514292",
-      "risk": "mdd_1y=-0.18956517158270336 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.189565260899887 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -482,7 +442,7 @@
         "event": 12
       },
       "why": "1年+9.4% · 20日+9.8% · vol=0.28 · turnover=14341845210",
-      "risk": "mdd_1y=-0.21066180730479334 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.21066181840170328 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -651,7 +611,7 @@
         "event": 12
       },
       "why": "1年+57.0% · 20日+1.7% · vol=0.29 · turnover=17140370860 · Sumitomo Mitsui Trust Group (TSE:8309) Stock Still Looks Undervalued On Fair Value Estimates / Sumitomo Mitsui Trust Gro",
-      "risk": "mdd_1y=-0.16083190419363824 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "risk": "mdd_1y=-0.16083181664615576 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
         {
@@ -745,7 +705,7 @@
         "event": 12
       },
       "why": "1年-4.4% · 20日+5.7% · vol=0.33 · turnover=85793374085",
-      "risk": "mdd_1y=-0.31809444056897374 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.31809436728489593 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -756,6 +716,46 @@
       "pit_issues": [],
       "screen_passed": false,
       "price": 4312.0
+    },
+    {
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "total": 74,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 16,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 12
+      },
+      "why": "1年+48.8% · 20日+1.1% · vol=0.38 · turnover=46000730376 · High AI Anxiety Blunts Asian Stock Markets / CB or TKOMY: Which Is the Better Value Stock Right Now?",
+      "risk": "mdd_1y=-0.13825641976834768 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
+      "surprise": null,
+      "news": [
+        {
+          "title": "High AI Anxiety Blunts Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/high-ai-anxiety-blunts-asian-105448167.html",
+          "published_at": "2026-11-20T10:54:48Z"
+        },
+        {
+          "title": "CB or TKOMY: Which Is the Better Value Stock Right Now?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/cb-tkomy-better-value-stock-144002962.html",
+          "published_at": "2026-10-28T14:40:02Z"
+        }
+      ],
+      "news_sentiment": "neutral",
+      "content_data": "news",
+      "pit_ok": false,
+      "pit_status": "stripped",
+      "pit_available_at": "2026-11-20",
+      "pit_issues": [
+        "news_after_as_of:2026-11-22"
+      ],
+      "screen_passed": true,
+      "price": 577.5
     },
     {
       "ticker": "8802.T",
@@ -795,7 +795,7 @@
         "event": 12
       },
       "why": "1年-1.1% · 20日+8.0% · vol=0.34 · turnover=20786011615",
-      "risk": "mdd_1y=-0.2796549948880075 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.27965506845504173 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1120,7 +1120,7 @@
         "event": 12
       },
       "why": "1年+3.8% · 20日+3.0% · vol=0.28 · turnover=5568104445",
-      "risk": "mdd_1y=-0.21081589032117642 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.21081586064412194 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1571,7 +1571,7 @@
         "event": 12
       },
       "why": "1年+19.1% · 20日+3.1% · vol=0.29 · turnover=9257772985",
-      "risk": "mdd_1y=-0.2566555495888009 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.2561389514434457 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1695,8 +1695,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年-18.7% · 20日+7.6% · vol=0.33 · turnover=6336134156",
-      "risk": "mdd_1y=-0.35998990918264384 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-17.8% · 20日+7.6% · vol=0.33 · turnover=6336134156",
+      "risk": "mdd_1y=-0.35998993758312703 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1746,7 +1746,7 @@
         "event": 12
       },
       "why": "1年+13.9% · 20日+4.2% · vol=0.38 · turnover=5572042105",
-      "risk": "mdd_1y=-0.3228522707537743 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.32285233708134586 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1771,7 +1771,7 @@
         "event": 12
       },
       "why": "1年+16.1% · 20日+5.2% · vol=0.30 · turnover=5333154285",
-      "risk": "mdd_1y=-0.2910679200082811 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.2910678734149861 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1795,8 +1795,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+87.2% · 20日+15.3% · vol=0.35 · turnover=4873256755 · TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues / Is TOMY Company (TSE:7867) Undervalued De",
-      "risk": "mdd_1y=-0.12870266859310686 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "why": "1年+87.5% · 20日+15.3% · vol=0.35 · turnover=4873256755 · TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues / Is TOMY Company (TSE:7867) Undervalued De",
+      "risk": "mdd_1y=-0.12870279630663584 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
         {
@@ -1840,7 +1840,7 @@
         "event": 12
       },
       "why": "1年-8.1% · 20日+4.3% · vol=0.27 · turnover=4658493950",
-      "risk": "mdd_1y=-0.23821524435912755 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.23821528572017747 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1914,8 +1914,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+29.8% · 20日+17.4% · vol=0.33 · turnover=21274202870",
-      "risk": "mdd_1y=-0.3062854331213555 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+29.9% · 20日+17.4% · vol=0.33 · turnover=21274202870",
+      "risk": "mdd_1y=-0.306285407903363 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1964,8 +1964,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-5.6% · 20日+2.9% · vol=0.37 · turnover=16942442745",
-      "risk": "mdd_1y=-0.4193719461316572 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-5.5% · 20日+2.9% · vol=0.37 · turnover=16942442745",
+      "risk": "mdd_1y=-0.41918780009668344 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -1990,7 +1990,7 @@
         "event": 12
       },
       "why": "1年+16.2% · 20日+0.2% · vol=0.47 · turnover=14569128510",
-      "risk": "mdd_1y=-0.28668651848678506 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.286686563293989 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2040,7 +2040,7 @@
         "event": 12
       },
       "why": "1年+10.4% · 20日+12.1% · vol=0.28 · turnover=13651133675",
-      "risk": "mdd_1y=-0.31979420295081085 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.3197941397984435 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2064,8 +2064,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-7.6% · 20日+1.4% · vol=0.20 · turnover=10061373722",
-      "risk": "mdd_1y=-0.2518814872322065 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-9.4% · 20日+1.4% · vol=0.20 · turnover=10061373722",
+      "risk": "mdd_1y=-0.25188137800194044 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2146,8 +2146,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+41.2% · 20日-4.5% · vol=0.42 · turnover=75341488150",
-      "risk": "mdd_1y=-0.2463455497342416 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+41.6% · 20日-4.5% · vol=0.42 · turnover=75341488150",
+      "risk": "mdd_1y=-0.24634552523499798 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2171,8 +2171,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+35.1% · 20日-7.4% · vol=0.34 · turnover=73811843415",
-      "risk": "mdd_1y=-0.19261766996161644 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+33.6% · 20日-7.4% · vol=0.35 · turnover=73811843415",
+      "risk": "mdd_1y=-0.19261760037355846 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2183,6 +2183,31 @@
       "pit_issues": [],
       "screen_passed": false,
       "price": 2936.0
+    },
+    {
+      "ticker": "6861.T",
+      "name": "キーエンス",
+      "total": 67,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 13,
+        "momentum": 8,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 12
+      },
+      "why": "1年+28.9% · 20日-12.7% · vol=0.40 · turnover=57872549650",
+      "risk": "mdd_1y=-0.20089040571728545 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "surprise": null,
+      "news": null,
+      "news_sentiment": null,
+      "content_data": "missing",
+      "pit_ok": true,
+      "pit_status": "ok",
+      "pit_available_at": null,
+      "pit_issues": [],
+      "screen_passed": false,
+      "price": 14025.0
     },
     {
       "ticker": "8308.T",
@@ -2221,8 +2246,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+38.2% · 20日-9.3% · vol=0.29 · turnover=20238001410",
-      "risk": "mdd_1y=-0.19480109488735198 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+39.1% · 20日-9.3% · vol=0.29 · turnover=20238001410",
+      "risk": "mdd_1y=-0.19480111737311212 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2396,8 +2421,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+9.0% · 20日+2.3% · vol=0.39 · turnover=9332860755",
-      "risk": "mdd_1y=-0.37615946268833444 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+7.7% · 20日+2.3% · vol=0.39 · turnover=9332860755",
+      "risk": "mdd_1y=-0.38368960414337727 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2421,7 +2446,7 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+52.6% · 20日-7.7% · vol=0.46 · turnover=8473432210",
+      "why": "1年+52.7% · 20日-7.7% · vol=0.46 · turnover=8473432210",
       "risk": "mdd_1y=-0.19981260248301713 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
@@ -2609,8 +2634,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+77.1% · 20日+4.6% · vol=0.62 · turnover=4405998670",
-      "risk": "mdd_1y=-0.335434500733678 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+77.6% · 20日+4.6% · vol=0.62 · turnover=4405998670",
+      "risk": "mdd_1y=-0.33543457550899003 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2660,7 +2685,7 @@
         "event": 12
       },
       "why": "1年+6.2% · 20日+11.9% · vol=0.28 · turnover=4182286628",
-      "risk": "mdd_1y=-0.25033060805420093 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.25033052539728373 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2684,8 +2709,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-32.9% · 20日+1.5% · vol=0.40 · turnover=83912558330",
-      "risk": "mdd_1y=-0.49977372761074745 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-32.3% · 20日+1.5% · vol=0.40 · turnover=83912558330",
+      "risk": "mdd_1y=-0.4997736903569113 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2809,8 +2834,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-6.0% · 20日-18.1% · vol=0.39 · turnover=72354877350",
-      "risk": "mdd_1y=-0.22830794546943556 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-5.9% · 20日-18.1% · vol=0.39 · turnover=72354877350",
+      "risk": "mdd_1y=-0.22830798625001958 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -2959,8 +2984,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+34.2% · 20日-9.8% · vol=0.33 · turnover=22643333825",
-      "risk": "mdd_1y=-0.20716837784573605 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+34.3% · 20日-9.8% · vol=0.33 · turnover=22643333825",
+      "risk": "mdd_1y=-0.20633961852277605 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3009,8 +3034,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+27.1% · 20日-11.8% · vol=0.40 · turnover=20420263155",
-      "risk": "mdd_1y=-0.21340435981084438 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+27.2% · 20日-11.8% · vol=0.40 · turnover=20420263155",
+      "risk": "mdd_1y=-0.21340434778365158 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3084,8 +3109,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+29.7% · 20日-2.1% · vol=0.36 · turnover=15222068170",
-      "risk": "mdd_1y=-0.20851493277684652 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+32.6% · 20日-2.1% · vol=0.36 · turnover=15222068170",
+      "risk": "mdd_1y=-0.20851499391343742 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3109,8 +3134,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+11.6% · 20日-19.6% · vol=0.36 · turnover=14420629070",
-      "risk": "mdd_1y=-0.2381656305241221 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+11.8% · 20日-19.6% · vol=0.36 · turnover=14420629070",
+      "risk": "mdd_1y=-0.23708462175063005 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3134,8 +3159,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-10.6% · 20日-8.6% · vol=0.33 · turnover=12501086805",
-      "risk": "mdd_1y=-0.23755341397803942 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-10.4% · 20日-8.6% · vol=0.33 · turnover=12501086805",
+      "risk": "mdd_1y=-0.23755336729812082 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3234,8 +3259,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年-14.9% · 20日+2.3% · vol=0.44 · turnover=9688312700",
-      "risk": "mdd_1y=-0.43281571128023066 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-14.7% · 20日+2.3% · vol=0.44 · turnover=9688312700",
+      "risk": "mdd_1y=-0.43123693044853206 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3378,8 +3403,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+32.7% · 20日-1.9% · vol=0.31 · turnover=9694053475",
-      "risk": "mdd_1y=-0.14187572693431272 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+35.6% · 20日-1.9% · vol=0.31 · turnover=9694053475",
+      "risk": "mdd_1y=-0.14187574387014434 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3454,7 +3479,7 @@
         "event": 12
       },
       "why": "1年+20.5% · 20日-7.9% · vol=0.34 · turnover=8449016180",
-      "risk": "mdd_1y=-0.17112179364372937 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.17112189136372558 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3504,7 +3529,7 @@
         "event": 12
       },
       "why": "1年+30.1% · 20日-7.3% · vol=0.36 · turnover=7152814242",
-      "risk": "mdd_1y=-0.2172636979423418 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.2172636243220305 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3578,8 +3603,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+41.1% · 20日-14.3% · vol=0.29 · turnover=5260564205",
-      "risk": "mdd_1y=-0.17389472828631203 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+41.4% · 20日-14.3% · vol=0.29 · turnover=5260564205",
+      "risk": "mdd_1y=-0.1721108735324295 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3828,8 +3853,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-3.7% · 20日-13.2% · vol=0.30 · turnover=32143401925",
-      "risk": "mdd_1y=-0.2564102564102564 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-3.1% · 20日-13.2% · vol=0.30 · turnover=32143401925",
+      "risk": "mdd_1y=-0.2564102228290921 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3928,8 +3953,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+15.4% · 20日-10.1% · vol=0.38 · turnover=24239036585",
-      "risk": "mdd_1y=-0.2764294808914177 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+15.5% · 20日-10.1% · vol=0.38 · turnover=24239036585",
+      "risk": "mdd_1y=-0.2756720236122191 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -3954,7 +3979,7 @@
         "event": 12
       },
       "why": "1年+1.5% · 20日-24.3% · vol=0.43 · turnover=23304351090",
-      "risk": "mdd_1y=-0.3784343193563059 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.37830956865895893 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -4191,8 +4216,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+54.0% · 20日-1.4% · vol=0.35 · turnover=6675385265",
-      "risk": "mdd_1y=-0.2528211068559263 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+54.2% · 20日-1.4% · vol=0.35 · turnover=6675385265",
+      "risk": "mdd_1y=-0.252821187697299 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -4241,7 +4266,7 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+26.6% · 20日-20.5% · vol=0.49 · turnover=8795053580",
+      "why": "1年+26.8% · 20日-20.5% · vol=0.49 · turnover=8795053580",
       "risk": "mdd_1y=-0.343899077705926 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
@@ -4266,8 +4291,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+121.0% · 20日-21.4% · vol=0.63 · turnover=8348435665",
-      "risk": "mdd_1y=-0.3444805711375819 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+121.1% · 20日-21.4% · vol=0.63 · turnover=8348435665",
+      "risk": "mdd_1y=-0.3439854745193064 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -4316,8 +4341,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+18.0% · 20日-7.4% · vol=0.34 · turnover=7824336092",
-      "risk": "mdd_1y=-0.21756432943730364 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+18.2% · 20日-7.4% · vol=0.34 · turnover=7824336092",
+      "risk": "mdd_1y=-0.21756432597396114 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -4392,7 +4417,7 @@
         "event": 12
       },
       "why": "1年+12.6% · 20日-0.8% · vol=0.26 · turnover=6256699500",
-      "risk": "mdd_1y=-0.2062274984843323 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.20622755720771235 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -4416,7 +4441,7 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+30.0% · 20日-19.4% · vol=0.35 · turnover=6126640610",
+      "why": "1年+30.1% · 20日-19.4% · vol=0.35 · turnover=6126640610",
       "risk": "mdd_1y=-0.28811881188118815 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
@@ -4541,8 +4566,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+4.8% · 20日-13.9% · vol=0.32 · turnover=5188934912",
-      "risk": "mdd_1y=-0.23464938970672933 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+4.9% · 20日-13.9% · vol=0.32 · turnover=5188934912",
+      "risk": "mdd_1y=-0.23387310664657412 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -4666,8 +4691,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+40.2% · 20日-2.7% · vol=0.39 · turnover=4276777147",
-      "risk": "mdd_1y=-0.21772786168373814 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+31.0% · 20日-2.7% · vol=0.39 · turnover=4276777147",
+      "risk": "mdd_1y=-0.2177279097911916 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -4866,8 +4891,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-14.2% · 20日-6.0% · vol=0.47 · turnover=13211061500",
-      "risk": "mdd_1y=-0.4731636642370606 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-14.0% · 20日-6.0% · vol=0.47 · turnover=13211061500",
+      "risk": "mdd_1y=-0.4722989255058935 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -4966,7 +4991,7 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+21.4% · 20日-25.1% · vol=0.75 · turnover=666225419225",
+      "why": "1年+21.6% · 20日-25.1% · vol=0.75 · turnover=666225419225",
       "risk": "mdd_1y=-0.4204301075268817 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
@@ -4978,6 +5003,31 @@
       "pit_issues": [],
       "screen_passed": false,
       "price": 24255.0
+    },
+    {
+      "ticker": "6954.T",
+      "name": "ファナック",
+      "total": 57,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 10,
+        "momentum": 8,
+        "risk": 9,
+        "liquidity": 18,
+        "event": 12
+      },
+      "why": "1年+1.5% · 20日-10.3% · vol=0.52 · turnover=43833407120",
+      "risk": "mdd_1y=-0.3937630697538783 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "surprise": null,
+      "news": null,
+      "news_sentiment": null,
+      "content_data": "missing",
+      "pit_ok": true,
+      "pit_status": "ok",
+      "pit_available_at": null,
+      "pit_issues": [],
+      "screen_passed": false,
+      "price": 5047.0
     },
     {
       "ticker": "8136.T",
@@ -5041,8 +5091,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+12.6% · 20日-20.7% · vol=0.48 · turnover=9522450800",
-      "risk": "mdd_1y=-0.3805196649155189 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+13.6% · 20日-20.7% · vol=0.48 · turnover=9522450800",
+      "risk": "mdd_1y=-0.3750463622255239 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5242,7 +5292,7 @@
         "event": 12
       },
       "why": "1年+19.1% · 20日-11.9% · vol=0.39 · turnover=8051246821",
-      "risk": "mdd_1y=-0.25368382106821563 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.2536836858428242 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5380,6 +5430,31 @@
       "price": 17350.0
     },
     {
+      "ticker": "7966.T",
+      "name": "リンテック",
+      "total": 57,
+      "decision": "SKIP",
+      "factors": {
+        "trend": 10,
+        "momentum": 8,
+        "risk": 13,
+        "liquidity": 14,
+        "event": 12
+      },
+      "why": "1年+26.1% · 20日-8.3% · vol=0.45 · turnover=5420132500",
+      "risk": "mdd_1y=-0.39974647495157867 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "surprise": null,
+      "news": null,
+      "news_sentiment": null,
+      "content_data": "missing",
+      "pit_ok": true,
+      "pit_status": "ok",
+      "pit_available_at": null,
+      "pit_issues": [],
+      "screen_passed": false,
+      "price": 4780.0
+    },
+    {
       "ticker": "6113.T",
       "name": "アマダ",
       "total": 57,
@@ -5467,7 +5542,7 @@
         "event": 12
       },
       "why": "1年+0.7% · 20日-7.8% · vol=0.28 · turnover=4562478862",
-      "risk": "mdd_1y=-0.2181167186612636 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.21811677759960468 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5491,8 +5566,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+1.8% · 20日-0.2% · vol=0.23 · turnover=4560081112",
-      "risk": "mdd_1y=-0.2482745603275054 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+1.9% · 20日-0.2% · vol=0.23 · turnover=4560081112",
+      "risk": "mdd_1y=-0.24827450459320566 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5517,7 +5592,7 @@
         "event": 12
       },
       "why": "1年-3.1% · 20日-2.4% · vol=0.30 · turnover=4557995332",
-      "risk": "mdd_1y=-0.2595012101422063 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.25950114122400414 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5617,7 +5692,7 @@
         "event": 12
       },
       "why": "1年+2.5% · 20日-7.5% · vol=0.25 · turnover=4256362295",
-      "risk": "mdd_1y=-0.19819185171157228 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.19819193843019045 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5691,8 +5766,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+30.4% · 20日-12.1% · vol=0.60 · turnover=193860436370",
-      "risk": "mdd_1y=-0.4571931666725686 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+26.9% · 20日-12.1% · vol=0.59 · turnover=193860436370",
+      "risk": "mdd_1y=-0.47180589342009027 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5742,7 +5817,7 @@
         "event": 12
       },
       "why": "1年-13.1% · 20日-19.3% · vol=0.67 · turnover=114507466000",
-      "risk": "mdd_1y=-0.5367445419952808 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.5366163606299335 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5830,31 +5905,6 @@
       "price": 2425.0
     },
     {
-      "ticker": "6954.T",
-      "name": "ファナック",
-      "total": 54,
-      "decision": "SKIP",
-      "factors": {
-        "trend": 10,
-        "momentum": 8,
-        "risk": 6,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+0.3% · 20日-10.3% · vol=0.52 · turnover=43833407120",
-      "risk": "mdd_1y=-0.40116279069767447 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
-      "surprise": null,
-      "news": null,
-      "news_sentiment": null,
-      "content_data": "missing",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": null,
-      "pit_issues": [],
-      "screen_passed": false,
-      "price": 5047.0
-    },
-    {
       "ticker": "6762.T",
       "name": "ＴＤＫ",
       "total": 54,
@@ -5866,8 +5916,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-14.1% · 20日-23.9% · vol=0.57 · turnover=33348084065",
-      "risk": "mdd_1y=-0.4839801206467875 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-14.0% · 20日-23.9% · vol=0.57 · turnover=33348084065",
+      "risk": "mdd_1y=-0.48309953458263577 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5917,7 +5967,7 @@
         "event": 12
       },
       "why": "1年-27.7% · 20日-29.9% · vol=0.52 · turnover=26313732028",
-      "risk": "mdd_1y=-0.5777818063188753 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.577781834783563 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -5991,8 +6041,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年+27.7% · 20日-30.3% · vol=0.65 · turnover=20461436078",
-      "risk": "mdd_1y=-0.5595798319327732 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+28.3% · 20日-30.3% · vol=0.65 · turnover=20461436078",
+      "risk": "mdd_1y=-0.5572897685193052 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6042,7 +6092,7 @@
         "event": 12
       },
       "why": "1年-3.6% · 20日-24.7% · vol=0.52 · turnover=13803770150",
-      "risk": "mdd_1y=-0.4159903233286747 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.41586145766337057 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6291,8 +6341,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+41.7% · 20日-11.3% · vol=0.47 · turnover=7579617870",
-      "risk": "mdd_1y=-0.46372540844017596 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+41.9% · 20日-11.3% · vol=0.47 · turnover=7579617870",
+      "risk": "mdd_1y=-0.46271984113917364 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6380,31 +6430,6 @@
       "price": 1681.0
     },
     {
-      "ticker": "7966.T",
-      "name": "リンテック",
-      "total": 54,
-      "decision": "SKIP",
-      "factors": {
-        "trend": 10,
-        "momentum": 8,
-        "risk": 10,
-        "liquidity": 14,
-        "event": 12
-      },
-      "why": "1年+25.5% · 20日-8.3% · vol=0.45 · turnover=5420132500",
-      "risk": "mdd_1y=-0.40287277577134906 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
-      "surprise": null,
-      "news": null,
-      "news_sentiment": null,
-      "content_data": "missing",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": null,
-      "pit_issues": [],
-      "screen_passed": false,
-      "price": 4780.0
-    },
-    {
       "ticker": "8303.T",
       "name": "ＳＢＩ新生銀行",
       "total": 53,
@@ -6416,8 +6441,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年-36.9% · 20日+12.5% · vol=19771263.29 · turnover=9037154052",
-      "risk": "mdd_1y=-0.9999999748191353 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-36.9% · 20日+12.5% · vol=19771264.80 · turnover=9037154052",
+      "risk": "mdd_1y=-0.9999999748191372 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6441,7 +6466,7 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+21.5% · 20日-32.8% · vol=0.53 · turnover=7256165335",
+      "why": "1年+21.7% · 20日-32.8% · vol=0.53 · turnover=7256165335",
       "risk": "mdd_1y=-0.44224588188027325 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
@@ -6492,7 +6517,7 @@
         "event": 12
       },
       "why": "1年+19.6% · 20日-9.8% · vol=0.58 · turnover=6352478458",
-      "risk": "mdd_1y=-0.3621543926303543 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.36187529702798904 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6591,8 +6616,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年-9.3% · 20日-18.2% · vol=0.47 · turnover=4693664850",
-      "risk": "mdd_1y=-0.32731704760192315 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-8.8% · 20日-18.2% · vol=0.47 · turnover=4693664850",
+      "risk": "mdd_1y=-0.32731709689835076 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6742,7 +6767,7 @@
         "event": 12
       },
       "why": "1年+41.3% · 20日-45.7% · vol=0.99 · turnover=170998442265",
-      "risk": "mdd_1y=-0.6459193331974975 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.646078175422015 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6766,8 +6791,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-31.3% · 20日-44.8% · vol=0.87 · turnover=145960492772",
-      "risk": "mdd_1y=-0.7122005039631201 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-31.0% · 20日-44.8% · vol=0.87 · turnover=145960492772",
+      "risk": "mdd_1y=-0.7109713360598304 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6778,31 +6803,6 @@
       "pit_issues": [],
       "screen_passed": false,
       "price": 2252.0
-    },
-    {
-      "ticker": "6861.T",
-      "name": "キーエンス",
-      "total": 50,
-      "decision": "SKIP",
-      "factors": {
-        "trend": 10,
-        "momentum": 8,
-        "risk": 2,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年-74.2% · 20日-82.5% · vol=0.89 · turnover=57872549650",
-      "risk": "mdd_1y=-0.8394250500857527 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
-      "surprise": null,
-      "news": null,
-      "news_sentiment": null,
-      "content_data": "missing",
-      "pit_ok": true,
-      "pit_status": "ok",
-      "pit_available_at": null,
-      "pit_issues": [],
-      "screen_passed": false,
-      "price": 14025.0
     },
     {
       "ticker": "3905.T",
@@ -6866,8 +6866,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-43.6% · 20日-47.0% · vol=0.84 · turnover=26160606150",
-      "risk": "mdd_1y=-0.7828188106542402 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-46.7% · 20日-47.0% · vol=0.84 · turnover=26160606150",
+      "risk": "mdd_1y=-0.7947476935557723 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6916,8 +6916,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-25.7% · 20日-29.1% · vol=0.90 · turnover=16676879355",
-      "risk": "mdd_1y=-0.6703200705857336 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-25.6% · 20日-29.1% · vol=0.90 · turnover=16676879355",
+      "risk": "mdd_1y=-0.6698924724575503 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6941,8 +6941,8 @@
         "liquidity": 18,
         "event": 12
       },
-      "why": "1年-25.2% · 20日-18.3% · vol=1.10 · turnover=15111584100",
-      "risk": "mdd_1y=-0.8565817015009232 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+49.7% · 20日-18.3% · vol=0.98 · turnover=15111584100",
+      "risk": "mdd_1y=-0.713039063716299 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -6992,7 +6992,7 @@
         "event": 12
       },
       "why": "1年+9.5% · 20日-30.2% · vol=0.62 · turnover=9719185075",
-      "risk": "mdd_1y=-0.46072746684987953 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.46054357296248216 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7066,8 +7066,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+36.3% · 20日-19.9% · vol=0.65 · turnover=7843711460",
-      "risk": "mdd_1y=-0.563080684596577 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+38.3% · 20日-19.9% · vol=0.65 · turnover=7843711460",
+      "risk": "mdd_1y=-0.5565875555102153 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7167,7 +7167,7 @@
         "event": 12
       },
       "why": "1年-52.7% · 20日-15.0% · vol=0.60 · turnover=7075401990",
-      "risk": "mdd_1y=-0.6226392798325997 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.6226393028183153 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7216,8 +7216,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年-17.9% · 20日-22.5% · vol=0.54 · turnover=6793498052",
-      "risk": "mdd_1y=-0.4059861020623071 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-18.4% · 20日-22.5% · vol=0.54 · turnover=6793498052",
+      "risk": "mdd_1y=-0.4095645655858825 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7317,7 +7317,7 @@
         "event": 12
       },
       "why": "1年-56.1% · 20日-29.1% · vol=0.54 · turnover=6336724140",
-      "risk": "mdd_1y=-0.5686852076439358 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.5684470822380167 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7467,7 +7467,7 @@
         "event": 12
       },
       "why": "1年-11.8% · 20日-8.0% · vol=0.65 · turnover=4438204835",
-      "risk": "mdd_1y=-0.3809302325581395 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "risk": "mdd_1y=-0.3805149868240396 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7491,8 +7491,8 @@
         "liquidity": 14,
         "event": 12
       },
-      "why": "1年+36.0% · 20日-23.7% · vol=0.80 · turnover=8431681635",
-      "risk": "mdd_1y=-0.5806721342930725 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+36.1% · 20日-23.7% · vol=0.80 · turnover=8431681635",
+      "risk": "mdd_1y=-0.5805408389407736 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7616,8 +7616,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年-19.1% · 20日-24.9% · vol=0.65 · turnover=4974404530",
-      "risk": "mdd_1y=-0.5371729485032324 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年-22.6% · 20日-24.9% · vol=0.65 · turnover=4974404530",
+      "risk": "mdd_1y=-0.5567192095784255 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7691,8 +7691,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+96.8% · 20日-9.7% · vol=0.91 · turnover=4585844950",
-      "risk": "mdd_1y=-0.598143527445427 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+97.3% · 20日-9.7% · vol=0.92 · turnover=4585844950",
+      "risk": "mdd_1y=-0.5971973061472371 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
@@ -7813,7 +7813,7 @@
     "7832.T",
     "9735.T",
     "2503.T",
-    "8766.T"
+    "6367.T"
   ],
   "skipped_reasons": [
     "20日リターンが概ね35%超、または vol_1y>0.9 は SKIP",
@@ -7841,7 +7841,7 @@
       "7832.T",
       "9735.T",
       "2503.T",
-      "8766.T"
+      "6367.T"
     ],
     "overlap_with_screen": [
       "3563.T",
@@ -7849,11 +7849,11 @@
       "4502.T",
       "7832.T",
       "9735.T",
-      "2503.T",
-      "8766.T"
+      "2503.T"
     ],
     "discover_only": [
-      "9983.T"
+      "9983.T",
+      "6367.T"
     ],
     "top_nonpass_watch": [
       {
@@ -7866,7 +7866,7 @@
         "ticker": "6367.T",
         "name": "ダイキン工業",
         "total": 77,
-        "decision": "WATCH"
+        "decision": "ADOPT"
       },
       {
         "ticker": "6902.T",

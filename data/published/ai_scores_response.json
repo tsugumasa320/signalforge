@@ -242,57 +242,6 @@
       "price": 7220.0
     },
     {
-      "ticker": "8766.T",
-      "name": "東京海上ホールディングス",
-      "total": 78,
-      "decision": "WATCH",
-      "factors": {
-        "trend": 20,
-        "momentum": 12,
-        "risk": 16,
-        "liquidity": 18,
-        "event": 12
-      },
-      "why": "1年+89.7% · 20日+1.1% · vol=0.45 · turnover=46000730376 · High AI Anxiety Blunts Asian Stock Markets / CB or TKOMY: Which Is the Better Value Stock Right Now?",
-      "risk": "mdd_1y=-0.13825641652644627 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
-      "surprise": null,
-      "news": [
-        {
-          "title": "High AI Anxiety Blunts Asian Stock Markets",
-          "publisher": "MT Newswires",
-          "link": "https://finance.yahoo.com/markets/world-indices/articles/high-ai-anxiety-blunts-asian-105448167.html",
-          "published_at": "2026-11-20T10:54:48Z"
-        },
-        {
-          "title": "CB or TKOMY: Which Is the Better Value Stock Right Now?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/cb-tkomy-better-value-stock-144002962.html",
-          "published_at": "2026-10-28T14:40:02Z"
-        },
-        {
-          "title": "Is Tokio Marine Holdings (TSE:8766) Priced Below Fair Value After A 5 Year Surge?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tokio-marine-holdings-tse-8766-071340037.html",
-          "published_at": "2026-10-25T07:13:40Z"
-        },
-        {
-          "title": "RNR or TKOMY: Which Is the Better Value Stock Right Now?",
-          "publisher": "Zacks",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/rnr-tkomy-better-value-stock-144004284.html",
-          "published_at": "2026-10-12T14:40:04Z"
-        }
-      ],
-      "news_sentiment": "neutral",
-      "content_data": "news",
-      "pit_ok": false,
-      "pit_status": "stripped",
-      "pit_available_at": "2026-11-20",
-      "pit_issues": [
-        "news_after_as_of:2026-11-22"
-      ],
-      "price": 577.5
-    },
-    {
       "ticker": "4503.T",
       "name": "アステラス製薬",
       "total": 77,
@@ -439,7 +388,7 @@
         "event": 12
       },
       "why": "1年+57.0% · 20日+1.7% · vol=0.29 · turnover=17140370860 · Sumitomo Mitsui Trust Group (TSE:8309) Stock Still Looks Undervalued On Fair Value Estimates / Sumitomo Mitsui Trust Gro",
-      "risk": "mdd_1y=-0.16083190419363824 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "risk": "mdd_1y=-0.16083181664615576 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
         {
@@ -480,6 +429,57 @@
       "pit_available_at": "2026-11-20",
       "pit_issues": [],
       "price": 1650.5
+    },
+    {
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "total": 74,
+      "decision": "WATCH",
+      "factors": {
+        "trend": 16,
+        "momentum": 12,
+        "risk": 16,
+        "liquidity": 18,
+        "event": 12
+      },
+      "why": "1年+48.8% · 20日+1.1% · vol=0.38 · turnover=46000730376 · High AI Anxiety Blunts Asian Stock Markets / CB or TKOMY: Which Is the Better Value Stock Right Now?",
+      "risk": "mdd_1y=-0.13825641976834768 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=stripped",
+      "surprise": null,
+      "news": [
+        {
+          "title": "High AI Anxiety Blunts Asian Stock Markets",
+          "publisher": "MT Newswires",
+          "link": "https://finance.yahoo.com/markets/world-indices/articles/high-ai-anxiety-blunts-asian-105448167.html",
+          "published_at": "2026-11-20T10:54:48Z"
+        },
+        {
+          "title": "CB or TKOMY: Which Is the Better Value Stock Right Now?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/cb-tkomy-better-value-stock-144002962.html",
+          "published_at": "2026-10-28T14:40:02Z"
+        },
+        {
+          "title": "Is Tokio Marine Holdings (TSE:8766) Priced Below Fair Value After A 5 Year Surge?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tokio-marine-holdings-tse-8766-071340037.html",
+          "published_at": "2026-10-25T07:13:40Z"
+        },
+        {
+          "title": "RNR or TKOMY: Which Is the Better Value Stock Right Now?",
+          "publisher": "Zacks",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/rnr-tkomy-better-value-stock-144004284.html",
+          "published_at": "2026-10-12T14:40:04Z"
+        }
+      ],
+      "news_sentiment": "neutral",
+      "content_data": "news",
+      "pit_ok": false,
+      "pit_status": "stripped",
+      "pit_available_at": "2026-11-20",
+      "pit_issues": [
+        "news_after_as_of:2026-11-22"
+      ],
+      "price": 577.5
     },
     {
       "ticker": "4911.T",
@@ -646,8 +646,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+87.2% · 20日+15.3% · vol=0.35 · turnover=4873256755 · TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues / Is TOMY Company (TSE:7867) Undervalued De",
-      "risk": "mdd_1y=-0.12870266859310686 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
+      "why": "1年+87.5% · 20日+15.3% · vol=0.35 · turnover=4873256755 · TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues / Is TOMY Company (TSE:7867) Undervalued De",
+      "risk": "mdd_1y=-0.12870279630663584 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=news · pit=ok",
       "surprise": null,
       "news": [
         {
@@ -812,8 +812,8 @@
         "liquidity": 10,
         "event": 12
       },
-      "why": "1年+77.1% · 20日+4.6% · vol=0.62 · turnover=4405998670",
-      "risk": "mdd_1y=-0.335434500733678 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
+      "why": "1年+77.6% · 20日+4.6% · vol=0.62 · turnover=4405998670",
+      "risk": "mdd_1y=-0.33543457550899003 · earnings_next=None · earnings_next_days=None · event_data=missing · content_data=missing · pit=ok",
       "surprise": null,
       "news": null,
       "news_sentiment": null,
