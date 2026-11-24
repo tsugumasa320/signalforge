@@ -28,14 +28,61 @@
   "cash": 3000000.0,
   "positions": {},
   "pending": [],
-  "last_session": null,
-  "decisions": [],
+  "last_session": "2026-11-24",
+  "decisions": [
+    {
+      "date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "coverage": 0.9964798266991606,
+      "candidates": [],
+      "orders": [],
+      "rules_hash": "9f38907b54b80da96ad98537deeef9ef4515610a455a931df5107ad44b485c26",
+      "cash": 3000000.0
+    }
+  ],
   "fills": [],
-  "equity": [],
+  "equity": [
+    {
+      "date": "2026-11-24",
+      "equity": 3000000.0,
+      "cash": 3000000.0,
+      "positions": 0,
+      "coverage": 0.9964798266991606,
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00"
+    }
+  ],
   "events": [],
   "issues": [],
-  "status": "waiting_for_first_session",
-  "last_attempt_at": "2026-11-24T07:42:32.951662+09:00",
-  "latest_data_session": "2026-11-20",
-  "coverage": 0.9997292174383969
+  "status": "observing",
+  "last_attempt_at": "2026-11-25T06:18:13.219067+09:00",
+  "latest_data_session": "2026-11-24",
+  "coverage": 0.9964798266991606,
+  "observations": [
+    {
+      "date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "bars": {
+        "1321.T": {
+          "open": 605.7999877929688,
+          "high": 617.2999877929688,
+          "low": 603.0,
+          "close": 610.2000122070312,
+          "volume": 39655070.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "1306.T": {
+          "open": 392.0,
+          "high": 398.20001220703125,
+          "low": 391.20001220703125,
+          "close": 395.8999938964844,
+          "volume": 27614150.0,
+          "split": 0.0,
+          "dividend": 0.0
+        }
+      },
+      "coverage": 0.9964798266991606,
+      "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317"
+    }
+  ]
 }

@@ -25,15 +25,678 @@
   "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317",
   "cash": 3000000.0,
   "positions": {},
-  "pending": [],
-  "last_session": null,
-  "decisions": [],
+  "pending": [
+    {
+      "ticker": "7012.T",
+      "side": "buy",
+      "shares": 300,
+      "budget": 600000.0,
+      "sector": "輸送用機器",
+      "box": null,
+      "signal_date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "kind": "duke",
+      "atr": 107.89285714285714
+    },
+    {
+      "ticker": "5713.T",
+      "side": "buy",
+      "shares": 100,
+      "budget": 600000.0,
+      "sector": "非鉄金属",
+      "box": null,
+      "signal_date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "kind": "duke",
+      "atr": 522.9285714285714
+    },
+    {
+      "ticker": "5838.T",
+      "side": "buy",
+      "shares": 100,
+      "budget": 600000.0,
+      "sector": "銀行業",
+      "box": null,
+      "signal_date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "kind": "duke",
+      "atr": 421.85714285714283
+    },
+    {
+      "ticker": "5711.T",
+      "side": "buy",
+      "shares": 100,
+      "budget": 600000.0,
+      "sector": "非鉄金属",
+      "box": null,
+      "signal_date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "kind": "duke",
+      "atr": 233.64285714285714
+    },
+    {
+      "ticker": "6674.T",
+      "side": "buy",
+      "shares": 100,
+      "budget": 600000.0,
+      "sector": "電気機器",
+      "box": null,
+      "signal_date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "kind": "duke",
+      "atr": 213.78571428571428
+    }
+  ],
+  "last_session": "2026-11-24",
+  "decisions": [
+    {
+      "date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "coverage": 0.9964798266991606,
+      "candidates": [
+        {
+          "ticker": "215A.T",
+          "sector": "サービス業",
+          "atr": 65.85714285714286,
+          "turnover": 1378635300.0,
+          "close": 1239.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "2780.T",
+          "sector": "小売業",
+          "atr": 168.92857142857142,
+          "turnover": 627356500.0,
+          "close": 3095.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "290A.T",
+          "sector": "情報・通信業",
+          "atr": 90.42857142857143,
+          "turnover": 912038400.0,
+          "close": 896.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "2980.T",
+          "sector": "不動産業",
+          "atr": 113.5,
+          "turnover": 846508500.0,
+          "close": 1565.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "3498.T",
+          "sector": "不動産業",
+          "atr": 329.2857142857143,
+          "turnover": 1491100000.0,
+          "close": 6200.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "3993.T",
+          "sector": "情報・通信業",
+          "atr": 214.92857142857142,
+          "turnover": 1536701000.0,
+          "close": 2609.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "4165.T",
+          "sector": "情報・通信業",
+          "atr": 62.714285714285715,
+          "turnover": 1525027800.0,
+          "close": 282.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "4275.T",
+          "sector": "化学",
+          "atr": 98.14285714285714,
+          "turnover": 908262300.0,
+          "close": 1441.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5246.T",
+          "sector": "情報・通信業",
+          "atr": 62.214285714285715,
+          "turnover": 580542300.0,
+          "close": 767.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5253.T",
+          "sector": "情報・通信業",
+          "atr": 72.78571428571429,
+          "turnover": 1196831400.0,
+          "close": 1202.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5541.T",
+          "sector": "鉄鋼",
+          "atr": 80.71428571428571,
+          "turnover": 704341900.0,
+          "close": 1997.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5702.T",
+          "sector": "非鉄金属",
+          "atr": 67.21428571428571,
+          "turnover": 515524800.0,
+          "close": 1374.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5703.T",
+          "sector": "非鉄金属",
+          "atr": 99.5,
+          "turnover": 981162000.0,
+          "close": 2340.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5711.T",
+          "sector": "非鉄金属",
+          "atr": 233.64285714285714,
+          "turnover": 5745376000.0,
+          "close": 3640.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5713.T",
+          "sector": "非鉄金属",
+          "atr": 522.9285714285714,
+          "turnover": 18675058200.0,
+          "close": 5567.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5741.T",
+          "sector": "非鉄金属",
+          "atr": 90.71428571428571,
+          "turnover": 1961449600.0,
+          "close": 1648.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "5838.T",
+          "sector": "銀行業",
+          "atr": 421.85714285714283,
+          "turnover": 14628888000.0,
+          "close": 3980.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "6250.T",
+          "sector": "機械",
+          "atr": 179.28571428571428,
+          "turnover": 674800000.0,
+          "close": 3500.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "6432.T",
+          "sector": "機械",
+          "atr": 257.85714285714283,
+          "turnover": 1572840000.0,
+          "close": 6800.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "6674.T",
+          "sector": "電気機器",
+          "atr": 213.78571428571428,
+          "turnover": 2477391500.0,
+          "close": 3967.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "7012.T",
+          "sector": "輸送用機器",
+          "atr": 107.89285714285714,
+          "turnover": 34848186550.0,
+          "close": 1565.5,
+          "kind": "bb"
+        },
+        {
+          "ticker": "7047.T",
+          "sector": "サービス業",
+          "atr": 113.0,
+          "turnover": 522444000.0,
+          "close": 1105.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "7456.T",
+          "sector": "卸売業",
+          "atr": 368.2142857142857,
+          "turnover": 717099000.0,
+          "close": 4530.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "7868.T",
+          "sector": "その他製品",
+          "atr": 20.571428571428573,
+          "turnover": 512240900.0,
+          "close": 443.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "8508.T",
+          "sector": "その他金融業",
+          "atr": 33.285714285714285,
+          "turnover": 767493900.0,
+          "close": 621.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "8600.T",
+          "sector": "銀行業",
+          "atr": 47.214285714285715,
+          "turnover": 613720800.0,
+          "close": 902.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "8698.T",
+          "sector": "証券、商品先物取引業",
+          "atr": 18.642857142857142,
+          "turnover": 1189658700.0,
+          "close": 543.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "9247.T",
+          "sector": "サービス業",
+          "atr": 83.21428571428571,
+          "turnover": 765808500.0,
+          "close": 1333.0,
+          "kind": "bb"
+        },
+        {
+          "ticker": "9722.T",
+          "sector": "サービス業",
+          "atr": 103.35714285714286,
+          "turnover": 577714000.0,
+          "close": 2644.0,
+          "kind": "bb"
+        }
+      ],
+      "orders": [
+        {
+          "ticker": "7012.T",
+          "side": "buy",
+          "shares": 300,
+          "budget": 600000.0,
+          "sector": "輸送用機器",
+          "box": null,
+          "signal_date": "2026-11-24",
+          "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+          "kind": "duke",
+          "atr": 107.89285714285714
+        },
+        {
+          "ticker": "5713.T",
+          "side": "buy",
+          "shares": 100,
+          "budget": 600000.0,
+          "sector": "非鉄金属",
+          "box": null,
+          "signal_date": "2026-11-24",
+          "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+          "kind": "duke",
+          "atr": 522.9285714285714
+        },
+        {
+          "ticker": "5838.T",
+          "side": "buy",
+          "shares": 100,
+          "budget": 600000.0,
+          "sector": "銀行業",
+          "box": null,
+          "signal_date": "2026-11-24",
+          "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+          "kind": "duke",
+          "atr": 421.85714285714283
+        },
+        {
+          "ticker": "5711.T",
+          "side": "buy",
+          "shares": 100,
+          "budget": 600000.0,
+          "sector": "非鉄金属",
+          "box": null,
+          "signal_date": "2026-11-24",
+          "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+          "kind": "duke",
+          "atr": 233.64285714285714
+        },
+        {
+          "ticker": "6674.T",
+          "side": "buy",
+          "shares": 100,
+          "budget": 600000.0,
+          "sector": "電気機器",
+          "box": null,
+          "signal_date": "2026-11-24",
+          "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+          "kind": "duke",
+          "atr": 213.78571428571428
+        }
+      ],
+      "rules_hash": "dd9da7fbefc714224ee66c3d6416235793c754572f685ee72c9065d563e2e176",
+      "cash": 3000000.0
+    }
+  ],
   "fills": [],
-  "equity": [],
+  "equity": [
+    {
+      "date": "2026-11-24",
+      "equity": 3000000.0,
+      "cash": 3000000.0,
+      "positions": 0,
+      "coverage": 0.9964798266991606,
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00"
+    }
+  ],
   "events": [],
   "issues": [],
-  "status": "waiting_for_first_session",
-  "last_attempt_at": "2026-11-24T07:42:32.951662+09:00",
-  "latest_data_session": "2026-11-20",
-  "coverage": 0.9997292174383969
+  "status": "observing",
+  "last_attempt_at": "2026-11-25T06:18:13.219067+09:00",
+  "latest_data_session": "2026-11-24",
+  "coverage": 0.9964798266991606,
+  "observations": [
+    {
+      "date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "bars": {
+        "5253.T": {
+          "open": 1261.0,
+          "high": 1268.0,
+          "low": 1202.0,
+          "close": 1202.0,
+          "volume": 995700.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "6250.T": {
+          "open": 3455.0,
+          "high": 3545.0,
+          "low": 3440.0,
+          "close": 3500.0,
+          "volume": 192800.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "3993.T": {
+          "open": 2725.0,
+          "high": 2731.0,
+          "low": 2588.0,
+          "close": 2609.0,
+          "volume": 589000.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "7456.T": {
+          "open": 4545.0,
+          "high": 4615.0,
+          "low": 4480.0,
+          "close": 4530.0,
+          "volume": 158300.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "7047.T": {
+          "open": 1150.0,
+          "high": 1166.0,
+          "low": 1093.0,
+          "close": 1105.0,
+          "volume": 472800.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "7012.T": {
+          "open": 1560.5,
+          "high": 1611.5,
+          "low": 1522.0,
+          "close": 1565.5,
+          "volume": 22260100.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "6674.T": {
+          "open": 4072.0,
+          "high": 4124.0,
+          "low": 3962.0,
+          "close": 3967.0,
+          "volume": 624500.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "5838.T": {
+          "open": 4050.0,
+          "high": 4147.0,
+          "low": 3912.0,
+          "close": 3980.0,
+          "volume": 3675600.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "8508.T": {
+          "open": 635.0,
+          "high": 635.0,
+          "low": 618.0,
+          "close": 621.0,
+          "volume": 1235900.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "4275.T": {
+          "open": 1457.0,
+          "high": 1490.0,
+          "low": 1414.0,
+          "close": 1441.0,
+          "volume": 630300.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "2780.T": {
+          "open": 3125.0,
+          "high": 3200.0,
+          "low": 3065.0,
+          "close": 3095.0,
+          "volume": 202700.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "215A.T": {
+          "open": 1263.0,
+          "high": 1271.0,
+          "low": 1239.0,
+          "close": 1239.0,
+          "volume": 1112700.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "3498.T": {
+          "open": 6340.0,
+          "high": 6340.0,
+          "low": 6150.0,
+          "close": 6200.0,
+          "volume": 240500.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "8600.T": {
+          "open": 894.0,
+          "high": 910.0,
+          "low": 891.0,
+          "close": 902.0,
+          "volume": 680400.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "9722.T": {
+          "open": 2672.0,
+          "high": 2681.0,
+          "low": 2617.0,
+          "close": 2644.0,
+          "volume": 218500.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "7868.T": {
+          "open": 451.0,
+          "high": 452.0,
+          "low": 441.0,
+          "close": 443.0,
+          "volume": 1156300.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "4165.T": {
+          "open": 333.0,
+          "high": 333.0,
+          "low": 276.0,
+          "close": 282.0,
+          "volume": 5407900.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "5702.T": {
+          "open": 1392.0,
+          "high": 1403.0,
+          "low": 1371.0,
+          "close": 1374.0,
+          "volume": 375200.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "8698.T": {
+          "open": 554.0,
+          "high": 556.0,
+          "low": 543.0,
+          "close": 543.0,
+          "volume": 2190900.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "5713.T": {
+          "open": 5668.0,
+          "high": 5749.0,
+          "low": 5516.0,
+          "close": 5567.0,
+          "volume": 3354600.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "5703.T": {
+          "open": 2350.0,
+          "high": 2390.0,
+          "low": 2330.0,
+          "close": 2340.0,
+          "volume": 419300.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "6432.T": {
+          "open": 6930.0,
+          "high": 6940.0,
+          "low": 6730.0,
+          "close": 6800.0,
+          "volume": 231300.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "1306.T": {
+          "open": 392.0,
+          "high": 398.20001220703125,
+          "low": 391.20001220703125,
+          "close": 395.8999938964844,
+          "volume": 27614150.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "290A.T": {
+          "open": 913.0,
+          "high": 932.0,
+          "low": 888.0,
+          "close": 896.0,
+          "volume": 1017900.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "5541.T": {
+          "open": 2037.0,
+          "high": 2067.0,
+          "low": 1988.0,
+          "close": 1997.0,
+          "volume": 352700.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "9247.T": {
+          "open": 1333.0,
+          "high": 1357.0,
+          "low": 1317.0,
+          "close": 1333.0,
+          "volume": 574500.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "2980.T": {
+          "open": 1670.0,
+          "high": 1672.0,
+          "low": 1543.0,
+          "close": 1565.0,
+          "volume": 540900.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "5741.T": {
+          "open": 1660.0,
+          "high": 1681.0,
+          "low": 1636.0,
+          "close": 1648.0,
+          "volume": 1190200.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "1321.T": {
+          "open": 605.7999877929688,
+          "high": 617.2999877929688,
+          "low": 603.0,
+          "close": 610.2000122070312,
+          "volume": 39655070.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "5246.T": {
+          "open": 780.0,
+          "high": 794.0,
+          "low": 747.0,
+          "close": 767.0,
+          "volume": 756900.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "5711.T": {
+          "open": 3722.0,
+          "high": 3735.0,
+          "low": 3615.0,
+          "close": 3640.0,
+          "volume": 1578400.0,
+          "split": 0.0,
+          "dividend": 0.0
+        }
+      },
+      "coverage": 0.9964798266991606,
+      "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317"
+    }
+  ]
 }

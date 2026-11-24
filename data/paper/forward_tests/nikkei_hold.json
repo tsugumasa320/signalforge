@@ -25,15 +25,84 @@
   "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317",
   "cash": 3000000.0,
   "positions": {},
-  "pending": [],
-  "last_session": null,
-  "decisions": [],
+  "pending": [
+    {
+      "ticker": "1321.T",
+      "side": "buy",
+      "shares": 4900,
+      "budget": 3000000.0,
+      "sector": "ETF",
+      "box": null,
+      "signal_date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00"
+    }
+  ],
+  "last_session": "2026-11-24",
+  "decisions": [
+    {
+      "date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "coverage": 1.0,
+      "candidates": [],
+      "orders": [
+        {
+          "ticker": "1321.T",
+          "side": "buy",
+          "shares": 4900,
+          "budget": 3000000.0,
+          "sector": "ETF",
+          "box": null,
+          "signal_date": "2026-11-24",
+          "recorded_at": "2026-11-25T06:18:13.219067+09:00"
+        }
+      ],
+      "rules_hash": "5c4687067c54e0333182d37a33fa1230d4680cbec9e55359f158888173225dfb",
+      "cash": 3000000.0
+    }
+  ],
   "fills": [],
-  "equity": [],
+  "equity": [
+    {
+      "date": "2026-11-24",
+      "equity": 3000000.0,
+      "cash": 3000000.0,
+      "positions": 0,
+      "coverage": 1.0,
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00"
+    }
+  ],
   "events": [],
   "issues": [],
-  "status": "waiting_for_first_session",
-  "last_attempt_at": "2026-11-24T07:42:32.951662+09:00",
-  "latest_data_session": "2026-11-20",
-  "coverage": 1.0
+  "status": "observing",
+  "last_attempt_at": "2026-11-25T06:18:13.219067+09:00",
+  "latest_data_session": "2026-11-24",
+  "coverage": 1.0,
+  "observations": [
+    {
+      "date": "2026-11-24",
+      "recorded_at": "2026-11-25T06:18:13.219067+09:00",
+      "bars": {
+        "1321.T": {
+          "open": 605.7999877929688,
+          "high": 617.2999877929688,
+          "low": 603.0,
+          "close": 610.2000122070312,
+          "volume": 39655070.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "1306.T": {
+          "open": 392.0,
+          "high": 398.20001220703125,
+          "low": 391.20001220703125,
+          "close": 395.8999938964844,
+          "volume": 27614150.0,
+          "split": 0.0,
+          "dividend": 0.0
+        }
+      },
+      "coverage": 1.0,
+      "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317"
+    }
+  ]
 }
