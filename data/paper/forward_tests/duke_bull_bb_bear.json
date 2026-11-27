@@ -35,7 +35,7 @@
       "box": null,
       "signal_date": "2026-11-24",
       "recorded_at": "2026-11-25T06:18:13.219067+09:00",
-      "kind": "duke",
+      "kind": "bb",
       "atr": 107.89285714285714
     },
     {
@@ -47,7 +47,7 @@
       "box": null,
       "signal_date": "2026-11-24",
       "recorded_at": "2026-11-25T06:18:13.219067+09:00",
-      "kind": "duke",
+      "kind": "bb",
       "atr": 522.9285714285714
     },
     {
@@ -59,7 +59,7 @@
       "box": null,
       "signal_date": "2026-11-24",
       "recorded_at": "2026-11-25T06:18:13.219067+09:00",
-      "kind": "duke",
+      "kind": "bb",
       "atr": 421.85714285714283
     },
     {
@@ -71,7 +71,7 @@
       "box": null,
       "signal_date": "2026-11-24",
       "recorded_at": "2026-11-25T06:18:13.219067+09:00",
-      "kind": "duke",
+      "kind": "bb",
       "atr": 233.64285714285714
     },
     {
@@ -83,7 +83,7 @@
       "box": null,
       "signal_date": "2026-11-24",
       "recorded_at": "2026-11-25T06:18:13.219067+09:00",
-      "kind": "duke",
+      "kind": "bb",
       "atr": 213.78571428571428
     }
   ],
@@ -406,8 +406,8 @@
   ],
   "events": [],
   "issues": [],
-  "status": "observing",
-  "last_attempt_at": "2026-11-25T06:18:13.219067+09:00",
+  "status": "data_unavailable",
+  "last_attempt_at": "2026-11-27T10:56:10.573321+09:00",
   "latest_data_session": "2026-11-24",
   "coverage": 0.9964798266991606,
   "observations": [

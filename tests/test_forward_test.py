@@ -116,3 +116,59 @@ def test_cached_future_sessions_are_rejected():
     f=pd.DataFrame([bar(500)],index=pd.to_datetime(['2026-11-25']))
     with pytest.raises(ValueError,match='future sessions'):
         runner.completed_frames({'7203.T':f},now('2026-11-24'))
+
+
+def test_bb_candidate_without_box():
+    """Regression: BB candidates lack 'box' but have 'atr'; must not cause TypeError."""
+    bb_candidate = dict(ticker='7203.T', sector='A', atr=50.0, turnover=1e9, close=1000, kind='bb')
+    a = advance_book(registered('duke_bull_bb_bear'), '2026-11-24', {'7203.T': bar(), '1321.T': bar()},
+                     [bb_candidate], now('2026-11-24'))
+    assert len(a['pending']) == 1
+    order = a['pending'][0]
+    assert order['ticker'] == '7203.T'
+    assert order.get('box') is None
+    assert order.get('atr') == 50.0
+    assert order.get('kind') == 'bb'
+    
+    b = advance_book(a, '2026-11-25', {'7203.T': bar(), '1321.T': bar()}, [], now('2026-11-25'))
+    assert len(b['fills']) == 1
+    assert b['fills'][0]['side'] == 'buy'
+    assert b['fills'][0]['strategy_kind'] == 'bb'
+    assert '7203.T' in b['positions']
+    pos = b['positions']['7203.T']
+    assert pos['kind'] == 'bb'
+    assert pos['stop'] == pytest.approx(1000 * (1 + 0.0003) - 2 * 50.0, abs=0.01)
+
+
+def test_duke_candidate_with_box():
+    """DUKE candidates have 'box' and no 'atr'."""
+    duke_candidate = dict(ticker='7203.T', sector='A', box=900.0, turnover=1e9, close=1000, kind='duke')
+    a = advance_book(registered('duke_bull_bb_bear'), '2026-11-24', {'7203.T': bar(), '1321.T': bar()},
+                     [duke_candidate], now('2026-11-24'))
+    assert len(a['pending']) == 1
+    order = a['pending'][0]
+    assert order['ticker'] == '7203.T'
+    assert order.get('box') == 900.0
+    assert order.get('atr') is None
+    assert order.get('kind') == 'duke'
+    
+    b = advance_book(a, '2026-11-25', {'7203.T': bar(), '1321.T': bar()}, [], now('2026-11-25'))
+    assert len(b['fills']) == 1
+    assert b['fills'][0]['strategy_kind'] == 'duke'
+    assert '7203.T' in b['positions']
+    pos = b['positions']['7203.T']
+    assert pos['kind'] == 'duke'
+    assert pos['stop'] == max(1000 * (1 + 0.0003) * 0.9, 900.0)
+
+
+def test_etf_without_box_or_atr():
+    """ETF positions have no stop, so box=None is acceptable."""
+    a = advance_book(registered('nikkei_hold'), '2026-11-24', {'1321.T': bar()}, [], now('2026-11-24'))
+    assert len(a['pending']) == 1
+    order = a['pending'][0]
+    assert order.get('box') is None
+    assert order.get('atr') is None
+    
+    b = advance_book(a, '2026-11-25', {'1321.T': bar()}, [], now('2026-11-25'))
+    assert '1321.T' in b['positions']
+    assert b['positions']['1321.T']['stop'] == 0.0

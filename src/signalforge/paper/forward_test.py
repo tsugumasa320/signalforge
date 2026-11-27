@@ -147,7 +147,18 @@ def advance_book(original,day,bars,candidates,now,*,coverage=1.,plan=True,regime
             p['stop']=max(p['stop'],p['entry']*.9,p['entry'] if p['armed'] else 0)
         else:
             position_duke=kind=='duke'
-            stop=(max(price*.9,order['box']) if position_duke else price-2*order['atr']) if spec['ticker'] is None else 0.
+            if spec['ticker'] is None:
+                if position_duke:
+                    if order.get('box') is None:
+                        stop=price*.9
+                    else:
+                        stop=max(price*.9,order['box'])
+                else:
+                    if order.get('atr') is None:
+                        raise ValueError(f"BB position {ticker} missing ATR for stop calculation")
+                    stop=price-2*order['atr']
+            else:
+                stop=0.
             positions[ticker]={'kind':kind,'shares':shares,'entry':price,'spent':spent,'sector':order['sector'],'budget':order['budget'],
                 'stop':stop,'armed':False,'tranches':1,'age':0,'mark':price}
         b['fills'].append({'date':day,'ticker':ticker,'side':'buy','shares':shares,'price':price,'fee':shares*price*FEE,'signal_date':order['signal_date'],'decision_recorded_at':order['recorded_at'],'strategy_kind':kind,'recorded_at':now.isoformat()})
@@ -206,7 +217,7 @@ def advance_book(original,day,bars,candidates,now,*,coverage=1.,plan=True,regime
                 ticker=c['ticker'];sector=c['sector'];kind=c.get('kind','duke' if duke else 'bb')
                 if ticker in planned or len(planned)>=5 or sum(sectors.get(t)==sector for t in planned)>=2:continue
                 tranches=5 if kind=='duke' else 1
-                buy(ticker,equity*.2/tranches,sector,c.get('box'),c.get('atr'),kind='duke' if mixed else None);sectors[ticker]=sector
+                buy(ticker,equity*.2/tranches,sector,c.get('box'),c.get('atr'),kind=kind if mixed else None);sectors[ticker]=sector
     b['pending']+=orders
     b['decisions'].append({'date':day,'recorded_at':stamp,'coverage':coverage,'candidates':deepcopy(candidates) if not spec['ticker'] else [],'orders':deepcopy(orders),'rules_hash':b['rules_hash'],'cash':b['cash']})
     return b
