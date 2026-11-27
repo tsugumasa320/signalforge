@@ -28,12 +28,21 @@
   "cash": 3000000.0,
   "positions": {},
   "pending": [],
-  "last_session": "2026-11-24",
+  "last_session": "2026-11-27",
   "decisions": [
     {
       "date": "2026-11-24",
       "recorded_at": "2026-11-25T06:18:13.219067+09:00",
       "coverage": 0.9964798266991606,
+      "candidates": [],
+      "orders": [],
+      "rules_hash": "f294a3aa72c48271ded03657232b0438490d3fcbcca14d2edfecd794a083b63e",
+      "cash": 3000000.0
+    },
+    {
+      "date": "2026-11-27",
+      "recorded_at": "2026-11-28T05:00:09.323137+09:00",
+      "coverage": 0.9888979149742757,
       "candidates": [],
       "orders": [],
       "rules_hash": "f294a3aa72c48271ded03657232b0438490d3fcbcca14d2edfecd794a083b63e",
@@ -49,14 +58,38 @@
       "positions": 0,
       "coverage": 0.9964798266991606,
       "recorded_at": "2026-11-25T06:18:13.219067+09:00"
+    },
+    {
+      "date": "2026-11-25",
+      "equity": 3000000.0,
+      "cash": 3000000.0,
+      "positions": 0,
+      "coverage": 0.9888979149742757,
+      "recorded_at": "2026-11-28T05:00:09.323137+09:00"
+    },
+    {
+      "date": "2026-11-26",
+      "equity": 3000000.0,
+      "cash": 3000000.0,
+      "positions": 0,
+      "coverage": 0.9888979149742757,
+      "recorded_at": "2026-11-28T05:00:09.323137+09:00"
+    },
+    {
+      "date": "2026-11-27",
+      "equity": 3000000.0,
+      "cash": 3000000.0,
+      "positions": 0,
+      "coverage": 0.9888979149742757,
+      "recorded_at": "2026-11-28T05:00:09.323137+09:00"
     }
   ],
   "events": [],
   "issues": [],
-  "status": "data_unavailable",
-  "last_attempt_at": "2026-11-27T10:56:10.573321+09:00",
-  "latest_data_session": "2026-11-24",
-  "coverage": 0.9964798266991606,
+  "status": "observing",
+  "last_attempt_at": "2026-11-28T05:00:09.323137+09:00",
+  "latest_data_session": "2026-11-27",
+  "coverage": 0.9888979149742757,
   "observations": [
     {
       "date": "2026-11-24",
@@ -82,6 +115,84 @@
         }
       },
       "coverage": 0.9964798266991606,
+      "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317"
+    },
+    {
+      "date": "2026-11-25",
+      "recorded_at": "2026-11-28T05:00:09.323137+09:00",
+      "bars": {
+        "1321.T": {
+          "open": 595.0,
+          "high": 597.7999877929688,
+          "low": 588.7000122070312,
+          "close": 595.0,
+          "volume": 34037310.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "1306.T": {
+          "open": 392.5,
+          "high": 395.79998779296875,
+          "low": 390.8999938964844,
+          "close": 394.70001220703125,
+          "volume": 15855710.0,
+          "split": 0.0,
+          "dividend": 0.0
+        }
+      },
+      "coverage": 0.9888979149742757,
+      "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317"
+    },
+    {
+      "date": "2026-11-26",
+      "recorded_at": "2026-11-28T05:00:09.323137+09:00",
+      "bars": {
+        "1321.T": {
+          "open": 600.0,
+          "high": 606.9000244140625,
+          "low": 596.5,
+          "close": 598.9000244140625,
+          "volume": 25589720.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "1306.T": {
+          "open": 396.8999938964844,
+          "high": 398.70001220703125,
+          "low": 393.6000061035156,
+          "close": 394.6000061035156,
+          "volume": 17100680.0,
+          "split": 0.0,
+          "dividend": 0.0
+        }
+      },
+      "coverage": 0.9888979149742757,
+      "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317"
+    },
+    {
+      "date": "2026-11-27",
+      "recorded_at": "2026-11-28T05:00:09.323137+09:00",
+      "bars": {
+        "1321.T": {
+          "open": 602.0,
+          "high": 612.0,
+          "low": 598.2000122070312,
+          "close": 611.2999877929688,
+          "volume": 14634300.0,
+          "split": 0.0,
+          "dividend": 0.0
+        },
+        "1306.T": {
+          "open": 397.0,
+          "high": 402.3999938964844,
+          "low": 397.0,
+          "close": 401.3999938964844,
+          "volume": 14016470.0,
+          "split": 0.0,
+          "dividend": 0.0
+        }
+      },
+      "coverage": 0.9888979149742757,
       "universe_hash": "fa05022688dbe69cd0fb8ce492c8e76fa8eb015103333dde47b29a66e5a29317"
     }
   ]

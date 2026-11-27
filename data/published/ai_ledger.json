@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-ledger/v1",
-  "updated_at": "2026-11-24T21:34:38+00:00",
+  "updated_at": "2026-11-27T20:18:58+00:00",
   "events": [
     {
       "ts": "2026-11-15T13:35:35+00:00",
@@ -827,6 +827,89 @@
       "prev_hash": "66f84c9fb313bedd0a18861e819b69e97c57f8d917ef68e329fc5b8a859fe329",
       "hash": "5ecbec3319c89249cf882c5b24a169a221cc339d4d8d29d5bc1fa690873a56dc",
       "seq": 42
+    },
+    {
+      "ts": "2026-11-27T20:18:58+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-26",
+      "payload": {
+        "ticker": "3563.T",
+        "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "5ecbec3319c89249cf882c5b24a169a221cc339d4d8d29d5bc1fa690873a56dc",
+      "hash": "0666c1140f0c20af7d99e550d99f69bcce7a5a2c7d0301a207b3e267a9fe9831",
+      "seq": 43
+    },
+    {
+      "ts": "2026-11-27T20:18:58+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-26",
+      "payload": {
+        "ticker": "7453.T",
+        "name": "良品計画",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "0666c1140f0c20af7d99e550d99f69bcce7a5a2c7d0301a207b3e267a9fe9831",
+      "hash": "0f683f6682444c599738dbffa103244bd428fd5554cf8df0ede422c3079fb09f",
+      "seq": 44
+    },
+    {
+      "ts": "2026-11-27T20:18:58+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-26",
+      "payload": {
+        "ticker": "8766.T",
+        "name": "東京海上ホールディングス",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "0f683f6682444c599738dbffa103244bd428fd5554cf8df0ede422c3079fb09f",
+      "hash": "99f30a5eca39bed39701db670ba6a93b615b7059dcdf10e29c4c0dcd3399edb6",
+      "seq": 45
+    },
+    {
+      "ts": "2026-11-27T20:18:58+00:00",
+      "kind": "adopt_proposed",
+      "as_of": "2026-11-26",
+      "payload": {
+        "ticker": "4578.T",
+        "name": "大塚ホールディングス",
+        "total": 84,
+        "source": "rules/v1"
+      },
+      "prev_hash": "99f30a5eca39bed39701db670ba6a93b615b7059dcdf10e29c4c0dcd3399edb6",
+      "hash": "5d258083144e24f3659e257341fb37cd4ca54eaf4a8f69bea1b58e66fff1da47",
+      "seq": 46
+    },
+    {
+      "ts": "2026-11-27T20:18:58+00:00",
+      "kind": "daily_run",
+      "as_of": "2026-11-26",
+      "payload": {
+        "source": "rules/v1",
+        "adopted": [
+          "3563.T",
+          "7453.T",
+          "8766.T",
+          "4578.T"
+        ],
+        "score_n": 20,
+        "debate_n": 3,
+        "roles": [
+          "analyst_score",
+          "brief_summarizer",
+          "bull_researcher",
+          "bear_researcher",
+          "risk_officer",
+          "human_approver"
+        ]
+      },
+      "prev_hash": "5d258083144e24f3659e257341fb37cd4ca54eaf4a8f69bea1b58e66fff1da47",
+      "hash": "6c753b5025596e743d8a19ebb4522511c7b4f4a69fae67f87acb96f952e11a28",
+      "seq": 47
     }
   ]
 }

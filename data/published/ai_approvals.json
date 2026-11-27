@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-approvals/v1",
-  "updated_at": "2026-11-24T21:34:38+00:00",
+  "updated_at": "2026-11-27T20:18:58+00:00",
   "items": [
     {
       "id": "2026-11-13:8309.T",
@@ -259,6 +259,58 @@
       "source": "rules/v1",
       "status": "pending",
       "proposed_at": "2026-11-20T12:15:08+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-26:3563.T",
+      "as_of": "2026-11-26",
+      "ticker": "3563.T",
+      "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+      "total": 84,
+      "price": 6040.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-27T20:18:58+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-26:7453.T",
+      "as_of": "2026-11-26",
+      "ticker": "7453.T",
+      "name": "良品計画",
+      "total": 84,
+      "price": 5099.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-27T20:18:58+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-26:8766.T",
+      "as_of": "2026-11-26",
+      "ticker": "8766.T",
+      "name": "東京海上ホールディングス",
+      "total": 84,
+      "price": 591.0999755859375,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-27T20:18:58+00:00",
+      "resolved_at": null,
+      "note": ""
+    },
+    {
+      "id": "2026-11-26:4578.T",
+      "as_of": "2026-11-26",
+      "ticker": "4578.T",
+      "name": "大塚ホールディングス",
+      "total": 84,
+      "price": 12800.0,
+      "source": "rules/v1",
+      "status": "pending",
+      "proposed_at": "2026-11-27T20:18:58+00:00",
       "resolved_at": null,
       "note": ""
     }

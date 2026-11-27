@@ -1,6 +1,6 @@
 {
   "schema": "signalforge-ai-adoption-log/v1",
-  "updated_at": "2026-11-24T21:34:38+00:00",
+  "updated_at": "2026-11-27T20:18:58+00:00",
   "entries": [
     {
       "as_of": "2026-11-13",
@@ -589,6 +589,134 @@
           "ticker": "4475.T",
           "name": "ＨＥＮＮＧＥ",
           "total": 66,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7581.T",
+          "name": "サイゼリヤ",
+          "total": 64,
+          "decision": "WATCH"
+        }
+      ],
+      "skipped_count": 1
+    },
+    {
+      "as_of": "2026-11-26",
+      "logged_at": "2026-11-27T20:18:58+00:00",
+      "source": "rules/v1",
+      "adopted": [
+        {
+          "ticker": "3563.T",
+          "name": "ＦＯＯＤ　＆　ＬＩＦＥ　ＣＯＭＰＡＮＩＥＳ",
+          "total": 84,
+          "price": 6040.0,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "7453.T",
+          "name": "良品計画",
+          "total": 84,
+          "price": 5099.0,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "8766.T",
+          "name": "東京海上ホールディングス",
+          "total": 84,
+          "price": 591.0999755859375,
+          "decision": "ADOPT"
+        },
+        {
+          "ticker": "4578.T",
+          "name": "大塚ホールディングス",
+          "total": 84,
+          "price": 12800.0,
+          "decision": "ADOPT"
+        }
+      ],
+      "watched": [
+        {
+          "ticker": "2269.T",
+          "name": "明治ホールディングス",
+          "total": 80,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "8725.T",
+          "name": "ＭＳ＆ＡＤインシュアランスグループホールディングス",
+          "total": 78,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "2579.T",
+          "name": "コカ・コーラ　ボトラーズジャパンホールディングス",
+          "total": 77,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7832.T",
+          "name": "バンダイナムコホールディングス",
+          "total": 75,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4502.T",
+          "name": "武田薬品工業",
+          "total": 75,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "2702.T",
+          "name": "日本マクドナルドホールディングス",
+          "total": 75,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "9983.T",
+          "name": "ファーストリテイリング",
+          "total": 75,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7867.T",
+          "name": "タカラトミー",
+          "total": 74,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4911.T",
+          "name": "資生堂",
+          "total": 72,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7747.T",
+          "name": "朝日インテック",
+          "total": 71,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "4612.T",
+          "name": "日本ペイントホールディングス",
+          "total": 71,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "7550.T",
+          "name": "ゼンショーホールディングス",
+          "total": 68,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "9706.T",
+          "name": "日本空港ビルデング",
+          "total": 68,
+          "decision": "WATCH"
+        },
+        {
+          "ticker": "6532.T",
+          "name": "ベイカレント",
+          "total": 65,
           "decision": "WATCH"
         },
         {

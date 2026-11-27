@@ -1,20 +1,20 @@
 {
-  "as_of": "2026-11-20",
+  "as_of": "2026-11-26",
   "generator": "rules/v1",
   "market_regime": {
     "overall": "risk_off",
     "jp": "risk_off",
     "us": "risk_off",
-    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-10.7%/弱気（リスクオフ） · ダウ先物:20日-4.8%/弱気（リスクオフ） · S&P500先物:20日-7.1%/弱気（リスクオフ） · NASDAQ100先物:20日-12.0%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-6.6%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-4.9%/弱気（リスクオフ） · NYダウ:20日-4.5%/弱気（リスクオフ）"
+    "takeaway": "弱気（リスクオフ） · 日経225先物:20日-9.0%/弱気（リスクオフ） · ダウ先物:20日-3.2%/弱気（リスクオフ） · S&P500先物:20日-5.8%/弱気（リスクオフ） · NASDAQ100先物:20日-9.5%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-9.2%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-6.2%/弱気（リスクオフ） · NYダウ:20日-3.0%/弱気（リスクオフ）"
   },
-  "market_take": "トレンド通過 38 / 目標 5。紙上当月超過は -0.9%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-10.7%/弱気（リスクオフ） · ダウ先物:20日-4.8%/弱気（リスクオフ） · S&P500先物:20日-7.1%/弱気（リスクオフ） · NASDAQ100先物:20日-12.0%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-6.6%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-4.9%/弱気（リスクオフ） · NYダウ:20日-4.5%/弱気（リスクオフ） ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
+  "market_take": "トレンド通過 43 / 目標 5。紙上当月超過は -0.9%。 地合い: 弱気（リスクオフ） · 日経225先物:20日-9.0%/弱気（リスクオフ） · ダウ先物:20日-3.2%/弱気（リスクオフ） · S&P500先物:20日-5.8%/弱気（リスクオフ） · NASDAQ100先物:20日-9.5%/弱気（リスクオフ） · 日経平均（1321 ETF）:20日-9.2%/弱気（リスクオフ） · TOPIX（1306 ETF）:20日-6.2%/弱気（リスクオフ） · NYダウ:20日-3.0%/弱気（リスクオフ） ルールベース自動 Brief（LLMなし）。新規攻めより保有点検を優先。",
   "watch": [
     {
       "ticker": "4588.T",
       "name": "オンコリスバイオファーマ",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 1 位 · 1年+549.8% · 20日+23.9% · ニュース: Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
+      "why": "目標 1 位 · 1年+667.0% · 20日+11.7% · ニュース: Oncolys BioPharma (TSE:4588) Stock Still Looks Overvalued As Book Value Lags",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
@@ -34,41 +34,11 @@
       "content_data": "news"
     },
     {
-      "ticker": "7867.T",
-      "name": "タカラトミー",
-      "stance": "WATCH",
-      "confidence": 62,
-      "why": "目標 2 位 · 1年+87.5% · 20日+15.3% · ニュース: TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
-      "risk": "イベント日付はパケット次第。",
-      "surprise": null,
-      "news": [
-        {
-          "title": "TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-tse-7867-stock-still-121613696.html",
-          "published_at": "2026-11-12T12:16:13Z"
-        },
-        {
-          "title": "Is TOMY Company (TSE:7867) Undervalued Despite Its 382% Five Year Run?",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-company-tse-7867-undervalued-200832236.html",
-          "published_at": "2026-10-26T20:08:32Z"
-        },
-        {
-          "title": "Why TOMY Company (TSE:7867) Is Getting Fresh Attention",
-          "publisher": "Simply Wall St.",
-          "link": "https://finance.yahoo.com/markets/stocks/articles/why-tomy-company-tse-7867-111250689.html",
-          "published_at": "2026-09-21T11:12:50Z"
-        }
-      ],
-      "content_data": "news"
-    },
-    {
       "ticker": "6532.T",
       "name": "ベイカレント",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 3 位 · 1年+87.4% · 20日+11.7% · ニュース: Tech Rebound Amid General Caution Roils Asian Stock Markets",
+      "why": "目標 2 位 · 1年+108.4% · 20日+18.6% · ニュース: Tech Rebound Amid General Caution Roils Asian Stock Markets",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
       "news": [
@@ -106,15 +76,76 @@
       "content_data": "news"
     },
     {
-      "ticker": "4475.T",
-      "name": "ＨＥＮＮＧＥ",
+      "ticker": "4911.T",
+      "name": "資生堂",
       "stance": "WATCH",
       "confidence": 62,
-      "why": "目標 4 位 · 1年+77.6% · 20日+4.6%",
+      "why": "目標 3 位 · 1年+101.8% · 20日+17.5% · ニュース: Shiseido Selling Chinese Subsidiary Producing Aupres Brand",
       "risk": "イベント日付はパケット次第。",
       "surprise": null,
-      "news": null,
-      "content_data": "missing"
+      "news": [
+        {
+          "title": "Shiseido Selling Chinese Subsidiary Producing Aupres Brand",
+          "publisher": "WWD",
+          "link": "https://wwd.com/beauty-industry-news/skin-care/shiseido-selling-chinese-subsidiary-producing-aupres-1239420296/",
+          "published_at": "2026-11-17T15:15:33Z"
+        },
+        {
+          "title": "Shiseido (TSE:4911) Stock Could Be 49% Overvalued Despite Raised 2026 Guidance",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/shiseido-tse-4911-stock-could-171424105.html",
+          "published_at": "2026-11-13T17:14:24Z"
+        },
+        {
+          "title": "Shiseido (TSE:4911) Stock May Look Pricey On Cash Flow Prospects",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/shiseido-tse-4911-stock-may-121527887.html",
+          "published_at": "2026-10-24T12:15:27Z"
+        },
+        {
+          "title": "Shiseido Company (TSE:4911) Could Be 27% Overvalued On Biosignal Serum Buzz",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/shiseido-company-tse-4911-could-072055798.html",
+          "published_at": "2026-10-13T07:20:55Z"
+        },
+        {
+          "title": "Blackstone bet on ZO Skin Health, a brand you won’t find at Sephora. Now it could be worth $2 billion",
+          "publisher": "Fortune",
+          "link": "https://finance.yahoo.com/healthcare/articles/blackstone-bet-zo-skin-health-084100648.html",
+          "published_at": "2026-09-19T08:41:00Z"
+        }
+      ],
+      "content_data": "news"
+    },
+    {
+      "ticker": "7867.T",
+      "name": "タカラトミー",
+      "stance": "WATCH",
+      "confidence": 62,
+      "why": "目標 4 位 · 1年+90.9% · 20日+16.2% · ニュース: TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
+      "risk": "イベント日付はパケット次第。",
+      "surprise": null,
+      "news": [
+        {
+          "title": "TOMY (TSE:7867) Stock Still Looks Like A Bargain As Its 5 Year Run Continues",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-tse-7867-stock-still-121613696.html",
+          "published_at": "2026-11-12T12:16:13Z"
+        },
+        {
+          "title": "Is TOMY Company (TSE:7867) Undervalued Despite Its 382% Five Year Run?",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/tomy-company-tse-7867-undervalued-200832236.html",
+          "published_at": "2026-10-26T20:08:32Z"
+        },
+        {
+          "title": "Why TOMY Company (TSE:7867) Is Getting Fresh Attention",
+          "publisher": "Simply Wall St.",
+          "link": "https://finance.yahoo.com/markets/stocks/articles/why-tomy-company-tse-7867-111250689.html",
+          "published_at": "2026-09-21T11:12:50Z"
+        }
+      ],
+      "content_data": "news"
     },
     {
       "ticker": "3563.T",
