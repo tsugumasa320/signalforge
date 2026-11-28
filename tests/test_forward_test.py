@@ -172,3 +172,53 @@ def test_etf_without_box_or_atr():
     b = advance_book(a, '2026-11-25', {'1321.T': bar()}, [], now('2026-11-25'))
     assert '1321.T' in b['positions']
     assert b['positions']['1321.T']['stop'] == 0.0
+
+
+def test_ticker_names_loaded():
+    """Company names are loaded from universe.json and ETFs."""
+    from signalforge.report.forward_test_page import _load_ticker_names
+    
+    names = _load_ticker_names()
+    # Check ETF names are present
+    assert '1321.T' in names
+    assert '1306.T' in names
+    assert '日経225' in names['1321.T']
+    assert 'TOPIX' in names['1306.T']
+    # If universe.json exists, check some stock names are loaded
+    if Path('config/forward/universe.json').exists():
+        assert len(names) > 2  # More than just the 2 ETFs
+
+
+def test_yahoo_jp_links_in_holdings():
+    """Holdings display includes Yahoo! Finance links and company names."""
+    from signalforge.report.forward_test_page import export_forward_pages
+    import tempfile
+    
+    # Create a minimal forward test state
+    state_dir = Path('data/paper/forward_tests')
+    state_dir.mkdir(parents=True, exist_ok=True)
+    
+    test_book = create_book('nikkei_hold', now('2026-11-20'), 'fixed-universe')
+    test_book = advance_book(test_book, '2026-11-24', {'1321.T': bar()}, [], now('2026-11-24'))
+    test_book = advance_book(test_book, '2026-11-25', {'1321.T': bar()}, [], now('2026-11-25'))
+    
+    test_path = state_dir / 'nikkei_hold.json'
+    import json
+    test_path.write_text(json.dumps(test_book, ensure_ascii=False))
+    
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = Path(tmpdir)
+            export_forward_pages(out)
+            
+            html_file = out / 'forward' / 'nikkei_hold.html'
+            assert html_file.exists()
+            
+            content = html_file.read_text()
+            # Check that Yahoo! Finance link is present
+            assert 'finance.yahoo.co.jp/quote/1321.T' in content
+            # Check that company name is present (not just ticker)
+            assert '日経225' in content
+    finally:
+        if test_path.exists():
+            test_path.unlink()

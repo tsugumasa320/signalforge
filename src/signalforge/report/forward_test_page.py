@@ -4,10 +4,33 @@ from html import escape
 import json
 from datetime import datetime,timezone
 from signalforge.report.static_html import wrap_page
+from signalforge.report.yahoo_jp import yahoo_jp_anchor
 from signalforge.paper.forward_test import REGIME_SWITCHES
 
 STATE=Path('data/paper/forward_tests')
 STATUS={'waiting_for_first_session':'開始後の取引日待ち','observing':'観測中','data_incomplete':'データ不足・新規注文停止','data_unavailable':'データ取得待ち','needs_review':'要確認・更新停止'}
+
+# Common ETF names (not in universe.json)
+ETF_NAMES = {
+    '1321.T': '日経225連動型上場投信',
+    '1306.T': 'TOPIX連動型上場投信',
+}
+
+def _load_ticker_names():
+    """Load ticker to company name mapping from universe.json and ETFs."""
+    names = dict(ETF_NAMES)
+    try:
+        universe_path = Path('config/forward/universe.json')
+        if universe_path.exists():
+            universe_doc = json.loads(universe_path.read_text())
+            for stock in universe_doc.get('stocks', []):
+                ticker = stock.get('ticker')
+                name = stock.get('name')
+                if ticker and name:
+                    names[ticker] = name
+    except (json.JSONDecodeError, OSError):
+        pass
+    return names
 
 def books():return [json.loads(p.read_text()) for p in sorted(STATE.glob('*.json'))]
 
@@ -23,14 +46,15 @@ def summary_html(depth=0):
 def export_forward_pages(out):
     directory=out/'forward';directory.mkdir(parents=True,exist_ok=True)
     selection=json.loads(Path('config/forward/selection.json').read_text())
+    ticker_names = _load_ticker_names()
     for b in books():
         evidence=selection['strategies'].get(b['strategy'])
         rationale=''
         if evidence:
             rationale=f"<section><h2>追加した根拠（過去の参考検証）</h2><p>{escape(selection['period'])}：リターン {evidence['return_pct']:+.2f}%、最大下落 {evidence['max_dd_pct']:.2f}%、決済 {evidence['closed_trades']}件。未解決の企業行動・期末評価フラグなし。</p><p>広範囲の検証でプラスを残した、DUKEと異なる反発型の候補です。{escape(selection['note'])} この数値をフォワード成績には加算しません。</p></section>"
-        fills=''.join(f"<tr><td>{escape(f['date'])}</td><td>{escape(f['ticker'])}</td><td>{'DUKE' if f.get('strategy_kind')=='duke' else 'BB＋RSI' if f.get('strategy_kind')=='bb' else '—'}</td><td>{'買い' if f['side']=='buy' else '売り'}</td><td>{f['shares']:,.0f}</td><td>{f['price']:,.2f}</td><td>{f['fee']:,.2f}</td></tr>" for f in reversed(b['fills']))
-        pending=''.join(f"<li>{escape(o['ticker'])}：{'買い' if o['side']=='buy' else '売り'} {o['shares']:,.0f}株／口（判断日 {escape(o['signal_date'])}）</li>" for o in b['pending']) or '<li>注文なし</li>'
-        held=''.join(f"<li>{escape(t)}：{'DUKE' if p.get('kind')=='duke' else 'BB＋RSI' if p.get('kind')=='bb' else ''} {p['shares']:,.0f}株／口・評価単価 {p['mark']:,.2f}円</li>" for t,p in b['positions'].items()) or '<li>保有なし</li>'
+        fills=''.join(f"<tr><td>{escape(f['date'])}</td><td>{yahoo_jp_anchor(f['ticker'], label=ticker_names.get(f['ticker'], f['ticker']))}</td><td>{'DUKE' if f.get('strategy_kind')=='duke' else 'BB＋RSI' if f.get('strategy_kind')=='bb' else '—'}</td><td>{'買い' if f['side']=='buy' else '売り'}</td><td>{f['shares']:,.0f}</td><td>{f['price']:,.2f}</td><td>{f['fee']:,.2f}</td></tr>" for f in reversed(b['fills']))
+        pending=''.join(f"<li>{yahoo_jp_anchor(o['ticker'], label=ticker_names.get(o['ticker'], o['ticker']))}：{'買い' if o['side']=='buy' else '売り'} {o['shares']:,.0f}株／口（判断日 {escape(o['signal_date'])}）</li>" for o in b['pending']) or '<li>注文なし</li>'
+        held=''.join(f"<li>{yahoo_jp_anchor(t, label=ticker_names.get(t, t))}：{'DUKE' if p.get('kind')=='duke' else 'BB＋RSI' if p.get('kind')=='bb' else ''} {p['shares']:,.0f}株／口・評価単価 {p['mark']:,.2f}円</li>" for t,p in b['positions'].items()) or '<li>保有なし</li>'
         issues=''.join(f"<li>{escape(i['date'])} {escape(i['ticker'])}：{escape(i['reason'])}</li>" for i in b['issues'])
         if b['strategy'] in REGIME_SWITCHES:
             market_sma=REGIME_SWITCHES[b['strategy']]
